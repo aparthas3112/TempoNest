@@ -1433,16 +1433,27 @@ void getCustomDVectorLike(void *context, double *TNDM, int Nobs, int TimeToMargi
     pulsar* psr = ((MNStruct *)context)->pulse;
     FitInfo* fitinfo = &(psr->fitinfo);
 
+    // we have to loop over parameters first then jumps
+    // being careful to keep track of where we are.
+    // This is because temponest keeps jumps at the end
+    // but otherwise the parameters are in the same order.
+    //
+    // In tempo2 the jumps come before most parameters so we
+    // skip over the part with the jumps without incrementing
+    // the temponest index. Later we start from the total number
+    // of parameters excluding jumps and only loop over the jumps
+
     for (int iparam = 0; iparam < fitinfo->nParams; ++iparam){
-	// this is something we want to marginalise over
-	param_label p = fitinfo->paramIndex[iparam];
-	 // skip over parameters that are part of the TN model
-	if (p==param_red_sin) continue;
+        // this is something we want to marginalise over
+        param_label p = fitinfo->paramIndex[iparam];
+        // skip over parameters that are part of the TN model
+        if (p==param_red_sin) continue;
         if (p==param_red_cos) continue;
         if (p==param_jitter) continue;
         if (p==param_red_dm_sin) continue;
         if (p==param_red_dm_cos) continue;
 
+        // skip over jumps here. Note that jumps are at the start, so we skip without incrementing pcount.
         if (p==param_JUMP) continue;
 
         if(((MNStruct *)context)->LDpriors[pcount][2]==1){
@@ -1452,7 +1463,7 @@ void getCustomDVectorLike(void *context, double *TNDM, int Nobs, int TimeToMargi
                 const double x = psr->obsn[iobs].bat - psr->param[param_pepoch].val[0];
 
                 TNDM[iobs + imargin*((MNStruct *)context)->pulse->nobs]=fitinfo->paramDerivs[iparam](psr,0,x,iobs,p,k);
-		/// mjk - comment this out to make the code a lot faster
+                /// mjk - comment this out to make the code a lot faster
                 //printf("TNDM: %i %i %i %g \n", iobs, imargin, iobs+imargin*((MNStruct *)context)->pulse->nobs, fitinfo->paramDerivs[iparam](psr,0,x,iobs,p,k));
             }
             ++imargin;
@@ -1460,7 +1471,8 @@ void getCustomDVectorLike(void *context, double *TNDM, int Nobs, int TimeToMargi
         ++pcount;
     }
 
-    pcount=0;
+    // temponest has jumps at the end, so do NOT reset pcount!
+    // pcount should be positioned at the first jump
 
     for (int iparam = 0; iparam < fitinfo->nParams; ++iparam){
         param_label p = fitinfo->paramIndex[iparam];
@@ -1470,10 +1482,9 @@ void getCustomDVectorLike(void *context, double *TNDM, int Nobs, int TimeToMargi
         if (p==param_red_dm_sin) continue;
         if (p==param_red_dm_cos) continue;
 
-        if(((MNStruct *)context)->LDpriors[pcount][2]==1){
-            if (p==param_JUMP) {
+        if (p==param_JUMP) {
+            if(((MNStruct *)context)->LDpriors[pcount][2]==1){
 
-		
                 const int k=fitinfo->paramCounters[iparam];
                 for (int iobs = 0; iobs < psr->nobs; ++iobs){
                     const double x = psr->obsn[iobs].bat - psr->param[param_pepoch].val[0];
@@ -1483,12 +1494,9 @@ void getCustomDVectorLike(void *context, double *TNDM, int Nobs, int TimeToMargi
 
                 ++imargin;
             }
+            ++pcount;
         }
-        ++pcount;
     }
-
-
-
 
 }
 
