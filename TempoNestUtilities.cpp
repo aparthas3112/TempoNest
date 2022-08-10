@@ -2345,6 +2345,7 @@ void getArraySizeInfo(void *context){
 
 	int FitRedCoeff=2*(((MNStruct *)context)->numFitRedCoeff);
 	int FitDMCoeff=2*(((MNStruct *)context)->numFitDMCoeff);
+	int FitScatCoeff=2*(((MNStruct *)context)->numFitScatCoeff);
 	int FitBandNoiseCoeff=2*(((MNStruct *)context)->numFitBandNoiseCoeff);
 	int FitGroupNoiseCoeff = 2*((MNStruct *)context)->numFitGroupNoiseCoeff;
 
@@ -2365,6 +2366,7 @@ void getArraySizeInfo(void *context){
 	int totCoeff=0;
 	if(((MNStruct *)context)->incRED != 0 || ((MNStruct *)context)->incGWB == 1)totCoeff+=FitRedCoeff;
 	if(((MNStruct *)context)->incDM != 0)totCoeff+=FitDMCoeff;
+	if(((MNStruct *)context)->incScat != 0)totCoeff+=FitScatCoeff;
 	if(((MNStruct *)context)->incBandNoise > 0)totCoeff+= ((MNStruct *)context)->incBandNoise*FitBandNoiseCoeff;
 	if(((MNStruct *)context)->incNGJitter >0)totCoeff+=((MNStruct *)context)->numNGJitterEpochs;
 	if(((MNStruct *)context)->incNGSJitter >0)totCoeff+=((MNStruct *)context)->numNGSJitterEpochs;
