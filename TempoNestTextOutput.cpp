@@ -533,6 +533,14 @@ void TNtextOutput(pulsar *psr, int npsr, int newpar, long double *Tempo2Fit, voi
 			}
 		}
 
+		if(((MNStruct *)context)->incScat ==1 ){
+			printf("Power Law Scattering Model:\n");
+	                printf("Log Amplitude: %g +/- %g\n",paramarray[fitcount][0], paramarray[fitcount][1]);
+			fitcount++;
+			printf("Spectral Index: %g +/- %g\n",paramarray[fitcount][0], paramarray[fitcount][1]);
+                        fitcount++;
+                }
+
 		if(((MNStruct *)context)->incFloatDM > 0){
 			printf("Floating DM, %i Coefficients used:\n",((MNStruct *)context)->incFloatDM);
 			for(int i =0; i < ((MNStruct *)context)->incFloatDM; i++){
@@ -543,7 +551,6 @@ void TNtextOutput(pulsar *psr, int npsr, int newpar, long double *Tempo2Fit, voi
 				fitcount++;
 		    }
 		}
-
 	}
 
 
@@ -1486,6 +1493,17 @@ void TNtextOutput(pulsar *psr, int npsr, int newpar, long double *Tempo2Fit, voi
                 whitefitcount++;
 
 	}
+	 if(((MNStruct *)context)->incScat ==1 ){
+                fprintf(fout2, "TNScatAmp %g\n", paramarray[whitefitcount][2]);
+                tablefile <<  "Log$_{10}$[Scat Amp] \\dotfill & "<< paramarray[whitefitcount][0] <<" $\\pm$ "<< paramarray[whitefitcount][1] <<"  \\\\ \n";
+		whitefitcount++;
+                 fprintf(fout2, "TNScatGam %g\n", paramarray[whitefitcount][2]);
+                fprintf(fout2, "TNScatC %i\n", ((MNStruct *)context)->numFitDMCoeff);
+
+                tablefile <<  "Scat Index \\dotfill & "<< paramarray[whitefitcount][0] <<" $\\pm$ "<< paramarray[whitefitcount][1] <<"  \\\\ \n";
+		whitefitcount++;
+
+        }
 	if(((MNStruct *)context)->incDMShapeEvent != 0){
                 for(int i =0; i < ((MNStruct *)context)->incDMShapeEvent; i++){
 

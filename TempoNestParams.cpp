@@ -41,6 +41,7 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 		int &incEQUAD,
 		int &incRED,
 		int &incDM,
+		int &incScat, 
 		int &doTimeMargin,
 		int &doJumpMargin,
 		double &FitSig,
@@ -52,12 +53,17 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 		double *AmpPrior,
 		double *DMAlphaPrior,
 		double *DMAmpPrior,
+		double *ScatAlphaPrior,
+                double *ScatAmpPrior, 
 		double &numRedCoeff,
 		double &numDMCoeff,
+		double &numScatCoeff, 
 		int &numRedPL,
 		int &numDMPL,
+		int &numScatPL, 
 		double *RedCoeffPrior,
 		double *DMCoeffPrior,
+		double *ScatCoeffPrior, 
 		int &FloatingDM,
 		double *DMFreqPrior,
 		int &yearlyDM,
@@ -75,6 +81,7 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 		double *GWBAmpPrior,
 		int &RedPriorType,
 		int &DMPriorType,
+		int &ScatPriorType, 
 		int &EQUADPriorType,
 		int &EFACPriorType,
 		int &useOriginalErrors,
@@ -230,7 +237,8 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 
 	incRED=0; //include Red Noise model: 0 = no, 1 = power law model (vHL2013), 2 = model independent (L2013)
 	incDM=0; //include Red Noise model: 0 = no, 1 = power law model (vHL2013), 2 = model independent (L2013)
-
+	incScat=0; //include Scattering noise model: 0 = no, 1 = similar to power law model=3 for DM
+	
 	FitLowFreqCutoff = 0; //Include f_low as a free parameter
 
 	doTimeMargin=0 ; //0=No Analytical Marginalisation over Timing Model. 1=Marginalise over QSD. 2=Marginalise over all Model params excluding jumps.
@@ -298,6 +306,7 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 
 	RedPriorType = 0; // 0 = Log, 1 = Uniform
 	DMPriorType = 0;   // 0 = Log, 1 = Uniform
+	ScatPriorType = 0; // 0 = Log, 1 = Uniform
 	EQUADPriorType = 0;   // 0 = Log, 1 = Uniform
 	EFACPriorType = 0;   // 0 = Log, 1 = Uniform
 	usecosiprior = 0; // 0 = uniform in sini, 1 = uniform in cosi
@@ -324,9 +333,11 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 	
 	numRedPL=1;
 	numDMPL=1;
-
+	numScatPL=1;
+	
 	numRedCoeff=10;
 	numDMCoeff=10;
+	numScatCoeff=10;
 
 	varyRedCoeff=0;
 	varyDMCoeff=0;
@@ -343,6 +354,11 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 	DMAmpPrior[0]=-18;
 	DMAmpPrior[1]=-8;
 
+	ScatAlphaPrior[0]=1.1;
+        ScatAlphaPrior[1]=6.1;
+
+        ScatAmpPrior[0]=-18;
+        ScatAmpPrior[1]=-4;
 	
 	RedCoeffPrior[0]=-10;
 	RedCoeffPrior[1]=0;
@@ -472,8 +488,9 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 
 
         parameters.readInto(incRED, "incRED", incRED);
-		parameters.readInto(incDM, "incDM", incDM);
-        parameters.readInto(doTimeMargin, "doTimeMargin", doTimeMargin);
+	parameters.readInto(incDM, "incDM", incDM);
+	parameters.readInto(incScat, "incScat", incScat);
+	parameters.readInto(doTimeMargin, "doTimeMargin", doTimeMargin);
         parameters.readInto(doJumpMargin, "doJumpMargin", doJumpMargin);
         parameters.readInto(customPriors, "customPriors", customPriors);
         parameters.readInto(FitSig, "FitSig", FitSig);
@@ -488,9 +505,11 @@ void setupparams(char *ConfigFileName, int &useGPUS,
         parameters.readInto(AmpPrior[0], "AmpPrior[0]", AmpPrior[0]);
         parameters.readInto(AmpPrior[1], "AmpPrior[1]", AmpPrior[1]);
         parameters.readInto(numRedCoeff, "numRedCoeff", numRedCoeff);
-		parameters.readInto(numDMCoeff, "numDMCoeff", numDMCoeff);
+	parameters.readInto(numDMCoeff, "numDMCoeff", numDMCoeff);
+	parameters.readInto(numScatCoeff, "numScatCoeff", numScatCoeff);
         parameters.readInto(numRedPL, "numRedPL", numRedPL);
-		parameters.readInto(numDMPL, "numDMPL", numDMPL);
+	parameters.readInto(numDMPL, "numDMPL", numDMPL);
+	parameters.readInto(numScatPL, "numScatPL", numScatPL);
         parameters.readInto(RedCoeffPrior[0], "RedCoeffPrior[0]", RedCoeffPrior[0]);
         parameters.readInto(RedCoeffPrior[1], "RedCoeffPrior[1]", RedCoeffPrior[1]);
         parameters.readInto(DMCoeffPrior[0], "DMCoeffPrior[0]", DMCoeffPrior[0]);
@@ -499,7 +518,11 @@ void setupparams(char *ConfigFileName, int &useGPUS,
         parameters.readInto(DMAlphaPrior[1], "DMAlphaPrior[1]", DMAlphaPrior[1]);
         parameters.readInto(DMAmpPrior[0], "DMAmpPrior[0]", DMAmpPrior[0]);
         parameters.readInto(DMAmpPrior[1], "DMAmpPrior[1]", DMAmpPrior[1]);
-        
+	parameters.readInto(ScatAlphaPrior[0], "ScatAlphaPrior[0]", ScatAlphaPrior[0]);
+	parameters.readInto(ScatAlphaPrior[1], "ScatAlphaPrior[1]", ScatAlphaPrior[1]);
+	parameters.readInto(ScatAmpPrior[0], "ScatAmpPrior[0]", ScatAmpPrior[0]);
+        parameters.readInto(ScatAmpPrior[1], "ScatAmpPrior[1]", ScatAmpPrior[1]);
+	
         parameters.readInto(FloatingDM, "FloatingDM", FloatingDM);
 	parameters.readInto(yearlyDM, "yearlyDM", yearlyDM);
 	parameters.readInto(incsinusoid, "incsinusoid", incsinusoid);
@@ -526,6 +549,7 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 	parameters.readInto(GWBAmpPrior[1], "GWBAmpPrior[1]", GWBAmpPrior[1]);
 	parameters.readInto(RedPriorType, "RedPriorType", RedPriorType);
 	parameters.readInto(DMPriorType, "DMPriorType", DMPriorType);
+	parameters.readInto(ScatPriorType, "ScatPriorType", ScatPriorType);
 	parameters.readInto(EFACPriorType, "EFACPriorType", EFACPriorType);
 	parameters.readInto(EQUADPriorType, "EQUADPriorType", EQUADPriorType);
 	parameters.readInto(useOriginalErrors, "useOriginalErrors", useOriginalErrors);
@@ -762,7 +786,7 @@ void setTNPriors(char *ConfigFileName, double **Dpriors, long double **TempoPrio
 }
 
 
-void setFrequencies(char *ConfigFileName, double *SampleFreq, int numRedfreqs, int numDMfreqs, int numRedLogFreqs, int numDMLogFreqs, double RedLowFreq, double DMLowFreq, double RedMidFreq, double DMMidFreq){
+void setFrequencies(char *ConfigFileName, double *SampleFreq, int numRedfreqs, int numDMfreqs, int numScatfreqs, int numRedLogFreqs, int numDMLogFreqs, int numScatLogFreqs, double RedLowFreq, double DMLowFreq, double ScatLowFreq, double RedMidFreq, double DMMidFreq, double ScatMidFreq){
 
 //This function sets or overwrites the default values for the sampled frequencies sent to multinest
 
@@ -787,7 +811,12 @@ void setFrequencies(char *ConfigFileName, double *SampleFreq, int numRedfreqs, i
 		startpoint++;
 		//printf("making freqs %i %g", startpoint+i, SampleFreq[startpoint+i]);
         }
-
+	for(int i =0;i < numScatfreqs; i++){
+                SampleFreq[startpoint]=i+1;
+                startpoint++;
+                //printf("making freqs %i %g", startpoint+i, SampleFreq[startpoint+i]);
+        }
+	
 	startpoint=0;
 	for(int i =0;i<numRedfreqs; i++){	
 

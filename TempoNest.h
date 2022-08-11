@@ -58,13 +58,16 @@ typedef struct {
 	int *includeEQsys;
 	int numFitRedCoeff;
 	int numFitDMCoeff;
+        int numFitScatCoeff;
 	int totCoeff;
 	int numFitRedPL;
 	int numFitDMPL;
+        int numFitScatPL;
 	double *sampleFreq;
 	int numdims;
 	int incRED;
 	int incDM;
+        int incScat;
 	int incFloatDM;
 	int incFloatRed;
 	int yearlyDM;
@@ -98,6 +101,7 @@ typedef struct {
 	int numDMScatterShapeCoeff;
 	int RedPriorType;
 	int DMPriorType;
+        int ScatPriorType;
 	int EQUADPriorType;
 	int EFACPriorType;
 	int useOriginalErrors;
@@ -391,6 +395,7 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 		int &incEQUAD,
 		int &incRED,
 		int &incDM,
+		 int &incScat, 
 		int &doTimeMargin,
 		int &doJumpMargin,
 		double &FitSig,
@@ -402,12 +407,17 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 		double *AmpPrior,
 		double *DMAlphaPrior,
 		double *DMAmpPrior,
+		double *ScatAlphaPrior,
+                double *ScatAmpPrior, 
 		double &numRedCoeff,
 		double &numDMCoeff,
+		double &numScatCoeff, 
 		int &numRedPL,
 		int &numDMPL,
+		int &numScatPL,
 		double *RedCoeffPrior,
 		double *DMCoeffPrior,
+		double *ScatCoeffPrior,
 		int &FloatingDM,
 		double *DMFreqPrior,
 		int &yearlyDM,
@@ -425,6 +435,7 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 		double *GWBAmpPrior,
 		int &RedPriorType,
 		int &DMPriorType,
+		int &ScatPriorType,
 		int &EQUADPriorType,
 		int &EFACPriorType,
 		int &useOriginalErrors,
@@ -513,7 +524,8 @@ void setupparams(char *ConfigFileName, int &useGPUS,
 		int &ScatterPBF);
 
 void setTNPriors(char *ConfigFileName, double **Dpriors, long double **TempoPriors, int TPsize, int DPsize);
-void setFrequencies(char *ConfigFileName, double *SampleFreq, int numRedfreqs, int numDMfreqs, int numRedLogFreqs, int numDMLogFreqs, double RedLowFreq, double DMLowFreq, double RedMidFreq, double DMMidFreq);
+//void setFrequencies(char *ConfigFileName, double *SampleFreq, int numRedfreqs, int numDMfreqs, int numRedLogFreqs, int numDMLogFreqs, double RedLowFreq, double DMLowFreq, double RedMidFreq, double DMMidFreq);
+void setFrequencies(char *ConfigFileName, double *SampleFreq, int numRedfreqs, int numDMfreqs, int numScatfreqs, int numRedLogFreqs, int numDMLogFreqs, int numScatLogFreqs, double RedLowFreq, double DMLowFreq, double ScatLowFreq, double RedMidFreq, double DMMidFreq, double ScatMidFreq);
 void GetGroupsToFit(char *ConfigFileName, int incGroupNoise, int **FitForGroup, int incBandNoise, int **FitForBand);
 void setShapePriors(char *ConfigFileName, double **ShapePriors, double **BetaPrior, int numcoeff, int numcomps);
 void GetProfileFitInfo(char *ConfigFileName, int numProfComponents, int *numGPTAshapecoeff, int *numProfileFitCoeff, int *numEvoCoeff, int *numFitEvoCoeff, 	int *numGPTAstocshapecoeff, double *ProfCompSeps, double &TemplateChanWidth, int *TimeCorrShapeCoeff, int incExtraComp,  double **FitForExtraComp, int *FitCompWidths, int *FitCompPos);
