@@ -903,6 +903,7 @@ double  NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived
 
 	int FitRedCoeff=2*(((MNStruct *)globalcontext)->numFitRedCoeff);
 	int FitDMCoeff=2*(((MNStruct *)globalcontext)->numFitDMCoeff);
+	int FitScatCoeff=2*(((MNStruct *)globalcontext)->numFitScatCoeff);
 	int FitBandCoeff=2*(((MNStruct *)globalcontext)->numFitBandNoiseCoeff);
 	int FitGroupNoiseCoeff = 2*((MNStruct *)globalcontext)->numFitGroupNoiseCoeff;
 
@@ -1352,7 +1353,57 @@ double  NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived
 
         }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////Scattering variations ////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+       double *ScatVec=new double[((MNStruct *)globalcontext)->pulse->nobs];
 
+	if(((MNStruct *)globalcontext)->incScat > 0) {
+	        if(((MNStruct *)globalcontext)->storeFMatrices == 0)
+	            for(int o=0;o<((MNStruct *)globalcontext)->pulse->nobs; o++)
+	                ScatVec[o]=1./(pow((double)((MNStruct *)globalcontext)->pulse->obsn[o].freqSSB/1400e6, 4)); // Referenced to 1.4 Ghz to be consistent with Enterprise; Invert to be consistent with Tempo2 - 20220810 GD/AP
+		
+		for(int i=0;i<FitScatCoeff/2;i++){
+
+		        freqs[startpos+i]=((MNStruct *)globalcontext)->sampleFreq[startpos/2 - ((MNStruct *)globalcontext)->incFloatRed+i]/maxtspan;
+		        freqs[startpos+i+FitScatCoeff/2]=freqs[startpos+i];
+
+		        if(((MNStruct *)globalcontext)->storeFMatrices == 0){
+			        for(int k=0;k<((MNStruct *)globalcontext)->pulse->nobs;k++){
+                                        double time=(double)((MNStruct *)globalcontext)->pulse->obsn[k].bat;
+
+					TotalMatrix[k + (i+TimetoMargin+startpos)*((MNStruct *)globalcontext)->pulse->nobs]=cos(2*M_PI*freqs[startpos+i]*time)*ScatVec[k];
+                                        TotalMatrix[k + (i+FitScatCoeff/2+TimetoMargin+startpos)*((MNStruct *)globalcontext)->pulse->nobs] = sin(2*M_PI*freqs[startpos+i]*time)*ScatVec[k];
+
+				}
+                        }
+                }
+
+		for(int pl = 0; pl < ((MNStruct *)globalcontext)->numFitScatPL; pl++){
+                        double ScatAmp=Cube[pcount];
+                        pcount++;
+                        double ScatSlope=Cube[pcount];
+                        pcount++;
+
+			double Tspan = maxtspan;
+                        double f1yr = 1.0/3.16e7;
+
+			ScatAmp=pow(10.0, ScatAmp);
+                        if(((MNStruct *)globalcontext)->ScatPriorType ==1) { uniformpriorterm += log(ScatAmp); }
+                        for (int i=0; i<FitScatCoeff/2; i++){
+
+				double rho = (ScatAmp*ScatAmp)/12./M_PI/M_PI*pow(f1yr,(-3)) * pow(freqs[startpos+i]*365.25,(-ScatSlope))/(maxtspan*24*60*60);
+                                powercoeff[startpos+i]+=rho;
+                                powercoeff[startpos+i+FitScatCoeff/2]+=rho;
+                        }
+                }
+
+		for (int i=0; i<FitScatCoeff/2; i++){
+                        freqdet=freqdet+2*log(powercoeff[startpos+i]);
+                }
+                startpos+=FitScatCoeff;
+
+	}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////  
@@ -1837,6 +1888,7 @@ double  NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived
 
 
 	delete[] DMVec;
+	delete[] ScatVec;
 	delete[] WorkCoeff;
 	delete[] WorkCoeff2;
 	for(int i=0; i < ((MNStruct *)globalcontext)->EPolTerms; i++) delete[] EFAC[i];
