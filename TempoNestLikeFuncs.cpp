@@ -1359,11 +1359,9 @@ double  NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived
        double *ScatVec=new double[((MNStruct *)globalcontext)->pulse->nobs];
 
 	if(((MNStruct *)globalcontext)->incScat > 0) {
-	  //printf("incScat = %d FitScatCoeff = %d numFitScatPL = %d freqSSB = %lf\n", ((MNStruct *)globalcontext)->incScat, FitScatCoeff, ((MNStruct *)globalcontext)->numFitScatPL, (double)((MNStruct *)globalcontext)->pulse->obsn[0].freqSSB);
-		for(int o=0;o<((MNStruct *)globalcontext)->pulse->nobs; o++){
-		  ScatVec[o]=1./(pow((double)((MNStruct *)globalcontext)->pulse->obsn[o].freqSSB/1400e6, 4)); // Referenced to 1.4 Ghz to be consistent with Enterprise; Invert to be consistent with Tempo2 - 20220810 GD/AP
-		}
-		printf("ScatVec = %lg\n", ScatVec[0]);
+	        if(((MNStruct *)globalcontext)->storeFMatrices == 0)
+	            for(int o=0;o<((MNStruct *)globalcontext)->pulse->nobs; o++)
+	                ScatVec[o]=1./(pow((double)((MNStruct *)globalcontext)->pulse->obsn[o].freqSSB/1400e6, 4)); // Referenced to 1.4 Ghz to be consistent with Enterprise; Invert to be consistent with Tempo2 - 20220810 GD/AP
 		
 		for(int i=0;i<FitScatCoeff/2;i++){
 
@@ -1386,19 +1384,15 @@ double  NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived
                         pcount++;
                         double ScatSlope=Cube[pcount];
                         pcount++;
-			ScatAmp = -14.5;
-			ScatSlope = 3;
 
 			double Tspan = maxtspan;
                         double f1yr = 1.0/3.16e7;
-
 
 			ScatAmp=pow(10.0, ScatAmp);
                         if(((MNStruct *)globalcontext)->ScatPriorType ==1) { uniformpriorterm += log(ScatAmp); }
                         for (int i=0; i<FitScatCoeff/2; i++){
 
 				double rho = (ScatAmp*ScatAmp)/12./M_PI/M_PI*pow(f1yr,(-3)) * pow(freqs[startpos+i]*365.25,(-ScatSlope))/(maxtspan*24*60*60);
-				//printf("freqs = %lg rho = %lg\n", freqs[startpos+i], rho);
                                 powercoeff[startpos+i]+=rho;
                                 powercoeff[startpos+i+FitScatCoeff/2]+=rho;
                         }
