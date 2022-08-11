@@ -2024,6 +2024,7 @@ void StoreTMatrix(double *TotalMatrix, void *context){
 
 	int FitRedCoeff=2*(((MNStruct *)context)->numFitRedCoeff);
 	int FitDMCoeff=2*(((MNStruct *)context)->numFitDMCoeff);
+	int FitScatCoeff=2*(((MNStruct *)context)->numFitScatCoeff);
 	int FitBandCoeff=2*(((MNStruct *)context)->numFitBandNoiseCoeff);
 	int FitGroupNoiseCoeff = 2*((MNStruct *)context)->numFitGroupNoiseCoeff;
 
@@ -2095,6 +2096,29 @@ void StoreTMatrix(double *TotalMatrix, void *context){
 		startpos += FitDMCoeff;
 	} 
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////Scattering variations ////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+	if(((MNStruct *)context)->incScat > 0) {
+	  double *ScatVec=new double[((MNStruct *)context)->pulse->nobs];
+	  for(int o=0;o<((MNStruct *)context)->pulse->nobs; o++)
+	    ScatVec[o]=1./(pow((double)((MNStruct *)context)->pulse->obsn[o].freqSSB/1400e6, 4)); // Referenced to 1.4 Ghz to be consistent with Enterprise; Invert to be consistent with Tempo2 - 20220810 GD/AP
+	  
+	  for(int i=0;i<FitScatCoeff/2;i++){
+	    freqs[startpos+i]=((MNStruct *)context)->sampleFreq[startpos/2 - ((MNStruct *)context)->incFloatRed+i]/maxtspan;
+	    freqs[startpos+i+FitScatCoeff/2]=freqs[startpos+i];
+
+	    for(int k=0;k<((MNStruct *)context)->pulse->nobs;k++){
+	      double time=(double)((MNStruct *)context)->pulse->obsn[k].bat;
+	      TotalMatrix[k + (i+TimetoMargin+startpos)*((MNStruct *)context)->pulse->nobs]=cos(2*M_PI*freqs[startpos+i]*time)*ScatVec[k];
+	      TotalMatrix[k + (i+FitScatCoeff/2+TimetoMargin+startpos)*((MNStruct *)context)->pulse->nobs] = sin(2*M_PI*freqs[startpos+i]*time)*ScatVec[k];
+	      //printf("tot Mat = %lg\n", TotalMatrix[k + (i+TimetoMargin+startpos)*((MNStruct *)context)->pulse->nobs]);
+	    }
+	  }
+	  startpos += FitScatCoeff;
+	  delete[] ScatVec;
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////  
 /////////////////////////Band DM/////////////////////////////////////////////////////////////

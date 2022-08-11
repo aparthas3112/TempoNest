@@ -411,7 +411,7 @@ void TNtextOutput(pulsar *psr, int npsr, int newpar, long double *Tempo2Fit, voi
                         }
               //  }
 //        printf("fitcount %i %i\n", fitcount, whitefitcount);	
-	if(incRED != 0 || ((MNStruct *)context)->incDM !=0 ||((MNStruct *)context)->numFitEFAC > 0 || ((MNStruct *)context)->numFitEQUAD > 0){
+	if(incRED != 0 || ((MNStruct *)context)->incDM !=0 || ((MNStruct *)context)->incScat !=0 || ((MNStruct *)context)->numFitEFAC > 0 || ((MNStruct *)context)->numFitEQUAD > 0){
 		whitefitcount=fitcount;
                 printf("------------------------------------------------------------------------------\n");
                 printf("Stochastic Parameters:\n");
@@ -1498,7 +1498,7 @@ void TNtextOutput(pulsar *psr, int npsr, int newpar, long double *Tempo2Fit, voi
                 tablefile <<  "Log$_{10}$[Scat Amp] \\dotfill & "<< paramarray[whitefitcount][0] <<" $\\pm$ "<< paramarray[whitefitcount][1] <<"  \\\\ \n";
 		whitefitcount++;
                  fprintf(fout2, "TNScatGam %g\n", paramarray[whitefitcount][2]);
-                fprintf(fout2, "TNScatC %i\n", ((MNStruct *)context)->numFitDMCoeff);
+                fprintf(fout2, "TNScatC %i\n", ((MNStruct *)context)->numFitScatCoeff);
 
                 tablefile <<  "Scat Index \\dotfill & "<< paramarray[whitefitcount][0] <<" $\\pm$ "<< paramarray[whitefitcount][1] <<"  \\\\ \n";
 		whitefitcount++;
