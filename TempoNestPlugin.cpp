@@ -2237,7 +2237,8 @@ extern "C" int graphicalInterface(int argc, char **argv,
 
 	TempoFitNums[paramsfitted][0]=0;
 	TempoFitNums[paramsfitted][1]=0;
-	if(doTimeMargin != 0 || doJumpMargin != 0)TempoPriors[paramsfitted][2]=1;
+	//if(doTimeMargin != 0 || doJumpMargin != 0)TempoPriors[paramsfitted][2]=1;
+        TempoPriors[paramsfitted][2]=1; // always marginalise over phase. @TODO: make an option to allow fitting for
 	paramsfitted++;
 	for (int p=0;p<MAX_PARAMS;p++) {
 	      for (int k=0;k<psr[0].param[p].aSize;k++){
@@ -3249,7 +3250,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 		   settings.cluster_posteriors = false;
 		   settings.feedback      = 1;
 		   settings.compression_factor = 0.36787944117144233; // ad-hoc number take from PC example, TBC
-		   settings.synchronous = false;
+		   // settings.synchronous = false; //Needed for the new PolyChord version for GD - AP
 		   settings.boost_posterior= 5.0;
 
 		if(sample==1){
