@@ -1429,6 +1429,14 @@ void TNtextOutput(pulsar *psr, int npsr, int newpar, long double *Tempo2Fit, voi
 	  }
 
 //	printf("end of White parms %i\n", whitefitcount);
+
+// Print solar wind amp
+	  if(((MNStruct *)context)->FitSolarWind == 1){
+	    fprintf(fout2, "SW %g\n", paramarray[whitefitcount][2]);
+	    tablefile <<  "Solar wind amplitude \\dotfill & "<< paramarray[whitefitcount][0] <<" $\\pm$ "<< paramarray[whitefitcount][1] <<"  \\\\ \n";
+	    whitefitcount++;
+	  }
+
 	if(((MNStruct *)context)->FitLowFreqCutoff > 0){
 		fprintf(fout2, "TNRedFLow %g\n", paramarray[whitefitcount][2]);
 		fprintf(fout2, "TNRedFMid %g\n", 2.0);

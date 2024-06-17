@@ -509,6 +509,10 @@ double  NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived
 	pcount++;
 	for(int p=1;p<((MNStruct *)globalcontext)->numFitTiming;p++){
 		((MNStruct *)globalcontext)->pulse->param[((MNStruct *)globalcontext)->TempoFitNums[p][0]].val[((MNStruct *)globalcontext)->TempoFitNums[p][1]] = LDparams[pcount];	
+                if (((MNStruct *)globalcontext)->TempoFitNums[p][0] == param_ne_sw) {
+                    // This is the solar wind, need to update ne_sw directly
+                    ((MNStruct *)globalcontext)->pulse->ne_sw = LDparams[pcount];
+                    }
 		pcount++;
 	}
 	for(int p=0;p<((MNStruct *)globalcontext)->numFitJumps;p++){
@@ -1550,6 +1554,10 @@ double  NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived
 	if(((MNStruct *)globalcontext)->FitSolarWind == 1){
 
 		for(int o=0;o<((MNStruct *)globalcontext)->pulse->nobs; o++){
+
+		  //printf("ne-sw value %g \n",((MNStruct *)globalcontext)->pulse->ne_sw);
+		  //printf("ne-sw*tdis2 value %g \n",((MNStruct *)globalcontext)->pulse->ne_sw*((MNStruct *)globalcontext)->pulse->obsn[o].tdis2);
+		  //printf("SolarWind(TempoNest) value %g \n",SolarWind);
 
 			Resvec[o]-= (SolarWind-((MNStruct *)globalcontext)->pulse->ne_sw)*((MNStruct *)globalcontext)->pulse->obsn[o].tdis2;
 		}

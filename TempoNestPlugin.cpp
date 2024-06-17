@@ -577,18 +577,6 @@ void printPriors(pulsar *psr, long double **TempoPriors, double **Dpriors, int i
 		}
 	}
 
-	if(((MNStruct *)context)->FitSolarWind==1){
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Solar Wind %.5g -> %.5g\n", Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  getdistparamnames <<  "SW\n";
-	  paramsfitted++;
-	}	
-
-        if(((MNStruct *)context)->FitWhiteSolarWind==1){
-	  if (((MNStruct *)context)->rank==0) printf("Prior on White Solar Wind %.5g -> %.5g\n", Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  getdistparamnames <<  "WSW\n";
-	  paramsfitted++;
-        }
-
 	if(((MNStruct *)context)->incNGJitter>0){
 	  int ECORRnum=1;	
 	  for(int i =0;i<((MNStruct *)context)->incNGJitter;i++){
@@ -608,6 +596,18 @@ void printPriors(pulsar *psr, long double **TempoPriors, double **Dpriors, int i
 	    SECORRnum++;
 	  }
 	}
+
+	if(((MNStruct *)context)->FitSolarWind==1){
+	  if (((MNStruct *)context)->rank==0) printf("Prior on Solar Wind %.5g -> %.5g\n", Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
+	  getdistparamnames <<  "SW\n";
+	  paramsfitted++;
+	}	
+
+        if(((MNStruct *)context)->FitWhiteSolarWind==1){
+	  if (((MNStruct *)context)->rank==0) printf("Prior on White Solar Wind %.5g -> %.5g\n", Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
+	  getdistparamnames <<  "WSW\n";
+	  paramsfitted++;
+        }
 
 	if(((MNStruct *)context)->incDMEQUAD == 1){
 	  if (((MNStruct *)context)->rank==0) printf("Prior on DMEQUAD: %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
@@ -2237,8 +2237,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 
 	TempoFitNums[paramsfitted][0]=0;
 	TempoFitNums[paramsfitted][1]=0;
-	//if(doTimeMargin != 0 || doJumpMargin != 0)TempoPriors[paramsfitted][2]=1;
-        TempoPriors[paramsfitted][2]=1; // always marginalise over phase. @TODO: make an option to allow fitting for
+	if(doTimeMargin != 0 || doJumpMargin != 0)TempoPriors[paramsfitted][2]=1;
 	paramsfitted++;
 	for (int p=0;p<MAX_PARAMS;p++) {
 	      for (int k=0;k<psr[0].param[p].aSize;k++){
@@ -3250,7 +3249,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 		   settings.cluster_posteriors = false;
 		   settings.feedback      = 1;
 		   settings.compression_factor = 0.36787944117144233; // ad-hoc number take from PC example, TBC
-		   // settings.synchronous = false; //Needed for the new PolyChord version for GD - AP
+                   //settings.synchronous = false;
 		   settings.boost_posterior= 5.0;
 
 		if(sample==1){
