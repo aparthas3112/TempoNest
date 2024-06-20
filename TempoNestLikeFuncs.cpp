@@ -153,7 +153,7 @@ double  FastNewLRedMarginLogLike(double *Cube, int ndim, double *DerivedParams, 
 	printf("In fast like\n");
 	int pcount=0;
 	
-	int numfit=((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps;
+	int numfit=((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps + ((MNStruct *)globalcontext)->numFitfdJumps;
 	long double LDparams[numfit];
 	double Fitparams[numfit];
 	double *Resvec=new double[((MNStruct *)globalcontext)->pulse->nobs];
@@ -161,7 +161,7 @@ double  FastNewLRedMarginLogLike(double *Cube, int ndim, double *DerivedParams, 
 	
 	pcount=0;
 
-	for(int p=0;p< ((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps; p++){
+	for(int p=0;p< ((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps + ((MNStruct *)globalcontext)->numFitfdJumps; p++){
 		if(((MNStruct *)globalcontext)->Dpriors[p][1] != ((MNStruct *)globalcontext)->Dpriors[p][0]){
 
 			double val = 0;
@@ -191,7 +191,10 @@ double  FastNewLRedMarginLogLike(double *Cube, int ndim, double *DerivedParams, 
 		((MNStruct *)globalcontext)->pulse->jumpVal[((MNStruct *)globalcontext)->TempoJumpNums[p]]= LDparams[pcount];
 		pcount++;
 	}
-
+	for(int p=0;p<((MNStruct *)globalcontext)->numFitfdJumps;p++){
+	  ((MNStruct *)globalcontext)->pulse->fdjumpVal[((MNStruct *)globalcontext)->TempofdJumpNums[p]]= LDparams[pcount];
+	  pcount++;
+	}
 	
 	fastformBatsAll(((MNStruct *)globalcontext)->pulse,((MNStruct *)globalcontext)->numberpulsars);       
 	formResiduals(((MNStruct *)globalcontext)->pulse,((MNStruct *)globalcontext)->numberpulsars,1);       
@@ -317,7 +320,7 @@ double  FastNewLRedMarginLogLike(double *Cube, int ndim, double *DerivedParams, 
         int totCoeff=((MNStruct *)globalcontext)->totCoeff;
 
         int TimetoMargin=0;
-        for(int i =0; i < ((MNStruct *)globalcontext)->numFitTiming+((MNStruct *)globalcontext)->numFitJumps; i++){
+        for(int i =0; i < ((MNStruct *)globalcontext)->numFitTiming+((MNStruct *)globalcontext)->numFitJumps + ((MNStruct *)globalcontext)->numFitfdJumps; i++){
                 if(((MNStruct *)globalcontext)->LDpriors[i][2]==1)TimetoMargin++;
         }
 	
@@ -447,7 +450,7 @@ double  NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived
 	double *EQUAD;
 	int pcount=0;
 	
-	int numfit=((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps;
+	int numfit=((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps + ((MNStruct *)globalcontext)->numFitfdJumps;
 	int TimetoMargin=((MNStruct *)globalcontext)->TimetoMargin;
 	long double LDparams[numfit];
 	for(int i = 0; i < numfit; i++){LDparams[i]=0;}
@@ -471,7 +474,7 @@ double  NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived
 
 
 	// Convert priors to physical units (here only for timing parameters and jumps)
-	for(int p=0;p< ((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps; p++){
+	for(int p=0;p< ((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps + ((MNStruct *)globalcontext)->numFitfdJumps; p++){
 		if(((MNStruct *)globalcontext)->Dpriors[p][1] != ((MNStruct *)globalcontext)->Dpriors[p][0]){
 			double val = 0;
 			if((((MNStruct *)globalcontext)->LDpriors[p][3]) == 0){
@@ -519,7 +522,10 @@ double  NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived
 		((MNStruct *)globalcontext)->pulse->jumpVal[((MNStruct *)globalcontext)->TempoJumpNums[p]]= LDparams[pcount];
 		pcount++;
 	}
-
+	for(int p=0;p<((MNStruct *)globalcontext)->numFitfdJumps;p++){
+	  ((MNStruct *)globalcontext)->pulse->fdjumpVal[((MNStruct *)globalcontext)->TempofdJumpNums[p]]= LDparams[pcount];
+	  pcount++;
+	}
 
 	if(TimetoMargin != numfit){
 		fastformBatsAll(((MNStruct *)globalcontext)->pulse,((MNStruct *)globalcontext)->numberpulsars);       /* Form Barycentric arrival times */
@@ -884,7 +890,7 @@ double  NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived
 //////////////////////////////////////////////////////////////////////////////////////////  
 
 
-	if(TimetoMargin != ((MNStruct *)globalcontext)->numFitTiming+((MNStruct *)globalcontext)->numFitJumps){
+	if(TimetoMargin != ((MNStruct *)globalcontext)->numFitTiming+((MNStruct *)globalcontext)->numFitJumps + ((MNStruct *)globalcontext)->numFitfdJumps){
 
 		getCustomDVectorLike(globalcontext, TotalMatrix, ((MNStruct *)globalcontext)->pulse->nobs, TimetoMargin, totalsize);
 		vector_dgesvd(TotalMatrix,((MNStruct *)globalcontext)->pulse->nobs, TimetoMargin);

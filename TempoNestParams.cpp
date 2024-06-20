@@ -706,6 +706,7 @@ void setTNPriors(char *ConfigFileName, double **Dpriors, long double **TempoPrio
 //THe order of the parameters is always the same:
 //Timing Model parameters (linear or non linear)
 //Jumps
+//fdJumps
 //EFAC(s) 
 //EQUAD
 //Red Noise Parameters (Amplitude then Alpha for incRed=1, coefficients 1..n for incRed=2)

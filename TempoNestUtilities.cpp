@@ -290,9 +290,9 @@ void read_ddgr(std::string longname, int ndim, int sampler,  void *context){
 			TempCube[i] = paramlist[i];
 
 		 }
-		long double LDparams[((MNStruct *)context)->numFitTiming + ((MNStruct *)context)->numFitJumps];
+		 long double LDparams[((MNStruct *)context)->numFitTiming + ((MNStruct *)context)->numFitJumps + ((MNStruct *)context)->numFitfdJumps];
 		int fitcount = 0;
-		for(int p=0;p< ((MNStruct *)context)->numFitTiming + ((MNStruct *)context)->numFitJumps; p++){
+		for(int p=0;p< ((MNStruct *)context)->numFitTiming + ((MNStruct *)context)->numFitJumps + ((MNStruct *)context)->numFitfdJumps; p++){
 			if(((MNStruct *)context)->Dpriors[p][1] != ((MNStruct *)context)->Dpriors[p][0]){
 
 				double val = 0;
@@ -331,7 +331,10 @@ void read_ddgr(std::string longname, int ndim, int sampler,  void *context){
 			((MNStruct *)context)->pulse->jumpVal[((MNStruct *)context)->TempoJumpNums[p]]= LDparams[pcount];
 			pcount++;
 		}
-
+		for(int p=0;p<((MNStruct *)context)->numFitfdJumps;p++){
+		  ((MNStruct *)context)->pulse->fdjumpVal[((MNStruct *)context)->TempofdJumpNums[p]]= LDparams[pcount];
+		  pcount++;
+		}
 
 		fastformBatsAll(((MNStruct *)context)->pulse,((MNStruct *)context)->numberpulsars);       /* Form Barycentric arrival times */
 		formResiduals(((MNStruct *)context)->pulse,((MNStruct *)context)->numberpulsars,1);       /* Form residuals */
@@ -366,7 +369,7 @@ void readsummary(pulsar *psr, std::string longname, int ndim, void *context, lon
 	readtxtoutput(longname, ndim, paramarray);
 	readphyslive(longname, ndim, paramarray, ((MNStruct *)context)->sampler);
 //	read_ddgr( longname, ndim, ((MNStruct *)context)->sampler,  context);
-	int numlongparams=((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps;
+	int numlongparams=((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps+((MNStruct *)context)->numFitfdJumps;
 	long double *LDP = new long double[numlongparams];
 	pcount=0;
 	fitcount=0;
@@ -408,6 +411,17 @@ void readsummary(pulsar *psr, std::string longname, int ndim, void *context, lon
 		pcount++;
 	}
 	
+	for(int j=1;j<((MNStruct *)context)->numFitfdJumps;j++){
+	  if(((MNStruct *)context)->Dpriors[pcount][0] != ((MNStruct *)context)->Dpriors[pcount][1]){
+	    LDP[pcount]=paramarray[fitcount][2]*(((MNStruct *)context)->LDpriors[pcount][1])+(((MNStruct *)context)->LDpriors[pcount][0]);
+	    fitcount++;
+	  }
+	  else if(((MNStruct *)context)->Dpriors[pcount][0] == ((MNStruct *)context)->Dpriors[pcount][1]){
+	    LDP[pcount]=((MNStruct *)context)->Dpriors[pcount][0]*(((MNStruct *)context)->LDpriors[pcount][1])+(((MNStruct *)context)->LDpriors[pcount][0]);
+	  }
+	  pcount++;
+	}
+
 
 		
 	pcount=0;
@@ -456,8 +470,26 @@ void readsummary(pulsar *psr, std::string longname, int ndim, void *context, lon
 		((MNStruct *)context)->pulse->jumpValErr[((MNStruct *)context)->TempoJumpNums[j]] = error;
 		pcount++;
 	}	
-	
-	
+
+	for(int j=1;j<((MNStruct *)context)->numFitfdJumps;j++){
+
+	  long double value;
+	  long double error;
+
+	  value=LDP[pcount];
+
+	  if(((MNStruct *)context)->LDpriors[pcount][2]==0){
+	    error=paramarray[fitcount][1]*(((MNStruct *)context)->LDpriors[pcount][1]);
+	    fitcount++;
+	  }
+	  else if(((MNStruct *)context)->LDpriors[pcount][2]==1){
+	    error=0;
+	  }
+
+	  ((MNStruct *)context)->pulse->fdjumpVal[((MNStruct *)context)->TempofdJumpNums[j]] = value;
+	  ((MNStruct *)context)->pulse->fdjumpValErr[((MNStruct *)context)->TempofdJumpNums[j]] = error;
+	  pcount++;
+	}
 
 	if(((MNStruct *)context)->incBreakingIndex==1){
 		long double F0 = ((MNStruct *)context)->pulse->param[param_f].val[0];
@@ -485,7 +517,7 @@ void readsummary(pulsar *psr, std::string longname, int ndim, void *context, lon
 	
 	designfile.open(dname.c_str());
 	double pdParamDeriv[MAX_PARAMS];
-	int numtofit=((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps;
+	int numtofit=((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps+((MNStruct *)context)->numFitfdJumps;
 	for(int i =1;i<((MNStruct *)context)->numFitTiming; i++){
 		designfile << psr->param[((MNStruct *)context)->TempoFitNums[i][0]].label[((MNStruct *)context)->TempoFitNums[i][1]];
 		designfile << " ";
@@ -1000,7 +1032,7 @@ void getNGSJitterMatrix(pulsar *pulse, double **JitterMatrix, int &NumEpochs){
 
 
 
-void getCustomDMatrix(pulsar *pulse, int *MarginList, int **TempoFitNums, int *TempoJumpNums, double **Dpriors, int incDM, int TimetoFit, int JumptoFit){
+void getCustomDMatrix(pulsar *pulse, int *MarginList, int **TempoFitNums, int *TempoJumpNums, int *TempofdJumpNums, double **Dpriors, int incDM, int TimetoFit, int JumptoFit, int fdJumptoFit){
 	
 	double pdParamDeriv[MAX_PARAMS], dMultiplication;
 
@@ -1040,7 +1072,18 @@ void getCustomDMatrix(pulsar *pulse, int *MarginList, int **TempoFitNums, int *T
 			pcount++;
 		}
 
-	
+		for(int i=0; i < fdJumptoFit; i++){
+		  if(MarginList[pcount]!=1){
+		    pulse[0].fitfdJump[TempofdJumpNums[i]]=0;
+		  }
+		  else if(MarginList[pcount]==1){
+		    pulse[0].fitfdJump[TempofdJumpNums[i]]=1;
+		    Dpriors[pcount][0]=0;
+		    Dpriors[pcount][1]=0;
+		    numToMargin++;
+		  }
+		  pcount++;
+                }
 	
 //		for(int i=0; i < pulse->nobs; i++) {
 //			FITfuncs(pulse[0].obsn[i].bat - pulse[0].param[param_pepoch].val[0], pdParamDeriv, numToMargin, pulse, i,0);
@@ -1058,6 +1101,10 @@ void getCustomDMatrix(pulsar *pulse, int *MarginList, int **TempoFitNums, int *T
 	
 		for(int i=0; i < JumptoFit; i++){
 			pulse[0].fitJump[TempoJumpNums[i]]=1;
+		}
+
+		for(int i=0; i < fdJumptoFit; i++){
+		  pulse[0].fitfdJump[TempofdJumpNums[i]]=1;
 		}
 }
 /*
@@ -2331,7 +2378,7 @@ void getArraySizeInfo(void *context){
 
 
 	int TimetoMargin=0;
-	for(int i =0; i < ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps; i++){
+	for(int i =0; i < ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps + ((MNStruct *)context)->numFitfdJumps; i++){
 		if(((MNStruct *)context)->LDpriors[i][2]==1)TimetoMargin++;
 	}
 
@@ -2548,7 +2595,7 @@ void Tscrunch(void *globalcontext, double TemplateChanWidth){
 	}
 
 
-        long double LDparams[((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps];
+        long double LDparams[((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps + ((MNStruct *)globalcontext)->numFitfdJumps];
 	int pcount = 0;
 	int fitcount=0;
 
@@ -2953,7 +3000,7 @@ void Tscrunch2(void *globalcontext, double TemplateChanWidth){
 	}
 
 
-        long double LDparams[((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps];
+        long double LDparams[((MNStruct *)globalcontext)->numFitTiming + ((MNStruct *)globalcontext)->numFitJumps + ((MNStruct *)globalcontext)->numFitfdJumps];
 	int pcount = 0;
 	int fitcount=0;
 

@@ -50,6 +50,7 @@ typedef struct {
 	int numberpulsars;
 	int doLinear;
 	int numFitJumps;
+        int numFitfdJumps;
 	int numFitTiming;
 	int numFitEFAC;
 	int EPolTerms;
@@ -78,6 +79,7 @@ typedef struct {
 	int Dsize;
 	int **TempoFitNums;
 	int *TempoJumpNums;
+        int *TempofdJumpNums;
 	int *sysFlags;
 	double *TobsInfo;
 	int systemcount;
@@ -137,6 +139,7 @@ typedef struct {
 	int *TimingGradientSigns;
 	int usecosiprior;
 	double *PreJumpVals;
+        double *PrefdJumpVals;
 	int doMax;
 	double **FitForExtraComp;
 	int incExtraProfComp;
@@ -364,7 +367,7 @@ void NelderMeadOptimum(int nParameters);
 //void makeGDesign(pulsar *pulse, int &Gsize, int numtofit, double** staticGMatrix, double **oneDesign);
 //void getDMatrix(pulsar *pulse, int TimeToFit, int JumptoFit, int numToMargin, int **TempoFitNums, int *TempoJumpNums, double **Dpriors, int doJumpMargin, int doTimeMargin, double **TNDM);
 //void getMarginDMatrix(pulsar *pulse, int TimetoFit, int JumptoFit, int numToMargin, int **TempoFitNums, int *TempoJumpNums, double **Dpriors, int doJumpMargin, int doTimeMargin, double **TNDM, int linearFit);
-void getCustomDMatrix(pulsar *pulse, int *MarginList, int **TempoFitNums, int *TempoJumpNums, double **Dpriors, int incDM, int TimetoFit, int JumptoFit);
+void getCustomDMatrix(pulsar *pulse, int *MarginList, int **TempoFitNums, int *TempoJumpNums, int *TempofdJumpNums, double **Dpriors, int incDM, int TimetoFit, int JumptoFit, int fdJumptoFit);
 //void makeStaticGMatrix(pulsar *pulse, int Gsize, double **GMatrix, double** staticGMatrix, double &tdet);
 //void makeStaticDiagGMatrix(pulsar *pulse, int Gsize, double **GMatrix, double** UMatrix, double *SVec);
 void getCustomDMatrixLike(void *context, double **TNDM);

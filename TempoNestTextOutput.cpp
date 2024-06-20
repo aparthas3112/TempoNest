@@ -331,7 +331,6 @@ void TNtextOutput(pulsar *psr, int npsr, int newpar, long double *Tempo2Fit, voi
 
       /* JUMPS */
       for (i=1;i<=psr[p].nJumps;i++){
-	{
 	  printf("Jump %d (%s): %.14g %.14g ",i,psr[p].jumpStr[i],psr[p].jumpVal[i],psr[p].jumpValErr[i]);
 	  if (psr[p].fitJump[i]==1) {
 		if(doJumpMargin==0){
@@ -345,8 +344,28 @@ void TNtextOutput(pulsar *psr, int npsr, int newpar, long double *Tempo2Fit, voi
 		
 	  }
 	  else printf("N\n");
-	}
       }
+
+      /* FDJUMPS */
+      for (i=1;i<=psr[p].nfdJumps;i++){
+	if(psr[p].fdjumpIdx[i] == -2)
+	  printf("FDJUMPDM (%s): %.14g %.14g ",psr[p].fdjumpStr[i],psr[p].fdjumpVal[i],psr[p].fdjumpValErr[i]);
+	else
+	  printf("FDJUMP%d (%s): %.14g %.14g ",psr[p].fdjumpIdx[i],psr[p].fdjumpStr[i],psr[p].fdjumpVal[i],psr[p].fdjumpValErr[i]);
+	
+	if (psr[p].fitfdJump[i]==1) {
+	  if(doJumpMargin==0){
+	    printf("Y\n");
+	    fitcount++;
+	  }
+	  else if(doJumpMargin==1){
+	    printf("M\n");
+	  }
+	  pcount++;
+	}
+	else printf("N\n");
+      }
+
 
 /*	if(((MNStruct *)context)->incStep > 0){
 		printf("%i Step Functions used:\n",((MNStruct *)context)->incStep);
@@ -1306,6 +1325,20 @@ void TNtextOutput(pulsar *psr, int npsr, int newpar, long double *Tempo2Fit, voi
 	      else if (strcasecmp(str1,"NAME")==0 || strcasecmp(str1,"TEL")==0 || str1[0]=='-')
 		fprintf(fout2,"JUMP %s %s %.14g %d\n",str1,str2,psr[p].jumpVal[i],psr[p].fitJump[i]);
 	    }	
+
+	  /* Add fdjumps */
+	  for (i=1;i<=psr[p].nfdJumps;i++)
+	    {
+	      nread = sscanf(psr[p].fdjumpStr[i],"%s %s %s %s %s",str1,str2,str3,str4,str5);
+	      fprintf(fout2,"JUMP %s %s %.14g %d\n",str1,str2,psr[p].jumpVal[i],psr[p].fitJump[i]);
+
+              if(psr[p].fdjumpIdx[i] == -2)
+	        fprintf(fout2,"FDJUMPDM %s %s %.14g %d\n",str1,str2,psr[p].fdjumpVal[i],psr[p].fitfdJump[i]);
+              else
+		fprintf(fout2,"FDJUMP%d %s %s %.14g %d\n",psr[p].fdjumpIdx[i],str1,str2,psr[p].fdjumpVal[i],psr[p].fitfdJump[i]);
+	    }
+
+
 //	printf("end of T2 parms %i \n", whitefitcount);	
 
 	if(((MNStruct *)context)->incStep > 0){

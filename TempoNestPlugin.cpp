@@ -265,7 +265,7 @@ void SetNewAmps(Archive *archive){
 }
 #endif
 */
-MNStruct* init_struct(pulsar *pulseval,	 long double **LDpriorsval, int numberpulsarsval,int numFitJumpsval,int numFitTimingval, int systemcountval, int numFitEFACval, int numFitEQUADval, int numFitRedCoeffval, int numFitDMCoeffval, int numFitScatCoeffval, int numFitRedPLval, int numFitDMPLval, int numFitScatPLval, int **TempoFitNumsval,int *TempoJumpNumsval, int *sysFlagsval, int numdimsval, int incREDval, int incDMval, int incScatval, int incFloatDMval, int incFloatRedval, int DMFloatstartval, int RedFloatstartval, int TimeMarginVal, int JumpMarginVal, int doLinearVal, double *SampleFreqsVal, int incStepVal, char *whiteflagval, int whitemodelval, int varyRedCoeffval, int varyDMCoeffval, int yearlyDMval, int incsinusoidval, int EPolTermsval, int incGWBval,int RedPriorType,int DMPriorType,int ScatPriorType,int EQUADPriorType,int EFACPriorType,int useOriginalErrors, int incShannonJitter, int incDMEvent, int incDMShapeEvent, int numDMShapeCoeff, int incBandNoise, int numFitBandNoiseCoeff, int incRedShapeEvent, int numRedShapeCoeff, int MarginRedShapeCoeff, int incDMScatterShapeEvent, int numDMScatterShapeCoeff, int incNGJitter, int incNGSJitter, int incGlitch, int incGlitchTerms, int incBreakingIndex, int FitLowFreqCutoff, int useNbitsAlgebra, int incGroupNoise, int numFitGroupNoiseCoeff, int **FitForGroup, int numGroupstoFit, int *GroupNoiseFlags, int FitSolarWind, int FitWhiteSolarWind, int interpolateProfile, double InterpolatedTime, int sampler, int *GPTAnumstoccoeff, int totalshapestoccoeff, int StoreFMatrices, int incHighFreqStoc, int numNGJitter, int numNGSJitter, int **FitForBand, int incProfileEvo, double EvoRefFreq, int *numEvoFitCoeff, int incWideBandNoise, int incProfileFit, int *numProfileFitCoeff, int incDMEQUAD, int FitLinearProfileWidth, double offPulseLevel, double **GroupStartTimes, int FitEvoExponent, int numProfComponents, int totalEvoFitCoeff, int totalProfileFitCoeff, int *numEvoCoeff, int totalEvoCoeff, int incWidthJitter, int JitterProfComp, int incProfileEnergyEvo, int debug, int ProfileBaselineTerms, int incProfileNoise, int ProfileNoiseCoeff, int SubIntToFit, int ChannelToFit, int NProfileEvoPoly, double *ProfCompSeps, int usecosiprior, double *PreJumpVals, char *rootName, int doMax, int incWidthEvoTime, int incExtraProfComp, int incPrecession, int incTimeCorrProfileNoise, int *numTimeCorrCoeff, int totalTimeCorrCoeff, double phasePriorExpansion, int ProfileNoiseMethod, int FitPrecAmps, char *GroupNoiseName, int NProfileTimePoly, int incProfileScatter, int ScatterPBF, int *FitCompWidths, int *FitCompPos, int NumFitCompWidths, int NumFitCompPos, int NumCompswithWidth, int NumCompswithPos, int rank)
+MNStruct* init_struct(pulsar *pulseval,	 long double **LDpriorsval, int numberpulsarsval,int numFitJumpsval, int numFitfdJumpsval,int numFitTimingval, int systemcountval, int numFitEFACval, int numFitEQUADval, int numFitRedCoeffval, int numFitDMCoeffval, int numFitScatCoeffval, int numFitRedPLval, int numFitDMPLval, int numFitScatPLval, int **TempoFitNumsval,int *TempoJumpNumsval, int *TempofdJumpNumsval, int *sysFlagsval, int numdimsval, int incREDval, int incDMval, int incScatval, int incFloatDMval, int incFloatRedval, int DMFloatstartval, int RedFloatstartval, int TimeMarginVal, int JumpMarginVal, int doLinearVal, double *SampleFreqsVal, int incStepVal, char *whiteflagval, int whitemodelval, int varyRedCoeffval, int varyDMCoeffval, int yearlyDMval, int incsinusoidval, int EPolTermsval, int incGWBval,int RedPriorType,int DMPriorType,int ScatPriorType,int EQUADPriorType,int EFACPriorType,int useOriginalErrors, int incShannonJitter, int incDMEvent, int incDMShapeEvent, int numDMShapeCoeff, int incBandNoise, int numFitBandNoiseCoeff, int incRedShapeEvent, int numRedShapeCoeff, int MarginRedShapeCoeff, int incDMScatterShapeEvent, int numDMScatterShapeCoeff, int incNGJitter, int incNGSJitter, int incGlitch, int incGlitchTerms, int incBreakingIndex, int FitLowFreqCutoff, int useNbitsAlgebra, int incGroupNoise, int numFitGroupNoiseCoeff, int **FitForGroup, int numGroupstoFit, int *GroupNoiseFlags, int FitSolarWind, int FitWhiteSolarWind, int interpolateProfile, double InterpolatedTime, int sampler, int *GPTAnumstoccoeff, int totalshapestoccoeff, int StoreFMatrices, int incHighFreqStoc, int numNGJitter, int numNGSJitter, int **FitForBand, int incProfileEvo, double EvoRefFreq, int *numEvoFitCoeff, int incWideBandNoise, int incProfileFit, int *numProfileFitCoeff, int incDMEQUAD, int FitLinearProfileWidth, double offPulseLevel, double **GroupStartTimes, int FitEvoExponent, int numProfComponents, int totalEvoFitCoeff, int totalProfileFitCoeff, int *numEvoCoeff, int totalEvoCoeff, int incWidthJitter, int JitterProfComp, int incProfileEnergyEvo, int debug, int ProfileBaselineTerms, int incProfileNoise, int ProfileNoiseCoeff, int SubIntToFit, int ChannelToFit, int NProfileEvoPoly, double *ProfCompSeps, int usecosiprior, double *PreJumpVals, double *PrefdJumpVals, char *rootName, int doMax, int incWidthEvoTime, int incExtraProfComp, int incPrecession, int incTimeCorrProfileNoise, int *numTimeCorrCoeff, int totalTimeCorrCoeff, double phasePriorExpansion, int ProfileNoiseMethod, int FitPrecAmps, char *GroupNoiseName, int NProfileTimePoly, int incProfileScatter, int ScatterPBF, int *FitCompWidths, int *FitCompPos, int NumFitCompWidths, int NumFitCompPos, int NumCompswithWidth, int NumCompswithPos, int rank)
 {
     MNStruct* MNS = (MNStruct*)malloc(sizeof(MNStruct));
 
@@ -273,6 +273,7 @@ MNStruct* init_struct(pulsar *pulseval,	 long double **LDpriorsval, int numberpu
 	MNS->LDpriors=LDpriorsval;
 	MNS->numberpulsars=numberpulsarsval;
 	MNS->numFitJumps=numFitJumpsval;
+	MNS->numFitfdJumps=numFitfdJumpsval;
 	MNS->numFitTiming=numFitTimingval;
 	MNS->systemcount=systemcountval;
 	MNS->numFitEFAC=numFitEFACval;
@@ -285,6 +286,7 @@ MNStruct* init_struct(pulsar *pulseval,	 long double **LDpriorsval, int numberpu
 	MNS->numFitScatPL=numFitScatPLval;
 	MNS->TempoFitNums=TempoFitNumsval;
 	MNS->TempoJumpNums=TempoJumpNumsval;
+	MNS->TempofdJumpNums=TempofdJumpNumsval;
 	MNS->sysFlags=sysFlagsval;
 	MNS->numdims=numdimsval;
 	MNS->incRED=incREDval;
@@ -376,6 +378,7 @@ MNStruct* init_struct(pulsar *pulseval,	 long double **LDpriorsval, int numberpu
 	MNS->ProfCompSeps=ProfCompSeps;
 	MNS->usecosiprior=usecosiprior;
 	MNS->PreJumpVals=PreJumpVals;
+	MNS->PrefdJumpVals=PrefdJumpVals;
 	MNS->rootName = rootName;
 	MNS->doMax = doMax;
 	MNS->incWidthEvoTime = incWidthEvoTime;
@@ -479,7 +482,19 @@ void printPriors(pulsar *psr, long double **TempoPriors, double **Dpriors, int i
 			paramsfitted++;
 			jumpsfitted++;
 		}
-	} 
+	}
+
+	int fdjumpsfitted=0;
+	for(int i=1;i<=psr[0].nfdJumps;i++){
+	  if(psr[0].fitfdJump[i] == 1){
+	    if(TempoPriors[paramsfitted][2] == 0){
+	      if (((MNStruct *)context)->rank==0) printf("Prior on fdJump %i : %.25Lg -> %.25Lg\n",fdjumpsfitted+1, TempoPriors[paramsfitted][0]+Dpriors[paramsfitted][0]*TempoPriors[paramsfitted][1],TempoPriors[paramsfitted][0]+Dpriors[paramsfitted][1]*TempoPriors[paramsfitted][1]);
+	      getdistparamnames <<  "fdJump"<< fdjumpsfitted+1 <<"\n";
+	    }
+	    paramsfitted++;
+	    fdjumpsfitted++;
+	  }
+	}
 
 	if(incStep>0){
 		for(int i =0; i < incStep; i++){
@@ -1220,6 +1235,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 	struct tm *rawstoptimeinfo;
 	const char *CVS_verNum = "$Revision: 1.28 $";
 	int numFitJumps;
+	int numFitfdJumps;
 	int numToMargin=0;
 	int nprocs = 0;
 	char *ConfigFileName;
@@ -2193,35 +2209,47 @@ extern "C" int graphicalInterface(int argc, char **argv,
 	      }
 	}
 
+	// Count jump fits
 	numFitJumps=0;
 	for(int i=0;i<=psr[0].nJumps;i++){
-		if(psr[0].fitJump[i] == 1)numFitJumps++;
+		if(psr[0].fitJump[i] == 1) numFitJumps++;
 // 		  printf("%i %i %g %g \n",i,psr[0].fitJump[i], psr[0].jumpVal[i],psr[0].jumpValErr[i]/sqrt(psr[0].fitChisq/psr[0].fitNfree));
 	}  
+
+	// Count fdjump fits
+	numFitfdJumps=0;
+	for (int i=1;i<=psr[0].nfdJumps;i++){
+	  if (psr[0].fitfdJump[i]==1) numFitfdJumps++;
+	}
+
 	if (rank==0) {
 	  printf("Found %i jumps to fit \n",numFitJumps);
-	  printf("total Timing Model params to fit:  %i \n",numFitJumps+fitcount);
+	  printf("Found %i fdjumps to fit \n",numFitfdJumps);
+	  printf("total Timing Model params to fit:  %i \n",numFitJumps+fitcount+numFitfdJumps);
 	}
 
 	long double **TempoPriors;
-	long double *Tempo2Fit = new long double[numFitJumps+fitcount];
+	long double *Tempo2Fit = new long double[numFitJumps+fitcount+numFitfdJumps];
 	int **TempoFitNums;
 	int *TempoJumpNums;
-	TempoPriors=new long double*[numFitJumps+fitcount];
-	for(int i=0;i<numFitJumps+fitcount;i++){
+	int *TempofdJumpNums;
+
+	TempoPriors=new long double*[numFitJumps+fitcount+numFitfdJumps];
+	for(int i=0;i<numFitJumps+fitcount+numFitfdJumps;i++){
 		TempoPriors[i]=new long double[4];
 		for(int j=0; j< 4; j++){
 				TempoPriors[i][j]=0;
 		}
 		
 	}
-	TempoFitNums=new int*[fitcount+numFitJumps];
-	for(int i=0;i<fitcount+numFitJumps;i++){
+	TempoFitNums=new int*[fitcount+numFitJumps+numFitfdJumps];
+	for(int i=0;i<fitcount+numFitJumps+numFitfdJumps;i++){
 		TempoFitNums[i]=new int[2];
 		TempoFitNums[i][0] = -1;
 		TempoFitNums[i][1] = -1;
 	}
 	TempoJumpNums=new int[numFitJumps];
+	TempofdJumpNums=new int[numFitfdJumps];
 	//printf("allocated\n");
 	int paramsfitted=0;
 //	printf("Offset and error: %g %g %g\n", psr[0].offset, psr[0].offset_e, psr[0].offset_e/sqrt(psr[0].fitChisq/psr[0].fitNfree));
@@ -2260,9 +2288,13 @@ extern "C" int graphicalInterface(int argc, char **argv,
 	    		}
 		}
 	}
+
 	int jumpsfitted=0;
+	int fdjumpsfitted=0;
 	double *PreJumpVals = new double[psr[0].nJumps+1]();
-	if (rank==0) printf("There are %i jumps \n", psr[0].nJumps);
+	double *PrefdJumpVals = new double[psr[0].nfdJumps+1]();
+	if (rank==0) printf("There are %i jumps and %i fdjumps.\n", psr[0].nJumps, psr[0].nfdJumps);
+
 	for(int i=0;i<=psr[0].nJumps;i++){
 
 		char str1[100],str2[100],str3[100],str4[100],str5[100];
@@ -2322,7 +2354,46 @@ extern "C" int graphicalInterface(int argc, char **argv,
 			jumpsfitted++;
 
 		}
-	}  
+	}
+
+	for(int i=1;i<=psr[0].nfdJumps;i++){
+
+	  char str1[100],str2[100],str3[100],str4[100],str5[100];
+	  int nread=sscanf(psr[0].fdjumpStr[i],"%s %s %s %s %s",str1,str2,str3,str4,str5);
+
+	  double prefdjump= 0;
+	  prefdjump=atof(str3);
+	  PrefdJumpVals[i] = prefdjump;
+
+	  if(psr[0].fitfdJump[i] == 1){
+
+	    //printf("gonna read jump %i %s \n",i,psr[0].jumpStr[i]);
+	    char str1[100],str2[100],str3[100],str4[100],str5[100];
+	    int nread=sscanf(psr[0].fdjumpStr[i],"%s %s %s %s %s",str1,str2,str3,str4,str5);
+	    
+	    double prefdjump=atof(str3);
+
+	    if(numTempo2its > 1){
+	      TempoPriors[paramsfitted][0]=psr[0].fdjumpVal[i];
+	      TempoPriors[paramsfitted][1]=psr[0].fdjumpValErr[i]/std::sqrt(psr[0].fitChisq/psr[0].fitNfree);
+	      Tempo2Fit[paramsfitted]=psr[0].fdjumpVal[i];
+	    }
+	    else{
+	      TempoPriors[paramsfitted][0]=prefdjump;
+	      TempoPriors[paramsfitted][1]=psr[0].fdjumpValErr[i]/std::sqrt(psr[0].fitChisq/psr[0].fitNfree);
+	      Tempo2Fit[paramsfitted]=prefdjump;
+	    }
+
+	    TempofdJumpNums[fdjumpsfitted]=i;
+	    
+	    if(doJumpMargin == 1)TempoPriors[paramsfitted][2]=1;
+	    
+	    paramsfitted++;
+	    fdjumpsfitted++;
+	  }
+	}
+
+
 
 	// set the MultiNest sampling parameters
 	
@@ -2345,7 +2416,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 
 
 	double tol = 0.5;				// tol, defines the stopping criteria
-	int ndims = numFitJumps+fitcount+numEFAC*numEPolTerms +numEQUAD+numNGJitter+numNGSJitter+Reddims+DMdims+Scatdims+numStep*3 + DMModeldims + 2*varyDMCoeff + 2*varyRedCoeff + 2*yearlyDM + 3*incsinusoid+numSQUAD + 7*incDMEvent + Glitchdims +swdims + incHighFreqStoc + incDMEQUAD + incWidthJitter + pnoisedims; // dimensionality (no. of free parameters)
+	int ndims = numFitJumps+numFitfdJumps+fitcount+numEFAC*numEPolTerms +numEQUAD+numNGJitter+numNGSJitter+Reddims+DMdims+Scatdims+numStep*3 + DMModeldims + 2*varyDMCoeff + 2*varyRedCoeff + 2*yearlyDM + 3*incsinusoid+numSQUAD + 7*incDMEvent + Glitchdims +swdims + incHighFreqStoc + incDMEQUAD + incWidthJitter + pnoisedims; // dimensionality (no. of free parameters)
 	int nPar = ndims;					// total no. of parameters including free & derived parameters
 							// note: posterior files are updated & dumper routine is called after every updInt*10 iterations
 	double Ztol = -1E90;				// all the modes with logZ < Ztol are ignored
@@ -2363,14 +2434,14 @@ extern "C" int graphicalInterface(int argc, char **argv,
 	void *context = 0;				// not required by MultiNest, any additional information user wants to pass
 	//printf("Here \n");
 	
-	int FloatRedstart=numFitJumps+fitcount+numEFAC+numEQUAD+Reddims-incFloatRed*2;
-	int FloatDMstart=numFitJumps+fitcount+numEFAC+numEQUAD+Reddims+DMdims-incFloatDM*2;
+	int FloatRedstart=numFitJumps+numFitfdJumps+fitcount+numEFAC+numEQUAD+Reddims-incFloatRed*2;
+	int FloatDMstart=numFitJumps+numFitfdJumps+fitcount+numEFAC+numEQUAD+Reddims+DMdims-incFloatDM*2;
 
 
 	char *chartroot = new char[longname.length() + 1];
         std::strcpy(chartroot , longname.c_str());
 
-	MNStruct *MNS = init_struct(psr,TempoPriors,npsr,numFitJumps,fitcount,systemcount,numEFAC,numEQUAD, int(numRedCoeff), int(numDMCoeff), int(numScatCoeff), numRedPL, numDMPL, numScatPL, TempoFitNums,TempoJumpNums,numFlags, ndims, incRED,incDM,incScat,incFloatDM,incFloatRed, FloatDMstart, FloatRedstart, doTimeMargin,doJumpMargin, doLinearFit, SampleFreq, numStep, wflag, whitemodel,varyRedCoeff, varyDMCoeff,yearlyDM, incsinusoid, numEPolTerms, incGWB,RedPriorType, DMPriorType, ScatPriorType, EQUADPriorType,EFACPriorType,useOriginalErrors,numSQUAD, incDMEvent, incDMShapeEvent, numDMShapeCoeff, incBandNoise, numBandNoiseCoeff, incRedShapeEvent, numRedShapeCoeff, MarginRedShapeCoeff, incDMScatterShapeEvent, numDMScatterShapeCoeff, incNGJitter, incNGSJitter, incGlitch, incGlitchTerms, incBreakingIndex, FitLowFreqCutoff, useNbitsAlgebra, incGroupNoise, numGroupCoeff, FitForGroup, numGroupstoFit,GroupNoiseSys, FitSolarWind, FitWhiteSolarWind, interpolateProfile, InterpolatedTime, sampler, GPTAnumstocshapecoeff, totalshapestoccoeff, StoreFMatrices, incHighFreqStoc, numNGJitter, numNGSJitter, FitForBand, incProfileEvo, EvoRefFreq, numEvoFitCoeff, incWideBandNoise, incProfileFit, numProfileFitCoeff, incDMEQUAD, FitLinearProfileWidth, offPulseLevel,GroupStartTimes, FitEvoExponent,numProfComponents, totalEvoFitCoeff, totalProfileFitCoeff, numEvoCoeff, totalEvoCoeff,incWidthJitter, JitterProfComp, incProfileEnergyEvo, debug, ProfileBaselineTerms, incProfileNoise, ProfileNoiseCoeff, SubIntToFit, ChannelToFit, NProfileEvoPoly, ProfCompSeps,usecosiprior, PreJumpVals, chartroot, doMax, incWidthEvoTime, incExtraProfComp, incPrecession, incTimeCorrProfileNoise, numTimeCorrCoeff, totalTimeCorrCoeff, phasePriorExpansion, ProfileNoiseMethod, FitPrecAmps, GroupNoiseName, NProfileTimePoly, incProfileScatter, ScatterPBF, FitCompWidths, FitCompPos, NumFitCompWidths, NumFitCompPos, NumCompswithWidth, NumCompswithPos, rank);
+	MNStruct *MNS = init_struct(psr,TempoPriors,npsr,numFitJumps,numFitfdJumps,fitcount,systemcount,numEFAC,numEQUAD, int(numRedCoeff), int(numDMCoeff), int(numScatCoeff), numRedPL, numDMPL, numScatPL, TempoFitNums,TempoJumpNums,TempofdJumpNums, numFlags, ndims, incRED,incDM,incScat,incFloatDM,incFloatRed, FloatDMstart, FloatRedstart, doTimeMargin,doJumpMargin, doLinearFit, SampleFreq, numStep, wflag, whitemodel,varyRedCoeff, varyDMCoeff,yearlyDM, incsinusoid, numEPolTerms, incGWB,RedPriorType, DMPriorType, ScatPriorType, EQUADPriorType,EFACPriorType,useOriginalErrors,numSQUAD, incDMEvent, incDMShapeEvent, numDMShapeCoeff, incBandNoise, numBandNoiseCoeff, incRedShapeEvent, numRedShapeCoeff, MarginRedShapeCoeff, incDMScatterShapeEvent, numDMScatterShapeCoeff, incNGJitter, incNGSJitter, incGlitch, incGlitchTerms, incBreakingIndex, FitLowFreqCutoff, useNbitsAlgebra, incGroupNoise, numGroupCoeff, FitForGroup, numGroupstoFit,GroupNoiseSys, FitSolarWind, FitWhiteSolarWind, interpolateProfile, InterpolatedTime, sampler, GPTAnumstocshapecoeff, totalshapestoccoeff, StoreFMatrices, incHighFreqStoc, numNGJitter, numNGSJitter, FitForBand, incProfileEvo, EvoRefFreq, numEvoFitCoeff, incWideBandNoise, incProfileFit, numProfileFitCoeff, incDMEQUAD, FitLinearProfileWidth, offPulseLevel,GroupStartTimes, FitEvoExponent,numProfComponents, totalEvoFitCoeff, totalProfileFitCoeff, numEvoCoeff, totalEvoCoeff,incWidthJitter, JitterProfComp, incProfileEnergyEvo, debug, ProfileBaselineTerms, incProfileNoise, ProfileNoiseCoeff, SubIntToFit, ChannelToFit, NProfileEvoPoly, ProfCompSeps,usecosiprior, PreJumpVals, PrefdJumpVals, chartroot, doMax, incWidthEvoTime, incExtraProfComp, incPrecession, incTimeCorrProfileNoise, numTimeCorrCoeff, totalTimeCorrCoeff, phasePriorExpansion, ProfileNoiseMethod, FitPrecAmps, GroupNoiseName, NProfileTimePoly, incProfileScatter, ScatterPBF, FitCompWidths, FitCompPos, NumFitCompWidths, NumFitCompPos, NumCompswithWidth, NumCompswithPos, rank);
 	
 	MNS->includeEQsys = includeEQsys;	
 
@@ -2477,7 +2548,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 
 	//If using custompriors for errors incase T2 doesnt converge, get those values before doing anything else
 	if(customPriors == 1){
-		setTNPriors(ConfigFileName,Dpriors, TempoPriors, ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps,ndims);
+	  setTNPriors(ConfigFileName,Dpriors, TempoPriors, ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps+((MNStruct *)context)->numFitfdJumps,ndims);
 		update_MNPriors(MNS,Dpriors, TempoPriors,0);
 
 		context=MNS;
@@ -2493,15 +2564,18 @@ extern "C" int graphicalInterface(int argc, char **argv,
 			psr[0].jumpVal[((MNStruct *)context)->TempoJumpNums[j]] =  TempoPriors[pcount][0];
 			pcount++;
 		}
+
+		for(int j=1;j<((MNStruct *)context)->numFitfdJumps;j++){
+		  psr[0].fdjumpVal[((MNStruct *)context)->TempofdJumpNums[j]] =  TempoPriors[pcount][0];
+		  pcount++;
+		}
 	}
-
-
 
 
 	//Combine all the priors into one aray: Dpriors
 	int pcount=0;
 
-	for(int i =0; i< numFitJumps+fitcount; i++){
+	for(int i =0; i< numFitJumps+fitcount+numFitfdJumps; i++){
 		Dpriors[pcount][0]=-FitSig;
 		Dpriors[pcount][1]=FitSig;
 		pcount++;
@@ -2989,7 +3063,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 			FitList[i]=0;
 		}
 		numToMargin=0;
-		for(int i=0;i<((MNStruct *)context)->numFitTiming + ((MNStruct *)context)->numFitJumps;i++){
+		for(int i=0;i<((MNStruct *)context)->numFitTiming + ((MNStruct *)context)->numFitJumps + ((MNStruct *)context)->numFitfdJumps;i++){
 			if(TempoPriors[i][2]==1){
 				FitList[i]=1;
 				if (rank==0) printf("marginalising over timing param: %i \n",i);
@@ -2997,7 +3071,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 			}
 		}
 
-		getCustomDMatrix(psr, FitList, TempoFitNums, TempoJumpNums, Dpriors, incDM, ((MNStruct *)context)->numFitTiming, ((MNStruct *)context)->numFitJumps);
+		getCustomDMatrix(psr, FitList, TempoFitNums, TempoJumpNums, TempofdJumpNums, Dpriors, incDM, ((MNStruct *)context)->numFitTiming, ((MNStruct *)context)->numFitJumps, ((MNStruct *)context)->numFitfdJumps);
 
 		update_MNPriors(MNS,Dpriors, TempoPriors,0);
 
@@ -3007,7 +3081,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 		//Finally after doing everything reset custom priors in case overwritten by previous steps.
 		if(customPriors == 1){
 			if (rank==0) printf("Set to use custom priors, updating from setPriors function \n");
-			setTNPriors(ConfigFileName,Dpriors, TempoPriors,  ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps,ndims);
+			setTNPriors(ConfigFileName,Dpriors, TempoPriors,  ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps+((MNStruct *)context)->numFitfdJumps,ndims);
 			paramsfitted=0;
 		}
 		update_MNPriors(MNS,Dpriors, TempoPriors,0);
@@ -3106,7 +3180,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 	       int numfast = 0;
 	       int numslow = 0;
 
-	       for(int i =0; i < ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps; i++){
+	       for(int i =0; i < ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps+((MNStruct *)context)->numFitfdJumps; i++){
 			if(((MNStruct *)context)->LDpriors[i][2]==0){
 				numfast++;
 			}
@@ -3148,7 +3222,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 			((MNStruct *)context)->totCoeff = totCoeff;
 
 			int TimetoMargin=0;
-			for(int i =0; i < ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps; i++){
+			for(int i =0; i < ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps+((MNStruct *)context)->numFitfdJumps; i++){
 				if(((MNStruct *)context)->LDpriors[i][2]==1)TimetoMargin++;
 			}
 
@@ -3187,7 +3261,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 			((MNStruct *)context)->PreviousInfo = 0;
 
 			pcount = 0;
-			for(int i =0; i < ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps; i++){
+			for(int i =0; i < ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps+((MNStruct *)context)->numFitfdJumps; i++){
 	        		if(((MNStruct *)context)->LDpriors[i][2]==0){
 					grades[numslow + pcount] = 2;
 					pcount++;
