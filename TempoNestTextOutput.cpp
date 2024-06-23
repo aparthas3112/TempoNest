@@ -1330,8 +1330,6 @@ void TNtextOutput(pulsar *psr, int npsr, int newpar, long double *Tempo2Fit, voi
 	  for (i=1;i<=psr[p].nfdJumps;i++)
 	    {
 	      nread = sscanf(psr[p].fdjumpStr[i],"%s %s %s %s %s",str1,str2,str3,str4,str5);
-	      fprintf(fout2,"JUMP %s %s %.14g %d\n",str1,str2,psr[p].jumpVal[i],psr[p].fitJump[i]);
-
               if(psr[p].fdjumpIdx[i] == -2)
 	        fprintf(fout2,"FDJUMPDM %s %s %.14g %d\n",str1,str2,psr[p].fdjumpVal[i],psr[p].fitfdJump[i]);
               else
@@ -1438,7 +1436,7 @@ void TNtextOutput(pulsar *psr, int npsr, int newpar, long double *Tempo2Fit, voi
 	    if(((MNStruct *)context)->incNGJitter >0){
 
 		for(int i =0; i < ((MNStruct *)context)->incNGJitter; i++){
-			fprintf(fout2, "TNECORR %s %s %g\n", ((MNStruct *)context)->whiteflag, psr->TNECORRFlagVal[i],pow(10.0,paramarray[whitefitcount][2])/pow(10.0,-6));
+			fprintf(fout2, "TNECORR %s %s %g\n", psr->TNECORRFlagID[i], psr->TNECORRFlagVal[i],pow(10.0,paramarray[whitefitcount][2])/pow(10.0,-6));
                             tablefile <<  "Log$_{10}$[TNECORR] "<< ((MNStruct *)context)->whiteflag <<" "<< ((MNStruct *)context)->pulse[0].obsn[systempos[i]].flagVal[sysflag[i]] <<" \\dotfill & "<< paramarray[whitefitcount][0] <<" $\\pm$ "<< paramarray[whitefitcount][1] <<"  \\\\ \n";
                             whitefitcount++;
                     }

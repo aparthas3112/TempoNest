@@ -411,7 +411,7 @@ void readsummary(pulsar *psr, std::string longname, int ndim, void *context, lon
 		pcount++;
 	}
 	
-	for(int j=1;j<((MNStruct *)context)->numFitfdJumps;j++){
+	for(int j=0;j<((MNStruct *)context)->numFitfdJumps;j++){
 	  if(((MNStruct *)context)->Dpriors[pcount][0] != ((MNStruct *)context)->Dpriors[pcount][1]){
 	    LDP[pcount]=paramarray[fitcount][2]*(((MNStruct *)context)->LDpriors[pcount][1])+(((MNStruct *)context)->LDpriors[pcount][0]);
 	    fitcount++;
@@ -471,7 +471,7 @@ void readsummary(pulsar *psr, std::string longname, int ndim, void *context, lon
 		pcount++;
 	}	
 
-	for(int j=1;j<((MNStruct *)context)->numFitfdJumps;j++){
+	for(int j=0;j<((MNStruct *)context)->numFitfdJumps;j++){
 
 	  long double value;
 	  long double error;

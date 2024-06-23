@@ -2360,6 +2360,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 
 	  char str1[100],str2[100],str3[100],str4[100],str5[100];
 	  int nread=sscanf(psr[0].fdjumpStr[i],"%s %s %s %s %s",str1,str2,str3,str4,str5);
+	  printf("FDJUMP Str and Val: %s %g\n", psr[0].fdjumpStr[i], psr[0].fdjumpVal[i]);
 
 	  double prefdjump= 0;
 	  prefdjump=atof(str3);
@@ -2565,7 +2566,7 @@ extern "C" int graphicalInterface(int argc, char **argv,
 			pcount++;
 		}
 
-		for(int j=1;j<((MNStruct *)context)->numFitfdJumps;j++){
+		for(int j=0;j<((MNStruct *)context)->numFitfdJumps;j++){
 		  psr[0].fdjumpVal[((MNStruct *)context)->TempofdJumpNums[j]] =  TempoPriors[pcount][0];
 		  pcount++;
 		}
