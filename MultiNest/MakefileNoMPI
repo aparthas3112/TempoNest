@@ -4,7 +4,7 @@ CXX = mpicxx
 FFLAGS += -O3  -fPIC -ffree-line-length-none
 CFLAGS += -O3 -DMPI
 
-LAPACKLIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread
+LAPACKLIB = -llapack -lpthread
 
 NESTLIBDIR = ./
 

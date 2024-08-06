@@ -1183,7 +1183,16 @@ void StoreTMatrix(double* TotalMatrix, void* context)
         Eigen::MatrixXd DMatrix(((MNStruct*)context)->pulse->nobs, TimetoMargin);
         getEigenDVectorLike(context, DMatrix, ((MNStruct*)context)->pulse->nobs, TimetoMargin,
                             totalsize);
-        // vector_dgesvd(TotalMatrix, ((MNStruct*)context)->pulse->nobs, TimetoMargin);
+
+        // Perform SVD
+        Eigen::BDCSVD<Eigen::MatrixXd> svd(DMatrix, Eigen::ComputeThinU | Eigen::ComputeThinV);
+
+        Eigen::MatrixXd U = svd.matrixU();
+        for (int i = 0; i < ((MNStruct*)context)->pulse->nobs; i++) {
+            for (int j = 0; j < TimetoMargin; j++) {
+                TotalMatrix[i + j * ((MNStruct*)context)->pulse->nobs] = U(i, j);
+            }
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////
