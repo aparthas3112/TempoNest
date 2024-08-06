@@ -98,7 +98,7 @@ ifeq ($(COMPILER_TYPE),gfortran)
 # --------------
 # free-line-length-none : turn of line length limitation (why is this not a default??)
 # cpp  					: perform preprocessing
-FCFLAGS += -ffree-line-length-none -cpp -fPIC 
+FCFLAGS += -ffree-line-length-none -cpp -fPIC -fallow-argument-mismatch 
 
 ifdef DEBUG
 # Debugging mode

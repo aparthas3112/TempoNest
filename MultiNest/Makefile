@@ -1,7 +1,7 @@
 FC = mpif90# -fc=gfortran
 CC = mpicc 
 CXX = mpicxx 
-FFLAGS += -O3 -DMPI -fPIC -ffree-line-length-none
+FFLAGS += -O3 -DMPI -fPIC -ffree-line-length-none -fallow-argument-mismatch
 CFLAGS += -O3 -DMPI
 
 LAPACKLIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread
