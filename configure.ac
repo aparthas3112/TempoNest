@@ -32,18 +32,36 @@ AC_PROG_FC
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 
-if test X$user_set_cxxflags != Xyes; then
-	CXXFLAGS="-O3"
-fi
+# Optimization flags
+AC_ARG_ENABLE([debug],
+    [AS_HELP_STRING([--enable-debug], [Enable debug build])],
+    [enable_debug=$enableval],
+    [enable_debug=no])
 
-if test X$user_set_fflags != Xyes; then
-	FFLAGS="-O3 -DHAVE_CONFIG_H"
-fi
+AS_IF([test "x$enable_debug" = xyes], [
+    CFLAGS="-g -O0"
+    CXXFLAGS="-g -O0"
+    FFLAGS="-g -O0 -DHAVE_CONFIG_H"
+], [
+    CFLAGS="-O3 -march=native -mtune=native -ffast-math"
+    CXXFLAGS="-O3 -march=native -mtune=native -ffast-math"
+    FFLAGS="-O3 -march=native -mtune=native -ffast-math -DHAVE_CONFIG_H"
+])
 
-if test X$user_set_cflags != Xyes; then
-	CFLAGS="-O3"
-fi
+# Add warning flags
+CFLAGS="$CFLAGS -Wall -Wextra -Wpedantic"
+CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wpedantic"
 
+# Respect user-set flags
+if test "x$user_set_cxxflags" = xyes; then
+    AC_MSG_NOTICE([Using user-provided CXXFLAGS: $CXXFLAGS])
+fi
+if test "x$user_set_cflags" = xyes; then
+    AC_MSG_NOTICE([Using user-provided CFLAGS: $CFLAGS])
+fi
+if test "x$user_set_fflags" = xyes; then
+    AC_MSG_NOTICE([Using user-provided FFLAGS: $FFLAGS])
+fi
 
 AC_CONFIG_AUX_DIR([config])
 #AC_CONFIG_SRCDIR([Makefile.am])
@@ -123,6 +141,36 @@ AC_MSG_CHECKING([for BLAS])
 AC_MSG_RESULT($have_blas)
 AM_CONDITIONAL(HAVE_BLAS, [test x$have_blas = xyes])
 
+# Check for Eigen
+AC_MSG_CHECKING([for Eigen])
+AC_LANG_PUSH([C++])
+AC_TRY_COMPILE([#include <Eigen/Dense>],
+               [Eigen::MatrixXd m(2,2);],
+               [have_eigen=yes],
+               [have_eigen=no])
+AC_LANG_POP([C++])
+AC_MSG_RESULT([$have_eigen])
+
+if test "x$have_eigen" = xno; then
+    AC_MSG_ERROR([
+    Eigen is required but not found. Please install Eigen or specify its location:
+    ./configure CPPFLAGS="-I/path/to/eigen"
+    or
+    ./configure --with-eigen=/path/to/eigen
+    
+    Current CPPFLAGS: $CPPFLAGS
+    Current compile command: $CXX $CPPFLAGS $CXXFLAGS
+    ])
+fi
+
+# Add option to specify Eigen include directory
+AC_ARG_WITH([eigen],
+    [AS_HELP_STRING([--with-eigen=DIR],
+        [prefix for Eigen headers])],
+    [EIGEN_CPPFLAGS="-I$withval"],
+    [EIGEN_CPPFLAGS='-I/usr/include/eigen3'])
+AC_SUBST([EIGEN_CPPFLAGS])
+
 # test for LAPACK acceleration
 ACX_LAPACK(have_lapack=yes, have_lapack=no)
 AC_MSG_CHECKING([for LAPACK])
@@ -171,6 +219,19 @@ AC_CONFIG_FILES([Makefile])
 #		 unsupported_plugins/toasim/Makefile
 #		 unsupported_plugins/ppta/Makefile
 #		 unsupported_plugins/glast/Makefile])
+
+if test "x$have_eigen" = xyes; then
+    AC_MSG_NOTICE([Eigen found and will be used])
+else
+    AC_MSG_NOTICE([Eigen not found. Some matrix operations may be slower])
+fi
+
+AC_MSG_NOTICE([Summary of build options:])
+AC_MSG_NOTICE([  Debug mode: $enable_debug])
+AC_MSG_NOTICE([  CFLAGS: $CFLAGS])
+AC_MSG_NOTICE([  CXXFLAGS: $CXXFLAGS])
+AC_MSG_NOTICE([  FFLAGS: $FFLAGS])
+AC_MSG_NOTICE([  Eigen include flags: $EIGEN_CPPFLAGS])
 
 AC_OUTPUT
 

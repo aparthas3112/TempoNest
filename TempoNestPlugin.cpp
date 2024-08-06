@@ -1,1137 +1,1391 @@
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+    #include <config.h>
 #endif
 //  Copyright (C) 2013 Lindley Lentati
 
 /*
-* This file is part of TempoNest
-*
-* TempoNest is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* TempoNest is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-* You should have received a copy of the GNU General Public License
-* along with TempoNest. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of TempoNest
+ *
+ * TempoNest is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * TempoNest is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with TempoNest. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /*
-* If you use TempoNest and as a byproduct both Tempo2 and MultiNest
-* then please acknowledge it by citing Lentati L., Alexander P., Hobson M. P. (2013) for TempoNest,
-* Hobbs, Edwards & Manchester (2006) MNRAS, Vol 369, Issue 2,
-* pp. 655-672 (bibtex: 2006MNRAS.369..655H)
-* or Edwards, Hobbs & Manchester (2006) MNRAS, VOl 372, Issue 4,
-* pp. 1549-1574 (bibtex: 2006MNRAS.372.1549E) when discussing the
-* timing model and MultiNest Papers here.
-*/
+ * If you use TempoNest and as a byproduct both Tempo2 and MultiNest
+ * then please acknowledge it by citing Lentati L., Alexander P., Hobson M. P. (2013) for TempoNest,
+ * Hobbs, Edwards & Manchester (2006) MNRAS, Vol 369, Issue 2,
+ * pp. 655-672 (bibtex: 2006MNRAS.369..655H)
+ * or Edwards, Hobbs & Manchester (2006) MNRAS, VOl 372, Issue 4,
+ * pp. 1549-1574 (bibtex: 2006MNRAS.372.1549E) when discussing the
+ * timing model and MultiNest Papers here.
+ */
 
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <math.h>
-#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
+#include <time.h>
 #include "tempo2.h"
-//#include "tempo2Util.h"
+// #include "tempo2Util.h"
 #include "tempo2pred.h"
 #include "tempo2pred_int.h"
-//#include "T2accel.h"
+// #include "T2accel.h"
 #include <dlfcn.h>
 // #include "T2toolkit.h"
-#include <vector>
-#include <algorithm>
 #include <float.h>
-#include "multinest.h"
-#include "interfaces.hpp"
-#include "TempoNest.h"
 #include <t2fit.h>
+#include <algorithm>
+#include <vector>
+#include "TempoNest.h"
+#include "multinest.h"
 
 #include <string.h>
-#include <sstream>
-#include <iterator>
 #include <cstring>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <iterator>
+#include <sstream>
 
 #include <gsl/gsl_sf_gamma.h>
-#include "dpotri.h"
-#include "dpotrf.h"
-#include "dgesvd.h"
-#ifdef HAVE_CULA
-#include <cula_lapack_device.h>
-#endif /* HAVE_CULA */
 
 #include <mpi.h>
 
 #ifdef HAVE_MLAPACK
-#include <mpblas_mpfr.h>
+    #include <mpblas_mpfr.h>
 #endif
 
 /*
 #ifdef HAVE_PSRCHIVE
 // psrchive stuff
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
-#include "Pulsar/Profile.h"
 #include "Pulsar/FaradayRotation.h"
+#include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfileStats.h"
+#include "Pulsar/Profile.h"
 #include "T2Observatory.h"
 using namespace Pulsar;
 #endif
 */
 
-void ephemeris_routines(pulsar *psr,int npsr);
-void clock_corrections(pulsar *psr,int npsr);
-void extra_delays(pulsar *psr,int npsr);
+void ephemeris_routines(pulsar* psr, int npsr);
+void clock_corrections(pulsar* psr, int npsr);
+void extra_delays(pulsar* psr, int npsr);
 
 #ifdef HAVE_CULA
-//extern "C" void copy_gmat_(double *G, int N);
-//extern "C" void copy_floatgmat_(float *G, int N);
-//extern "C" void copy_staticgmat_(double *G, int M, int N);
-//extern "C" void copy_staticumat_(double *G, int M, int N);
-//extern "C" void copy_staticdmat_(double **TNDM, double *D, int M, int N);
-//extern "C" void copy_staticECorrmat_(double *EVec, int E, int N);
-extern "C" void copy_staticTmat_(double *T, int totalsize, int Nobs);
+// extern "C" void copy_gmat_(double *G, int N);
+// extern "C" void copy_floatgmat_(float *G, int N);
+// extern "C" void copy_staticgmat_(double *G, int M, int N);
+// extern "C" void copy_staticumat_(double *G, int M, int N);
+// extern "C" void copy_staticdmat_(double **TNDM, double *D, int M, int N);
+// extern "C" void copy_staticECorrmat_(double *EVec, int E, int N);
+extern "C" void copy_staticTmat_(double* T, int totalsize, int Nobs);
 #endif /* HAVE_CULA */
 
-
-void fastephemeris_routines(pulsar *psr,int npsr)
+void fastephemeris_routines(pulsar* psr, int npsr)
 {
-vectorPulsar(psr,npsr); /* 1. Form a vector pointing at the pulsar */
-readEphemeris(psr,npsr,0);/* 2. Read the ephemeris normally out */
-get_obsCoord(psr,npsr);   /* 3. Get Coordinate of observatory relative to Earth's centre normally out*/
-tt2tb(psr,npsr); /* Observatory/time-dependent part of TT-TB normally out*/
-readEphemeris(psr,npsr,0); /* Re-evaluate ephemeris with correct TB */
-//readShortEphemeris(psr,npsr,0); /* Re-evaluate ephemeris with correct TB */
+    vectorPulsar(psr, npsr);     /* 1. Form a vector pointing at the pulsar */
+    readEphemeris(psr, npsr, 0); /* 2. Read the ephemeris normally out */
+    get_obsCoord(
+        psr, npsr);   /* 3. Get Coordinate of observatory relative to Earth's centre normally out*/
+    tt2tb(psr, npsr); /* Observatory/time-dependent part of TT-TB normally out*/
+    readEphemeris(psr, npsr, 0); /* Re-evaluate ephemeris with correct TB */
+    // readShortEphemeris(psr,npsr,0); /* Re-evaluate ephemeris with correct TB */
 }
 
-
-void fastSubIntephemeris_routines(pulsar *psr,int npsr)
+void fastSubIntephemeris_routines(pulsar* psr, int npsr)
 {
-//vectorPulsar(psr,npsr); /* 1. Form a vector pointing at the pulsar */
-//readEphemeris(psr,npsr,0);/* 2. Read the ephemeris */
-get_obsCoord(psr,npsr);   /* 3. Get Coordinate of observatory relative to Earth's centre */
-//tt2tb(psr,npsr); /* Observatory/time-dependent part of TT-TB */
-//readEphemeris(psr,npsr,0); /* Re-evaluate ephemeris with correct TB */
-
+    // vectorPulsar(psr,npsr); /* 1. Form a vector pointing at the pulsar */
+    // readEphemeris(psr,npsr,0);/* 2. Read the ephemeris */
+    get_obsCoord(psr, npsr); /* 3. Get Coordinate of observatory relative to Earth's centre */
+    // tt2tb(psr,npsr); /* Observatory/time-dependent part of TT-TB */
+    // readEphemeris(psr,npsr,0); /* Re-evaluate ephemeris with correct TB */
 }
 
-void fastformBatsAll(pulsar *psr,int npsr)
+void fastformBatsAll(pulsar* psr, int npsr)
 {
-	//clock_corrections(psr,npsr); /* Clock corrections ... */
+    // clock_corrections(psr,npsr); /* Clock corrections ... */
 
-	int dotime = 0;
-	struct timeval tval_before, tval_after, tval_resultone, tval_resulttwo;
-	if(dotime == 1){
-		gettimeofday(&tval_before, NULL);
-	}
+    int dotime = 0;
+    struct timeval tval_before, tval_after, tval_resultone, tval_resulttwo;
+    if (dotime == 1) {
+        gettimeofday(&tval_before, NULL);
+    }
 
-	fastephemeris_routines(psr,npsr); /* Ephemeris routines ... */
+    fastephemeris_routines(psr, npsr); /* Ephemeris routines ... */
 
-	if(dotime == 1){
+    if (dotime == 1) {
 
-		gettimeofday(&tval_after, NULL);
-		timersub(&tval_after, &tval_before, &tval_resultone);
-		printf("Time elapsed Up to end of ephem: %ld.%06ld\n", (long int)tval_resultone.tv_sec, (long int)tval_resultone.tv_usec);
-		gettimeofday(&tval_before, NULL);
+        gettimeofday(&tval_after, NULL);
+        timersub(&tval_after, &tval_before, &tval_resultone);
+        printf("Time elapsed Up to end of ephem: %ld.%06ld\n", (long int)tval_resultone.tv_sec,
+               (long int)tval_resultone.tv_usec);
+        gettimeofday(&tval_before, NULL);
+    }
 
-	}
+    extra_delays(psr, npsr); /* Other time delays ... */
 
+    if (dotime == 1) {
 
-	extra_delays(psr,npsr); /* Other time delays ... */
+        gettimeofday(&tval_after, NULL);
+        timersub(&tval_after, &tval_before, &tval_resultone);
+        printf("Time elapsed Up to end of extra: %ld.%06ld\n", (long int)tval_resultone.tv_sec,
+               (long int)tval_resultone.tv_usec);
+        gettimeofday(&tval_before, NULL);
+    }
 
-	if(dotime == 1){
+    formBats(psr, npsr); /* Form Barycentric arrival times */
 
-		gettimeofday(&tval_after, NULL);
-		timersub(&tval_after, &tval_before, &tval_resultone);
-		printf("Time elapsed Up to end of extra: %ld.%06ld\n", (long int)tval_resultone.tv_sec, (long int)tval_resultone.tv_usec);
-		gettimeofday(&tval_before, NULL);
+    if (dotime == 1) {
 
-	}
+        gettimeofday(&tval_after, NULL);
+        timersub(&tval_after, &tval_before, &tval_resultone);
+        printf("Time elapsed Up to end of formbats: %ld.%06ld\n", (long int)tval_resultone.tv_sec,
+               (long int)tval_resultone.tv_usec);
+        gettimeofday(&tval_before, NULL);
+    }
 
-	formBats(psr,npsr); /* Form Barycentric arrival times */
+    secularMotion(psr, npsr);
+    // updateBatsAll(psr, npsr);
+    if (dotime == 1) {
 
-	if(dotime == 1){
-
-		gettimeofday(&tval_after, NULL);
-		timersub(&tval_after, &tval_before, &tval_resultone);
-		printf("Time elapsed Up to end of formbats: %ld.%06ld\n", (long int)tval_resultone.tv_sec, (long int)tval_resultone.tv_usec);
-		gettimeofday(&tval_before, NULL);
-
-	}
-
-	secularMotion(psr,npsr);
-	//updateBatsAll(psr, npsr);
-	if(dotime == 1){
-
-		gettimeofday(&tval_after, NULL);
-		timersub(&tval_after, &tval_before, &tval_resultone);
-		printf("Time elapsed Up to end of secular: %ld.%06ld\n", (long int)tval_resultone.tv_sec, (long int)tval_resultone.tv_usec);
-		gettimeofday(&tval_before, NULL);
-
-	}
+        gettimeofday(&tval_after, NULL);
+        timersub(&tval_after, &tval_before, &tval_resultone);
+        printf("Time elapsed Up to end of secular: %ld.%06ld\n", (long int)tval_resultone.tv_sec,
+               (long int)tval_resultone.tv_usec);
+        gettimeofday(&tval_before, NULL);
+    }
 }
 
-
-void fastformSubIntBatsAll(pulsar *psr,int npsr)
+void fastformSubIntBatsAll(pulsar* psr, int npsr)
 {
-        //clock_corrections(psr,npsr); /* Clock corrections ... */
-        fastSubIntephemeris_routines(psr,npsr); /* Ephemeris routines ... */
-  	extra_delays(psr,npsr); /* Other time delays ... */
-	formBats(psr,npsr); /* Form Barycentric arrival times */
-	secularMotion(psr,npsr);
-
+    // clock_corrections(psr,npsr); /* Clock corrections ... */
+    fastSubIntephemeris_routines(psr, npsr); /* Ephemeris routines ... */
+    extra_delays(psr, npsr);                 /* Other time delays ... */
+    formBats(psr, npsr);                     /* Form Barycentric arrival times */
+    secularMotion(psr, npsr);
 }
 
 /*
 #ifdef HAVE_PSRCHIVE
 void SaveNewArchive(Archive *archive, std::string NewArchiveName){
 
-	
 
-	archive->unload(NewArchiveName);
+
+    archive->unload(NewArchiveName);
 
 
 }
 #endif
 */
-void readDMVals(double *StoredDMVals){
+void readDMVals(double* StoredDMVals)
+{
 
+    std::ifstream MeanProfileFile;
+    std::string MeanProfileFilename =
+        "/home/ltl21/scratch/Pulsars/ProfileData/FrequencyData/Sims/WideBandPaper/Sim4/"
+        "RedSignal.dat";
+    MeanProfileFile.open(MeanProfileFilename.c_str());
 
-	std::ifstream MeanProfileFile;
-	std::string MeanProfileFilename = "/home/ltl21/scratch/Pulsars/ProfileData/FrequencyData/Sims/WideBandPaper/Sim4/RedSignal.dat";
-	MeanProfileFile.open(MeanProfileFilename.c_str());
-
-	for(int i = 0; i < 100; i++){
-		std::string line;
-		getline(MeanProfileFile,line);
-		std::istringstream myStream( line );
-		std::istream_iterator< double > begin(myStream),eof;
-		std::vector<double> ProfileVal(begin,eof);
-		StoredDMVals[i] = ProfileVal[0];
-	}
-	MeanProfileFile.close();
-
+    for (int i = 0; i < 100; i++) {
+        std::string line;
+        getline(MeanProfileFile, line);
+        std::istringstream myStream(line);
+        std::istream_iterator<double> begin(myStream), eof;
+        std::vector<double> ProfileVal(begin, eof);
+        StoredDMVals[i] = ProfileVal[0];
+    }
+    MeanProfileFile.close();
 }
+
 /*
 #ifdef HAVE_PSRCHIVE
 void SetNewAmps(Archive *archive){
 
 
 
-	std::ifstream MeanProfileFile;
-	std::string MeanProfileFilename = "/scratch/ltl21/Pulsars/ProfileData/FrequencyData/J1713+0747/results/OneProfStoc.dat";
-	MeanProfileFile.open(MeanProfileFilename.c_str());
+    std::ifstream MeanProfileFile;
+    std::string MeanProfileFilename =
+"/scratch/ltl21/Pulsars/ProfileData/FrequencyData/J1713+0747/results/OneProfStoc.dat";
+    MeanProfileFile.open(MeanProfileFilename.c_str());
 
-	float *readvals = new float[1024];
-	for(int i = 0; i < 1024; i++){
-		std::string line;
-		getline(MeanProfileFile,line);
-		std::istringstream myStream( line );
-		std::istream_iterator< double > begin(myStream),eof;
-		std::vector<double> ProfileVal(begin,eof);
-		readvals[i] = ProfileVal[0];
-		//printf("Read File: coeff %i = %g \n", i, readvals[i]);
-		
-	}
-	MeanProfileFile.close();
+    float *readvals = new float[1024];
+    for(int i = 0; i < 1024; i++){
+        std::string line;
+        getline(MeanProfileFile,line);
+        std::istringstream myStream( line );
+        std::istream_iterator< double > begin(myStream),eof;
+        std::vector<double> ProfileVal(begin,eof);
+        readvals[i] = ProfileVal[0];
+        //printf("Read File: coeff %i = %g \n", i, readvals[i]);
 
-	for(int i=0; i < archive->get_nsubint(); i++){
+    }
+    MeanProfileFile.close();
 
-		Integration *subint = archive->get_Integration(i);
+    for(int i=0; i < archive->get_nsubint(); i++){
 
-		int nbins = subint->get_nbin();
-		int nchans = subint->get_nchan();
-		int npols = subint->get_npol();
+        Integration *subint = archive->get_Integration(i);
 
-		for(int j = 0; j < nchans; j++){
+        int nbins = subint->get_nbin();
+        int nchans = subint->get_nchan();
+        int npols = subint->get_npol();
 
-			int ipol = 0; //only want total Intensity
-			Profile *prof = archive->get_Profile(i, ipol, j);
-			float *pvalues = prof->get_amps();
+        for(int j = 0; j < nchans; j++){
 
-			double oneflux = 0;	
-			for(int b =0; b < nbins; b++){
-				oneflux = oneflux + pvalues[b];
-			}  
-			//float *newpvalues = new float[nbins]();
-			if(oneflux != 0){prof->set_amps(readvals);}
-		}
-	}
+            int ipol = 0; //only want total Intensity
+            Profile *prof = archive->get_Profile(i, ipol, j);
+            float *pvalues = prof->get_amps();
+
+            double oneflux = 0;
+            for(int b =0; b < nbins; b++){
+                oneflux = oneflux + pvalues[b];
+            }
+            //float *newpvalues = new float[nbins]();
+            if(oneflux != 0){prof->set_amps(readvals);}
+        }
+    }
 }
 #endif
 */
-MNStruct* init_struct(pulsar *pulseval,	 long double **LDpriorsval, int numberpulsarsval,int numFitJumpsval,int numFitTimingval, int systemcountval, int numFitEFACval, int numFitEQUADval, int numFitRedCoeffval, int numFitDMCoeffval, int numFitScatCoeffval, int numFitRedPLval, int numFitDMPLval, int numFitScatPLval, int **TempoFitNumsval,int *TempoJumpNumsval, int *sysFlagsval, int numdimsval, int incREDval, int incDMval, int incScatval, int incFloatDMval, int incFloatRedval, int DMFloatstartval, int RedFloatstartval, int TimeMarginVal, int JumpMarginVal, int doLinearVal, double *SampleFreqsVal, int incStepVal, char *whiteflagval, int whitemodelval, int varyRedCoeffval, int varyDMCoeffval, int yearlyDMval, int incsinusoidval, int EPolTermsval, int incGWBval,int RedPriorType,int DMPriorType,int ScatPriorType,int EQUADPriorType,int EFACPriorType,int useOriginalErrors, int incShannonJitter, int incDMEvent, int incDMShapeEvent, int numDMShapeCoeff, int incBandNoise, int numFitBandNoiseCoeff, int incRedShapeEvent, int numRedShapeCoeff, int MarginRedShapeCoeff, int incDMScatterShapeEvent, int numDMScatterShapeCoeff, int incNGJitter, int incNGSJitter, int incGlitch, int incGlitchTerms, int incBreakingIndex, int FitLowFreqCutoff, int useNbitsAlgebra, int incGroupNoise, int numFitGroupNoiseCoeff, int **FitForGroup, int numGroupstoFit, int *GroupNoiseFlags, int FitSolarWind, int FitWhiteSolarWind, int interpolateProfile, double InterpolatedTime, int sampler, int *GPTAnumstoccoeff, int totalshapestoccoeff, int StoreFMatrices, int incHighFreqStoc, int numNGJitter, int numNGSJitter, int **FitForBand, int incProfileEvo, double EvoRefFreq, int *numEvoFitCoeff, int incWideBandNoise, int incProfileFit, int *numProfileFitCoeff, int incDMEQUAD, int FitLinearProfileWidth, double offPulseLevel, double **GroupStartTimes, int FitEvoExponent, int numProfComponents, int totalEvoFitCoeff, int totalProfileFitCoeff, int *numEvoCoeff, int totalEvoCoeff, int incWidthJitter, int JitterProfComp, int incProfileEnergyEvo, int debug, int ProfileBaselineTerms, int incProfileNoise, int ProfileNoiseCoeff, int SubIntToFit, int ChannelToFit, int NProfileEvoPoly, double *ProfCompSeps, int usecosiprior, double *PreJumpVals, char *rootName, int doMax, int incWidthEvoTime, int incExtraProfComp, int incPrecession, int incTimeCorrProfileNoise, int *numTimeCorrCoeff, int totalTimeCorrCoeff, double phasePriorExpansion, int ProfileNoiseMethod, int FitPrecAmps, char *GroupNoiseName, int NProfileTimePoly, int incProfileScatter, int ScatterPBF, int *FitCompWidths, int *FitCompPos, int NumFitCompWidths, int NumFitCompPos, int NumCompswithWidth, int NumCompswithPos, int rank)
+MNStruct* init_struct(
+    pulsar* pulseval, long double** LDpriorsval, int numberpulsarsval, int numFitJumpsval,
+    int numFitTimingval, int systemcountval, int numFitEFACval, int numFitEQUADval,
+    int numFitRedCoeffval, int numFitDMCoeffval, int numFitScatCoeffval, int numFitRedPLval,
+    int numFitDMPLval, int numFitScatPLval, int** TempoFitNumsval, int* TempoJumpNumsval,
+    int* sysFlagsval, int numdimsval, int incREDval, int incDMval, int incScatval,
+    int incFloatDMval, int incFloatRedval, int DMFloatstartval, int RedFloatstartval,
+    int TimeMarginVal, int JumpMarginVal, int doLinearVal, double* SampleFreqsVal, int incStepVal,
+    char* whiteflagval, int whitemodelval, int varyRedCoeffval, int varyDMCoeffval, int yearlyDMval,
+    int incsinusoidval, int EPolTermsval, int incGWBval, int RedPriorType, int DMPriorType,
+    int ScatPriorType, int EQUADPriorType, int EFACPriorType, int useOriginalErrors,
+    int incShannonJitter, int incDMEvent, int incDMShapeEvent, int numDMShapeCoeff,
+    int incBandNoise, int numFitBandNoiseCoeff, int incRedShapeEvent, int numRedShapeCoeff,
+    int MarginRedShapeCoeff, int incDMScatterShapeEvent, int numDMScatterShapeCoeff,
+    int incNGJitter, int incNGSJitter, int incGlitch, int incGlitchTerms, int incBreakingIndex,
+    int FitLowFreqCutoff, int useNbitsAlgebra, int incGroupNoise, int numFitGroupNoiseCoeff,
+    int** FitForGroup, int numGroupstoFit, int* GroupNoiseFlags, int FitSolarWind,
+    int FitWhiteSolarWind, int interpolateProfile, double InterpolatedTime, int sampler,
+    int* GPTAnumstoccoeff, int totalshapestoccoeff, int StoreFMatrices, int incHighFreqStoc,
+    int numNGJitter, int numNGSJitter, int** FitForBand, int incProfileEvo, double EvoRefFreq,
+    int* numEvoFitCoeff, int incWideBandNoise, int incProfileFit, int* numProfileFitCoeff,
+    int incDMEQUAD, int FitLinearProfileWidth, double offPulseLevel, double** GroupStartTimes,
+    int FitEvoExponent, int numProfComponents, int totalEvoFitCoeff, int totalProfileFitCoeff,
+    int* numEvoCoeff, int totalEvoCoeff, int incWidthJitter, int JitterProfComp,
+    int incProfileEnergyEvo, int debug, int ProfileBaselineTerms, int incProfileNoise,
+    int ProfileNoiseCoeff, int SubIntToFit, int ChannelToFit, int NProfileEvoPoly,
+    double* ProfCompSeps, int usecosiprior, double* PreJumpVals, char* rootName, int doMax,
+    int incWidthEvoTime, int incExtraProfComp, int incPrecession, int incTimeCorrProfileNoise,
+    int* numTimeCorrCoeff, int totalTimeCorrCoeff, double phasePriorExpansion,
+    int ProfileNoiseMethod, int FitPrecAmps, char* GroupNoiseName, int NProfileTimePoly,
+    int incProfileScatter, int ScatterPBF, int* FitCompWidths, int* FitCompPos,
+    int NumFitCompWidths, int NumFitCompPos, int NumCompswithWidth, int NumCompswithPos, int rank)
 {
     MNStruct* MNS = (MNStruct*)malloc(sizeof(MNStruct));
 
-	MNS->pulse=pulseval;
-	MNS->LDpriors=LDpriorsval;
-	MNS->numberpulsars=numberpulsarsval;
-	MNS->numFitJumps=numFitJumpsval;
-	MNS->numFitTiming=numFitTimingval;
-	MNS->systemcount=systemcountval;
-	MNS->numFitEFAC=numFitEFACval;
-	MNS->numFitEQUAD=numFitEQUADval;
-	MNS->numFitRedCoeff=numFitRedCoeffval;
-	MNS->numFitDMCoeff=numFitDMCoeffval;
-	MNS->numFitScatCoeff=numFitScatCoeffval;
-	MNS->numFitRedPL=numFitRedPLval;
-	MNS->numFitDMPL=numFitDMPLval;
-	MNS->numFitScatPL=numFitScatPLval;
-	MNS->TempoFitNums=TempoFitNumsval;
-	MNS->TempoJumpNums=TempoJumpNumsval;
-	MNS->sysFlags=sysFlagsval;
-	MNS->numdims=numdimsval;
-	MNS->incRED=incREDval;
-	MNS->incDM=incDMval;
-	MNS->incScat=incScatval;
-	MNS->incFloatRed=incFloatRedval;
-	MNS->incFloatDM=incFloatDMval;
-	MNS->yearlyDM=yearlyDMval;
-	MNS->incsinusoid=incsinusoidval;
-	MNS->FloatRedstart=RedFloatstartval;
-   	MNS->FloatDMstart=DMFloatstartval;
-	MNS->TimeMargin=TimeMarginVal;
-	MNS->JumpMargin=JumpMarginVal;
-	MNS->doLinear=doLinearVal;
-	MNS->sampleFreq=SampleFreqsVal;
-	MNS->incStep=incStepVal;
-	MNS->whiteflag=whiteflagval;
-	MNS->whitemodel=whitemodelval;
-	MNS->varyRedCoeff=varyRedCoeffval;
-	MNS->varyDMCoeff=varyDMCoeffval;
-	MNS->EPolTerms=EPolTermsval;
-	MNS->incGWB=incGWBval;
-	MNS->incDMEvent=incDMEvent;
-	MNS->RedPriorType=RedPriorType;
-	MNS->DMPriorType=DMPriorType;
-	MNS->EQUADPriorType=EQUADPriorType;
-	MNS->EFACPriorType=EFACPriorType;
-	MNS->useOriginalErrors=useOriginalErrors;
-	MNS->incShannonJitter=incShannonJitter;
-	MNS->incDMShapeEvent=incDMShapeEvent;
-	MNS->numDMShapeCoeff=numDMShapeCoeff;
-	MNS->incRedShapeEvent=incRedShapeEvent;
-	MNS->numRedShapeCoeff=numRedShapeCoeff;
-	MNS->MarginRedShapeCoeff=MarginRedShapeCoeff;
-	MNS->incDMScatterShapeEvent=incDMScatterShapeEvent;
-	MNS->numDMScatterShapeCoeff=numDMScatterShapeCoeff;
-	MNS->incBandNoise=incBandNoise;
-	MNS->numFitBandNoiseCoeff=numFitBandNoiseCoeff;
-	MNS->incNGJitter=incNGJitter;
-        MNS->incNGSJitter=incNGSJitter;
-	MNS->incGlitch=incGlitch;
-	MNS->incGlitchTerms=incGlitchTerms;
-	MNS->incBreakingIndex=incBreakingIndex;
-	MNS->FitLowFreqCutoff=FitLowFreqCutoff;
-	MNS->useNbitsAlgebra=useNbitsAlgebra;
-	MNS->incGroupNoise=incGroupNoise;
-	MNS->numFitGroupNoiseCoeff=numFitGroupNoiseCoeff;	
-	MNS->FitForGroup=FitForGroup;
-	MNS->numGroupstoFit=numGroupstoFit;
-	MNS->GroupNoiseFlags=GroupNoiseFlags;
-	MNS->FitSolarWind = FitSolarWind;
-	MNS->FitWhiteSolarWind = FitWhiteSolarWind;
-	MNS->InterpolateProfile = interpolateProfile;
-	MNS->InterpolatedTime = InterpolatedTime*std::pow(10.0, -9);
-	MNS->sampler = sampler;
-	MNS->numshapestoccoeff = GPTAnumstoccoeff;
-	MNS->storeFMatrices = StoreFMatrices;
-	MNS->incHighFreqStoc = incHighFreqStoc;
-	MNS->incNGJitter=numNGJitter;
-        MNS->incNGSJitter=numNGSJitter;
-	MNS->FitForBand = FitForBand;
-	MNS->incProfileEvo = incProfileEvo;
-	MNS->EvoRefFreq = EvoRefFreq;
-	MNS->numEvoFitCoeff = numEvoFitCoeff;
-	MNS->incWideBandNoise = incWideBandNoise;
-	MNS->incProfileFit = incProfileFit;
-	MNS->numProfileFitCoeff = numProfileFitCoeff;
-	MNS->incDMEQUAD = incDMEQUAD;
-	MNS->FitLinearProfileWidth = FitLinearProfileWidth;
-	MNS->offPulseLevel = offPulseLevel;
-	MNS->GroupStartTimes=GroupStartTimes;
-	MNS->FitEvoExponent = FitEvoExponent;
-	MNS->numProfComponents = numProfComponents;
-	MNS->totalEvoFitCoeff = totalEvoFitCoeff;
-	MNS->totalProfileFitCoeff = totalProfileFitCoeff;
-	MNS->totalEvoCoeff = totalEvoCoeff;
-	MNS->numEvoCoeff = numEvoCoeff;
-	MNS->incWidthJitter = incWidthJitter;
-	MNS->JitterProfComp = JitterProfComp;
-	MNS->totalshapestoccoeff = totalshapestoccoeff;
-	MNS->incProfileEnergyEvo = incProfileEnergyEvo;
-	MNS->debug = debug;
-	MNS->ProfileBaselineTerms = ProfileBaselineTerms;
-	MNS->incProfileNoise = incProfileNoise;
-	MNS->ProfileNoiseCoeff = ProfileNoiseCoeff;
-	MNS->SubIntToFit = SubIntToFit;
-	MNS->ChannelToFit = ChannelToFit;
-	MNS->NProfileEvoPoly = NProfileEvoPoly;
-	MNS->ProfCompSeps=ProfCompSeps;
-	MNS->usecosiprior=usecosiprior;
-	MNS->PreJumpVals=PreJumpVals;
-	MNS->rootName = rootName;
-	MNS->doMax = doMax;
-	MNS->incWidthEvoTime = incWidthEvoTime;
-        MNS->Tspan = 0;
-        MNS->TimetoMargin = 0;
-        MNS->totCoeff = 0;
-        MNS->totRedShapeCoeff = 0;
-        MNS->totalsize = 0;
-	MNS->incExtraProfComp = incExtraProfComp;
-	MNS->incPrecession = incPrecession;
-	MNS->incTimeCorrProfileNoise = incTimeCorrProfileNoise;
-	MNS->totalTimeCorrCoeff = totalTimeCorrCoeff;
-	MNS->numTimeCorrCoeff = numTimeCorrCoeff;
-	MNS->phasePriorExpansion = phasePriorExpansion;
-	MNS->ProfileNoiseMethod = ProfileNoiseMethod;
-	MNS->FitPrecAmps = FitPrecAmps;
-	MNS->GroupNoiseName= GroupNoiseName;
-	MNS->NProfileTimePoly = NProfileTimePoly;
-	MNS->incProfileScatter = incProfileScatter;
-	MNS->ScatterPBF = ScatterPBF;
-	MNS->FitCompWidths = FitCompWidths;
-	MNS->FitCompPos = FitCompPos;
-	MNS->NumFitCompWidths = NumFitCompWidths;
-	MNS->NumFitCompPos = NumFitCompPos;
-	MNS->NumCompswithWidth = NumCompswithWidth;
-	MNS->NumCompswithPos = NumCompswithPos;
-	MNS->rank = rank;
-	return MNS;
+    MNS->pulse = pulseval;
+    MNS->LDpriors = LDpriorsval;
+    MNS->numberpulsars = numberpulsarsval;
+    MNS->numFitJumps = numFitJumpsval;
+    MNS->numFitTiming = numFitTimingval;
+    MNS->systemcount = systemcountval;
+    MNS->numFitEFAC = numFitEFACval;
+    MNS->numFitEQUAD = numFitEQUADval;
+    MNS->numFitRedCoeff = numFitRedCoeffval;
+    MNS->numFitDMCoeff = numFitDMCoeffval;
+    MNS->numFitScatCoeff = numFitScatCoeffval;
+    MNS->numFitRedPL = numFitRedPLval;
+    MNS->numFitDMPL = numFitDMPLval;
+    MNS->numFitScatPL = numFitScatPLval;
+    MNS->TempoFitNums = TempoFitNumsval;
+    MNS->TempoJumpNums = TempoJumpNumsval;
+    MNS->sysFlags = sysFlagsval;
+    MNS->numdims = numdimsval;
+    MNS->incRED = incREDval;
+    MNS->incDM = incDMval;
+    MNS->incScat = incScatval;
+    MNS->incFloatRed = incFloatRedval;
+    MNS->incFloatDM = incFloatDMval;
+    MNS->yearlyDM = yearlyDMval;
+    MNS->incsinusoid = incsinusoidval;
+    MNS->FloatRedstart = RedFloatstartval;
+    MNS->FloatDMstart = DMFloatstartval;
+    MNS->TimeMargin = TimeMarginVal;
+    MNS->JumpMargin = JumpMarginVal;
+    MNS->doLinear = doLinearVal;
+    MNS->sampleFreq = SampleFreqsVal;
+    MNS->incStep = incStepVal;
+    MNS->whiteflag = whiteflagval;
+    MNS->whitemodel = whitemodelval;
+    MNS->varyRedCoeff = varyRedCoeffval;
+    MNS->varyDMCoeff = varyDMCoeffval;
+    MNS->EPolTerms = EPolTermsval;
+    MNS->incGWB = incGWBval;
+    MNS->incDMEvent = incDMEvent;
+    MNS->RedPriorType = RedPriorType;
+    MNS->DMPriorType = DMPriorType;
+    MNS->EQUADPriorType = EQUADPriorType;
+    MNS->EFACPriorType = EFACPriorType;
+    MNS->useOriginalErrors = useOriginalErrors;
+    MNS->incShannonJitter = incShannonJitter;
+    MNS->incDMShapeEvent = incDMShapeEvent;
+    MNS->numDMShapeCoeff = numDMShapeCoeff;
+    MNS->incRedShapeEvent = incRedShapeEvent;
+    MNS->numRedShapeCoeff = numRedShapeCoeff;
+    MNS->MarginRedShapeCoeff = MarginRedShapeCoeff;
+    MNS->incDMScatterShapeEvent = incDMScatterShapeEvent;
+    MNS->numDMScatterShapeCoeff = numDMScatterShapeCoeff;
+    MNS->incBandNoise = incBandNoise;
+    MNS->numFitBandNoiseCoeff = numFitBandNoiseCoeff;
+    MNS->incNGJitter = incNGJitter;
+    MNS->incNGSJitter = incNGSJitter;
+    MNS->incGlitch = incGlitch;
+    MNS->incGlitchTerms = incGlitchTerms;
+    MNS->incBreakingIndex = incBreakingIndex;
+    MNS->FitLowFreqCutoff = FitLowFreqCutoff;
+    MNS->useNbitsAlgebra = useNbitsAlgebra;
+    MNS->incGroupNoise = incGroupNoise;
+    MNS->numFitGroupNoiseCoeff = numFitGroupNoiseCoeff;
+    MNS->FitForGroup = FitForGroup;
+    MNS->numGroupstoFit = numGroupstoFit;
+    MNS->GroupNoiseFlags = GroupNoiseFlags;
+    MNS->FitSolarWind = FitSolarWind;
+    MNS->FitWhiteSolarWind = FitWhiteSolarWind;
+    MNS->InterpolateProfile = interpolateProfile;
+    MNS->InterpolatedTime = InterpolatedTime * std::pow(10.0, -9);
+    MNS->sampler = sampler;
+    MNS->numshapestoccoeff = GPTAnumstoccoeff;
+    MNS->storeFMatrices = StoreFMatrices;
+    MNS->incHighFreqStoc = incHighFreqStoc;
+    MNS->incNGJitter = numNGJitter;
+    MNS->incNGSJitter = numNGSJitter;
+    MNS->FitForBand = FitForBand;
+    MNS->incProfileEvo = incProfileEvo;
+    MNS->EvoRefFreq = EvoRefFreq;
+    MNS->numEvoFitCoeff = numEvoFitCoeff;
+    MNS->incWideBandNoise = incWideBandNoise;
+    MNS->incProfileFit = incProfileFit;
+    MNS->numProfileFitCoeff = numProfileFitCoeff;
+    MNS->incDMEQUAD = incDMEQUAD;
+    MNS->FitLinearProfileWidth = FitLinearProfileWidth;
+    MNS->offPulseLevel = offPulseLevel;
+    MNS->GroupStartTimes = GroupStartTimes;
+    MNS->FitEvoExponent = FitEvoExponent;
+    MNS->numProfComponents = numProfComponents;
+    MNS->totalEvoFitCoeff = totalEvoFitCoeff;
+    MNS->totalProfileFitCoeff = totalProfileFitCoeff;
+    MNS->totalEvoCoeff = totalEvoCoeff;
+    MNS->numEvoCoeff = numEvoCoeff;
+    MNS->incWidthJitter = incWidthJitter;
+    MNS->JitterProfComp = JitterProfComp;
+    MNS->totalshapestoccoeff = totalshapestoccoeff;
+    MNS->incProfileEnergyEvo = incProfileEnergyEvo;
+    MNS->debug = debug;
+    MNS->ProfileBaselineTerms = ProfileBaselineTerms;
+    MNS->incProfileNoise = incProfileNoise;
+    MNS->ProfileNoiseCoeff = ProfileNoiseCoeff;
+    MNS->SubIntToFit = SubIntToFit;
+    MNS->ChannelToFit = ChannelToFit;
+    MNS->NProfileEvoPoly = NProfileEvoPoly;
+    MNS->ProfCompSeps = ProfCompSeps;
+    MNS->usecosiprior = usecosiprior;
+    MNS->PreJumpVals = PreJumpVals;
+    MNS->rootName = rootName;
+    MNS->doMax = doMax;
+    MNS->incWidthEvoTime = incWidthEvoTime;
+    MNS->Tspan = 0;
+    MNS->TimetoMargin = 0;
+    MNS->totCoeff = 0;
+    MNS->totRedShapeCoeff = 0;
+    MNS->totalsize = 0;
+    MNS->incExtraProfComp = incExtraProfComp;
+    MNS->incPrecession = incPrecession;
+    MNS->incTimeCorrProfileNoise = incTimeCorrProfileNoise;
+    MNS->totalTimeCorrCoeff = totalTimeCorrCoeff;
+    MNS->numTimeCorrCoeff = numTimeCorrCoeff;
+    MNS->phasePriorExpansion = phasePriorExpansion;
+    MNS->ProfileNoiseMethod = ProfileNoiseMethod;
+    MNS->FitPrecAmps = FitPrecAmps;
+    MNS->GroupNoiseName = GroupNoiseName;
+    MNS->NProfileTimePoly = NProfileTimePoly;
+    MNS->incProfileScatter = incProfileScatter;
+    MNS->ScatterPBF = ScatterPBF;
+    MNS->FitCompWidths = FitCompWidths;
+    MNS->FitCompPos = FitCompPos;
+    MNS->NumFitCompWidths = NumFitCompWidths;
+    MNS->NumFitCompPos = NumFitCompPos;
+    MNS->NumCompswithWidth = NumCompswithWidth;
+    MNS->NumCompswithPos = NumCompswithPos;
+    MNS->rank = rank;
+    return MNS;
 }
 
-void printPriors(pulsar *psr, long double **TempoPriors, double **Dpriors, int incEFAC, int incEQUAD, int incRED, int incDM, int incScat, int numRedCoeff, int numDMCoeff, int numScatCoeff, int numFloatRed, int numFloatDM, int fitDMModel, std::string longname, int incStep, int varyRedCoeff, int varyDMCoeff, int yearlyDM, int incsinusoid, int numEPolTerms, int incShannonJitter, void *context){
+void printPriors(pulsar* psr, long double** TempoPriors, double** Dpriors, int incEFAC,
+                 int incEQUAD, int incRED, int incDM, int incScat, int numRedCoeff, int numDMCoeff,
+                 int numScatCoeff, int numFloatRed, int numFloatDM, int fitDMModel,
+                 std::string longname, int incStep, int varyRedCoeff, int varyDMCoeff, int yearlyDM,
+                 int incsinusoid, int numEPolTerms, int incShannonJitter, void* context)
+{
 
+    std::ofstream getdistparamnames;
+    std::string gdpnfname = longname + ".paramnames";
+    std::string latexvar;
+    getdistparamnames.open(gdpnfname.c_str());
 
-	std::ofstream getdistparamnames;
-	std::string gdpnfname = longname+".paramnames";
-	std::string latexvar;
-	getdistparamnames.open(gdpnfname.c_str());
-	
-	if(TempoPriors[0][2] == 0){
-	  getdistparamnames << "Phase \\phi\n";
-	}
-	
-	if (((MNStruct *)context)->rank==0) printf("\nPriors:\n");
-	int paramsfitted=0;
-	if(TempoPriors[0][2] == 0){	
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Phase : %.25Lg -> %.25Lg\n",TempoPriors[paramsfitted][0]+Dpriors[paramsfitted][0]*TempoPriors[paramsfitted][1],TempoPriors[paramsfitted][0]+Dpriors[paramsfitted][1]*TempoPriors[paramsfitted][1]);
-	}
-	paramsfitted++;
-	
-	for (int p=0;p<MAX_PARAMS;p++) {
-	  for (int k=0;k<psr[0].param[p].aSize;k++){
-	    if (p==param_raj) latexvar="\\alpha";
-	    else if (p==param_decj) latexvar="\\delta";
-	    else if (p==param_pmra) latexvar="\\mu_\\alpha";
-	    else if (p==param_pmdec) latexvar="\\mu_\\delta";
-	    else if (p==param_px) latexvar="\\pi";
-	    else if (p==param_sini) latexvar="\\sin i";
-	    else if (p==param_pb) latexvar="P_b";
-	    else if (p==param_t0) latexvar="T_0";
-	    else if (p==param_ecc) latexvar="e";
-	    else if (p==param_pbdot) latexvar="\\dot{P_bb}";
-	    else if (p==param_om) latexvar="\\omega";
-	    else if (p==param_omdot) latexvar="\\dot{\\omega}";
-	    else if (p==param_tasc) latexvar="T_{asc}";
-	    else if (p==param_m2) latexvar="m_2";
-	    else if (p==param_eps1) latexvar="\\kappa";
-	    else if (p==param_eps2) latexvar="\\eta";
-	    else if (p==param_gamma) latexvar="\\gamma";
-	    else if (p==param_f && k==0) latexvar="\\nu";
-	    else if (p==param_f && k==1) latexvar="\\dot{\\nu}";
-	    else if (p==param_f && k==2) latexvar="\\ddot{\\nu}";
-	    else if (p==param_dm && k==0) latexvar="";
-	    else if (p==param_dm && k==1) latexvar="";
-	    else if (p==param_dm && k==2) latexvar="";
-	    else latexvar = psr[0].param[p].shortlabel[k];
-	    
-	    if(psr[0].param[p].fitFlag[k] == 1 && p != param_dmmodel){
-	      if(TempoPriors[paramsfitted][2] == 0 && ((MNStruct *)context)->rank==0){
-		printf("Prior on %s : %.25Lg -> %.25Lg\n",psr[0].param[p].shortlabel[k], TempoPriors[paramsfitted][0]+Dpriors[paramsfitted][0]*TempoPriors[paramsfitted][1],TempoPriors[paramsfitted][0]+Dpriors[paramsfitted][1]*TempoPriors[paramsfitted][1]);
-	      }
-	      
-	      if(TempoPriors[paramsfitted][2] == 0){
-		getdistparamnames <<  psr[0].param[p].shortlabel[k]<< " " << latexvar << "\n";
-	      }
-	      paramsfitted++;
-	    }
-	  }
-	}
-		
-	int jumpsfitted=0;
-	for(int i=0;i<=psr[0].nJumps;i++){
-		if(psr[0].fitJump[i] == 1){
-	
-			if(TempoPriors[paramsfitted][2] == 0){
-	
-			  if (((MNStruct *)context)->rank==0) printf("Prior on Jump %i : %.25Lg -> %.25Lg\n",jumpsfitted+1, TempoPriors[paramsfitted][0]+Dpriors[paramsfitted][0]*TempoPriors[paramsfitted][1],TempoPriors[paramsfitted][0]+Dpriors[paramsfitted][1]*TempoPriors[paramsfitted][1]);
-			
-			  getdistparamnames <<  "Jump"<< jumpsfitted+1 <<"\n";
-			}
+    if (TempoPriors[0][2] == 0) {
+        getdistparamnames << "Phase \\phi\n";
+    }
 
-			paramsfitted++;
-			jumpsfitted++;
-		}
-	} 
+    if (((MNStruct*)context)->rank == 0)
+        printf("\nPriors:\n");
+    int paramsfitted = 0;
+    if (TempoPriors[0][2] == 0) {
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Phase : %.25Lg -> %.25Lg\n",
+                   TempoPriors[paramsfitted][0] +
+                       Dpriors[paramsfitted][0] * TempoPriors[paramsfitted][1],
+                   TempoPriors[paramsfitted][0] +
+                       Dpriors[paramsfitted][1] * TempoPriors[paramsfitted][1]);
+    }
+    paramsfitted++;
 
-	if(incStep>0){
-		for(int i =0; i < incStep; i++){
-			getdistparamnames <<  "StepG"<< i+1 <<"\n";
-			getdistparamnames <<  "StepT"<< i+1 <<"\n";
-			getdistparamnames <<  "StepA"<< i+1 <<"\n";
+    for (int p = 0; p < MAX_PARAMS; p++) {
+        for (int k = 0; k < psr[0].param[p].aSize; k++) {
+            if (p == param_raj)
+                latexvar = "\\alpha";
+            else if (p == param_decj)
+                latexvar = "\\delta";
+            else if (p == param_pmra)
+                latexvar = "\\mu_\\alpha";
+            else if (p == param_pmdec)
+                latexvar = "\\mu_\\delta";
+            else if (p == param_px)
+                latexvar = "\\pi";
+            else if (p == param_sini)
+                latexvar = "\\sin i";
+            else if (p == param_pb)
+                latexvar = "P_b";
+            else if (p == param_t0)
+                latexvar = "T_0";
+            else if (p == param_ecc)
+                latexvar = "e";
+            else if (p == param_pbdot)
+                latexvar = "\\dot{P_bb}";
+            else if (p == param_om)
+                latexvar = "\\omega";
+            else if (p == param_omdot)
+                latexvar = "\\dot{\\omega}";
+            else if (p == param_tasc)
+                latexvar = "T_{asc}";
+            else if (p == param_m2)
+                latexvar = "m_2";
+            else if (p == param_eps1)
+                latexvar = "\\kappa";
+            else if (p == param_eps2)
+                latexvar = "\\eta";
+            else if (p == param_gamma)
+                latexvar = "\\gamma";
+            else if (p == param_f && k == 0)
+                latexvar = "\\nu";
+            else if (p == param_f && k == 1)
+                latexvar = "\\dot{\\nu}";
+            else if (p == param_f && k == 2)
+                latexvar = "\\ddot{\\nu}";
+            else if (p == param_dm && k == 0)
+                latexvar = "";
+            else if (p == param_dm && k == 1)
+                latexvar = "";
+            else if (p == param_dm && k == 2)
+                latexvar = "";
+            else
+                latexvar = psr[0].param[p].shortlabel[k];
 
-			if (((MNStruct *)context)->rank==0) printf("Prior for Step Group: %i %g %g \n",i,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;	
-			if (((MNStruct *)context)->rank==0) printf("Prior for Step Time: %i %g %g \n",i,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;	
-			if (((MNStruct *)context)->rank==0) printf("Prior for Step Amp: %i %g %g \n",i,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;	
-
-		}
-	}
-	
-
-	if(((MNStruct *)context)->incGlitch>0){
-		for(int i =0; i < ((MNStruct *)context)->incGlitch; i++){
-			getdistparamnames <<  "GlitchMJD"<< i+1 << "\n";
-
-			if (((MNStruct *)context)->rank==0) printf("Prior for Glitch Epoch: %i %g %g \n",i,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;
-
-			if(((MNStruct *)context)->incGlitchTerms < 3){
-				for(int j=0; j < ((MNStruct *)context)->incGlitchTerms; j++){
-					getdistparamnames <<  "GlitchF"<< i+1 << "\n";
-
-					if (((MNStruct *)context)->rank==0) printf("Prior for Glitch F%i: %i %g %g \n",j, i,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-					paramsfitted++;
-				}
-			}
-			else{
-					getdistparamnames <<  "GlitchF0"<< i+1 << "\n";
-
-					if (((MNStruct *)context)->rank==0) printf("Prior for Glitch F0: %i %g %g \n", i,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-					paramsfitted++;
-
-					getdistparamnames <<  "GlitchDA"<< i+1 <<"\n";
-
-					if (((MNStruct *)context)->rank==0) printf("Prior for Glitch Decay Amp: %i %g %g \n", i,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-					paramsfitted++;
-
-					getdistparamnames <<  "GlitchDT"<< i+1 <<"\n";
-
-					if (((MNStruct *)context)->rank==0) printf("Prior for Glitch Decay Timescale: %i %g %g \n", i,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-					paramsfitted++;
-
-			}
-                }
-        }
-
-
-		
-	if(incEFAC>0){
-		for(int n=1;n<=numEPolTerms; n++){
-			int EFACnum=1;
-			for(int i =0;i<incEFAC;i++){
-			  if (((MNStruct *)context)->rank==0) printf("Prior on EPol %i EFAC %i : %.5g -> %.5g\n",n, EFACnum, Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			  getdistparamnames <<  "EFAC"<< i+1 << "\n";
-			  paramsfitted++;
-			  EFACnum++;
-			}
-		}
-	}
-
-	if(incEQUAD>0){
-		int EQUADnum=1;	
-		for(int i =0;i<incEQUAD;i++){
-		  if (((MNStruct *)context)->rank==0) printf("Prior on EQUAD %i: %.5g -> %.5g\n",EQUADnum,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  getdistparamnames <<  "EQUAD"<< i+1 << "\n";
-		  paramsfitted++;
-		  EQUADnum++;
-		}
-	}
-	
-	if(incShannonJitter>0){
-		int SQUADnum=1;	
-		for(int i =0;i<incShannonJitter;i++){
-		  if (((MNStruct *)context)->rank==0) printf("Prior on SQUAD %i: %.5g -> %.5g\n",SQUADnum,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  getdistparamnames <<  "SQUAD"<< i+1 << "\n";
-		  paramsfitted++;	
-		  SQUADnum++;
-		}
-	}
-
-	if(((MNStruct *)context)->incHighFreqStoc>0){
-		int HF=1;	
-		for(int i =0;i<((MNStruct *)context)->incHighFreqStoc;i++){
-		  if (((MNStruct *)context)->rank==0) printf("Prior on High Frequency Profile Stochasticity %i: %.5g -> %.5g\n",HF,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  getdistparamnames <<  "HF"<< i+1 << "\n";
-		  paramsfitted++;	
-		  HF++;
-		}
-	}
-
-	if(((MNStruct *)context)->FitSolarWind==1){
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Solar Wind %.5g -> %.5g\n", Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  getdistparamnames <<  "SW\n";
-	  paramsfitted++;
-	}	
-
-        if(((MNStruct *)context)->FitWhiteSolarWind==1){
-	  if (((MNStruct *)context)->rank==0) printf("Prior on White Solar Wind %.5g -> %.5g\n", Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  getdistparamnames <<  "WSW\n";
-	  paramsfitted++;
-        }
-
-	if(((MNStruct *)context)->incNGJitter>0){
-	  int ECORRnum=1;	
-	  for(int i =0;i<((MNStruct *)context)->incNGJitter;i++){
-	    if (((MNStruct *)context)->rank==0) printf("Prior on ECORR %i: %.5g -> %.5g\n",ECORRnum,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	    getdistparamnames <<  "ECORR"<< i+1 << "\n";
-	    paramsfitted++;	
-	    ECORRnum++;
-	  }
-	}
-
-	if(((MNStruct *)context)->incNGSJitter>0){
-	  int SECORRnum=1;	
-	  for(int i =0;i<((MNStruct *)context)->incNGSJitter;i++){
-	    if (((MNStruct *)context)->rank==0) printf("Prior on SECORR %i: %.5g -> %.5g\n",SECORRnum,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	    getdistparamnames <<  "SECORR"<< i+1 << "\n";
-	    paramsfitted++;	
-	    SECORRnum++;
-	  }
-	}
-
-	if(((MNStruct *)context)->incDMEQUAD == 1){
-	  if (((MNStruct *)context)->rank==0) printf("Prior on DMEQUAD: %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  getdistparamnames <<  "DMEQ\n";
-	  paramsfitted++;	
-	}
-
-	if(((MNStruct *)context)->incWidthJitter == 1){
-	  if (((MNStruct *)context)->rank==0) printf("Prior on WidthJitter: %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  getdistparamnames <<  "WJ\n";
-	  paramsfitted++;	
-	}
-
-
-	if(((MNStruct *)context)->incDMEvent != 0){
-                for(int i =0; i < ((MNStruct *)context)->incDMEvent; i++){
-		  if (((MNStruct *)context)->rank==0) printf("Prior on DM Event %i Start Point %g -> %g \n", i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  paramsfitted++;		
-		  if (((MNStruct *)context)->rank==0) printf("Prior on DM Event %i Length %g -> %g \n", i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  paramsfitted++;	
-		  if (((MNStruct *)context)->rank==0) printf("Prior on DM Event %i Log Amp %g -> %g \n", i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  paramsfitted++;	
-		  if (((MNStruct *)context)->rank==0) printf("Prior on DM Event %i Spectral Index %g -> %g \n", i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  paramsfitted++;	
-		  if (((MNStruct *)context)->rank==0) printf("Prior on DM Event %i Offset Term %g -> %g \n", i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  paramsfitted++;	
-		  if (((MNStruct *)context)->rank==0) printf("Prior on DM Event %i Linear Term %g -> %g \n", i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  paramsfitted++;	
-		  if (((MNStruct *)context)->rank==0) printf("Prior on DM Event %i Quadratic Term %g -> %g \n", i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  paramsfitted++;	
-
-		  getdistparamnames <<  "DMEventStart"<< i+1 << "\n";
-		  getdistparamnames <<  "DMEventLength"<< i+1 << "\n";
-		  getdistparamnames <<  "DMEventLogAmp"<< i+1 << "\n";
-		  getdistparamnames <<  "DMEventIndex"<< i+1 << "\n";
-		  getdistparamnames <<  "DMEventOffset"<< i+1 << "\n";
-		  getdistparamnames <<  "DMEventLinear"<< i+1 << "\n";
-		  getdistparamnames <<  "DMEventQuad"<< i+1 << "\n";
-		}
-	}
-
-
-	if(((MNStruct *)context)->FitLowFreqCutoff > 0){
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Red LF Cutoff %g -> %g \n", Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  paramsfitted++;
-	  getdistparamnames <<  "LFC\n";
-	}
-			
-	if(incRED==1 || incRED==3){
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Red Noise Log Amplitude : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  paramsfitted++;		
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Red Noise Slope : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  paramsfitted++;
-	  
-	  getdistparamnames <<  "RedAmp\n";
-	  getdistparamnames <<  "RedSlope\n";
-	  
-	  if(varyRedCoeff==1){
-	    if (((MNStruct *)context)->rank==0) printf("Varying RedCoeffs : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	    paramsfitted++;	
-	    getdistparamnames <<  "RedPLCoeff\n";
-	    paramsfitted++;	
-	    getdistparamnames <<  "RedPLCoeffAmp\n";
-	  }
-	}
-	else if(incRED==2){
-	  int Coeffnum=1;
-	  for(int i =0;i<numRedCoeff;i++){
-	    if (((MNStruct *)context)->rank==0) printf("Prior on Red Noise Coefficient %i Log Amplitude : %.5g -> %.5g\n",Coeffnum,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	    getdistparamnames <<  "RedC"<< i+1 << "\n";
-	    paramsfitted++;	
-	  }
-	}
-	else if(incRED==4){
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Red Noise Log Amplitude : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  paramsfitted++;
-
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Red Noise Slope : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  paramsfitted++;
-	  
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Red Noise Corner Freq : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  paramsfitted++;
-
-	  getdistparamnames <<  "RedAmp\n";
-	  getdistparamnames <<  "RedSlope\n";
-	  getdistparamnames <<  "RedCorner\n";	  
-	  
-	  if(varyRedCoeff==1){
-	    if (((MNStruct *)context)->rank==0) printf("Varying RedCoeffs : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	    paramsfitted++;
-	    getdistparamnames <<  "RedPLCoeff\n";
-	    paramsfitted++;
-	    getdistparamnames <<  "RedPLCoeffAmp\n";
-	  }
-	}
-	else if(incRED==5){
-	  for(int i =0;i < 2*numRedCoeff;i++){
-	    if (((MNStruct *)context)->rank==0) printf("Prior on fourier coefficients: %i %g %g \n",i, Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	    getdistparamnames <<  "FourierC"<< i+1 << "\n";
-	    paramsfitted++;	
-	  }
-	  
-	  getdistparamnames <<  "RedAmp\n";
-	  getdistparamnames <<  "RedSlope\n";
-	  
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Red Noise Log Amplitude : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  paramsfitted++;		
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Red Noise Slope : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  paramsfitted++;
-	}	
-
-        if(numFloatRed>0){
-	  for(int i =0; i < numFloatRed; i++){
-	    getdistparamnames <<  "RFF"<< i+1 << "\n";
-	    getdistparamnames <<  "RFA"<< i+1 << "\n";
-	    if (((MNStruct *)context)->rank==0) printf("Prior on Floating Red Noise Frequency %i : %.5g -> %.5g\n",i, Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	    paramsfitted++;		
-	    if (((MNStruct *)context)->rank==0) printf("Prior on Floating Red Noise Log Amplitude %i : %.5g -> %.5g\n",i, Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	    paramsfitted++;
-	  }
-        }
-
-	if(((MNStruct *)context)->incGWB == 1){
-	  getdistparamnames <<  "GWBAmp\n";
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Log GWB Amplitude : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  paramsfitted++;
-	}
-
-	if(((MNStruct *)context)->incRedShapeEvent >0){
-	  for(int i =0; i < ((MNStruct *)context)->incRedShapeEvent; i++){
-	    getdistparamnames <<  "RedShapePos"<< i+1 << "\n";
-	    getdistparamnames <<  "RedShapeWidth"<< i+1 << "\n";
-	    if (((MNStruct *)context)->rank==0) printf("Prior on Red Shape Event %i Start : %.5g -> %.5g\n",i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	    paramsfitted++;	
-	    if (((MNStruct *)context)->rank==0) printf("Prior on Red Shape Event %i Width : %.5g -> %.5g\n",i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	    paramsfitted++;	
-	    
-	    if(((MNStruct *)context)->MarginRedShapeCoeff == 0){
-	      for(int c =0; c< ((MNStruct *)context)->numRedShapeCoeff; c++){
-		getdistparamnames <<  "RedShapeC"<< i+1 << "\n";
-		if (((MNStruct *)context)->rank==0) printf("Prior on Red Shape Event %i Coeff %i : %.5g -> %.5g\n",i+1,c+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		paramsfitted++;	
-	      }
-	    }
-	  }
-	}
-
-        if(incsinusoid==1){
-		getdistparamnames <<  "sineAmp\n";
-		getdistparamnames <<  "sinePhase\n";
-		getdistparamnames <<  "sineFreq\n";
-		if (((MNStruct *)context)->rank==0) printf("Prior on Sine Log Amplitude : %.5g -> %.5g\n", Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		paramsfitted++;		
-		if (((MNStruct *)context)->rank==0) printf("Prior on Sine phase : %.5g -> %.5g\n", Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		paramsfitted++;
-		if (((MNStruct *)context)->rank==0) printf("Prior on Log Sine Freq : %.5g -> %.5g\n", Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		paramsfitted++;
-        }
-			
-	if(incDM==1 || incDM==3){
-		getdistparamnames <<  "DMAmp\n";
-		getdistparamnames <<  "DMSlope\n";
-		if (((MNStruct *)context)->rank==0) printf("Prior on DM Log Amplitude : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		paramsfitted++;		
-		if (((MNStruct *)context)->rank==0) printf("Prior on DM Slope : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		paramsfitted++;
-
-		if(varyDMCoeff==1){
-		  if (((MNStruct *)context)->rank==0) printf("Varying DMCoeffs : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  paramsfitted++;	
-		  getdistparamnames <<  "DMPLCoeff\n";
-		  paramsfitted++;	
-		  getdistparamnames <<  "DMPLCoeffAmp\n";
-		}
-	}
-	else if(incDM==2){
-		int Coeffnum=1;
-		for(int i =0;i<numDMCoeff;i++){
-		  if (((MNStruct *)context)->rank==0) printf("Prior on DM Coefficient %i Log Amplitude : %.5g -> %.5g\n",Coeffnum,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  getdistparamnames <<  "DMC"<< i+1 << "\n";
-		  paramsfitted++;	
-		}
-	}
-
-        else if(incDM==5){
-                for(int i =0;i < 2*numDMCoeff;i++){
-		  if (((MNStruct *)context)->rank==0) printf("Prior on DM fourier coefficients: %i %g %g \n",i, Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  getdistparamnames <<  "DMFourierC"<< i+1 << "\n";
-		  paramsfitted++;
-                }
-		getdistparamnames <<  "DMAmp\n";
-		getdistparamnames <<  "DMPSlope\n";
-		
-		if (((MNStruct *)context)->rank==0) printf("Prior on DM Variations Log Amplitude : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		paramsfitted++;
-		if (((MNStruct *)context)->rank==0) printf("Prior on DM Variations Slope : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		paramsfitted++;
-        }
-
-        else if(incDM==6){
-                for(int i =0;i < 2*numDMCoeff;i++){
-		  if (((MNStruct *)context)->rank==0) printf("Prior on DM fourier coefficients: %i %g %g \n",i, Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  getdistparamnames <<  "DMFourierC"<< i+1 << "\n";
-		  paramsfitted++;
+            if (psr[0].param[p].fitFlag[k] == 1 && p != param_dmmodel) {
+                if (TempoPriors[paramsfitted][2] == 0 && ((MNStruct*)context)->rank == 0) {
+                    printf("Prior on %s : %.25Lg -> %.25Lg\n", psr[0].param[p].shortlabel[k],
+                           TempoPriors[paramsfitted][0] +
+                               Dpriors[paramsfitted][0] * TempoPriors[paramsfitted][1],
+                           TempoPriors[paramsfitted][0] +
+                               Dpriors[paramsfitted][1] * TempoPriors[paramsfitted][1]);
                 }
 
-                for(int i =0;i < numDMCoeff;i++){
-		  if (((MNStruct *)context)->rank==0) printf("Prior on DM PS coefficients: %i %g %g \n",i, Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  getdistparamnames <<  "DMFourierPC"<< i+1 << "\n";
-		  paramsfitted++;
+                if (TempoPriors[paramsfitted][2] == 0) {
+                    getdistparamnames << psr[0].param[p].shortlabel[k] << " " << latexvar << "\n";
                 }
+                paramsfitted++;
+            }
+        }
+    }
+
+    int jumpsfitted = 0;
+    for (int i = 0; i <= psr[0].nJumps; i++) {
+        if (psr[0].fitJump[i] == 1) {
+
+            if (TempoPriors[paramsfitted][2] == 0) {
+
+                if (((MNStruct*)context)->rank == 0)
+                    printf("Prior on Jump %i : %.25Lg -> %.25Lg\n", jumpsfitted + 1,
+                           TempoPriors[paramsfitted][0] +
+                               Dpriors[paramsfitted][0] * TempoPriors[paramsfitted][1],
+                           TempoPriors[paramsfitted][0] +
+                               Dpriors[paramsfitted][1] * TempoPriors[paramsfitted][1]);
+
+                getdistparamnames << "Jump" << jumpsfitted + 1 << "\n";
+            }
+
+            paramsfitted++;
+            jumpsfitted++;
+        }
+    }
+
+    if (incStep > 0) {
+        for (int i = 0; i < incStep; i++) {
+            getdistparamnames << "StepG" << i + 1 << "\n";
+            getdistparamnames << "StepT" << i + 1 << "\n";
+            getdistparamnames << "StepA" << i + 1 << "\n";
+
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior for Step Group: %i %g %g \n", i, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior for Step Time: %i %g %g \n", i, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior for Step Amp: %i %g %g \n", i, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+        }
+    }
+
+    if (((MNStruct*)context)->incGlitch > 0) {
+        for (int i = 0; i < ((MNStruct*)context)->incGlitch; i++) {
+            getdistparamnames << "GlitchMJD" << i + 1 << "\n";
+
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior for Glitch Epoch: %i %g %g \n", i, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+
+            if (((MNStruct*)context)->incGlitchTerms < 3) {
+                for (int j = 0; j < ((MNStruct*)context)->incGlitchTerms; j++) {
+                    getdistparamnames << "GlitchF" << i + 1 << "\n";
+
+                    if (((MNStruct*)context)->rank == 0)
+                        printf("Prior for Glitch F%i: %i %g %g \n", j, i, Dpriors[paramsfitted][0],
+                               Dpriors[paramsfitted][1]);
+                    paramsfitted++;
+                }
+            } else {
+                getdistparamnames << "GlitchF0" << i + 1 << "\n";
+
+                if (((MNStruct*)context)->rank == 0)
+                    printf("Prior for Glitch F0: %i %g %g \n", i, Dpriors[paramsfitted][0],
+                           Dpriors[paramsfitted][1]);
+                paramsfitted++;
+
+                getdistparamnames << "GlitchDA" << i + 1 << "\n";
+
+                if (((MNStruct*)context)->rank == 0)
+                    printf("Prior for Glitch Decay Amp: %i %g %g \n", i, Dpriors[paramsfitted][0],
+                           Dpriors[paramsfitted][1]);
+                paramsfitted++;
+
+                getdistparamnames << "GlitchDT" << i + 1 << "\n";
+
+                if (((MNStruct*)context)->rank == 0)
+                    printf("Prior for Glitch Decay Timescale: %i %g %g \n", i,
+                           Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+                paramsfitted++;
+            }
+        }
+    }
+
+    if (incEFAC > 0) {
+        for (int n = 1; n <= numEPolTerms; n++) {
+            int EFACnum = 1;
+            for (int i = 0; i < incEFAC; i++) {
+                if (((MNStruct*)context)->rank == 0)
+                    printf("Prior on EPol %i EFAC %i : %.5g -> %.5g\n", n, EFACnum,
+                           Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+                getdistparamnames << "EFAC" << i + 1 << "\n";
+                paramsfitted++;
+                EFACnum++;
+            }
+        }
+    }
+
+    if (incEQUAD > 0) {
+        int EQUADnum = 1;
+        for (int i = 0; i < incEQUAD; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on EQUAD %i: %.5g -> %.5g\n", EQUADnum, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            getdistparamnames << "EQUAD" << i + 1 << "\n";
+            paramsfitted++;
+            EQUADnum++;
+        }
+    }
+
+    if (incShannonJitter > 0) {
+        int SQUADnum = 1;
+        for (int i = 0; i < incShannonJitter; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on SQUAD %i: %.5g -> %.5g\n", SQUADnum, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            getdistparamnames << "SQUAD" << i + 1 << "\n";
+            paramsfitted++;
+            SQUADnum++;
+        }
+    }
+
+    if (((MNStruct*)context)->incHighFreqStoc > 0) {
+        int HF = 1;
+        for (int i = 0; i < ((MNStruct*)context)->incHighFreqStoc; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on High Frequency Profile Stochasticity %i: %.5g -> %.5g\n", HF,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            getdistparamnames << "HF" << i + 1 << "\n";
+            paramsfitted++;
+            HF++;
+        }
+    }
+
+    if (((MNStruct*)context)->FitSolarWind == 1) {
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Solar Wind %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        getdistparamnames << "SW\n";
+        paramsfitted++;
+    }
+
+    if (((MNStruct*)context)->FitWhiteSolarWind == 1) {
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on White Solar Wind %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        getdistparamnames << "WSW\n";
+        paramsfitted++;
+    }
+
+    if (((MNStruct*)context)->incNGJitter > 0) {
+        int ECORRnum = 1;
+        for (int i = 0; i < ((MNStruct*)context)->incNGJitter; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on ECORR %i: %.5g -> %.5g\n", ECORRnum, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            getdistparamnames << "ECORR" << i + 1 << "\n";
+            paramsfitted++;
+            ECORRnum++;
+        }
+    }
+
+    if (((MNStruct*)context)->incNGSJitter > 0) {
+        int SECORRnum = 1;
+        for (int i = 0; i < ((MNStruct*)context)->incNGSJitter; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on SECORR %i: %.5g -> %.5g\n", SECORRnum, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            getdistparamnames << "SECORR" << i + 1 << "\n";
+            paramsfitted++;
+            SECORRnum++;
+        }
+    }
+
+    if (((MNStruct*)context)->incDMEQUAD == 1) {
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on DMEQUAD: %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        getdistparamnames << "DMEQ\n";
+        paramsfitted++;
+    }
+
+    if (((MNStruct*)context)->incWidthJitter == 1) {
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on WidthJitter: %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        getdistparamnames << "WJ\n";
+        paramsfitted++;
+    }
+
+    if (((MNStruct*)context)->incDMEvent != 0) {
+        for (int i = 0; i < ((MNStruct*)context)->incDMEvent; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Event %i Start Point %g -> %g \n", i + 1,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Event %i Length %g -> %g \n", i + 1, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Event %i Log Amp %g -> %g \n", i + 1, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Event %i Spectral Index %g -> %g \n", i + 1,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Event %i Offset Term %g -> %g \n", i + 1,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Event %i Linear Term %g -> %g \n", i + 1,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Event %i Quadratic Term %g -> %g \n", i + 1,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+
+            getdistparamnames << "DMEventStart" << i + 1 << "\n";
+            getdistparamnames << "DMEventLength" << i + 1 << "\n";
+            getdistparamnames << "DMEventLogAmp" << i + 1 << "\n";
+            getdistparamnames << "DMEventIndex" << i + 1 << "\n";
+            getdistparamnames << "DMEventOffset" << i + 1 << "\n";
+            getdistparamnames << "DMEventLinear" << i + 1 << "\n";
+            getdistparamnames << "DMEventQuad" << i + 1 << "\n";
+        }
+    }
+
+    if (((MNStruct*)context)->FitLowFreqCutoff > 0) {
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Red LF Cutoff %g -> %g \n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+        getdistparamnames << "LFC\n";
+    }
+
+    if (incRED == 1 || incRED == 3) {
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Red Noise Log Amplitude : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Red Noise Slope : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+
+        getdistparamnames << "RedAmp\n";
+        getdistparamnames << "RedSlope\n";
+
+        if (varyRedCoeff == 1) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Varying RedCoeffs : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            getdistparamnames << "RedPLCoeff\n";
+            paramsfitted++;
+            getdistparamnames << "RedPLCoeffAmp\n";
+        }
+    } else if (incRED == 2) {
+        int Coeffnum = 1;
+        for (int i = 0; i < numRedCoeff; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on Red Noise Coefficient %i Log Amplitude : %.5g -> %.5g\n", Coeffnum,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            getdistparamnames << "RedC" << i + 1 << "\n";
+            paramsfitted++;
+        }
+    } else if (incRED == 4) {
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Red Noise Log Amplitude : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Red Noise Slope : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Red Noise Corner Freq : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+
+        getdistparamnames << "RedAmp\n";
+        getdistparamnames << "RedSlope\n";
+        getdistparamnames << "RedCorner\n";
+
+        if (varyRedCoeff == 1) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Varying RedCoeffs : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            getdistparamnames << "RedPLCoeff\n";
+            paramsfitted++;
+            getdistparamnames << "RedPLCoeffAmp\n";
+        }
+    } else if (incRED == 5) {
+        for (int i = 0; i < 2 * numRedCoeff; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on fourier coefficients: %i %g %g \n", i, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            getdistparamnames << "FourierC" << i + 1 << "\n";
+            paramsfitted++;
         }
 
-	if(incScat==1){
-	  getdistparamnames <<  "ScatAmp\n";
-	  getdistparamnames <<  "ScatSlope\n";
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Scat Log Amplitude : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  paramsfitted++;
-	  if (((MNStruct *)context)->rank==0) printf("Prior on Scat Slope : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-	  paramsfitted++;
-	}
-	
-        if(numFloatDM>0){
-        	for(int i =0; i < numFloatDM; i++){
-			getdistparamnames <<  "DMFF"<< i+1 << "\n";
-			getdistparamnames <<  "DMFA"<< i+1 << "\n";
+        getdistparamnames << "RedAmp\n";
+        getdistparamnames << "RedSlope\n";
 
-			if (((MNStruct *)context)->rank==0) printf("Prior on Floating DM Frequency %i : %.5g -> %.5g\n",i, Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;		
-			if (((MNStruct *)context)->rank==0) printf("Prior on Floating DM Log Amplitude %i : %.5g -> %.5g\n",i, Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;
-		    }
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Red Noise Log Amplitude : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Red Noise Slope : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+    }
+
+    if (numFloatRed > 0) {
+        for (int i = 0; i < numFloatRed; i++) {
+            getdistparamnames << "RFF" << i + 1 << "\n";
+            getdistparamnames << "RFA" << i + 1 << "\n";
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on Floating Red Noise Frequency %i : %.5g -> %.5g\n", i,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on Floating Red Noise Log Amplitude %i : %.5g -> %.5g\n", i,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+        }
+    }
+
+    if (((MNStruct*)context)->incGWB == 1) {
+        getdistparamnames << "GWBAmp\n";
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Log GWB Amplitude : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+    }
+
+    if (((MNStruct*)context)->incRedShapeEvent > 0) {
+        for (int i = 0; i < ((MNStruct*)context)->incRedShapeEvent; i++) {
+            getdistparamnames << "RedShapePos" << i + 1 << "\n";
+            getdistparamnames << "RedShapeWidth" << i + 1 << "\n";
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on Red Shape Event %i Start : %.5g -> %.5g\n", i + 1,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on Red Shape Event %i Width : %.5g -> %.5g\n", i + 1,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+
+            if (((MNStruct*)context)->MarginRedShapeCoeff == 0) {
+                for (int c = 0; c < ((MNStruct*)context)->numRedShapeCoeff; c++) {
+                    getdistparamnames << "RedShapeC" << i + 1 << "\n";
+                    if (((MNStruct*)context)->rank == 0)
+                        printf("Prior on Red Shape Event %i Coeff %i : %.5g -> %.5g\n", i + 1,
+                               c + 1, Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+                    paramsfitted++;
+                }
+            }
+        }
+    }
+
+    if (incsinusoid == 1) {
+        getdistparamnames << "sineAmp\n";
+        getdistparamnames << "sinePhase\n";
+        getdistparamnames << "sineFreq\n";
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Sine Log Amplitude : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Sine phase : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Log Sine Freq : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+    }
+
+    if (incDM == 1 || incDM == 3) {
+        getdistparamnames << "DMAmp\n";
+        getdistparamnames << "DMSlope\n";
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on DM Log Amplitude : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on DM Slope : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+
+        if (varyDMCoeff == 1) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Varying DMCoeffs : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            getdistparamnames << "DMPLCoeff\n";
+            paramsfitted++;
+            getdistparamnames << "DMPLCoeffAmp\n";
+        }
+    } else if (incDM == 2) {
+        int Coeffnum = 1;
+        for (int i = 0; i < numDMCoeff; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Coefficient %i Log Amplitude : %.5g -> %.5g\n", Coeffnum,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            getdistparamnames << "DMC" << i + 1 << "\n";
+            paramsfitted++;
+        }
+    }
+
+    else if (incDM == 5) {
+        for (int i = 0; i < 2 * numDMCoeff; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM fourier coefficients: %i %g %g \n", i, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            getdistparamnames << "DMFourierC" << i + 1 << "\n";
+            paramsfitted++;
+        }
+        getdistparamnames << "DMAmp\n";
+        getdistparamnames << "DMPSlope\n";
+
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on DM Variations Log Amplitude : %.5g -> %.5g\n",
+                   Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+        paramsfitted++;
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on DM Variations Slope : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+    }
+
+    else if (incDM == 6) {
+        for (int i = 0; i < 2 * numDMCoeff; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM fourier coefficients: %i %g %g \n", i, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            getdistparamnames << "DMFourierC" << i + 1 << "\n";
+            paramsfitted++;
         }
 
-	if(((MNStruct *)context)->incDMShapeEvent >0){
-		for(int i =0; i < ((MNStruct *)context)->incDMShapeEvent; i++){
-			getdistparamnames <<  "DMShapePos"<< i+1 << "\n";
-			getdistparamnames <<  "DMShapeWidth"<< i+1 << "\n";
+        for (int i = 0; i < numDMCoeff; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM PS coefficients: %i %g %g \n", i, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            getdistparamnames << "DMFourierPC" << i + 1 << "\n";
+            paramsfitted++;
+        }
+    }
 
-			if (((MNStruct *)context)->rank==0) printf("Prior on DM Shape Event %i Start : %.5g -> %.5g\n",i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;	
-			if (((MNStruct *)context)->rank==0) printf("Prior on DM Shape Event %i Width : %.5g -> %.5g\n",i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;	
+    if (incScat == 1) {
+        getdistparamnames << "ScatAmp\n";
+        getdistparamnames << "ScatSlope\n";
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Scat Log Amplitude : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+        if (((MNStruct*)context)->rank == 0)
+            printf("Prior on Scat Slope : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                   Dpriors[paramsfitted][1]);
+        paramsfitted++;
+    }
 
+    if (numFloatDM > 0) {
+        for (int i = 0; i < numFloatDM; i++) {
+            getdistparamnames << "DMFF" << i + 1 << "\n";
+            getdistparamnames << "DMFA" << i + 1 << "\n";
 
-			for(int c =0; c< ((MNStruct *)context)->numDMShapeCoeff; c++){
-				getdistparamnames <<  "DMShapeC"<< i+1 << "\n";
-				if (((MNStruct *)context)->rank==0) printf("Prior on DM Shape Event %i Coeff %i : %.5g -> %.5g\n",i+1,c+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-				paramsfitted++;	
-			}
-		}
-	}
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on Floating DM Frequency %i : %.5g -> %.5g\n", i,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on Floating DM Log Amplitude %i : %.5g -> %.5g\n", i,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+        }
+    }
 
-	if(((MNStruct *)context)->incDMScatterShapeEvent >0){
-		for(int i =0; i < ((MNStruct *)context)->incDMScatterShapeEvent; i++){
-			getdistparamnames <<  "DMScatterShapePos"<< i+1 << "\n";
-			getdistparamnames <<  "DMScatterShapeWidth"<< i+1 << "\n";
-			getdistparamnames <<  "DMScatterShapeFreq"<< i+1 << "\n";
-			
-			if (((MNStruct *)context)->rank==0) printf("Prior on DM Scatter Shape Event %i Start : %.5g -> %.5g\n",i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;	
-			if (((MNStruct *)context)->rank==0) printf("Prior on DM Scatter Shape Event %i Width : %.5g -> %.5g\n",i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;	
-			if (((MNStruct *)context)->rank==0) printf("Prior on DM Scatter Shape Event %i Frequency Dependence : %.5g -> %.5g\n",i+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;	
+    if (((MNStruct*)context)->incDMShapeEvent > 0) {
+        for (int i = 0; i < ((MNStruct*)context)->incDMShapeEvent; i++) {
+            getdistparamnames << "DMShapePos" << i + 1 << "\n";
+            getdistparamnames << "DMShapeWidth" << i + 1 << "\n";
 
-			for(int c =0; c< ((MNStruct *)context)->numDMScatterShapeCoeff; c++){
-				getdistparamnames <<  "DMScatterShapeC"<< i+1 << "\n";
-				if (((MNStruct *)context)->rank==0) printf("Prior on DM Scatter Shape Event %i Coeff %i : %.5g -> %.5g\n",i+1,c+1,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-				paramsfitted++;	
-			}
-		}
-	}
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Shape Event %i Start : %.5g -> %.5g\n", i + 1,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Shape Event %i Width : %.5g -> %.5g\n", i + 1,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
 
-	if(((MNStruct *)context)->incBandNoise > 0 ){
+            for (int c = 0; c < ((MNStruct*)context)->numDMShapeCoeff; c++) {
+                getdistparamnames << "DMShapeC" << i + 1 << "\n";
+                if (((MNStruct*)context)->rank == 0)
+                    printf("Prior on DM Shape Event %i Coeff %i : %.5g -> %.5g\n", i + 1, c + 1,
+                           Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+                paramsfitted++;
+            }
+        }
+    }
 
-		for(int b = 0; b < ((MNStruct *)context)->incBandNoise; b++){
-			getdistparamnames <<  "BNAmp\n";
-			getdistparamnames <<  "BNSpec\n";
-			if (((MNStruct *)context)->rank==0) printf("Prior on %i - %i Noise Log Amplitude : %.5g -> %.5g\n", ((MNStruct *)context)->FitForBand[b][0], ((MNStruct *)context)->FitForBand[b][1], Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;		
-			if (((MNStruct *)context)->rank==0) printf("Prior on %i - %i Noise Slope : %.5g -> %.5g\n", ((MNStruct *)context)->FitForBand[b][0], ((MNStruct *)context)->FitForBand[b][1], Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;
-		}
-	}
+    if (((MNStruct*)context)->incDMScatterShapeEvent > 0) {
+        for (int i = 0; i < ((MNStruct*)context)->incDMScatterShapeEvent; i++) {
+            getdistparamnames << "DMScatterShapePos" << i + 1 << "\n";
+            getdistparamnames << "DMScatterShapeWidth" << i + 1 << "\n";
+            getdistparamnames << "DMScatterShapeFreq" << i + 1 << "\n";
 
-	if(((MNStruct *)context)->incGroupNoise > 0 ){
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Scatter Shape Event %i Start : %.5g -> %.5g\n", i + 1,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Scatter Shape Event %i Width : %.5g -> %.5g\n", i + 1,
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on DM Scatter Shape Event %i Frequency Dependence : %.5g -> %.5g\n",
+                       i + 1, Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
 
-		for(int i = 0 ; i <((MNStruct *)context)->incGroupNoise; i++){
+            for (int c = 0; c < ((MNStruct*)context)->numDMScatterShapeCoeff; c++) {
+                getdistparamnames << "DMScatterShapeC" << i + 1 << "\n";
+                if (((MNStruct*)context)->rank == 0)
+                    printf("Prior on DM Scatter Shape Event %i Coeff %i : %.5g -> %.5g\n", i + 1,
+                           c + 1, Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+                paramsfitted++;
+            }
+        }
+    }
 
-			if(((MNStruct *)context)->FitForGroup[i][0] == -1){
-				getdistparamnames <<  "Group\n";
-			}
-                        if(((MNStruct *)context)->FitForGroup[i][1] == 1){
-				getdistparamnames <<  "GroupStart\n";
-				getdistparamnames <<  "GroupLength\n";
+    if (((MNStruct*)context)->incBandNoise > 0) {
 
+        for (int b = 0; b < ((MNStruct*)context)->incBandNoise; b++) {
+            getdistparamnames << "BNAmp\n";
+            getdistparamnames << "BNSpec\n";
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on %i - %i Noise Log Amplitude : %.5g -> %.5g\n",
+                       ((MNStruct*)context)->FitForBand[b][0],
+                       ((MNStruct*)context)->FitForBand[b][1], Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on %i - %i Noise Slope : %.5g -> %.5g\n",
+                       ((MNStruct*)context)->FitForBand[b][0],
+                       ((MNStruct*)context)->FitForBand[b][1], Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+        }
+    }
+
+    if (((MNStruct*)context)->incGroupNoise > 0) {
+
+        for (int i = 0; i < ((MNStruct*)context)->incGroupNoise; i++) {
+
+            if (((MNStruct*)context)->FitForGroup[i][0] == -1) {
+                getdistparamnames << "Group\n";
+            }
+            if (((MNStruct*)context)->FitForGroup[i][1] == 1) {
+                getdistparamnames << "GroupStart\n";
+                getdistparamnames << "GroupLength\n";
+            }
+
+            getdistparamnames << "GroupAmp\n";
+            getdistparamnames << "GroupSpec\n";
+
+            if (((MNStruct*)context)->FitForGroup[i][0] == -1) {
+                if (((MNStruct*)context)->rank == 0)
+                    printf("Prior on Group Noise Group : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                           Dpriors[paramsfitted][1]);
+                paramsfitted++;
+            }
+            if (((MNStruct*)context)->FitForGroup[i][1] == 1) {
+                if (((MNStruct*)context)->rank == 0)
+                    printf("Prior on Group Noise Start : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                           Dpriors[paramsfitted][1]);
+                paramsfitted++;
+                if (((MNStruct*)context)->rank == 0)
+                    printf("Prior on Group Noise Length : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                           Dpriors[paramsfitted][1]);
+                paramsfitted++;
+            }
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on Group Noise Log Amplitude : %.5g -> %.5g\n",
+                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
+            paramsfitted++;
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on Group Noise Slope : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+        }
+    }
+
+    if (fitDMModel == 1) {
+        for (int i = 0; i < psr[0].dmoffsDMnum; i++) {
+            getdistparamnames << "DMModel" << i + 1 << "\n";
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior for DMModel: %i %g %g \n", i, Dpriors[paramsfitted][0],
+                       Dpriors[paramsfitted][1]);
+            paramsfitted++;
+        }
+    }
+
+    for (int c = 0; c < ((MNStruct*)context)->numProfComponents; c++) {
+        for (int i = 0; i < ((MNStruct*)context)->numshapestoccoeff[c]; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf(
+                    "Prior on Profile Shape Stochasticitiy Coeff %i for comp %i Log Amplitude : "
+                    "%.5g -> %.5g\n",
+                    i, c, -10.0, 1.0);
+            getdistparamnames << "PS" << i + 1 << "\n";
+            paramsfitted++;
+        }
+    }
+
+    for (int c = 0; c < ((MNStruct*)context)->numProfComponents; c++) {
+        for (int i = 0; i < ((MNStruct*)context)->numProfileFitCoeff[c]; i++) {
+            if (((MNStruct*)context)->rank == 0)
+                printf("Prior on Profile Fit Coeff %i for comp %i: %.5g -> %.5g\n", i, -0.1, 0.1,
+                       c);
+            getdistparamnames << "PF" << i + 1 << "\n";
+            paramsfitted++;
+        }
+    }
+
+    if (((MNStruct*)context)->FitLinearProfileWidth == 1) {
+        getdistparamnames << "PW\n";
+        paramsfitted++;
+    }
+
+    if (((MNStruct*)context)->FitEvoExponent == 1) {
+        getdistparamnames << "EvoExp\n";
+        paramsfitted++;
+    }
+
+    for (int c = 0; c < ((MNStruct*)context)->numProfComponents; c++) {
+        for (int i = 0; i < ((MNStruct*)context)->numEvoFitCoeff[c]; i++) {
+            for (int j = 0; j < ((MNStruct*)context)->NProfileEvoPoly; j++) {
+                //				printf("Prior on Profile Evolution Coeff %i %i : %.5g ->
+                //%.5g\n",i,j, -0.1, 0.1);
+
+                getdistparamnames << "PE" << i + 1 << "\n";
+                paramsfitted++;
+            }
+        }
+    }
+
+    if (((MNStruct*)context)->incProfileEvo == 2) {
+        getdistparamnames << "EPW\n";
+        paramsfitted++;
+    }
+
+    getdistparamnames.close();
+}
+
+void update_MNPriors(MNStruct* MNS, double** DPriorsval, long double** priorsval, int linearPriors)
+{
+
+    int paramsfitted = 1;
+
+    if (linearPriors != 2) {
+        // printf("lin p is 0\n");
+        for (int p = 0; p < MAX_PARAMS; p++) {
+            for (int k = 0; k < MNS->pulse->param[p].aSize; k++) {
+                if (MNS->pulse->param[p].fitFlag[k] == 1 && p != param_dmmodel) {
+                    if (p == param_ecc || p == param_px || p == param_m2 ||
+                        p == param_dm && k == 0) {
+                        long double minprior =
+                            priorsval[paramsfitted][0] +
+                            DPriorsval[paramsfitted + linearPriors][0] * priorsval[paramsfitted][1];
+                        if (minprior < 0 && priorsval[paramsfitted][2] == 0) {
+                            //				printf("%.10Lg %.10Lg %g %g
+                            //\n",priorsval[paramsfitted][0],priorsval[paramsfitted][1],DPriorsval[paramsfitted+linearPriors][0],DPriorsval[paramsfitted+linearPriors][1]);
+                            long double newprior =
+                                -priorsval[paramsfitted][0] / priorsval[paramsfitted][1];
+                            DPriorsval[paramsfitted + linearPriors][0] = (double)newprior;
+                            printf(
+                                "Prior on %s updated to be physical (was <0) : %.25Lg -> %.25Lg\n",
+                                MNS->pulse->param[p].shortlabel[k],
+                                priorsval[paramsfitted][0] +
+                                    DPriorsval[paramsfitted + linearPriors][0] *
+                                        priorsval[paramsfitted][1],
+                                priorsval[paramsfitted][0] +
+                                    DPriorsval[paramsfitted + linearPriors][1] *
+                                        priorsval[paramsfitted][1]);
+                            //              		printf("%.10Lg %.10Lg %g %g
+                            //              \n",priorsval[paramsfitted][0],priorsval[paramsfitted][1],DPriorsval[paramsfitted+linearPriors][0],DPriorsval[paramsfitted+linearPriors][1]);
+                        }
+                    }
+                    if (p == param_stig) {
+                        long double minprior =
+                            priorsval[paramsfitted][0] +
+                            DPriorsval[paramsfitted + linearPriors][0] * priorsval[paramsfitted][1];
+                        long double maxprior =
+                            priorsval[paramsfitted][0] +
+                            DPriorsval[paramsfitted + linearPriors][1] * priorsval[paramsfitted][1];
+
+                        if (minprior < 0 && priorsval[paramsfitted][2] == 0) {
+                            long double newprior =
+                                -priorsval[paramsfitted][0] / priorsval[paramsfitted][1];
+                            DPriorsval[paramsfitted + linearPriors][0] = (double)newprior;
+                            printf(
+                                "Prior on %s updated to be physical (was <0) : %.25Lg -> %.25Lg\n",
+                                MNS->pulse->param[p].shortlabel[k],
+                                priorsval[paramsfitted][0] +
+                                    DPriorsval[paramsfitted + linearPriors][0] *
+                                        priorsval[paramsfitted][1],
+                                priorsval[paramsfitted][0] +
+                                    DPriorsval[paramsfitted + linearPriors][1] *
+                                        priorsval[paramsfitted][1]);
+                        }
+                        if (maxprior > 1 && priorsval[paramsfitted][2] == 0) {
+                            long double newprior =
+                                (1.0 - priorsval[paramsfitted][0]) / priorsval[paramsfitted][1];
+                            DPriorsval[paramsfitted + linearPriors][1] = (double)newprior;
+                            printf(
+                                "Prior on %s updated to be physical (was >1) : %.25Lg -> %.25Lg\n",
+                                MNS->pulse->param[p].shortlabel[k],
+                                priorsval[paramsfitted][0] +
+                                    DPriorsval[paramsfitted + linearPriors][0] *
+                                        priorsval[paramsfitted][1],
+                                priorsval[paramsfitted][0] +
+                                    DPriorsval[paramsfitted + linearPriors][1] *
+                                        priorsval[paramsfitted][1]);
+                        }
+                    }
+                    if (p == param_sini) {
+
+                        long double minprior =
+                            priorsval[paramsfitted][0] +
+                            DPriorsval[paramsfitted + linearPriors][0] * priorsval[paramsfitted][1];
+                        long double maxprior =
+                            priorsval[paramsfitted][0] +
+                            DPriorsval[paramsfitted + linearPriors][1] * priorsval[paramsfitted][1];
+
+                        if (minprior < 0 && priorsval[paramsfitted][2] == 0) {
+                            long double newprior =
+                                -priorsval[paramsfitted][0] / priorsval[paramsfitted][1];
+                            DPriorsval[paramsfitted + linearPriors][0] = (double)newprior;
+                            printf(
+                                "Prior on %s updated to be physical (was <0) : %.25Lg -> %.25Lg\n",
+                                MNS->pulse->param[p].shortlabel[k],
+                                priorsval[paramsfitted][0] +
+                                    DPriorsval[paramsfitted + linearPriors][0] *
+                                        priorsval[paramsfitted][1],
+                                priorsval[paramsfitted][0] +
+                                    DPriorsval[paramsfitted + linearPriors][1] *
+                                        priorsval[paramsfitted][1]);
+                        }
+                        if (maxprior > 1 && priorsval[paramsfitted][2] == 0) {
+                            long double newprior =
+                                (1.0 - priorsval[paramsfitted][0]) / priorsval[paramsfitted][1];
+                            DPriorsval[paramsfitted + linearPriors][1] = (double)newprior;
+                            printf(
+                                "Prior on %s updated to be physical (was >1) : %.25Lg -> %.25Lg\n",
+                                MNS->pulse->param[p].shortlabel[k],
+                                priorsval[paramsfitted][0] +
+                                    DPriorsval[paramsfitted + linearPriors][0] *
+                                        priorsval[paramsfitted][1],
+                                priorsval[paramsfitted][0] +
+                                    DPriorsval[paramsfitted + linearPriors][1] *
+                                        priorsval[paramsfitted][1]);
                         }
 
-			getdistparamnames <<  "GroupAmp\n";
-			getdistparamnames <<  "GroupSpec\n";
+                        /*
+                                            if(MNS->usecosiprior == 1){
 
-			if(((MNStruct *)context)->FitForGroup[i][0] == -1){
-			  if (((MNStruct *)context)->rank==0) printf("Prior on Group Noise Group : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			  paramsfitted++;	
-			}
-                        if(((MNStruct *)context)->FitForGroup[i][1] == 1){
-			  if (((MNStruct *)context)->rank==0) printf("Prior on Group Noise Start : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			  paramsfitted++;
-			  if (((MNStruct *)context)->rank==0) printf("Prior on Group Noise Length : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			  paramsfitted++;
+                                                long double
+                           minprior=priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1];
+                                                                    long double
+                           maxprior=priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][1]*priorsval[paramsfitted][1];
 
-                        }
-			if (((MNStruct *)context)->rank==0) printf("Prior on Group Noise Log Amplitude : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;		
-			if (((MNStruct *)context)->rank==0) printf("Prior on Group Noise Slope : %.5g -> %.5g\n",Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-			paramsfitted++;
-		}
-	}
-			
-	if(fitDMModel==1){
-		for(int i=0;i<psr[0].dmoffsDMnum;i++){
-		  getdistparamnames <<  "DMModel"<< i+1 << "\n";
-		  if (((MNStruct *)context)->rank==0) printf("Prior for DMModel: %i %g %g \n",i,Dpriors[paramsfitted][0],Dpriors[paramsfitted][1]);
-		  paramsfitted++;	
-		}
-	}
-
-	for(int c = 0; c < ((MNStruct *)context)->numProfComponents; c++){
-		for(int i =0; i<((MNStruct *)context)->numshapestoccoeff[c]; i++){
-		  if (((MNStruct *)context)->rank==0) printf("Prior on Profile Shape Stochasticitiy Coeff %i for comp %i Log Amplitude : %.5g -> %.5g\n",i, c, -10.0, 1.0);
-		  getdistparamnames <<  "PS"<< i+1 << "\n";
-		  paramsfitted++;
-		}
-	}
-
-	for(int c = 0; c < ((MNStruct *)context)->numProfComponents; c++){
-		for(int i =0; i<((MNStruct *)context)->numProfileFitCoeff[c]; i++){
-		  if (((MNStruct *)context)->rank==0) printf("Prior on Profile Fit Coeff %i for comp %i: %.5g -> %.5g\n",i,-0.1, 0.1, c);
-		  getdistparamnames <<  "PF"<< i+1 << "\n";
-		  paramsfitted++;
-		}
-	}
-
-	if(((MNStruct *)context)->FitLinearProfileWidth == 1){
-	  getdistparamnames <<  "PW\n";
-	  paramsfitted++;
-	}
-	
-	if(((MNStruct *)context)->FitEvoExponent == 1){
-	  getdistparamnames <<  "EvoExp\n";
-	  paramsfitted++;
-	}
-
-	for(int c = 0; c < ((MNStruct *)context)->numProfComponents; c++){
-		for(int i =0; i<((MNStruct *)context)->numEvoFitCoeff[c]; i++){
-			for(int j =0; j<((MNStruct *)context)->NProfileEvoPoly; j++){
-//				printf("Prior on Profile Evolution Coeff %i %i : %.5g -> %.5g\n",i,j, -0.1, 0.1);
-
-				getdistparamnames <<  "PE"<< i+1 << "\n";
-				paramsfitted++;
-			}
-		}
-	}	
-
-	if(((MNStruct *)context)->incProfileEvo == 2){
-			getdistparamnames <<  "EPW\n";
-			paramsfitted++;
-	}
-
-	getdistparamnames.close(); 
-			
-}
+                                                if(maxprior > 1){maxprior = 1;}
+                                                if(minprior < 0){minprior = 0;}
 
 
-void update_MNPriors(MNStruct* MNS, double ** DPriorsval, long double **priorsval, int linearPriors){
+                                                long double maxcosprior =  sqrt(1.0 -
+                           minprior*minprior); long double mincosprior =  sqrt(1.0 -
+                           maxprior*maxprior);
+
+                                                priorsval[paramsfitted][0] = 0;
+                                                priorsval[paramsfitted][1] = 1;
 
 
-	int paramsfitted=1;
+                                                 DPriorsval[paramsfitted+linearPriors][1]=(double)mincosprior;
+                                                DPriorsval[paramsfitted+linearPriors][1]=(double)maxcosprior;
 
-	
-	if(linearPriors != 2){
-	//printf("lin p is 0\n");
-	for (int p=0;p<MAX_PARAMS;p++) {
-        	for (int k=0;k<MNS->pulse->param[p].aSize;k++){
-                	if(MNS->pulse->param[p].fitFlag[k] == 1  && p != param_dmmodel){
-				if(p == param_ecc || p ==param_px || p == param_m2 || p==param_dm && k==0){
-					long double minprior=priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1];
-					if(minprior < 0 && priorsval[paramsfitted][2]==0){
-		//				printf("%.10Lg %.10Lg %g %g \n",priorsval[paramsfitted][0],priorsval[paramsfitted][1],DPriorsval[paramsfitted+linearPriors][0],DPriorsval[paramsfitted+linearPriors][1]);
-						long double newprior=-priorsval[paramsfitted][0]/priorsval[paramsfitted][1];
-						DPriorsval[paramsfitted+linearPriors][0]=(double)newprior;
-	                        		printf("Prior on %s updated to be physical (was <0) : %.25Lg -> %.25Lg\n", MNS->pulse->param[p].shortlabel[k], priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1],priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][1]*priorsval[paramsfitted][1]);
-	          //              		printf("%.10Lg %.10Lg %g %g \n",priorsval[paramsfitted][0],priorsval[paramsfitted][1],DPriorsval[paramsfitted+linearPriors][0],DPriorsval[paramsfitted+linearPriors][1]);
-					}
-				}
-				if(p==param_stig){
-					long double minprior=priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1];
-					long double maxprior=priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][1]*priorsval[paramsfitted][1];
-
-					if(minprior < 0 && priorsval[paramsfitted][2]==0 ){
-						long double newprior=-priorsval[paramsfitted][0]/priorsval[paramsfitted][1];
-						DPriorsval[paramsfitted+linearPriors][0]=(double)newprior;
-                                                printf("Prior on %s updated to be physical (was <0) : %.25Lg -> %.25Lg\n", MNS->pulse->param[p].shortlabel[k], priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1],priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][1]*priorsval[paramsfitted][1]);
-					}
-					if(maxprior > 1 && priorsval[paramsfitted][2]==0 ){
-                                                long double newprior=(1.0-priorsval[paramsfitted][0])/priorsval[paramsfitted][1];
-                                                DPriorsval[paramsfitted+linearPriors][1]=(double)newprior;
-                                                printf("Prior on %s updated to be physical (was >1) : %.25Lg -> %.25Lg\n", MNS->pulse->param[p].shortlabel[k], priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1],priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][1]*priorsval[paramsfitted][1]);
-                                        }
-
-				}
-				if(p == param_sini){
-
-					long double minprior=priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1];
-                                        long double maxprior=priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][1]*priorsval[paramsfitted][1];
-				
-					if(minprior < 0 && priorsval[paramsfitted][2]==0){
-						long double newprior=-priorsval[paramsfitted][0]/priorsval[paramsfitted][1];
-                                                DPriorsval[paramsfitted+linearPriors][0]=(double)newprior;
-                                                printf("Prior on %s updated to be physical (was <0) : %.25Lg -> %.25Lg\n", MNS->pulse->param[p].shortlabel[k], priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1],priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][1]*priorsval[paramsfitted][1]);
-                                        }
-                                        if(maxprior > 1 && priorsval[paramsfitted][2]==0 ){
-                                                long double newprior=(1.0-priorsval[paramsfitted][0])/priorsval[paramsfitted][1];
-                                                DPriorsval[paramsfitted+linearPriors][1]=(double)newprior;
-                                                printf("Prior on %s updated to be physical (was >1) : %.25Lg -> %.25Lg\n", MNS->pulse->param[p].shortlabel[k], priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1],priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][1]*priorsval[paramsfitted][1]);
-                                        }
-
-/*
-					if(MNS->usecosiprior == 1){
-
-						long double minprior=priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1];
-	                                        long double maxprior=priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][1]*priorsval[paramsfitted][1];
-
-						if(maxprior > 1){maxprior = 1;}
-						if(minprior < 0){minprior = 0;}
-
-						
-						long double maxcosprior =  sqrt(1.0 -  minprior*minprior);
-	                                        long double mincosprior =  sqrt(1.0 - maxprior*maxprior);
-
-						priorsval[paramsfitted][0] = 0;
-						priorsval[paramsfitted][1] = 1;
-
-
-						 DPriorsval[paramsfitted+linearPriors][1]=(double)mincosprior;
-						DPriorsval[paramsfitted+linearPriors][1]=(double)maxcosprior;
-
-						printf("Using cos prior on SINI:  %.25Lg -> %.25Lg\n", MNS->pulse->param[p].shortlabel[k], priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1],priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][1]*priorsval[paramsfitted][1]);
+                                                printf("Using cos prior on SINI:  %.25Lg ->
+                           %.25Lg\n", MNS->pulse->param[p].shortlabel[k],
+                           priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][0]*priorsval[paramsfitted][1],priorsval[paramsfitted][0]+DPriorsval[paramsfitted+linearPriors][1]*priorsval[paramsfitted][1]);
 
 
 
-					}
+                                            }
 
-*/
-				}
-                                paramsfitted++;
-			 }
+                        */
+                    }
+                    paramsfitted++;
                 }
-       }
+            }
+        }
+    }
 
-	}
-	
+    MNS->Dpriors = DPriorsval;
 
-	MNS->Dpriors=DPriorsval;
-
-	MNS->LDpriors=priorsval;
-
+    MNS->LDpriors = priorsval;
 }
 
+void update_MNGdata(MNStruct* MNS, int Gsizeval, double** GMatrixval)
+{
 
+    MNS->Gsize = Gsizeval;
+    MNS->GMatrix = GMatrixval;
+}
 
+void update_MNDdata(MNStruct* MNS, int Dsizeval, double** DMatrixval)
+{
 
-	void update_MNGdata(MNStruct* MNS, int Gsizeval, double **GMatrixval)
-	{
+    MNS->Dsize = Dsizeval;
+    MNS->DMatrix = DMatrixval;
+}
 
-		MNS->Gsize=Gsizeval;
-		MNS->GMatrix=GMatrixval;
+void update_MNGDdata(MNStruct* MNS, int Dsizeval, double** DMatrixval, int Gsizeval,
+                     double** GMatrixval)
+{
 
+    MNS->Dsize = Dsizeval;
+    MNS->DMatrix = DMatrixval;
+    MNS->Gsize = Gsizeval;
+    MNS->GMatrix = GMatrixval;
+}
 
-	}
+void update_MNstaticG(MNStruct* MNS, double** staticGMatrixVal, double staticdetval)
+{
 
-	void update_MNDdata(MNStruct* MNS, int Dsizeval, double **DMatrixval)
-	{
+    MNS->staticGMatrix = staticGMatrixVal;
+    MNS->staticTimeDet = staticdetval;
+}
 
-  
-		MNS->Dsize=Dsizeval;
-		MNS->DMatrix=DMatrixval;
+void update_MNstaticDiagG(MNStruct* MNS, double** UMatrixVal, double* SVecval)
+{
 
-	}
+    MNS->UMatrix = UMatrixVal;
+    MNS->SVec = SVecval;
+}
 
-	void update_MNGDdata(MNStruct* MNS, int Dsizeval, double **DMatrixval,int Gsizeval, double **GMatrixval)
-	{
-
-
-		MNS->Dsize=Dsizeval;
-		MNS->DMatrix=DMatrixval;
-		MNS->Gsize=Gsizeval;
-		MNS->GMatrix=GMatrixval;
-
-
-
-	}
-
-	void update_MNstaticG(MNStruct* MNS, double **staticGMatrixVal, double staticdetval)
-	{
-
-		MNS->staticGMatrix=staticGMatrixVal;
-		MNS->staticTimeDet=staticdetval;
-	}
-	
-	void update_MNstaticDiagG(MNStruct* MNS, double **UMatrixVal, double *SVecval)
-	{
-
-		MNS->UMatrix=UMatrixVal;
-		MNS->SVec=SVecval;
-	}
-
-
-
-/************************************************* dumper routine ******************************************************/
+/************************************************* dumper routine
+ * ******************************************************/
 
 // The dumper routine will be called every updInt*10 iterations
-// MultiNest doesn not need to the user to do anything. User can use the arguments in whichever way he/she wants
+// MultiNest doesn not need to the user to do anything. User can use the arguments in whichever way
+// he/she wants
 //
 //
 // Arguments:
@@ -1139,3508 +1393,2327 @@ void update_MNPriors(MNStruct* MNS, double ** DPriorsval, long double **priorsva
 // nSamples 						= total number of samples in posterior distribution
 // nlive 						= total number of live points
 // nPar 						= total number of parameters (free + derived)
-// physLive[1][nlive * (nPar + 1)] 			= 2D array containing the last set of live points (physical parameters plus derived parameters) along with their loglikelihood values
-// posterior[1][nSamples * (nPar + 2)] 			= posterior distribution containing nSamples points. Each sample has nPar parameters (physical + derived) along with the their loglike value & posterior probability
-// paramConstr[1][4*nPar]:
-// paramConstr[0][0] to paramConstr[0][nPar - 1] 	= mean values of the parameters
-// paramConstr[0][nPar] to paramConstr[0][2*nPar - 1] 	= standard deviation of the parameters
-// paramConstr[0][nPar*2] to paramConstr[0][3*nPar - 1] = best-fit (maxlike) parameters
-// paramConstr[0][nPar*4] to paramConstr[0][4*nPar - 1] = MAP (maximum-a-posteriori) parameters
-// maxLogLike						= maximum loglikelihood value
+// physLive[1][nlive * (nPar + 1)] 			= 2D array containing the last set of live points
+// (physical parameters plus derived parameters) along with their loglikelihood values
+// posterior[1][nSamples * (nPar + 2)] 			= posterior distribution containing nSamples points.
+// Each sample has nPar parameters (physical + derived) along with the their loglike value &
+// posterior probability paramConstr[1][4*nPar]: paramConstr[0][0] to paramConstr[0][nPar - 1] 	=
+// mean values of the parameters paramConstr[0][nPar] to paramConstr[0][2*nPar - 1] 	= standard
+// deviation of the parameters paramConstr[0][nPar*2] to paramConstr[0][3*nPar - 1] = best-fit
+// (maxlike) parameters paramConstr[0][nPar*4] to paramConstr[0][4*nPar - 1] = MAP
+// (maximum-a-posteriori) parameters maxLogLike						= maximum loglikelihood value
 // logZ							= log evidence value
 // logZerr						= error on log evidence value
 // context						void pointer, any additional information
 
-void dumper(int &nSamples, int &nlive, int &nPar, double **physLive, double **posterior, double **paramConstr, double &maxLogLike, double &logZ, double &logZerr, void *context)
+void dumper(int& nSamples, int& nlive, int& nPar, double** physLive, double** posterior,
+            double** paramConstr, double& maxLogLike, double& logZ, double& logZerr, void* context)
 {
-	// convert the 2D Fortran arrays to C++ arrays
-	
-	
-	// the posterior distribution
-	// postdist will have nPar parameters in the first nPar columns & loglike value & the posterior probability in the last two columns
-//printf("enter dump %i %i \n", nSamples, nPar);	
-//	int i, j;
-//	
-//	double **postdist=new double*[nSamples];
-//	for(int m1=0; m1<nSamples; m1++){
-//		postdist[m1]=new double[nPar+2];
-//	}
-//	for( i = 0; i < nPar + 2; i++ ){
-//		printf("%i\n",i);
-//		for( j = 0; j < nSamples; j++ )
-//			postdist[j][i] = posterior[0][i * nSamples + j];
-//	}
-	
-//printf("mid dump \n");	
-	
-	// last set of live points
-	// pLivePts will have nPar parameters in the first nPar columns & loglike value in the last column
-	
-//	double pLivePts[nlive][nPar + 1];
-//	for( i = 0; i < nPar + 1; i++ )
-//		for( j = 0; j < nlive; j++ )
-//			pLivePts[j][i] = physLive[0][i * nlive + j];
-//
-////	printf("exit dump\n");
-//	 for(int m1=0; m1<nSamples; m1++){
-  //              free(postdist[m1]);
-    //    }
-//	free(postdist);
+    // convert the 2D Fortran arrays to C++ arrays
 
+    // the posterior distribution
+    // postdist will have nPar parameters in the first nPar columns & loglike value & the posterior
+    // probability in the last two columns
+    // printf("enter dump %i %i \n", nSamples, nPar);
+    //	int i, j;
+    //
+    //	double **postdist=new double*[nSamples];
+    //	for(int m1=0; m1<nSamples; m1++){
+    //		postdist[m1]=new double[nPar+2];
+    //	}
+    //	for( i = 0; i < nPar + 2; i++ ){
+    //		printf("%i\n",i);
+    //		for( j = 0; j < nSamples; j++ )
+    //			postdist[j][i] = posterior[0][i * nSamples + j];
+    //	}
+
+    // printf("mid dump \n");
+
+    // last set of live points
+    // pLivePts will have nPar parameters in the first nPar columns & loglike value in the last
+    // column
+
+    //	double pLivePts[nlive][nPar + 1];
+    //	for( i = 0; i < nPar + 1; i++ )
+    //		for( j = 0; j < nlive; j++ )
+    //			pLivePts[j][i] = physLive[0][i * nlive + j];
+    //
+    ////	printf("exit dump\n");
+    //	 for(int m1=0; m1<nSamples; m1++){
+    //              free(postdist[m1]);
+    //    }
+    //	free(postdist);
 }
 
 /* The main function of a plugin called from Tempo2 is 'graphicalInterface'
-*/
-extern "C" int graphicalInterface(int argc, char **argv,
-    pulsar *psr, int *pnpsr) {
-	int iteration; 
-	int listparms;
-	int outRes=0;
-	int writeModel=0;
-	char timFile[MAX_PSR][MAX_FILELEN],parFile[MAX_PSR][MAX_FILELEN];
-	char outputSO[MAX_FILELEN];
-	char str[MAX_FILELEN];
-	char newparname[MAX_FILELEN];
-	longdouble coeff[MAX_COEFF]; /* For polynomial coefficients in polyco */
-	int npsr=*pnpsr;      /* The number of pulsars */
-	int noWarnings=1;
-	double globalParameter=0.0;
-	int  displayParams,p;
-	int nGlobal,i,flagPolyco=0,it,k;
-	char polyco_args[128];
-	char polyco_file[128];
-	int newpar=0;
-	int onlypre=0;
-	//  char tempo2MachineType[MAX_FILELEN]="";
-	FILE *alias;
-	char **commandLine;
-	clock_t startClock,endClock;
-	time_t rawstarttime, rawstoptime;
-	struct tm *rawstarttimeinfo;
-	struct tm *rawstoptimeinfo;
-	const char *CVS_verNum = "$Revision: 1.28 $";
-	int numFitJumps;
-	int numToMargin=0;
-	int nprocs = 0;
-	char *ConfigFileName;
+ */
+extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr)
+{
+    int iteration;
+    int listparms;
+    int outRes = 0;
+    int writeModel = 0;
+    char timFile[MAX_PSR][MAX_FILELEN], parFile[MAX_PSR][MAX_FILELEN];
+    char outputSO[MAX_FILELEN];
+    char str[MAX_FILELEN];
+    char newparname[MAX_FILELEN];
+    longdouble coeff[MAX_COEFF]; /* For polynomial coefficients in polyco */
+    int npsr = *pnpsr;           /* The number of pulsars */
+    int noWarnings = 1;
+    double globalParameter = 0.0;
+    int displayParams, p;
+    int nGlobal, i, flagPolyco = 0, it, k;
+    char polyco_args[128];
+    char polyco_file[128];
+    int newpar = 0;
+    int onlypre = 0;
+    //  char tempo2MachineType[MAX_FILELEN]="";
+    FILE* alias;
+    char** commandLine;
+    clock_t startClock, endClock;
+    time_t rawstarttime, rawstoptime;
+    struct tm* rawstarttimeinfo;
+    struct tm* rawstoptimeinfo;
+    const char* CVS_verNum = "$Revision: 1.28 $";
+    int numFitJumps;
+    int numToMargin = 0;
+    int nprocs = 0;
+    char* ConfigFileName;
 
-	int rank, size;
-        MPI_Comm world_comm;
-        MPI_Init(&argc, &argv);
-        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-        MPI_Comm_size(MPI_COMM_WORLD, &size);
-        MPI_Comm_dup(MPI_COMM_WORLD, &world_comm);
-	
-	if (rank==0) {
-	  printf("This program comes with ABSOLUTELY NO WARRANTY.\n");
-	  printf("This is free software, and you are welcome to redistribute it\n");
-	  printf("under conditions of GPL license.\n\n");
-	}
-  
-	startClock = clock();
+    int rank, size;
+    MPI_Comm world_comm;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_dup(MPI_COMM_WORLD, &world_comm);
 
-	time(&rawstarttime);
-	rawstarttimeinfo = localtime(&rawstarttime);
-	time_t starttime = mktime(rawstarttimeinfo);
-	if (rank==0) printf ( "The start date/time is: %s", asctime(rawstarttimeinfo));
-	commandLine = (char **)malloc(1000*sizeof(char *));
-
-	for (i=0;i<1000;i++)
-	  commandLine[i] = (char *)malloc(sizeof(char)*1000);
-
-
-	ConfigFileName = "defaultparameters.conf";
-	/* Parse input line for machine type */
-	for (i=0;i<argc;i++) {
-	  if (strcasecmp(argv[i],"-Cfile")==0){
-	    ConfigFileName = argv[i+1];
-	  }
-	  strcpy(commandLine[i],argv[i]);
-	}
-	
-	if (rank==0) {
-	  printf("Using config filename: %s \n", ConfigFileName);
-	}
-
-  strcpy(outputSO, "");
-  npsr = 0;   /* Initialise the number of pulsars */
-  displayParams=0;
-  nGlobal=0;
-  /* Obtain command line arguments */
-  logdbg("Running getInputs %d",psr[0].nits);
-  logdbg("Completed getInputs");
-  getInputs(psr,argc, commandLine, timFile,parFile,&listparms,&npsr,&nGlobal,&outRes,&writeModel,
-            outputSO,&flagPolyco,polyco_args,polyco_file,&newpar,&onlypre,dcmFile,covarFuncFile,newparname);
-
-  int doMaxLike=0;
-
-  logdbg("Reading par file");
-  readParfile(psr,parFile,timFile,npsr); /* Read .par file to define the pulsar's initial parameters */  
-  logdbg("Finished reading par file %d",psr[0].nits);
-  if (flagPolyco==0)
-    {
-      logdbg("Running readTimfile");
-      readTimfile(psr,timFile,npsr); /* Read .tim file to define the site-arrival-times */
-      logdbg("Completed readTimfile %d",psr[0].param[param_ecc].paramSet[1]);
+    if (rank == 0) {
+        printf("This program comes with ABSOLUTELY NO WARRANTY.\n");
+        printf("This is free software, and you are welcome to redistribute it\n");
+        printf("under conditions of GPL license.\n\n");
     }
 
-  logdbg("Running preProcess %d",psr[0].nits);
-  preProcess(psr,npsr,argc,commandLine);
-  logdbg("Completed preProcess %d",psr[0].nits);
-  
-   if (debugFlag==1)
-    {
-      logdbg("Number of iterations = %d",psr[0].nits);
-      logdbg("Maximum number of parameters = %d",MAX_PARAMS);
-      logdbg("Number of pulsars = %d",npsr);
+    startClock = clock();
+
+    time(&rawstarttime);
+    rawstarttimeinfo = localtime(&rawstarttime);
+    time_t starttime = mktime(rawstarttimeinfo);
+    if (rank == 0)
+        printf("The start date/time is: %s", asctime(rawstarttimeinfo));
+    commandLine = (char**)malloc(1000 * sizeof(char*));
+
+    for (i = 0; i < 1000; i++)
+        commandLine[i] = (char*)malloc(sizeof(char) * 1000);
+
+    ConfigFileName = "defaultparameters.conf";
+    /* Parse input line for machine type */
+    for (i = 0; i < argc; i++) {
+        if (strcasecmp(argv[i], "-Cfile") == 0) {
+            ConfigFileName = argv[i + 1];
+        }
+        strcpy(commandLine[i], argv[i]);
     }
 
-	int useGPUS;
-	int useNbitsAlgebra =0;
-	int GPTA=0;
-	int FixProfile = 0;
-	int FitTemplate = 0;
-	int interpolateProfile = 0;
-	double InterpolatedTime = 1;
+    if (rank == 0) {
+        printf("Using config filename: %s \n", ConfigFileName);
+    }
 
-	int StoreFMatrices = 1;
-	char root[100]; 
-	int numTempo2its;
-	int doLinearFit;
-	int doMax;
-	int incEFAC;
-	int numEPolTerms;
-	int incEQUAD;
+    strcpy(outputSO, "");
+    npsr = 0; /* Initialise the number of pulsars */
+    displayParams = 0;
+    nGlobal = 0;
+    /* Obtain command line arguments */
+    logdbg("Running getInputs %d", psr[0].nits);
+    logdbg("Completed getInputs");
+    getInputs(psr, argc, commandLine, timFile, parFile, &listparms, &npsr, &nGlobal, &outRes,
+              &writeModel, outputSO, &flagPolyco, polyco_args, polyco_file, &newpar, &onlypre,
+              dcmFile, covarFuncFile, newparname);
 
-	int swdims=0;
-	int FitSolarWind=0;
-	int FitWhiteSolarWind=0;
-	double *SolarWindPrior = new double[2];
-	double *WhiteSolarWindPrior = new double[2];
+    int doMaxLike = 0;
 
-	int incRED;
-	int FitLowFreqCutoff=0;
-	int incDM;
-	int incScat;
+    logdbg("Reading par file");
+    readParfile(psr, parFile, timFile,
+                npsr); /* Read .par file to define the pulsar's initial parameters */
+    logdbg("Finished reading par file %d", psr[0].nits);
+    if (flagPolyco == 0) {
+        logdbg("Running readTimfile");
+        readTimfile(psr, timFile, npsr); /* Read .tim file to define the site-arrival-times */
+        logdbg("Completed readTimfile %d", psr[0].param[param_ecc].paramSet[1]);
+    }
 
-	int incFloatRed=0;
-	int incFloatDM=0;
-	int doTimeMargin;
-	int doJumpMargin;
-	double FitSig;
-	int customPriors;
-	int Reddims=0;
-	int DMdims=0;
-	int Scatdims = 0;
-	int DMModeldims=0;
-	int fitDMModel=0;
-	double *EFACPrior;
-	double *EPolPrior;
-	double *EQUADPrior;
-	double *AlphaPrior;
-	double *AmpPrior;
-	double *DMAlphaPrior;
-	double *DMAmpPrior;
-	double *ScatAlphaPrior;
-	double *ScatAmpPrior;
-	double *DMFreqPrior;
-	double *RedFreqPrior;
-	double numRedCoeff;
-	double numDMCoeff;
-	double numScatCoeff;
-	int numRedPL;
-	int numDMPL;
-	int numScatPL;
-	double *RedCoeffPrior;
-	double *DMCoeffPrior;
-	double *ScatCoeffPrior;
-	double FourierSig;
-	double *SampleFreq;
-	int numEFAC=0;
-	int numEQUAD=0;
-	int numSQUAD=0;
-	int incBreakingIndex=0;
-	int numStep=0;
-	
-	int incGlitch=0;
-	int incGlitchTerms=0;
-	double GlitchFitSig=0;
-	int Glitchdims=0;
+    logdbg("Running preProcess %d", psr[0].nits);
+    preProcess(psr, npsr, argc, commandLine);
+    logdbg("Completed preProcess %d", psr[0].nits);
 
-	double *StepAmpPrior;
-	double *StepTimePrior;
-	char wflag[100];
-	int whitemodel;
-	int varyRedCoeff;
-	int varyDMCoeff;
-	int yearlyDM;
-	int incsinusoid;
-	int RedPriorType;
-	int DMPriorType;
-	int ScatPriorType;
-	int EQUADPriorType;
-	int EFACPriorType;
-	int useOriginalErrors;
-	int incShannonJitter;
-	int incNGJitter;
-	int numNGJitter=0;
-        int incNGSJitter;
-        int numNGSJitter=0;
+    if (debugFlag == 1) {
+        logdbg("Number of iterations = %d", psr[0].nits);
+        logdbg("Maximum number of parameters = %d", MAX_PARAMS);
+        logdbg("Number of pulsars = %d", npsr);
+    }
 
-	
-	char *Type = new char[100];
-	char *WhiteName = new char[100];
-	EFACPrior=new double[2];
-	EPolPrior=new double[2];
-	EQUADPrior=new double[2];
-	AlphaPrior=new double[2];
-	AmpPrior=new double[2];
-	DMAlphaPrior=new double[2];
-	DMAmpPrior=new double[2];
-	ScatAlphaPrior=new double[2];
-        ScatAmpPrior=new double[2];
-	RedCoeffPrior=new double[2];
-	DMCoeffPrior=new double[2];
-	RedFreqPrior=new double[2];
-	DMFreqPrior=new double[2];
-	StepAmpPrior=new double[2];
-	StepTimePrior=new double[2];
+    int useGPUS;
+    int useNbitsAlgebra = 0;
+    int GPTA = 0;
+    int FixProfile = 0;
+    int FitTemplate = 0;
+    int interpolateProfile = 0;
+    double InterpolatedTime = 1;
 
-	int incGWB;
-	double *GWBAmpPrior;
-	GWBAmpPrior=new double[2];
+    int StoreFMatrices = 1;
+    char root[100];
+    int numTempo2its;
+    int doLinearFit;
+    int doMax;
+    int incEFAC;
+    int numEPolTerms;
+    int incEQUAD;
 
-	int incDMEvent;
-	double *DMEventStartPrior;
-	double *DMEventLengthPrior;
-	DMEventStartPrior=new double[5*2]; // Assumes you include up to 5 DM events
-        DMEventLengthPrior=new double[5*2];
+    int swdims = 0;
+    int FitSolarWind = 0;
+    int FitWhiteSolarWind = 0;
+    double* SolarWindPrior = new double[2];
+    double* WhiteSolarWindPrior = new double[2];
 
-	int incDMShapeEvent;
-	int numDMShapeCoeff;
-	double *DMShapeCoeffPrior;
-	DMShapeCoeffPrior=new double[2];
-	
-	int incRedShapeEvent;
-	int numRedShapeCoeff;
-	int MarginRedShapeCoeff;
-	double *RedShapeCoeffPrior;
-	RedShapeCoeffPrior=new double[2];
+    int incRED;
+    int FitLowFreqCutoff = 0;
+    int incDM;
+    int incScat;
 
-	int incDMScatterShapeEvent;
-	int numDMScatterShapeCoeff;
-	double *DMScatterShapeCoeffPrior;
-	DMScatterShapeCoeffPrior=new double[2];
+    int incFloatRed = 0;
+    int incFloatDM = 0;
+    int doTimeMargin;
+    int doJumpMargin;
+    double FitSig;
+    int customPriors;
+    int Reddims = 0;
+    int DMdims = 0;
+    int Scatdims = 0;
+    int DMModeldims = 0;
+    int fitDMModel = 0;
+    double* EFACPrior;
+    double* EPolPrior;
+    double* EQUADPrior;
+    double* AlphaPrior;
+    double* AmpPrior;
+    double* DMAlphaPrior;
+    double* DMAmpPrior;
+    double* ScatAlphaPrior;
+    double* ScatAmpPrior;
+    double* DMFreqPrior;
+    double* RedFreqPrior;
+    double numRedCoeff;
+    double numDMCoeff;
+    double numScatCoeff;
+    int numRedPL;
+    int numDMPL;
+    int numScatPL;
+    double* RedCoeffPrior;
+    double* DMCoeffPrior;
+    double* ScatCoeffPrior;
+    double FourierSig;
+    double* SampleFreq;
+    int numEFAC = 0;
+    int numEQUAD = 0;
+    int numSQUAD = 0;
+    int incBreakingIndex = 0;
+    int numStep = 0;
 
+    int incGlitch = 0;
+    int incGlitchTerms = 0;
+    double GlitchFitSig = 0;
+    int Glitchdims = 0;
 
-	int incBandNoise;
-	int numBandNoiseCoeff = 0;
-	double *BandNoiseAmpPrior;
-	double *BandNoiseAlphaPrior;
-	BandNoiseAmpPrior=new double[2];
-	BandNoiseAlphaPrior=new double[2];
+    double* StepAmpPrior;
+    double* StepTimePrior;
+    char wflag[100];
+    int whitemodel;
+    int varyRedCoeff;
+    int varyDMCoeff;
+    int yearlyDM;
+    int incsinusoid;
+    int RedPriorType;
+    int DMPriorType;
+    int ScatPriorType;
+    int EQUADPriorType;
+    int EFACPriorType;
+    int useOriginalErrors;
+    int incShannonJitter;
+    int incNGJitter;
+    int numNGJitter = 0;
+    int incNGSJitter;
+    int numNGSJitter = 0;
 
-	char *GroupNoiseName = new char[100];
-	char GroupNoiseSysFlag[100];
-	int **FitForGroup=0;
-	int incGroupNoise=0;
-	int numGroupstoFit=0;
-	int numGroupTimestoFit=0;
-	int numGroupCoeff = 0;
-	double *GroupNoiseAmpPrior;
-	double *GroupNoiseAlphaPrior;	
-	GroupNoiseAmpPrior=new double[2];
-	GroupNoiseAlphaPrior=new double[2];
+    char* Type = new char[100];
+    char* WhiteName = new char[100];
+    EFACPrior = new double[2];
+    EPolPrior = new double[2];
+    EQUADPrior = new double[2];
+    AlphaPrior = new double[2];
+    AmpPrior = new double[2];
+    DMAlphaPrior = new double[2];
+    DMAmpPrior = new double[2];
+    ScatAlphaPrior = new double[2];
+    ScatAmpPrior = new double[2];
+    RedCoeffPrior = new double[2];
+    DMCoeffPrior = new double[2];
+    RedFreqPrior = new double[2];
+    DMFreqPrior = new double[2];
+    StepAmpPrior = new double[2];
+    StepTimePrior = new double[2];
 
-	int incHighFreqStoc = 0;
-	double *HighFreqStocPrior = new double[2];
+    int incGWB;
+    double* GWBAmpPrior;
+    GWBAmpPrior = new double[2];
 
-	int incProfileEvo = 0;
-	int NProfileEvoPoly = 0;
-	int FitEvoExponent = 0;
-	double EvoRefFreq = 0;
-	double *ProfileEvoPrior = new double[2];
+    int incDMEvent;
+    double* DMEventStartPrior;
+    double* DMEventLengthPrior;
+    DMEventStartPrior = new double[5 * 2];  // Assumes you include up to 5 DM events
+    DMEventLengthPrior = new double[5 * 2];
 
-	int incProfileFit = 0;
-	double *ProfileFitPrior = new double[2];
-	
-	int incWideBandNoise = 0;
+    int incDMShapeEvent;
+    int numDMShapeCoeff;
+    double* DMShapeCoeffPrior;
+    DMShapeCoeffPrior = new double[2];
 
-	int incDMEQUAD = 0;
-	double *DMEQUADPrior = new double[2];
+    int incRedShapeEvent;
+    int numRedShapeCoeff;
+    int MarginRedShapeCoeff;
+    double* RedShapeCoeffPrior;
+    RedShapeCoeffPrior = new double[2];
 
-	int FitLinearProfileWidth = 0;
-	double *LinearProfileWidthPrior = new double[2];
+    int incDMScatterShapeEvent;
+    int numDMScatterShapeCoeff;
+    double* DMScatterShapeCoeffPrior;
+    DMScatterShapeCoeffPrior = new double[2];
 
-	double offPulseLevel=0;
+    int incBandNoise;
+    int numBandNoiseCoeff = 0;
+    double* BandNoiseAmpPrior;
+    double* BandNoiseAlphaPrior;
+    BandNoiseAmpPrior = new double[2];
+    BandNoiseAlphaPrior = new double[2];
 
-	char *ProfFile = new char[100];
-	char ProfFileName[100]; 
+    char* GroupNoiseName = new char[100];
+    char GroupNoiseSysFlag[100];
+    int** FitForGroup = 0;
+    int incGroupNoise = 0;
+    int numGroupstoFit = 0;
+    int numGroupTimestoFit = 0;
+    int numGroupCoeff = 0;
+    double* GroupNoiseAmpPrior;
+    double* GroupNoiseAlphaPrior;
+    GroupNoiseAmpPrior = new double[2];
+    GroupNoiseAlphaPrior = new double[2];
 
-	int numProfComponents = 0;
+    int incHighFreqStoc = 0;
+    double* HighFreqStocPrior = new double[2];
 
-	int incWidthJitter = 0;
-	double *WidthJitterPrior = new double[2];	
+    int incProfileEvo = 0;
+    int NProfileEvoPoly = 0;
+    int FitEvoExponent = 0;
+    double EvoRefFreq = 0;
+    double* ProfileEvoPrior = new double[2];
 
-	int JitterProfComp = 0;
+    int incProfileFit = 0;
+    double* ProfileFitPrior = new double[2];
 
-	int incProfileEnergyEvo = 0;
-	double *ProfileEnergyEvoPrior = new double[2];
+    int incWideBandNoise = 0;
 
-	int debug = 0;
-	int ProfileBaselineTerms = 0;
+    int incDMEQUAD = 0;
+    double* DMEQUADPrior = new double[2];
 
-	int  pnoisedims = 0;
-	int incProfileNoise = 0;
-	int ProfileNoiseCoeff = 0;
-	double *ProfileNoiseAmpPrior = new double[2];	
-	double *ProfileNoiseSpecPrior = new double[2];
+    int FitLinearProfileWidth = 0;
+    double* LinearProfileWidthPrior = new double[2];
 
+    double offPulseLevel = 0;
 
-	int SubIntToFit = 0;
-	int ChannelToFit = 0;
+    char* ProfFile = new char[100];
+    char ProfFileName[100];
 
-	int usecosiprior = 0;
+    int numProfComponents = 0;
 
-	int incWidthEvoTime = 0;
+    int incWidthJitter = 0;
+    double* WidthJitterPrior = new double[2];
 
-	int incExtraProfComp = 0;
+    int JitterProfComp = 0;
 
-	int removeBaseline = 0;
-	int incPrecession = 0;
+    int incProfileEnergyEvo = 0;
+    double* ProfileEnergyEvoPrior = new double[2];
 
-	int incTimeCorrProfileNoise = 0;
-	double phasePriorExpansion = 0;
-	int ProfileNoiseMethod = 0;
-	int FitPrecAmps = -1;
+    int debug = 0;
+    int ProfileBaselineTerms = 0;
 
-	int NProfileTimePoly = 0;
+    int pnoisedims = 0;
+    int incProfileNoise = 0;
+    int ProfileNoiseCoeff = 0;
+    double* ProfileNoiseAmpPrior = new double[2];
+    double* ProfileNoiseSpecPrior = new double[2];
 
-	int incProfileScatter = 0;
-	int ScatterPBF = 0;
+    int SubIntToFit = 0;
+    int ChannelToFit = 0;
 
-	setupparams(ConfigFileName, useGPUS, Type, numTempo2its, doLinearFit, doMax, incEFAC, numEPolTerms, incEQUAD, incRED, incDM, incScat, doTimeMargin, doJumpMargin, FitSig, customPriors, EFACPrior, EPolPrior, EQUADPrior, AlphaPrior, AmpPrior, DMAlphaPrior, DMAmpPrior,ScatAlphaPrior, ScatAmpPrior, numRedCoeff, numDMCoeff, numScatCoeff, numRedPL, numDMPL, numScatPL, RedCoeffPrior, DMCoeffPrior, ScatCoeffPrior, incFloatDM, DMFreqPrior, yearlyDM, incsinusoid, incFloatRed, RedFreqPrior, FourierSig, numStep, StepAmpPrior, WhiteName,whitemodel, varyRedCoeff, varyDMCoeff, incGWB, GWBAmpPrior, RedPriorType, DMPriorType, ScatPriorType, EQUADPriorType, EFACPriorType, useOriginalErrors, incShannonJitter, incDMEvent, DMEventStartPrior, DMEventLengthPrior,incDMShapeEvent, numDMShapeCoeff, DMShapeCoeffPrior, incRedShapeEvent, numRedShapeCoeff, MarginRedShapeCoeff, RedShapeCoeffPrior, incDMScatterShapeEvent, numDMScatterShapeCoeff, DMScatterShapeCoeffPrior,incBandNoise, numBandNoiseCoeff, BandNoiseAmpPrior, BandNoiseAlphaPrior, incNGJitter, incNGSJitter, incGlitch, incGlitchTerms, GlitchFitSig, incBreakingIndex, FitLowFreqCutoff, useNbitsAlgebra, incGroupNoise, numGroupCoeff, GroupNoiseAmpPrior, GroupNoiseAlphaPrior, FitSolarWind, FitWhiteSolarWind, SolarWindPrior, WhiteSolarWindPrior,  GPTA,  GroupNoiseName, FixProfile, FitTemplate, interpolateProfile, InterpolatedTime, StoreFMatrices, incHighFreqStoc, HighFreqStocPrior, incProfileEvo, EvoRefFreq, ProfileEvoPrior, FitEvoExponent, incWideBandNoise, incProfileFit, ProfileFitPrior, FitLinearProfileWidth, LinearProfileWidthPrior, incDMEQUAD, DMEQUADPrior, offPulseLevel,ProfFile,numProfComponents,incWidthJitter,WidthJitterPrior,JitterProfComp,incProfileEnergyEvo,ProfileEnergyEvoPrior, debug, ProfileBaselineTerms, incProfileNoise, ProfileNoiseCoeff, ProfileNoiseAmpPrior, ProfileNoiseSpecPrior, SubIntToFit, ChannelToFit, NProfileEvoPoly, usecosiprior, incWidthEvoTime, incExtraProfComp, removeBaseline, incPrecession, incTimeCorrProfileNoise, phasePriorExpansion, ProfileNoiseMethod, FitPrecAmps, NProfileTimePoly, incProfileScatter, ScatterPBF); 
+    int usecosiprior = 0;
 
-	if (rank==0) {
-	  printf("PEP %g \n", phasePriorExpansion);
+    int incWidthEvoTime = 0;
+
+    int incExtraProfComp = 0;
+
+    int removeBaseline = 0;
+    int incPrecession = 0;
+
+    int incTimeCorrProfileNoise = 0;
+    double phasePriorExpansion = 0;
+    int ProfileNoiseMethod = 0;
+    int FitPrecAmps = -1;
+
+    int NProfileTimePoly = 0;
+
+    int incProfileScatter = 0;
+    int ScatterPBF = 0;
+
+    setupparams(
+        ConfigFileName, useGPUS, Type, numTempo2its, doLinearFit, doMax, incEFAC, numEPolTerms,
+        incEQUAD, incRED, incDM, incScat, doTimeMargin, doJumpMargin, FitSig, customPriors,
+        EFACPrior, EPolPrior, EQUADPrior, AlphaPrior, AmpPrior, DMAlphaPrior, DMAmpPrior,
+        ScatAlphaPrior, ScatAmpPrior, numRedCoeff, numDMCoeff, numScatCoeff, numRedPL, numDMPL,
+        numScatPL, RedCoeffPrior, DMCoeffPrior, ScatCoeffPrior, incFloatDM, DMFreqPrior, yearlyDM,
+        incsinusoid, incFloatRed, RedFreqPrior, FourierSig, numStep, StepAmpPrior, WhiteName,
+        whitemodel, varyRedCoeff, varyDMCoeff, incGWB, GWBAmpPrior, RedPriorType, DMPriorType,
+        ScatPriorType, EQUADPriorType, EFACPriorType, useOriginalErrors, incShannonJitter,
+        incDMEvent, DMEventStartPrior, DMEventLengthPrior, incDMShapeEvent, numDMShapeCoeff,
+        DMShapeCoeffPrior, incRedShapeEvent, numRedShapeCoeff, MarginRedShapeCoeff,
+        RedShapeCoeffPrior, incDMScatterShapeEvent, numDMScatterShapeCoeff,
+        DMScatterShapeCoeffPrior, incBandNoise, numBandNoiseCoeff, BandNoiseAmpPrior,
+        BandNoiseAlphaPrior, incNGJitter, incNGSJitter, incGlitch, incGlitchTerms, GlitchFitSig,
+        incBreakingIndex, FitLowFreqCutoff, useNbitsAlgebra, incGroupNoise, numGroupCoeff,
+        GroupNoiseAmpPrior, GroupNoiseAlphaPrior, FitSolarWind, FitWhiteSolarWind, SolarWindPrior,
+        WhiteSolarWindPrior, GPTA, GroupNoiseName, FixProfile, FitTemplate, interpolateProfile,
+        InterpolatedTime, StoreFMatrices, incHighFreqStoc, HighFreqStocPrior, incProfileEvo,
+        EvoRefFreq, ProfileEvoPrior, FitEvoExponent, incWideBandNoise, incProfileFit,
+        ProfileFitPrior, FitLinearProfileWidth, LinearProfileWidthPrior, incDMEQUAD, DMEQUADPrior,
+        offPulseLevel, ProfFile, numProfComponents, incWidthJitter, WidthJitterPrior,
+        JitterProfComp, incProfileEnergyEvo, ProfileEnergyEvoPrior, debug, ProfileBaselineTerms,
+        incProfileNoise, ProfileNoiseCoeff, ProfileNoiseAmpPrior, ProfileNoiseSpecPrior,
+        SubIntToFit, ChannelToFit, NProfileEvoPoly, usecosiprior, incWidthEvoTime, incExtraProfComp,
+        removeBaseline, incPrecession, incTimeCorrProfileNoise, phasePriorExpansion,
+        ProfileNoiseMethod, FitPrecAmps, NProfileTimePoly, incProfileScatter, ScatterPBF);
+
+    if (rank == 0) {
+        printf("PEP %g \n", phasePriorExpansion);
 #ifdef HAVE_MLAPACK
-	  if (useNbitsAlgebra>0) {
-	    printf("Using the MPLAPACK library with MPFR library for arbitrary decimal calculations");
-	    printf("MLAPACK: Set the linear algebra precision to %d bits\n", useNbitsAlgebra);
-	    mpfr_set_default_prec(useNbitsAlgebra);
-	  }
+        if (useNbitsAlgebra > 0) {
+            printf(
+                "Using the MPLAPACK library with MPFR library for arbitrary decimal calculations");
+            printf("MLAPACK: Set the linear algebra precision to %d bits\n", useNbitsAlgebra);
+            mpfr_set_default_prec(useNbitsAlgebra);
+        }
 #endif
-	}
-	
-	FitForGroup = new int*[incGroupNoise];
-	for(int i =0; i < incGroupNoise; i++){
-		FitForGroup[i] = new int[6];
-		for(int j=0; j < 6; j++){
-			FitForGroup[i][j] = 0;
-		}
-	}
-
-
-	int **FitForBand = new int*[incBandNoise];
-	for(int i =0; i < incBandNoise; i++){
-		FitForBand[i] = new int[4];
-		for(int j=0; j < 4; j++){
-			FitForBand[i][j] = 0;
-		}
-	}
-
-	GetGroupsToFit(ConfigFileName, incGroupNoise, FitForGroup, incBandNoise, FitForBand);
-	for(int i =0; i < incGroupNoise; i++){
-//		printf("Check Groups %i %i \n", i, FitForGroup[i]);
-		if(FitForGroup[i][0] ==-1)numGroupstoFit++;
-		if(FitForGroup[i][1] == 1)numGroupTimestoFit++;
-	}
-	if (rank==0) printf("Inc Scat = %d\n", incScat);
-	if (rank==0) printf("Fitting for %i group noise terms, and for %i groups, %i Times \n", incGroupNoise, numGroupstoFit, numGroupTimestoFit);
-	if (rank==0) printf("Fitting for %i band noise terms \n", incBandNoise);
-
-	int *GPTAnumshapecoeff;
-	int *numEvoCoeff;
-	int *numEvoFitCoeff;
-	int *numProfileFitCoeff;
-	int *GPTAnumstocshapecoeff;
-	int *numTimeCorrCoeff;
-	double *ProfCompSeps;
-	int *FitCompWidths;
-	int *FitCompPos;
-
-	double **FitForExtraComp = new double*[incExtraProfComp];
-	for(int i = 0; i < incExtraProfComp; i++){
-		FitForExtraComp[i] = new double[3]();
-	}
-
-	int totalEvoCoeff = 0;
-	int totalEvoFitCoeff = 0;
-	int totalProfileFitCoeff = 0;
-	int totalTimeCorrCoeff = 0;
-	int totalshapestoccoeff = 0;
-	int NumFitCompWidths = 0;
-	int NumFitCompPos = 0;
-	int NumCompswithWidth = 0;
-	int NumCompswithPos = 0;
-
-	double TemplateChanWidth = 0;
-	/*
-	if(GPTA ==1){
-		GPTAnumshapecoeff= new int[numProfComponents];
-		numEvoCoeff = new int[numProfComponents];
-		numEvoFitCoeff = new int[numProfComponents];
-		numProfileFitCoeff = new int[numProfComponents];
-		GPTAnumstocshapecoeff  = new int[numProfComponents];
-		numTimeCorrCoeff = new int[numProfComponents];
-		ProfCompSeps   = new double[numProfComponents];
-		FitCompWidths = new int[numProfComponents]();
-		FitCompPos = new int[numProfComponents]();
-
-		for(int i = 0; i < numProfComponents; i++){
-			GPTAnumshapecoeff[i] = 0;
-			numEvoCoeff[i] = 0;
-        	        numEvoFitCoeff[i] = 0;
-	                numProfileFitCoeff[i] = 0;
-			GPTAnumstocshapecoeff[i] = 0;
-			numTimeCorrCoeff[i] = 0;
-			ProfCompSeps[i] = 0;
-		}
-
-
-		GetProfileFitInfo(ConfigFileName, numProfComponents, GPTAnumshapecoeff, numProfileFitCoeff, numEvoCoeff, numEvoFitCoeff, GPTAnumstocshapecoeff, ProfCompSeps, TemplateChanWidth, numTimeCorrCoeff, incExtraProfComp, FitForExtraComp, FitCompWidths, FitCompPos);
-
-		for(int i = 0; i < numProfComponents; i++){
-			totalEvoFitCoeff +=  numEvoFitCoeff[i];
-			totalProfileFitCoeff += numProfileFitCoeff[i];
-			totalEvoCoeff += numEvoCoeff[i];
-			totalshapestoccoeff += GPTAnumstocshapecoeff[i];
-			totalTimeCorrCoeff += numTimeCorrCoeff[i];
-
-			NumFitCompWidths += FitCompWidths[i];
-			NumFitCompPos += FitCompPos[i];
-			if(FitCompWidths[i] > 0){ NumCompswithWidth += 1;}
-			if(FitCompPos[i] > 0){ NumCompswithPos += 1;}
-			printf("including %i shapelets in component %i Fit: %i Evo: %i Stoc: %i TimeCorr %i\n", GPTAnumshapecoeff[i], i, numProfileFitCoeff[i], numEvoFitCoeff[i], GPTAnumstocshapecoeff[i], numTimeCorrCoeff[i]);
-			printf("Fiting for %i Comp widths, and %i Comp positions \n", NumFitCompWidths, NumFitCompPos );
-		}
-
-
-		if(incProfileEvo != 1){
-			if(FitTemplate == 0){
-				NProfileEvoPoly = 0;
-			}
-			for(int i = 0; i < numProfComponents; i++){
-				numEvoFitCoeff[i]=0;
-			}
-		}
-		if(incProfileFit == 0){
-			for(int i = 0; i < numProfComponents; i++){
-				numProfileFitCoeff[i]=0;
-			}	
-		}
-		if(incTimeCorrProfileNoise == 0){
-			for(int i = 0; i < numProfComponents; i++){
-				numTimeCorrCoeff[i] = 0;
-			}
-		}
-	}
-
-*/
-
-  formBatsAll(psr,npsr);                /* Form Barycentric arrival times */
-  logdbg("calling formResiduals");
-  formResiduals(psr,npsr,1);       /* Form residuals */
-
-
-/*Work out data time span to get maximum number of coefficients*/
-	
-        double start,end;
-        int go=0;
-        for (int i=0;i<psr[0].nobs;i++)
-          {
-            if (psr[0].obsn[i].deleted==0)
-              {
-                if (go==0)
-                  {
-                    go = 1;
-                    start = (double)psr[0].obsn[i].bat;
-                    end  = start;
-                  }
-                else
-                  {
-                    if (start > (double)psr[0].obsn[i].bat)
-                      start = (double)psr[0].obsn[i].bat;
-                    if (end < (double)psr[0].obsn[i].bat)
-                      end = (double)psr[0].obsn[i].bat;
-
-                  }
-              }
-          }
-
-
-
-
-
-        double maxtspan=1*(end-start);
-
-	if(maxtspan < 1){
-		maxtspan = maxtspan*24*60;
-		if (rank==0) printf("Assume less than a day, Tspan is now in minutes\n");
-	}
-
-        int mindays =int(floor(1+2*maxtspan/psr[0].nobs));
-        int mincoeff = int(floor(1+maxtspan/mindays));
-
-        int Reddaysincoeffs=int(floor(maxtspan/numRedCoeff));
-	int DMdaysincoeffs=int(floor(maxtspan/numDMCoeff));
-	int Scatdaysincoeffs=int(floor(maxtspan/numScatCoeff));
-	int BandDMdaysincoeffs=int(floor(maxtspan/numBandNoiseCoeff));
-	int Groupdaysincoeffs=int(floor(maxtspan/numGroupCoeff));
-
-        if(numRedCoeff < mindays){
-                numRedCoeff=mincoeff;
-		if(FitLowFreqCutoff  > 0){
-			numRedCoeff=mincoeff+10;//int(Reddaysincoeffs);
-		}
-        }
-        else{
-                numRedCoeff=int(Reddaysincoeffs);//Reddaysincoeffs;
-        }
-
-        if(numDMCoeff < mindays){
-                numDMCoeff=mincoeff;
-        }
-        else{
-                numDMCoeff=int(DMdaysincoeffs);//DMdaysincoeffs;
-        }
-	
-	if(numScatCoeff < mindays)  numScatCoeff=mincoeff;
-        else  numScatCoeff=int(Scatdaysincoeffs);//Scatdaysincoeffs;
-
-
-        if(numBandNoiseCoeff < mindays){
-                numBandNoiseCoeff=mincoeff;
-        }
-        else{
-                numBandNoiseCoeff=int(BandDMdaysincoeffs);//DMdaysincoeffs;
-        }
-
-        if(numGroupCoeff < mindays){
-                numGroupCoeff=mincoeff;
-        }
-        else{
-                numGroupCoeff=int(Groupdaysincoeffs);//DMdaysincoeffs;
-        }
-
-
-	if(incRED == 0 && incGWB == 0)numRedCoeff=0;
-	if(incDM == 0)numDMCoeff=0;
-	if(incScat == 0)numScatCoeff=0;
-	SampleFreq=new double[int(numRedCoeff+numDMCoeff+numScatCoeff)];
-	setFrequencies(ConfigFileName, SampleFreq,numRedCoeff, numDMCoeff, numScatCoeff, 0, 0, 0, 1, 1, 1, 1, 1, 1);
-	
-
-
-
-
-
-	if (rank==0) printf("Num T2 its %i \n", numTempo2its);
-  for (it=0;it<numTempo2its;it++) /* Why pulsar 0 should select the iterations? */
-    {
-      if (it>0) /* Copy post-fit values to pre-fit values */
-	{
-	  for (i=0;i<MAX_PARAMS;i++)
-	    {
-	      for (p=0;p<npsr;p++)
-		{
-		  for (k=0;k<psr[p].param[i].aSize;k++)
-		    {
-		      psr[p].param[i].prefit[k] = psr[p].param[i].val[k];
-		      psr[p].param[i].prefitErr[k] = psr[p].param[i].err[k];
-		    }
-		}
-	    }
-	}
-      //      long seed = TKsetSeed();
-      for (iteration=0;iteration<2;iteration++) /* Do pre- and post- fit analysis */
-	{
-	  logdbg("iteration %d",iteration);
-	  logdbg("calling formBatsAll");
-	  //	  printf("Calling formBats\n");
-	  formBatsAll(psr,npsr);                /* Form Barycentric arrival times */
-	  logdbg("calling formResiduals");
-	  formResiduals(psr,npsr,1);       /* Form residuals */
-
-	  
-
-
-	  if (listparms==1 && iteration==0)displayParameters(13,timFile,parFile,psr,npsr); /* List out all the parameters */  
-	  if (iteration==0)          /* Only fit to pre-fit residuals */
-	    {
-	      logdbg("calling doFit");
-
-		  t2Fit(psr,npsr,covarFuncFile);
-	      //if (strcmp(dcmFile,"NULL")==0 && strcmp(covarFuncFile,"NULL")==0)
-		//doFit(psr,npsr,writeModel); /* Fit to the residuals to obtain updated parameters */
-	      //else
-		//doFitDCM(psr,dcmFile,covarFuncFile,npsr,writeModel);
-	      /* doFitGlobal(psr,npsr,&globalParameter,nGlobal,writeModel);*/ /* Fit to the residuals to obtain updated parameters  */
-	      logdbg("completed doFit");
-	    }
-	  if (iteration==1 || onlypre==1)
-	    {
-	      if (strlen(outputSO)==0){
-		if (rank==0) textOutput(psr,npsr,globalParameter,nGlobal,outRes,newpar,newparname); /* Output results to the screen */
-		}
-	      else  /* Use a plug in for the output */
-		{
-		  char *(*entry)(int,char **,pulsar *,int);
-		  void * module;
-		  for (int iplug=0; iplug < tempo2_plug_path_len; iplug++){
-			  sprintf(str,"%s/%s_%s_plug.t2",tempo2_plug_path[iplug],
-					  outputSO,tempo2MachineType);
-			  module = dlopen(str, RTLD_NOW); 
-			  if(module==NULL){	  
-				  printf("dlerror() = %s\n",dlerror());
-			  } else break;
-		  }
-		  if(!module)  {
-		    fprintf(stderr, "[error]: dlopen() failed while resolving symbols.\n" );
-		    return -1;
-		  }
-		  /*
-		   * Check that the plugin is compiled against the same version of tempo2.h
-		   */
-		  char ** pv  = (char**)dlsym(module, "plugVersionCheck");
-		  if(pv!=NULL){
-			  // there is a version check for this plugin
-			  if(strcmp(TEMPO2_h_VER,*pv)){
-				  fprintf(stderr, "[error]: Plugin version mismatch\n");
-				  fprintf(stderr, " '%s' != '%s'\n",TEMPO2_h_VER,*pv);
-				  fprintf(stderr, " Please recompile plugin against same tempo2 version!\n");
-				  dlclose(module);
-				  return -1;
-			  }
-		  }
-
-
-		  entry = (char*(*)(int,char **,pulsar *,int))dlsym(module, "tempoOutput");
-		  if( entry == NULL ) {
-		    dlclose(module);
-		    fprintf(stderr, "[error]: dlerror() failed while  retrieving address.\n" ); 
-		    return -1;
-		  }
-		  entry(argc,argv,psr,npsr);
-		}
-	    }
-	  psr[0].noWarnings=2;
-	  if (onlypre==1) iteration=2;
-	  /*	  textOutput(psr,npsr,globalParameter,nGlobal,outRes,newpar,"new.par");*/ /* Output results to the screen */
-	  /*	  printf("Next iteration\n");*/
-	}
     }
 
-
-	
-	if(incProfileNoise == 1)pnoisedims = 2;
-	if(incProfileNoise == 2)pnoisedims = ProfileNoiseCoeff;
-	if(incProfileNoise == 3)pnoisedims = ProfileNoiseCoeff;
-
-	if(FitSolarWind == 1)swdims++;
-	if(FitWhiteSolarWind == 1)swdims++;
-
-	if(incRED==0)Reddims=0;
-	if(incRED==1)Reddims=2;
-	if(incRED==2)Reddims=numRedCoeff;
-	if(incRED==3)Reddims=2*numRedPL;
-	if(incRED==4)Reddims=3*numRedPL;
-	if(incRED==5)Reddims=2*numRedCoeff+2;
-	if(incGWB==1)Reddims+=1;
-        if(incFloatRed>0)Reddims+=2*incFloatRed;
-	if(incRedShapeEvent>0 && MarginRedShapeCoeff == 0){ Reddims+=incRedShapeEvent*(2+numRedShapeCoeff);}
-	if(incRedShapeEvent>0 && MarginRedShapeCoeff == 1){ Reddims+=incRedShapeEvent*(2);}
-	if(FitLowFreqCutoff>0)Reddims+=1;
-
-	if(incDM==0)DMdims=0;
-	if(incDM==1)DMdims=2;
-	if(incDM==2)DMdims=numDMCoeff;
-	if(incDM==3)DMdims=2*numDMPL;
-	if(incDM==4)DMdims=3*numDMCoeff;
-	if(incDM==5)DMdims=2*numDMCoeff+2;
-	if(incDM==6)DMdims=2*numDMCoeff+numDMCoeff;
-
-	if(incScat==1) Scatdims=2*numScatPL;
-	/*
-	if(incProfileScatter == 1){
-
-
-
-
-		int nSx = psr[0].nSx;
-
-
-		if(ScatterPBF == 0) ScatterDims = 1*nSx; //Delta Function (ie none)
-		if(ScatterPBF == 1) ScatterDims = 1*nSx; //Exponential Decay
-		if(ScatterPBF == 2) ScatterDims = 1*nSx; //Thick screen near source (or observer)
-		if(ScatterPBF == 3) ScatterDims = 1*nSx; //Uniform
-		if(ScatterPBF == 4) ScatterDims = 2*nSx; //2 Exponential Decays
-		if(ScatterPBF == 5) ScatterDims = 2*nSx; //Thin screen with cut off
-		if(ScatterPBF == 6) ScatterDims = 2*nSx; //Anisotropic (different taus in X and Y)
-	}
-	*/
-	if(incBandNoise > 0) DMdims+= 2*incBandNoise;
-	if(incGroupNoise > 0) Reddims += 2*incGroupNoise + numGroupstoFit + 2*numGroupTimestoFit;
-	
-
-	if(incDMShapeEvent>0)DMdims+=incDMShapeEvent*(2+numDMShapeCoeff);
-	if(incDMScatterShapeEvent>0)DMdims+=incDMScatterShapeEvent*(3+numDMScatterShapeCoeff);	
-	if(incFloatDM>0)DMdims+=2*incFloatDM;
-
-	if(incGlitch > 0)Glitchdims=(incGlitchTerms+1)*incGlitch;
-
-    
-	//printf("DMModel flag: %i \n",psr[0].param[param_dmmodel].fitFlag[0]);
-	if(psr[0].param[param_dmmodel].fitFlag[0]==1){
-	//	printf("Fitting for DMModel using %i structure functions \n",psr[0].dmoffsDMnum);
-		DMModeldims=psr[0].dmoffsDMnum; 
-		fitDMModel=1;
-	}
-	
-	if(fitDMModel==1 && ( doTimeMargin != 0 || doJumpMargin != 0 || doLinearFit != 0)){
-	  if (rank==0) printf("DMModel currently only supports doTimeMargin= 0, doJumpMargin = 0, doLinear = 0");
-	  // 			return 0;
-	}
-
-	if((incRED == 1 && incDM != 1 && incDM != 0 )|| (incRED != 1 && incRED != 0 && incDM == 1)){
-	  if (rank==0) printf("Different methods for DM and red noise not currently supported, please use the same option for both");
-	  return 0;
-	}
-        
-	std::string pulsarname=psr[0].name;
-	std::string longname=Type+pulsarname+"-";
-
-	if(longname.size() >= 100){
-	  if (rank==0) printf("Root Name is too long, needs to be less than 100 characters, currently %i .\n",longname.size());
-	  return 0;
-	}
-
-	for(int r=0;r<=longname.size();r++){root[r]=longname[r];}
-
-	std::string wname=WhiteName;
-
-	if(wname.size() >= 100) {
-	  if (rank==0) printf("white noise flag is too long, needs to be less than 100 characters, currently %i .\n",wname.size());
-	  return 0;
-	}
-
-	for(int r=0;r<=wname.size();r++){wflag[r]=wname[r];}
-
-	std::string GNname=GroupNoiseName;
-
-	if(GNname.size() >= 100){
-	  if (rank==0) printf("Group Noise flag is too long, needs to be less than 100 characters, currently %i .\n",GNname.size());
-	  return 0;
-	}
-
-	for(int r=0;r<=GNname.size();r++){GroupNoiseSysFlag[r]=GNname[r];}
-
-	std::string ProfileFileName = ProfFile;
-	if(ProfileFileName.size() >= 100){
-	  if (rank==0) printf("Profile File Name is too long, needs to be less than 100 characters, currently %i .\n",ProfileFileName.size());
-	  return 0;
-	}
-	for(int r=0;r<=ProfileFileName.size();r++){ProfFileName[r]=ProfileFileName[r];}
-
-	if (rank==0) {
-	  printf("Graphical Interface: TempoNest\n");
-	  printf("Author:              L. Lentati\n");
-	  printf("Version:             1.0\n");
-	  printf("----------------------------------------------------------------\n");
-	  printf("This program comes with ABSOLUTELY NO WARRANTY.\n");
-	  printf("This is free software, and you are welcome to redistribute it\n");
-	  printf("under conditions of GPL license.\n\n");
-	  printf("----------------------------------------------------------------\n");
-
-	
-	  printf("\n\n\n\n*****************************************************\n");
-	  printf("Starting TempoNest\n");
-	  printf("*****************************************************\n\n\n\n");
-	  printf("Details of the fit:\n");
-#ifdef HAVE_CULA
-	  if(useGPUS == 1){
-	    printf("Using GPUs\n");
-	  }
-#endif
-	  printf("file root set to %s \n",root);
-}	
-	int systemcount=0;
-	int *numFlags=new int[psr[0].nobs];
-	for(int o=0;o<psr[0].nobs;o++){
-		numFlags[o]=0;
-	}
-	
-	
-	for(int o=0;o<psr[0].nobs;o++){
-		psr[0].obsn[o].snr = 1;
-		psr[0].obsn[o].tobs = 1;
-		for (int f=0;f< psr[0].obsn[o].nFlags;f++){
-                	if(strcasecmp( psr[0].obsn[o].flagID[f],"-snr")==0){
-				psr[0].obsn[o].snr =  atof(psr[0].obsn[o].flagVal[f]);
-			}
-			if(strcasecmp( psr[0].obsn[o].flagID[f],"-tobs")==0){
-				psr[0].obsn[o].tobs =  atof(psr[0].obsn[o].flagVal[f]);
-			}
-		}
-			
-	}
-
-//	if(incEFAC > 0 || incEQUAD > 0 || incShannonJitter > 0){printf("using white noise model %i\n", whitemodel);}
-
-	std::vector<std::string>systemnames;
-	for(int o=0;o<psr[0].nobs;o++){
-		int found=0;
-		for (int f=0;f<psr[0].obsn[o].nFlags;f++){
-			if(strcasecmp(psr[0].obsn[o].flagID[f],wflag)==0){
-				
-				if(std::find(systemnames.begin(), systemnames.end(), psr[0].obsn[o].flagVal[f]) != systemnames.end()) {
- 				/* systemnames contains x */
-				} else {
-	 				/* systemnames does not contain x */
-					if(incEFAC==2 || incEQUAD==2 || incShannonJitter==2) {
-					  if (rank==0) printf("Found %s %s \n",wflag, psr[0].obsn[o].flagVal[f]);
-					}
-					systemnames.push_back(psr[0].obsn[o].flagVal[f]);
-					systemcount++;
-				}
-				found=1;
-			}
-			
-
-		}
-		if(found==0 && (incEFAC==2 || incEQUAD==2 || incShannonJitter==2)){
-		  if (rank==0) printf("Observation %i is missing the %s flag, please check before continuing\n",o,wflag);
-		  return 0;
-		}
-	}
-
-	if(incEFAC==2 || incEQUAD==2 ||incShannonJitter==2 ) {
-	  if (rank==0) printf("total number of systems: %i \n",systemcount);
-	}
-	if(systemcount==0 && (incEFAC < 2 && incEQUAD < 2 && incShannonJitter < 2)){systemcount=1;}
-		
-	for(int o=0;o<psr[0].nobs;o++){
-		for (int f=0;f<psr[0].obsn[o].nFlags;f++){
-		
-			if(strcasecmp(psr[0].obsn[o].flagID[f],wflag)==0){
-				for (int l=0;l<systemcount;l++){
-					if(psr[0].obsn[o].flagVal[f] == systemnames[l]){
-						numFlags[o]=l;
-					}
-				}
-			}
-
-		}
-	}
-
-	int *includeEQsys=new int[systemcount];
-	for (int l=0;l<systemcount;l++){
-		includeEQsys[l] = 1;
-	}
-
-
-	if(incEQUAD==3){
-		for(int i =0; i < psr[0].nTNEQ; i++){
-		  if (rank==0) printf("Including for EQUAD==3 %i %s \n", i, psr->TNEQFlagVal[i]);
-		  for (int l=0;l<systemcount;l++){
-		    if(psr->TNEQFlagVal[i] == systemnames[l]){
-		      if (rank==0) printf("This corresponds to system %i \n", l);
-		      includeEQsys[l] = 0;
-		    }
-		  }
-		}
-
-		for (int l=0;l<systemcount;l++){
-			int changed = 0;
-			if(includeEQsys[l] == 0){ includeEQsys[l] = 1; changed=1;}			
-			if(includeEQsys[l] == 1 && changed == 0){ includeEQsys[l] = 0;}
-			if (rank==0) printf("Including? %i %i \n", l, includeEQsys[l]);
-		}
-		
-	}
-
-
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////Get Group Noise System Positions/////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GroupNoiseSysCount=0;
-	int *GroupNoiseSys=new int[psr[0].nobs];
-	double **GroupStartTimes;
-	for(int o=0;o<psr[0].nobs;o++){
-		GroupNoiseSys[o]=0;
-	}
-	
-	if(incGroupNoise > 0 || numStep > 0){
-		std::vector<std::string>GroupNoiseSystemNames;
-		for(int o=0;o<psr[0].nobs;o++){
-			int found=0;
-			for (int f=0;f<psr[0].obsn[o].nFlags;f++){
-				if(strcasecmp(psr[0].obsn[o].flagID[f],GroupNoiseSysFlag)==0){
-					if(std::find(GroupNoiseSystemNames.begin(), GroupNoiseSystemNames.end(), psr[0].obsn[o].flagVal[f]) != GroupNoiseSystemNames.end()) {
-	 				/* systemnames contains x */
-					} else {
-					  /* systemnames does not contain x */
-					  if (rank==0) printf("Found %s %s \n",GroupNoiseSysFlag, psr[0].obsn[o].flagVal[f]);
-					  GroupNoiseSystemNames.push_back(psr[0].obsn[o].flagVal[f]);
-					  GroupNoiseSysCount++;
-					}
-					found=1;
-				}
-			
-
-			}
-
-			if(found==0 ){
-			  if (rank==0) printf("Observation %i %s is missing the %s flag, please check before continuing\n",o,psr[0].obsn[o].fname, GroupNoiseSysFlag);
-			  return 0;
-			}
-		}
-
-		if (rank==0) printf("total number of Group Noise Systems: %i \n",GroupNoiseSysCount);
-
-		GroupStartTimes = new double*[GroupNoiseSysCount];
-		for(int o = 0; o < GroupNoiseSysCount; o++){
-		  if (rank==0) printf("Group Times: %i %g %g \n", o, GroupStartTimes[o][0], GroupStartTimes[o][1]);
-		  GroupStartTimes[o] = new double[2];
-		  GroupStartTimes[o][0] = 100000;
-		  GroupStartTimes[o][1] = 0;
-		}
-		
-		for(int o=0;o<psr[0].nobs;o++){
-			for (int f=0;f<psr[0].obsn[o].nFlags;f++){
-				if(strcasecmp(psr[0].obsn[o].flagID[f],GroupNoiseSysFlag)==0){
-					for (int l=0;l<GroupNoiseSysCount;l++){
-						if(psr[0].obsn[o].flagVal[f] == GroupNoiseSystemNames[l]){
-							GroupNoiseSys[o]=l;
-							if((double)psr[0].obsn[o].sat < GroupStartTimes[l][0]){GroupStartTimes[l][0] = (double)psr[0].obsn[o].sat;}
-							if((double)psr[0].obsn[o].sat > GroupStartTimes[l][1]){GroupStartTimes[l][1] = (double)psr[0].obsn[o].sat;}
-						}
-					}
-				}
-
-			}
-		}
-
-	}
-
-
-
-	if(incEFAC == 1){if (rank==0) printf("Including One EFAC for all observations\n");numEFAC=1;}
-	if(incEFAC == 2){if (rank==0) printf("Including One EFAC for each %s\n", wflag);numEFAC=systemcount;}	
-	if(incEQUAD == 1){if (rank==0) printf("Including One EQUAD for all observations\n");numEQUAD=1;}
-	if(incEQUAD == 2){if (rank==0) printf("Including One EQUAD for each %s\n", wflag);numEQUAD=systemcount;}
-	if(incEQUAD == 3){if (rank==0) printf("Including One EQUAD for the %i included TNEQ in par file\n",psr[0].nTNEQ);numEQUAD=psr[0].nTNEQ;}
-	if(incHighFreqStoc > 0){if (rank==0) printf("Including High frequency profile stochasticity \n");}
-	if(incShannonJitter==1){if (rank==0) printf("Including One SQUAD for all observations \n");numSQUAD=1;}
-	if(incShannonJitter == 2){if (rank==0) printf("Including One SQUAD for each %s\n", wflag);numSQUAD=systemcount;}
-	if(incNGJitter == 1){if (rank==0) printf("Including ECORR for %i systems\n", psr->nTNECORR);numNGJitter=psr->nTNECORR;}
-        if(incNGSJitter ==1){if (rank==0) printf("Including SECORR for %i systems\n", psr->nTNSECORR);numNGSJitter=psr->nTNSECORR;}
-	if (rank==0) {
-	  if(incDMEQUAD == 1) printf("Including DM EQUAD\n");
-	  if(FitSolarWind == 1) printf("Including Deterministic Solar Wind\n");
-	  if(FitWhiteSolarWind == 1) printf("Including Stochastic Solar Wind \n");
-	  if(incRED == 1) printf("Including Red Noise : Power Law Model\n");
-	  if(incRED == 2){printf("Including Red Noise : Model Independant - Fitting %i Coefficients\n", int(numRedCoeff));}
-	  if(incRED ==3){printf("Including Red Noise: Power Law Model to %i Coefficients \n", int(numRedCoeff));}
-	  if(incRED ==4){printf("Including Red Noise: Power Law Model with Corner Freq to %i Coefficients\n \n", int(numRedCoeff));}
-	  if(incRED ==5){printf("Including Red Noise Numerically: Power Law Model to %i Coefficients \n", int(numRedCoeff));}
-	  if(incDM == 1){printf("Including DM : Power Law Model\n");}
-	  if(incDM == 2){printf("Including DM : Model Independant - Fitting %i Coefficients\n", int(numDMCoeff));}
-	  if(incDM ==3){printf("Including DM: %i Component Power Law Model to %i Coefficients \n", numDMPL, int(numDMCoeff));}
-	  if(incDM ==5){printf("Including DM Variations Numerically: Power Law Model to %i Coefficients \n", int(numDMCoeff));}
-	  if(incScat ==1) {printf("Including Scattering variations: %i Component Power Law Model to %i Coefficients \n", numScatPL, int(numScatCoeff));}
-	  if(incFloatDM==1){printf("Including Floating DM power spectrum coefficient\n");}
-	  if(incFloatRed==1){printf("Including Floating Red noise power spectrum coefficient\n");}
-	  if(yearlyDM==1){printf("Including yearly DM variations\n");}
-	  if(incsinusoid==1){printf("Including additional sinusoid\n");}	
-	  if(incDMEvent != 0){printf("Including %i DM Events\n",incDMEvent);}
-	  if(incDMShapeEvent != 0){printf("Including %i DM Shape Events\n",incDMShapeEvent);}
-	  if(incDMScatterShapeEvent != 0){printf("Including %i DM Scatter Shape Events\n",incDMShapeEvent);}
-	  if(incRedShapeEvent != 0){printf("Including %i Red Shape Events\n",incRedShapeEvent);}
-	  if(incBandNoise > 0){printf("Including Band Noise for %i bands\n", incBandNoise);}
-	  if(incGroupNoise > 0){printf("Including Group Noise: Power Law Model to %i Coefficients \n", int(numGroupCoeff));}
-	  if(incProfileFit > 0){printf("Including profile fit\n");}
-	  if(incProfileEvo > 0){printf("Including profile evolution with %i polynoimals\n", NProfileEvoPoly);}
-	  if(FitLinearProfileWidth == 1){printf("Including Linear Profile Width\n");}
-	  if(incWidthEvoTime > 0){printf("Including Temporal profile width change \n");}
-	  if(incWidthJitter == 1){printf("Including Width Jitter \n");}
-	}
-	
-	int fitcount=0;
-	if (rank==0) printf("fitting for: Arbitrary Phase \n");
-	fitcount++;
-	for (int p=0;p<MAX_PARAMS;p++) {
-	      for (int k=0;k<psr[0].param[p].aSize;k++){
-			if(psr[0].param[p].fitFlag[k] == 1 && p != param_dmmodel){
-			  if (rank==0) printf("fitting for: %s \n",psr[0].param[p].shortlabel[k]);
-			  fitcount++;
-	    		}
-			if(psr[0].param[p].fitFlag[k] == 1 && p == param_dmmodel){
-			  if (rank==0) printf("fitting for: %s \n",psr[0].param[p].shortlabel[k]);
-			}
-	      }
-	}
-
-	numFitJumps=0;
-	for(int i=0;i<=psr[0].nJumps;i++){
-		if(psr[0].fitJump[i] == 1)numFitJumps++;
-// 		  printf("%i %i %g %g \n",i,psr[0].fitJump[i], psr[0].jumpVal[i],psr[0].jumpValErr[i]/sqrt(psr[0].fitChisq/psr[0].fitNfree));
-	}  
-	if (rank==0) {
-	  printf("Found %i jumps to fit \n",numFitJumps);
-	  printf("total Timing Model params to fit:  %i \n",numFitJumps+fitcount);
-	}
-
-	long double **TempoPriors;
-	long double *Tempo2Fit = new long double[numFitJumps+fitcount];
-	int **TempoFitNums;
-	int *TempoJumpNums;
-	TempoPriors=new long double*[numFitJumps+fitcount];
-	for(int i=0;i<numFitJumps+fitcount;i++){
-		TempoPriors[i]=new long double[4];
-		for(int j=0; j< 4; j++){
-				TempoPriors[i][j]=0;
-		}
-		
-	}
-	TempoFitNums=new int*[fitcount+numFitJumps];
-	for(int i=0;i<fitcount+numFitJumps;i++){
-		TempoFitNums[i]=new int[2];
-		TempoFitNums[i][0] = -1;
-		TempoFitNums[i][1] = -1;
-	}
-	TempoJumpNums=new int[numFitJumps];
-	//printf("allocated\n");
-	int paramsfitted=0;
-//	printf("Offset and error: %g %g %g\n", psr[0].offset, psr[0].offset_e, psr[0].offset_e/sqrt(psr[0].fitChisq/psr[0].fitNfree));
-	TempoPriors[paramsfitted][0]=0;//psr[0].offset;
-	TempoPriors[paramsfitted][1]=psr[0].offset_e;//offset_e/sqrt(psr[0].fitChisq/psr[0].fitNfree);
-
-	/*
-	if(GPTA == 1){
-		TempoPriors[paramsfitted][0]=0;
-        	TempoPriors[paramsfitted][1]=1;//offset_e/sqrt(psr[0].fitChisq/psr[0].fitNfree);
-	}
-	*/
-
-	TempoFitNums[paramsfitted][0]=0;
-	TempoFitNums[paramsfitted][1]=0;
-	//if(doTimeMargin != 0 || doJumpMargin != 0)TempoPriors[paramsfitted][2]=1;
-        TempoPriors[paramsfitted][2]=1; // always marginalise over phase. @TODO: make an option to allow fitting for
-	paramsfitted++;
-	for (int p=0;p<MAX_PARAMS;p++) {
-	      for (int k=0;k<psr[0].param[p].aSize;k++){
-			if(psr[0].param[p].fitFlag[k] == 1 && p != param_dmmodel){
-				
-				TempoPriors[paramsfitted][0]=psr[0].param[p].prefit[k];
-				TempoPriors[paramsfitted][1]=psr[0].param[p].err[k]/std::sqrt(psr[0].fitChisq/psr[0].fitNfree);
-				Tempo2Fit[paramsfitted]=psr[0].param[p].val[k];
-
-				TempoFitNums[paramsfitted][0]=p;
-				TempoFitNums[paramsfitted][1]=k;	
-
-				if(strcasecmp(psr[0].param[p].shortlabel[0],"F0")== 0){
-					if(doTimeMargin != 0)TempoPriors[paramsfitted][2]=1;
-				}
-				if(doTimeMargin == 2)TempoPriors[paramsfitted][2]=1;				 
-
-
-				paramsfitted++;
-	    		}
-		}
-	}
-	int jumpsfitted=0;
-	double *PreJumpVals = new double[psr[0].nJumps+1]();
-	if (rank==0) printf("There are %i jumps \n", psr[0].nJumps);
-	for(int i=0;i<=psr[0].nJumps;i++){
-
-		char str1[100],str2[100],str3[100],str4[100],str5[100];
-		int nread=sscanf(psr[0].jumpStr[i],"%s %s %s %s %s",str1,str2,str3,str4,str5);
-		//printf("Jump String %s %s %s %s %s \n", str1, str2, str3, str4, str5);
-
-
-		double prejump= 0;
-		if(strcasecmp( str1,"MJD")==0){
-			prejump=atof(str4);
-			if (rank==0) printf("MJD PreJump: %i %g \n",  i, prejump);
-		}
-		else{
-			prejump=atof(str3);
-			if (rank==0) printf("Not an MJD PreJump: %i %g \n",  i, prejump);
-		}
-		PreJumpVals[i] = prejump;
-		if(psr[0].fitJump[i] == 1){
-
-//			printf("gonna read jump %i %s \n",i,psr[0].jumpStr[i]);	
-			char str1[100],str2[100],str3[100],str4[100],str5[100];
-			int nread=sscanf(psr[0].jumpStr[i],"%s %s %s %s %s",str1,str2,str3,str4,str5);
-	
-			double prejump=0;
-
-			if(strcasecmp( str1,"MJD")==0){
-				prejump=atof(str4);
-			}
-			else{
-				prejump=atof(str3);
-			}
-			//printf(" Fitted Pre jump %i %g %g\n",i,prejump,psr[0].jumpVal[i]);
-			//if(GPTA==0){	
-			if(numTempo2its > 1){
-				TempoPriors[paramsfitted][0]=psr[0].jumpVal[i];
-				TempoPriors[paramsfitted][1]=psr[0].jumpValErr[i]/std::sqrt(psr[0].fitChisq/psr[0].fitNfree);
-				Tempo2Fit[paramsfitted]=psr[0].jumpVal[i];
-			}
-			else{
-				TempoPriors[paramsfitted][0]=prejump;
-				TempoPriors[paramsfitted][1]=psr[0].jumpValErr[i]/std::sqrt(psr[0].fitChisq/psr[0].fitNfree);
-				Tempo2Fit[paramsfitted]=prejump;
-			}
-			//}
-			//else{
-
-                        //        TempoPriors[paramsfitted][0]=prejump;
-                        ///        TempoPriors[paramsfitted][1]=psr[0].jumpValErr[i]/sqrt(psr[0].fitChisq/psr[0].fitNfree);
-                       //         Tempo2Fit[paramsfitted]=prejump;
-
-			//}
-			TempoJumpNums[jumpsfitted]=i;
-			
-			if(doJumpMargin == 1)TempoPriors[paramsfitted][2]=1;
-			
-			paramsfitted++;
-			jumpsfitted++;
-
-		}
-	}  
-
-	// set the MultiNest sampling parameters
-	
-// 	return 0;
-	int sampler = 1;
-	int Nchords=1; 	
-	int IS = 1;					// do Nested Importance Sampling?
-	int mmodal = 0;					// do mode separation?
-	int ceff = 0;					// run in constant efficiency mode?
-	int nlive = 500;				// number of live points
-	double efr = 0.1;				// set the required efficiency
-	int sample = 1;
-	int nClsPar = 1;				// no. of parameters to do mode separation on
-	int updInt = 2000;				// after how many iterations feedback is required & the output files should be updated
-	int NBurn = 100;
-	int NSamp = 10000;
-	int GHSresume = 0;
-
-	setupMNparams(ConfigFileName, sampler, IS, mmodal, ceff, nlive, efr, sample, updInt, nClsPar, Nchords , NBurn, NSamp, GHSresume);
-
-
-	double tol = 0.5;				// tol, defines the stopping criteria
-	int ndims = numFitJumps+fitcount+numEFAC*numEPolTerms +numEQUAD+numNGJitter+numNGSJitter+Reddims+DMdims+Scatdims+numStep*3 + DMModeldims + 2*varyDMCoeff + 2*varyRedCoeff + 2*yearlyDM + 3*incsinusoid+numSQUAD + 7*incDMEvent + Glitchdims +swdims + incHighFreqStoc + incDMEQUAD + incWidthJitter + pnoisedims; // dimensionality (no. of free parameters)
-	int nPar = ndims;					// total no. of parameters including free & derived parameters
-							// note: posterior files are updated & dumper routine is called after every updInt*10 iterations
-	double Ztol = -1E90;				// all the modes with logZ < Ztol are ignored
-	int maxModes = 100;				// expected max no. of modes (used only for memory allocation)
-	int pWrap[ndims];				// which parameters to have periodic boundary conditions?
-	for(int i = 0; i < ndims; i++) pWrap[i] = 0;
-	
-	int seed = -1;					// random no. generator seed, if < 0 then take the seed from system clock
-	int fb = 1;					// need feedback on standard output?
-	int resume = 1;					// resume from a previous job?
-	int outfile = 1;				// write output files?
-	int initMPI = 0;				// initialize MPI routines?, relevant only if compiling with MPI set it to F if you want your main program to handle MPI initialization
-	double logZero = -DBL_MAX;			// points with loglike < logZero will be ignored by MultiNest
-	int maxiter = 0;				// max no. of iterations, a non-positive value means infinity. MultiNest will terminate if either it has done max no. of iterations or convergence criterion (defined through tol) has been satisfied
-	void *context = 0;				// not required by MultiNest, any additional information user wants to pass
-	//printf("Here \n");
-	
-	int FloatRedstart=numFitJumps+fitcount+numEFAC+numEQUAD+Reddims-incFloatRed*2;
-	int FloatDMstart=numFitJumps+fitcount+numEFAC+numEQUAD+Reddims+DMdims-incFloatDM*2;
-
-
-	char *chartroot = new char[longname.length() + 1];
-        std::strcpy(chartroot , longname.c_str());
-
-	MNStruct *MNS = init_struct(psr,TempoPriors,npsr,numFitJumps,fitcount,systemcount,numEFAC,numEQUAD, int(numRedCoeff), int(numDMCoeff), int(numScatCoeff), numRedPL, numDMPL, numScatPL, TempoFitNums,TempoJumpNums,numFlags, ndims, incRED,incDM,incScat,incFloatDM,incFloatRed, FloatDMstart, FloatRedstart, doTimeMargin,doJumpMargin, doLinearFit, SampleFreq, numStep, wflag, whitemodel,varyRedCoeff, varyDMCoeff,yearlyDM, incsinusoid, numEPolTerms, incGWB,RedPriorType, DMPriorType, ScatPriorType, EQUADPriorType,EFACPriorType,useOriginalErrors,numSQUAD, incDMEvent, incDMShapeEvent, numDMShapeCoeff, incBandNoise, numBandNoiseCoeff, incRedShapeEvent, numRedShapeCoeff, MarginRedShapeCoeff, incDMScatterShapeEvent, numDMScatterShapeCoeff, incNGJitter, incNGSJitter, incGlitch, incGlitchTerms, incBreakingIndex, FitLowFreqCutoff, useNbitsAlgebra, incGroupNoise, numGroupCoeff, FitForGroup, numGroupstoFit,GroupNoiseSys, FitSolarWind, FitWhiteSolarWind, interpolateProfile, InterpolatedTime, sampler, GPTAnumstocshapecoeff, totalshapestoccoeff, StoreFMatrices, incHighFreqStoc, numNGJitter, numNGSJitter, FitForBand, incProfileEvo, EvoRefFreq, numEvoFitCoeff, incWideBandNoise, incProfileFit, numProfileFitCoeff, incDMEQUAD, FitLinearProfileWidth, offPulseLevel,GroupStartTimes, FitEvoExponent,numProfComponents, totalEvoFitCoeff, totalProfileFitCoeff, numEvoCoeff, totalEvoCoeff,incWidthJitter, JitterProfComp, incProfileEnergyEvo, debug, ProfileBaselineTerms, incProfileNoise, ProfileNoiseCoeff, SubIntToFit, ChannelToFit, NProfileEvoPoly, ProfCompSeps,usecosiprior, PreJumpVals, chartroot, doMax, incWidthEvoTime, incExtraProfComp, incPrecession, incTimeCorrProfileNoise, numTimeCorrCoeff, totalTimeCorrCoeff, phasePriorExpansion, ProfileNoiseMethod, FitPrecAmps, GroupNoiseName, NProfileTimePoly, incProfileScatter, ScatterPBF, FitCompWidths, FitCompPos, NumFitCompWidths, NumFitCompPos, NumCompswithWidth, NumCompswithPos, rank);
-	
-	MNS->includeEQsys = includeEQsys;	
-
-/*
-//	printf("Check NG: %i %i\n", incNGJitter, ndims );
-	if(incNGJitter ==1){
-		//printf("Calling\n");
-		double **NGJitterMatrix;
-		int NumNGEpochs;
-		getNGJitterMatrixEpochs(psr, NumNGEpochs);
-
-		NGJitterMatrix = new double*[psr->nobs];
-		for(int i =0; i < psr->nobs; i++){
-			NGJitterMatrix[i] = new double[NumNGEpochs];
-			for(int j =0; j < NumNGEpochs;  j++){
-				NGJitterMatrix[i][j] = 0;
-			}
-		}
-		int *NGJitterSysFlags = new int[psr->nobs];
-		
-
-		for (int i=0;i<psr->nobs;i++){
-			for (int j=0;j<psr->obsn[i].nFlags;j++){
-				for (int k=0;k<psr->nTNECORR;k++){
-					if (strcmp(psr->obsn[i].flagID[j], psr->TNECORRFlagID[k])==0){
-						if (strcmp(psr->obsn[i].flagVal[j],psr->TNECORRFlagVal[k])==0){
-							NGJitterSysFlags[i] = k;
-							//printf("NGFLag? %i %i %s \n", i, k, psr->TNECORRFlagVal[k]);
-						}
-					}
-				}
-			}
-		}
-
-
-		getNGJitterMatrix(psr, NGJitterMatrix, NumNGEpochs);
-
-		int *NGJitterEpochFlags = new int[NumNGEpochs];
-
-		printf("Check: %i %g \n", NumNGEpochs, NGJitterMatrix[0][0]);
-		for(int i =0; i < NumNGEpochs; i++){
-			for(int j=0; j < psr->nobs; j++){
-				if(NGJitterMatrix[j][i] != 0) {
-				//	printf("%i %i %i\n", j, i, NGJitterSysFlags[j]);
-					NGJitterEpochFlags[i]=NGJitterSysFlags[j];
-				}
-			}
-		}
-		delete[] NGJitterSysFlags;
-		MNS->NGJitterSysFlags=NGJitterEpochFlags;
-		MNS->NGJitterMatrix=NGJitterMatrix;
-		MNS->numNGJitterEpochs=NumNGEpochs;
-		MNS->incNGJitter=numNGJitter;
-	}
+    FitForGroup = new int*[incGroupNoise];
+    for (int i = 0; i < incGroupNoise; i++) {
+        FitForGroup[i] = new int[6];
+        for (int j = 0; j < 6; j++) {
+            FitForGroup[i][j] = 0;
+        }
+    }
+
+    int** FitForBand = new int*[incBandNoise];
+    for (int i = 0; i < incBandNoise; i++) {
+        FitForBand[i] = new int[4];
+        for (int j = 0; j < 4; j++) {
+            FitForBand[i][j] = 0;
+        }
+    }
+
+    GetGroupsToFit(ConfigFileName, incGroupNoise, FitForGroup, incBandNoise, FitForBand);
+    for (int i = 0; i < incGroupNoise; i++) {
+        //		printf("Check Groups %i %i \n", i, FitForGroup[i]);
+        if (FitForGroup[i][0] == -1)
+            numGroupstoFit++;
+        if (FitForGroup[i][1] == 1)
+            numGroupTimestoFit++;
+    }
+    if (rank == 0)
+        printf("Inc Scat = %d\n", incScat);
+    if (rank == 0)
+        printf("Fitting for %i group noise terms, and for %i groups, %i Times \n", incGroupNoise,
+               numGroupstoFit, numGroupTimestoFit);
+    if (rank == 0)
+        printf("Fitting for %i band noise terms \n", incBandNoise);
+
+    int* GPTAnumshapecoeff;
+    int* numEvoCoeff;
+    int* numEvoFitCoeff;
+    int* numProfileFitCoeff;
+    int* GPTAnumstocshapecoeff;
+    int* numTimeCorrCoeff;
+    double* ProfCompSeps;
+    int* FitCompWidths;
+    int* FitCompPos;
+
+    double** FitForExtraComp = new double*[incExtraProfComp];
+    for (int i = 0; i < incExtraProfComp; i++) {
+        FitForExtraComp[i] = new double[3]();
+    }
+
+    int totalEvoCoeff = 0;
+    int totalEvoFitCoeff = 0;
+    int totalProfileFitCoeff = 0;
+    int totalTimeCorrCoeff = 0;
+    int totalshapestoccoeff = 0;
+    int NumFitCompWidths = 0;
+    int NumFitCompPos = 0;
+    int NumCompswithWidth = 0;
+    int NumCompswithPos = 0;
+
+    double TemplateChanWidth = 0;
+    /*
+    if(GPTA ==1){
+        GPTAnumshapecoeff= new int[numProfComponents];
+        numEvoCoeff = new int[numProfComponents];
+        numEvoFitCoeff = new int[numProfComponents];
+        numProfileFitCoeff = new int[numProfComponents];
+        GPTAnumstocshapecoeff  = new int[numProfComponents];
+        numTimeCorrCoeff = new int[numProfComponents];
+        ProfCompSeps   = new double[numProfComponents];
+        FitCompWidths = new int[numProfComponents]();
+        FitCompPos = new int[numProfComponents]();
+
+        for(int i = 0; i < numProfComponents; i++){
+            GPTAnumshapecoeff[i] = 0;
+            numEvoCoeff[i] = 0;
+                    numEvoFitCoeff[i] = 0;
+                    numProfileFitCoeff[i] = 0;
+            GPTAnumstocshapecoeff[i] = 0;
+            numTimeCorrCoeff[i] = 0;
+            ProfCompSeps[i] = 0;
+        }
+
+
+        GetProfileFitInfo(ConfigFileName, numProfComponents, GPTAnumshapecoeff, numProfileFitCoeff,
+    numEvoCoeff, numEvoFitCoeff, GPTAnumstocshapecoeff, ProfCompSeps, TemplateChanWidth,
+    numTimeCorrCoeff, incExtraProfComp, FitForExtraComp, FitCompWidths, FitCompPos);
+
+        for(int i = 0; i < numProfComponents; i++){
+            totalEvoFitCoeff +=  numEvoFitCoeff[i];
+            totalProfileFitCoeff += numProfileFitCoeff[i];
+            totalEvoCoeff += numEvoCoeff[i];
+            totalshapestoccoeff += GPTAnumstocshapecoeff[i];
+            totalTimeCorrCoeff += numTimeCorrCoeff[i];
+
+            NumFitCompWidths += FitCompWidths[i];
+            NumFitCompPos += FitCompPos[i];
+            if(FitCompWidths[i] > 0){ NumCompswithWidth += 1;}
+            if(FitCompPos[i] > 0){ NumCompswithPos += 1;}
+            printf("including %i shapelets in component %i Fit: %i Evo: %i Stoc: %i TimeCorr %i\n",
+    GPTAnumshapecoeff[i], i, numProfileFitCoeff[i], numEvoFitCoeff[i], GPTAnumstocshapecoeff[i],
+    numTimeCorrCoeff[i]); printf("Fiting for %i Comp widths, and %i Comp positions \n",
+    NumFitCompWidths, NumFitCompPos );
+        }
+
+
+        if(incProfileEvo != 1){
+            if(FitTemplate == 0){
+                NProfileEvoPoly = 0;
+            }
+            for(int i = 0; i < numProfComponents; i++){
+                numEvoFitCoeff[i]=0;
+            }
+        }
+        if(incProfileFit == 0){
+            for(int i = 0; i < numProfComponents; i++){
+                numProfileFitCoeff[i]=0;
+            }
+        }
+        if(incTimeCorrProfileNoise == 0){
+            for(int i = 0; i < numProfComponents; i++){
+                numTimeCorrCoeff[i] = 0;
+            }
+        }
+    }
 
 */
-	
-	//return 0;
-	context=MNS;
+
+    formBatsAll(psr, npsr); /* Form Barycentric arrival times */
+    logdbg("calling formResiduals");
+    formResiduals(psr, npsr, 1); /* Form residuals */
+
+    /*Work out data time span to get maximum number of coefficients*/
+
+    double start, end;
+    int go = 0;
+    for (int i = 0; i < psr[0].nobs; i++) {
+        if (psr[0].obsn[i].deleted == 0) {
+            if (go == 0) {
+                go = 1;
+                start = (double)psr[0].obsn[i].bat;
+                end = start;
+            } else {
+                if (start > (double)psr[0].obsn[i].bat)
+                    start = (double)psr[0].obsn[i].bat;
+                if (end < (double)psr[0].obsn[i].bat)
+                    end = (double)psr[0].obsn[i].bat;
+            }
+        }
+    }
+
+    double maxtspan = 1 * (end - start);
+
+    if (maxtspan < 1) {
+        maxtspan = maxtspan * 24 * 60;
+        if (rank == 0)
+            printf("Assume less than a day, Tspan is now in minutes\n");
+    }
+
+    int mindays = int(floor(1 + 2 * maxtspan / psr[0].nobs));
+    int mincoeff = int(floor(1 + maxtspan / mindays));
+
+    int Reddaysincoeffs = int(floor(maxtspan / numRedCoeff));
+    int DMdaysincoeffs = int(floor(maxtspan / numDMCoeff));
+    int Scatdaysincoeffs = int(floor(maxtspan / numScatCoeff));
+    int BandDMdaysincoeffs = int(floor(maxtspan / numBandNoiseCoeff));
+    int Groupdaysincoeffs = int(floor(maxtspan / numGroupCoeff));
+
+    if (numRedCoeff < mindays) {
+        numRedCoeff = mincoeff;
+        if (FitLowFreqCutoff > 0) {
+            numRedCoeff = mincoeff + 10;  // int(Reddaysincoeffs);
+        }
+    } else {
+        numRedCoeff = int(Reddaysincoeffs);  // Reddaysincoeffs;
+    }
+
+    if (numDMCoeff < mindays) {
+        numDMCoeff = mincoeff;
+    } else {
+        numDMCoeff = int(DMdaysincoeffs);  // DMdaysincoeffs;
+    }
+
+    if (numScatCoeff < mindays)
+        numScatCoeff = mincoeff;
+    else
+        numScatCoeff = int(Scatdaysincoeffs);  // Scatdaysincoeffs;
+
+    if (numBandNoiseCoeff < mindays) {
+        numBandNoiseCoeff = mincoeff;
+    } else {
+        numBandNoiseCoeff = int(BandDMdaysincoeffs);  // DMdaysincoeffs;
+    }
+
+    if (numGroupCoeff < mindays) {
+        numGroupCoeff = mincoeff;
+    } else {
+        numGroupCoeff = int(Groupdaysincoeffs);  // DMdaysincoeffs;
+    }
+
+    if (incRED == 0 && incGWB == 0)
+        numRedCoeff = 0;
+    if (incDM == 0)
+        numDMCoeff = 0;
+    if (incScat == 0)
+        numScatCoeff = 0;
+    SampleFreq = new double[int(numRedCoeff + numDMCoeff + numScatCoeff)];
+    setFrequencies(ConfigFileName, SampleFreq, numRedCoeff, numDMCoeff, numScatCoeff, 0, 0, 0, 1, 1,
+                   1, 1, 1, 1);
+
+    if (rank == 0)
+        printf("Num T2 its %i \n", numTempo2its);
+    for (it = 0; it < numTempo2its; it++) /* Why pulsar 0 should select the iterations? */
+    {
+        if (it > 0) /* Copy post-fit values to pre-fit values */
+        {
+            for (i = 0; i < MAX_PARAMS; i++) {
+                for (p = 0; p < npsr; p++) {
+                    for (k = 0; k < psr[p].param[i].aSize; k++) {
+                        psr[p].param[i].prefit[k] = psr[p].param[i].val[k];
+                        psr[p].param[i].prefitErr[k] = psr[p].param[i].err[k];
+                    }
+                }
+            }
+        }
+        //      long seed = TKsetSeed();
+        for (iteration = 0; iteration < 2; iteration++) /* Do pre- and post- fit analysis */
+        {
+            logdbg("iteration %d", iteration);
+            logdbg("calling formBatsAll");
+            //	  printf("Calling formBats\n");
+            formBatsAll(psr, npsr); /* Form Barycentric arrival times */
+            logdbg("calling formResiduals");
+            formResiduals(psr, npsr, 1); /* Form residuals */
+
+            if (listparms == 1 && iteration == 0)
+                displayParameters(13, timFile, parFile, psr,
+                                  npsr); /* List out all the parameters */
+            if (iteration == 0)          /* Only fit to pre-fit residuals */
+            {
+                logdbg("calling doFit");
+
+                t2Fit(psr, npsr, covarFuncFile);
+                // if (strcmp(dcmFile,"NULL")==0 && strcmp(covarFuncFile,"NULL")==0)
+                // doFit(psr,npsr,writeModel); /* Fit to the residuals to obtain updated parameters
+                // */ else
+                // doFitDCM(psr,dcmFile,covarFuncFile,npsr,writeModel);
+                /* doFitGlobal(psr,npsr,&globalParameter,nGlobal,writeModel);*/ /* Fit to the
+                                                                                   residuals to
+                                                                                   obtain updated
+                                                                                   parameters  */
+                logdbg("completed doFit");
+            }
+            if (iteration == 1 || onlypre == 1) {
+                if (strlen(outputSO) == 0) {
+                    if (rank == 0)
+                        textOutput(psr, npsr, globalParameter, nGlobal, outRes, newpar,
+                                   newparname); /* Output results to the screen */
+                } else                          /* Use a plug in for the output */
+                {
+                    char* (*entry)(int, char**, pulsar*, int);
+                    void* module;
+                    for (int iplug = 0; iplug < tempo2_plug_path_len; iplug++) {
+                        sprintf(str, "%s/%s_%s_plug.t2", tempo2_plug_path[iplug], outputSO,
+                                tempo2MachineType);
+                        module = dlopen(str, RTLD_NOW);
+                        if (module == NULL) {
+                            printf("dlerror() = %s\n", dlerror());
+                        } else
+                            break;
+                    }
+                    if (!module) {
+                        fprintf(stderr, "[error]: dlopen() failed while resolving symbols.\n");
+                        return -1;
+                    }
+                    /*
+                     * Check that the plugin is compiled against the same version of tempo2.h
+                     */
+                    char** pv = (char**)dlsym(module, "plugVersionCheck");
+                    if (pv != NULL) {
+                        // there is a version check for this plugin
+                        if (strcmp(TEMPO2_h_VER, *pv)) {
+                            fprintf(stderr, "[error]: Plugin version mismatch\n");
+                            fprintf(stderr, " '%s' != '%s'\n", TEMPO2_h_VER, *pv);
+                            fprintf(stderr,
+                                    " Please recompile plugin against same tempo2 version!\n");
+                            dlclose(module);
+                            return -1;
+                        }
+                    }
+
+                    entry = (char* (*)(int, char**, pulsar*, int))dlsym(module, "tempoOutput");
+                    if (entry == NULL) {
+                        dlclose(module);
+                        fprintf(stderr, "[error]: dlerror() failed while  retrieving address.\n");
+                        return -1;
+                    }
+                    entry(argc, argv, psr, npsr);
+                }
+            }
+            psr[0].noWarnings = 2;
+            if (onlypre == 1)
+                iteration = 2;
+            /*	  textOutput(psr,npsr,globalParameter,nGlobal,outRes,newpar,"new.par");*/ /* Output
+                                                                                             results
+                                                                                             to the
+                                                                                             screen
+                                                                                           */
+            /*	  printf("Next iteration\n");*/
+        }
+    }
+
+    if (incProfileNoise == 1)
+        pnoisedims = 2;
+    if (incProfileNoise == 2)
+        pnoisedims = ProfileNoiseCoeff;
+    if (incProfileNoise == 3)
+        pnoisedims = ProfileNoiseCoeff;
+
+    if (FitSolarWind == 1)
+        swdims++;
+    if (FitWhiteSolarWind == 1)
+        swdims++;
+
+    if (incRED == 0)
+        Reddims = 0;
+    if (incRED == 1)
+        Reddims = 2;
+    if (incRED == 2)
+        Reddims = numRedCoeff;
+    if (incRED == 3)
+        Reddims = 2 * numRedPL;
+    if (incRED == 4)
+        Reddims = 3 * numRedPL;
+    if (incRED == 5)
+        Reddims = 2 * numRedCoeff + 2;
+    if (incGWB == 1)
+        Reddims += 1;
+    if (incFloatRed > 0)
+        Reddims += 2 * incFloatRed;
+    if (incRedShapeEvent > 0 && MarginRedShapeCoeff == 0) {
+        Reddims += incRedShapeEvent * (2 + numRedShapeCoeff);
+    }
+    if (incRedShapeEvent > 0 && MarginRedShapeCoeff == 1) {
+        Reddims += incRedShapeEvent * (2);
+    }
+    if (FitLowFreqCutoff > 0)
+        Reddims += 1;
+
+    if (incDM == 0)
+        DMdims = 0;
+    if (incDM == 1)
+        DMdims = 2;
+    if (incDM == 2)
+        DMdims = numDMCoeff;
+    if (incDM == 3)
+        DMdims = 2 * numDMPL;
+    if (incDM == 4)
+        DMdims = 3 * numDMCoeff;
+    if (incDM == 5)
+        DMdims = 2 * numDMCoeff + 2;
+    if (incDM == 6)
+        DMdims = 2 * numDMCoeff + numDMCoeff;
+
+    if (incScat == 1)
+        Scatdims = 2 * numScatPL;
+    /*
+    if(incProfileScatter == 1){
 
 
+
+
+        int nSx = psr[0].nSx;
+
+
+        if(ScatterPBF == 0) ScatterDims = 1*nSx; //Delta Function (ie none)
+        if(ScatterPBF == 1) ScatterDims = 1*nSx; //Exponential Decay
+        if(ScatterPBF == 2) ScatterDims = 1*nSx; //Thick screen near source (or observer)
+        if(ScatterPBF == 3) ScatterDims = 1*nSx; //Uniform
+        if(ScatterPBF == 4) ScatterDims = 2*nSx; //2 Exponential Decays
+        if(ScatterPBF == 5) ScatterDims = 2*nSx; //Thin screen with cut off
+        if(ScatterPBF == 6) ScatterDims = 2*nSx; //Anisotropic (different taus in X and Y)
+    }
+    */
+    if (incBandNoise > 0)
+        DMdims += 2 * incBandNoise;
+    if (incGroupNoise > 0)
+        Reddims += 2 * incGroupNoise + numGroupstoFit + 2 * numGroupTimestoFit;
+
+    if (incDMShapeEvent > 0)
+        DMdims += incDMShapeEvent * (2 + numDMShapeCoeff);
+    if (incDMScatterShapeEvent > 0)
+        DMdims += incDMScatterShapeEvent * (3 + numDMScatterShapeCoeff);
+    if (incFloatDM > 0)
+        DMdims += 2 * incFloatDM;
+
+    if (incGlitch > 0)
+        Glitchdims = (incGlitchTerms + 1) * incGlitch;
+
+    // printf("DMModel flag: %i \n",psr[0].param[param_dmmodel].fitFlag[0]);
+    if (psr[0].param[param_dmmodel].fitFlag[0] == 1) {
+        //	printf("Fitting for DMModel using %i structure functions \n",psr[0].dmoffsDMnum);
+        DMModeldims = psr[0].dmoffsDMnum;
+        fitDMModel = 1;
+    }
+
+    if (fitDMModel == 1 && (doTimeMargin != 0 || doJumpMargin != 0 || doLinearFit != 0)) {
+        if (rank == 0)
+            printf(
+                "DMModel currently only supports doTimeMargin= 0, doJumpMargin = 0, doLinear = 0");
+        // 			return 0;
+    }
+
+    if ((incRED == 1 && incDM != 1 && incDM != 0) || (incRED != 1 && incRED != 0 && incDM == 1)) {
+        if (rank == 0)
+            printf(
+                "Different methods for DM and red noise not currently supported, please use the "
+                "same option for both");
+        return 0;
+    }
+
+    std::string pulsarname = psr[0].name;
+    std::string longname = Type + pulsarname + "-";
+
+    if (longname.size() >= 100) {
+        if (rank == 0)
+            printf("Root Name is too long, needs to be less than 100 characters, currently %i .\n",
+                   longname.size());
+        return 0;
+    }
+
+    for (int r = 0; r <= longname.size(); r++) {
+        root[r] = longname[r];
+    }
+
+    std::string wname = WhiteName;
+
+    if (wname.size() >= 100) {
+        if (rank == 0)
+            printf(
+                "white noise flag is too long, needs to be less than 100 characters, currently %i "
+                ".\n",
+                wname.size());
+        return 0;
+    }
+
+    for (int r = 0; r <= wname.size(); r++) {
+        wflag[r] = wname[r];
+    }
+
+    std::string GNname = GroupNoiseName;
+
+    if (GNname.size() >= 100) {
+        if (rank == 0)
+            printf(
+                "Group Noise flag is too long, needs to be less than 100 characters, currently %i "
+                ".\n",
+                GNname.size());
+        return 0;
+    }
+
+    for (int r = 0; r <= GNname.size(); r++) {
+        GroupNoiseSysFlag[r] = GNname[r];
+    }
+
+    std::string ProfileFileName = ProfFile;
+    if (ProfileFileName.size() >= 100) {
+        if (rank == 0)
+            printf(
+                "Profile File Name is too long, needs to be less than 100 characters, currently %i "
+                ".\n",
+                ProfileFileName.size());
+        return 0;
+    }
+    for (int r = 0; r <= ProfileFileName.size(); r++) {
+        ProfFileName[r] = ProfileFileName[r];
+    }
+
+    if (rank == 0) {
+        printf("Graphical Interface: TempoNest\n");
+        printf("Author:              L. Lentati\n");
+        printf("Version:             1.0\n");
+        printf("----------------------------------------------------------------\n");
+        printf("This program comes with ABSOLUTELY NO WARRANTY.\n");
+        printf("This is free software, and you are welcome to redistribute it\n");
+        printf("under conditions of GPL license.\n\n");
+        printf("----------------------------------------------------------------\n");
+
+        printf("\n\n\n\n*****************************************************\n");
+        printf("Starting TempoNest\n");
+        printf("*****************************************************\n\n\n\n");
+        printf("Details of the fit:\n");
+#ifdef HAVE_CULA
+        if (useGPUS == 1) {
+            printf("Using GPUs\n");
+        }
+#endif
+        printf("file root set to %s \n", root);
+    }
+    int systemcount = 0;
+    int* numFlags = new int[psr[0].nobs];
+    for (int o = 0; o < psr[0].nobs; o++) {
+        numFlags[o] = 0;
+    }
+
+    for (int o = 0; o < psr[0].nobs; o++) {
+        psr[0].obsn[o].snr = 1;
+        psr[0].obsn[o].tobs = 1;
+        for (int f = 0; f < psr[0].obsn[o].nFlags; f++) {
+            if (strcasecmp(psr[0].obsn[o].flagID[f], "-snr") == 0) {
+                psr[0].obsn[o].snr = atof(psr[0].obsn[o].flagVal[f]);
+            }
+            if (strcasecmp(psr[0].obsn[o].flagID[f], "-tobs") == 0) {
+                psr[0].obsn[o].tobs = atof(psr[0].obsn[o].flagVal[f]);
+            }
+        }
+    }
+
+    //	if(incEFAC > 0 || incEQUAD > 0 || incShannonJitter > 0){printf("using white noise model
+    //%i\n", whitemodel);}
+
+    std::vector<std::string> systemnames;
+    for (int o = 0; o < psr[0].nobs; o++) {
+        int found = 0;
+        for (int f = 0; f < psr[0].obsn[o].nFlags; f++) {
+            if (strcasecmp(psr[0].obsn[o].flagID[f], wflag) == 0) {
+
+                if (std::find(systemnames.begin(), systemnames.end(), psr[0].obsn[o].flagVal[f]) !=
+                    systemnames.end()) {
+                    /* systemnames contains x */
+                } else {
+                    /* systemnames does not contain x */
+                    if (incEFAC == 2 || incEQUAD == 2 || incShannonJitter == 2) {
+                        if (rank == 0)
+                            printf("Found %s %s \n", wflag, psr[0].obsn[o].flagVal[f]);
+                    }
+                    systemnames.push_back(psr[0].obsn[o].flagVal[f]);
+                    systemcount++;
+                }
+                found = 1;
+            }
+        }
+        if (found == 0 && (incEFAC == 2 || incEQUAD == 2 || incShannonJitter == 2)) {
+            if (rank == 0)
+                printf("Observation %i is missing the %s flag, please check before continuing\n", o,
+                       wflag);
+            return 0;
+        }
+    }
+
+    if (incEFAC == 2 || incEQUAD == 2 || incShannonJitter == 2) {
+        if (rank == 0)
+            printf("total number of systems: %i \n", systemcount);
+    }
+    if (systemcount == 0 && (incEFAC < 2 && incEQUAD < 2 && incShannonJitter < 2)) {
+        systemcount = 1;
+    }
+
+    for (int o = 0; o < psr[0].nobs; o++) {
+        for (int f = 0; f < psr[0].obsn[o].nFlags; f++) {
+
+            if (strcasecmp(psr[0].obsn[o].flagID[f], wflag) == 0) {
+                for (int l = 0; l < systemcount; l++) {
+                    if (psr[0].obsn[o].flagVal[f] == systemnames[l]) {
+                        numFlags[o] = l;
+                    }
+                }
+            }
+        }
+    }
+
+    int* includeEQsys = new int[systemcount];
+    for (int l = 0; l < systemcount; l++) {
+        includeEQsys[l] = 1;
+    }
+
+    if (incEQUAD == 3) {
+        for (int i = 0; i < psr[0].nTNEQ; i++) {
+            if (rank == 0)
+                printf("Including for EQUAD==3 %i %s \n", i, psr->TNEQFlagVal[i]);
+            for (int l = 0; l < systemcount; l++) {
+                if (psr->TNEQFlagVal[i] == systemnames[l]) {
+                    if (rank == 0)
+                        printf("This corresponds to system %i \n", l);
+                    includeEQsys[l] = 0;
+                }
+            }
+        }
+
+        for (int l = 0; l < systemcount; l++) {
+            int changed = 0;
+            if (includeEQsys[l] == 0) {
+                includeEQsys[l] = 1;
+                changed = 1;
+            }
+            if (includeEQsys[l] == 1 && changed == 0) {
+                includeEQsys[l] = 0;
+            }
+            if (rank == 0)
+                printf("Including? %i %i \n", l, includeEQsys[l]);
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////Get Group Noise System
+    /// Positions/////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    int GroupNoiseSysCount = 0;
+    int* GroupNoiseSys = new int[psr[0].nobs];
+    double** GroupStartTimes;
+    for (int o = 0; o < psr[0].nobs; o++) {
+        GroupNoiseSys[o] = 0;
+    }
+
+    if (incGroupNoise > 0 || numStep > 0) {
+        std::vector<std::string> GroupNoiseSystemNames;
+        for (int o = 0; o < psr[0].nobs; o++) {
+            int found = 0;
+            for (int f = 0; f < psr[0].obsn[o].nFlags; f++) {
+                if (strcasecmp(psr[0].obsn[o].flagID[f], GroupNoiseSysFlag) == 0) {
+                    if (std::find(GroupNoiseSystemNames.begin(), GroupNoiseSystemNames.end(),
+                                  psr[0].obsn[o].flagVal[f]) != GroupNoiseSystemNames.end()) {
+                        /* systemnames contains x */
+                    } else {
+                        /* systemnames does not contain x */
+                        if (rank == 0)
+                            printf("Found %s %s \n", GroupNoiseSysFlag, psr[0].obsn[o].flagVal[f]);
+                        GroupNoiseSystemNames.push_back(psr[0].obsn[o].flagVal[f]);
+                        GroupNoiseSysCount++;
+                    }
+                    found = 1;
+                }
+            }
+
+            if (found == 0) {
+                if (rank == 0)
+                    printf(
+                        "Observation %i %s is missing the %s flag, please check before "
+                        "continuing\n",
+                        o, psr[0].obsn[o].fname, GroupNoiseSysFlag);
+                return 0;
+            }
+        }
+
+        if (rank == 0)
+            printf("total number of Group Noise Systems: %i \n", GroupNoiseSysCount);
+
+        GroupStartTimes = new double*[GroupNoiseSysCount];
+        for (int o = 0; o < GroupNoiseSysCount; o++) {
+            if (rank == 0)
+                printf("Group Times: %i %g %g \n", o, GroupStartTimes[o][0], GroupStartTimes[o][1]);
+            GroupStartTimes[o] = new double[2];
+            GroupStartTimes[o][0] = 100000;
+            GroupStartTimes[o][1] = 0;
+        }
+
+        for (int o = 0; o < psr[0].nobs; o++) {
+            for (int f = 0; f < psr[0].obsn[o].nFlags; f++) {
+                if (strcasecmp(psr[0].obsn[o].flagID[f], GroupNoiseSysFlag) == 0) {
+                    for (int l = 0; l < GroupNoiseSysCount; l++) {
+                        if (psr[0].obsn[o].flagVal[f] == GroupNoiseSystemNames[l]) {
+                            GroupNoiseSys[o] = l;
+                            if ((double)psr[0].obsn[o].sat < GroupStartTimes[l][0]) {
+                                GroupStartTimes[l][0] = (double)psr[0].obsn[o].sat;
+                            }
+                            if ((double)psr[0].obsn[o].sat > GroupStartTimes[l][1]) {
+                                GroupStartTimes[l][1] = (double)psr[0].obsn[o].sat;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (incEFAC == 1) {
+        if (rank == 0)
+            printf("Including One EFAC for all observations\n");
+        numEFAC = 1;
+    }
+    if (incEFAC == 2) {
+        if (rank == 0)
+            printf("Including One EFAC for each %s\n", wflag);
+        numEFAC = systemcount;
+    }
+    if (incEQUAD == 1) {
+        if (rank == 0)
+            printf("Including One EQUAD for all observations\n");
+        numEQUAD = 1;
+    }
+    if (incEQUAD == 2) {
+        if (rank == 0)
+            printf("Including One EQUAD for each %s\n", wflag);
+        numEQUAD = systemcount;
+    }
+    if (incEQUAD == 3) {
+        if (rank == 0)
+            printf("Including One EQUAD for the %i included TNEQ in par file\n", psr[0].nTNEQ);
+        numEQUAD = psr[0].nTNEQ;
+    }
+    if (incHighFreqStoc > 0) {
+        if (rank == 0)
+            printf("Including High frequency profile stochasticity \n");
+    }
+    if (incShannonJitter == 1) {
+        if (rank == 0)
+            printf("Including One SQUAD for all observations \n");
+        numSQUAD = 1;
+    }
+    if (incShannonJitter == 2) {
+        if (rank == 0)
+            printf("Including One SQUAD for each %s\n", wflag);
+        numSQUAD = systemcount;
+    }
+    if (incNGJitter == 1) {
+        if (rank == 0)
+            printf("Including ECORR for %i systems\n", psr->nTNECORR);
+        numNGJitter = psr->nTNECORR;
+    }
+    if (incNGSJitter == 1) {
+        if (rank == 0)
+            printf("Including SECORR for %i systems\n", psr->nTNSECORR);
+        numNGSJitter = psr->nTNSECORR;
+    }
+    if (rank == 0) {
+        if (incDMEQUAD == 1)
+            printf("Including DM EQUAD\n");
+        if (FitSolarWind == 1)
+            printf("Including Deterministic Solar Wind\n");
+        if (FitWhiteSolarWind == 1)
+            printf("Including Stochastic Solar Wind \n");
+        if (incRED == 1)
+            printf("Including Red Noise : Power Law Model\n");
+        if (incRED == 2) {
+            printf("Including Red Noise : Model Independant - Fitting %i Coefficients\n",
+                   int(numRedCoeff));
+        }
+        if (incRED == 3) {
+            printf("Including Red Noise: Power Law Model to %i Coefficients \n", int(numRedCoeff));
+        }
+        if (incRED == 4) {
+            printf("Including Red Noise: Power Law Model with Corner Freq to %i Coefficients\n \n",
+                   int(numRedCoeff));
+        }
+        if (incRED == 5) {
+            printf("Including Red Noise Numerically: Power Law Model to %i Coefficients \n",
+                   int(numRedCoeff));
+        }
+        if (incDM == 1) {
+            printf("Including DM : Power Law Model\n");
+        }
+        if (incDM == 2) {
+            printf("Including DM : Model Independant - Fitting %i Coefficients\n", int(numDMCoeff));
+        }
+        if (incDM == 3) {
+            printf("Including DM: %i Component Power Law Model to %i Coefficients \n", numDMPL,
+                   int(numDMCoeff));
+        }
+        if (incDM == 5) {
+            printf("Including DM Variations Numerically: Power Law Model to %i Coefficients \n",
+                   int(numDMCoeff));
+        }
+        if (incScat == 1) {
+            printf(
+                "Including Scattering variations: %i Component Power Law Model to %i Coefficients "
+                "\n",
+                numScatPL, int(numScatCoeff));
+        }
+        if (incFloatDM == 1) {
+            printf("Including Floating DM power spectrum coefficient\n");
+        }
+        if (incFloatRed == 1) {
+            printf("Including Floating Red noise power spectrum coefficient\n");
+        }
+        if (yearlyDM == 1) {
+            printf("Including yearly DM variations\n");
+        }
+        if (incsinusoid == 1) {
+            printf("Including additional sinusoid\n");
+        }
+        if (incDMEvent != 0) {
+            printf("Including %i DM Events\n", incDMEvent);
+        }
+        if (incDMShapeEvent != 0) {
+            printf("Including %i DM Shape Events\n", incDMShapeEvent);
+        }
+        if (incDMScatterShapeEvent != 0) {
+            printf("Including %i DM Scatter Shape Events\n", incDMShapeEvent);
+        }
+        if (incRedShapeEvent != 0) {
+            printf("Including %i Red Shape Events\n", incRedShapeEvent);
+        }
+        if (incBandNoise > 0) {
+            printf("Including Band Noise for %i bands\n", incBandNoise);
+        }
+        if (incGroupNoise > 0) {
+            printf("Including Group Noise: Power Law Model to %i Coefficients \n",
+                   int(numGroupCoeff));
+        }
+        if (incProfileFit > 0) {
+            printf("Including profile fit\n");
+        }
+        if (incProfileEvo > 0) {
+            printf("Including profile evolution with %i polynoimals\n", NProfileEvoPoly);
+        }
+        if (FitLinearProfileWidth == 1) {
+            printf("Including Linear Profile Width\n");
+        }
+        if (incWidthEvoTime > 0) {
+            printf("Including Temporal profile width change \n");
+        }
+        if (incWidthJitter == 1) {
+            printf("Including Width Jitter \n");
+        }
+    }
+
+    int fitcount = 0;
+    if (rank == 0)
+        printf("fitting for: Arbitrary Phase \n");
+    fitcount++;
+    for (int p = 0; p < MAX_PARAMS; p++) {
+        for (int k = 0; k < psr[0].param[p].aSize; k++) {
+            if (psr[0].param[p].fitFlag[k] == 1 && p != param_dmmodel) {
+                if (rank == 0)
+                    printf("fitting for: %s \n", psr[0].param[p].shortlabel[k]);
+                fitcount++;
+            }
+            if (psr[0].param[p].fitFlag[k] == 1 && p == param_dmmodel) {
+                if (rank == 0)
+                    printf("fitting for: %s \n", psr[0].param[p].shortlabel[k]);
+            }
+        }
+    }
+
+    numFitJumps = 0;
+    for (int i = 0; i <= psr[0].nJumps; i++) {
+        if (psr[0].fitJump[i] == 1)
+            numFitJumps++;
+        // 		  printf("%i %i %g %g \n",i,psr[0].fitJump[i],
+        // psr[0].jumpVal[i],psr[0].jumpValErr[i]/sqrt(psr[0].fitChisq/psr[0].fitNfree));
+    }
+    if (rank == 0) {
+        printf("Found %i jumps to fit \n", numFitJumps);
+        printf("total Timing Model params to fit:  %i \n", numFitJumps + fitcount);
+    }
+
+    long double** TempoPriors;
+    long double* Tempo2Fit = new long double[numFitJumps + fitcount];
+    int** TempoFitNums;
+    int* TempoJumpNums;
+    TempoPriors = new long double*[numFitJumps + fitcount];
+    for (int i = 0; i < numFitJumps + fitcount; i++) {
+        TempoPriors[i] = new long double[4];
+        for (int j = 0; j < 4; j++) {
+            TempoPriors[i][j] = 0;
+        }
+    }
+    TempoFitNums = new int*[fitcount + numFitJumps];
+    for (int i = 0; i < fitcount + numFitJumps; i++) {
+        TempoFitNums[i] = new int[2];
+        TempoFitNums[i][0] = -1;
+        TempoFitNums[i][1] = -1;
+    }
+    TempoJumpNums = new int[numFitJumps];
+    // printf("allocated\n");
+    int paramsfitted = 0;
+    //	printf("Offset and error: %g %g %g\n", psr[0].offset, psr[0].offset_e,
+    // psr[0].offset_e/sqrt(psr[0].fitChisq/psr[0].fitNfree));
+    TempoPriors[paramsfitted][0] = 0;  // psr[0].offset;
+    TempoPriors[paramsfitted][1] =
+        psr[0].offset_e;  // offset_e/sqrt(psr[0].fitChisq/psr[0].fitNfree);
+
+    /*
+    if(GPTA == 1){
+        TempoPriors[paramsfitted][0]=0;
+            TempoPriors[paramsfitted][1]=1;//offset_e/sqrt(psr[0].fitChisq/psr[0].fitNfree);
+    }
+    */
+
+    TempoFitNums[paramsfitted][0] = 0;
+    TempoFitNums[paramsfitted][1] = 0;
+    // if(doTimeMargin != 0 || doJumpMargin != 0)TempoPriors[paramsfitted][2]=1;
+    TempoPriors[paramsfitted][2] =
+        1;  // always marginalise over phase. @TODO: make an option to allow fitting for
+    paramsfitted++;
+    for (int p = 0; p < MAX_PARAMS; p++) {
+        for (int k = 0; k < psr[0].param[p].aSize; k++) {
+            if (psr[0].param[p].fitFlag[k] == 1 && p != param_dmmodel) {
+
+                TempoPriors[paramsfitted][0] = psr[0].param[p].prefit[k];
+                TempoPriors[paramsfitted][1] =
+                    psr[0].param[p].err[k] / std::sqrt(psr[0].fitChisq / psr[0].fitNfree);
+                Tempo2Fit[paramsfitted] = psr[0].param[p].val[k];
+
+                TempoFitNums[paramsfitted][0] = p;
+                TempoFitNums[paramsfitted][1] = k;
+
+                if (strcasecmp(psr[0].param[p].shortlabel[0], "F0") == 0) {
+                    if (doTimeMargin != 0)
+                        TempoPriors[paramsfitted][2] = 1;
+                }
+                if (doTimeMargin == 2)
+                    TempoPriors[paramsfitted][2] = 1;
+
+                paramsfitted++;
+            }
+        }
+    }
+    int jumpsfitted = 0;
+    double* PreJumpVals = new double[psr[0].nJumps + 1]();
+    if (rank == 0)
+        printf("There are %i jumps \n", psr[0].nJumps);
+    for (int i = 0; i <= psr[0].nJumps; i++) {
+
+        char str1[100], str2[100], str3[100], str4[100], str5[100];
+        int nread = sscanf(psr[0].jumpStr[i], "%s %s %s %s %s", str1, str2, str3, str4, str5);
+        // printf("Jump String %s %s %s %s %s \n", str1, str2, str3, str4, str5);
+
+        double prejump = 0;
+        if (strcasecmp(str1, "MJD") == 0) {
+            prejump = atof(str4);
+            if (rank == 0)
+                printf("MJD PreJump: %i %g \n", i, prejump);
+        } else {
+            prejump = atof(str3);
+            if (rank == 0)
+                printf("Not an MJD PreJump: %i %g \n", i, prejump);
+        }
+        PreJumpVals[i] = prejump;
+        if (psr[0].fitJump[i] == 1) {
+
+            //			printf("gonna read jump %i %s \n",i,psr[0].jumpStr[i]);
+            char str1[100], str2[100], str3[100], str4[100], str5[100];
+            int nread = sscanf(psr[0].jumpStr[i], "%s %s %s %s %s", str1, str2, str3, str4, str5);
+
+            double prejump = 0;
+
+            if (strcasecmp(str1, "MJD") == 0) {
+                prejump = atof(str4);
+            } else {
+                prejump = atof(str3);
+            }
+            // printf(" Fitted Pre jump %i %g %g\n",i,prejump,psr[0].jumpVal[i]);
+            // if(GPTA==0){
+            if (numTempo2its > 1) {
+                TempoPriors[paramsfitted][0] = psr[0].jumpVal[i];
+                TempoPriors[paramsfitted][1] =
+                    psr[0].jumpValErr[i] / std::sqrt(psr[0].fitChisq / psr[0].fitNfree);
+                Tempo2Fit[paramsfitted] = psr[0].jumpVal[i];
+            } else {
+                TempoPriors[paramsfitted][0] = prejump;
+                TempoPriors[paramsfitted][1] =
+                    psr[0].jumpValErr[i] / std::sqrt(psr[0].fitChisq / psr[0].fitNfree);
+                Tempo2Fit[paramsfitted] = prejump;
+            }
+            //}
+            // else{
+
+            //        TempoPriors[paramsfitted][0]=prejump;
+            ///        TempoPriors[paramsfitted][1]=psr[0].jumpValErr[i]/sqrt(psr[0].fitChisq/psr[0].fitNfree);
+            //         Tempo2Fit[paramsfitted]=prejump;
+
+            //}
+            TempoJumpNums[jumpsfitted] = i;
+
+            if (doJumpMargin == 1)
+                TempoPriors[paramsfitted][2] = 1;
+
+            paramsfitted++;
+            jumpsfitted++;
+        }
+    }
+
+    // set the MultiNest sampling parameters
+
+    // 	return 0;
+    int sampler = 1;
+    int Nchords = 1;
+    int IS = 1;        // do Nested Importance Sampling?
+    int mmodal = 0;    // do mode separation?
+    int ceff = 0;      // run in constant efficiency mode?
+    int nlive = 500;   // number of live points
+    double efr = 0.1;  // set the required efficiency
+    int sample = 1;
+    int nClsPar = 1;    // no. of parameters to do mode separation on
+    int updInt = 2000;  // after how many iterations feedback is required & the output files should
+                        // be updated
+    int NBurn = 100;
+    int NSamp = 10000;
+    int GHSresume = 0;
+
+    setupMNparams(ConfigFileName, sampler, IS, mmodal, ceff, nlive, efr, sample, updInt, nClsPar,
+                  Nchords, NBurn, NSamp, GHSresume);
+
+    double tol = 0.5;  // tol, defines the stopping criteria
+    int ndims = numFitJumps + fitcount + numEFAC * numEPolTerms + numEQUAD + numNGJitter +
+                numNGSJitter + Reddims + DMdims + Scatdims + numStep * 3 + DMModeldims +
+                2 * varyDMCoeff + 2 * varyRedCoeff + 2 * yearlyDM + 3 * incsinusoid + numSQUAD +
+                7 * incDMEvent + Glitchdims + swdims + incHighFreqStoc + incDMEQUAD +
+                incWidthJitter + pnoisedims;  // dimensionality (no. of free parameters)
+    int nPar = ndims;  // total no. of parameters including free & derived parameters
+                       // note: posterior files are updated & dumper routine is called after every
+                       // updInt*10 iterations
+    double Ztol = -1E90;  // all the modes with logZ < Ztol are ignored
+    int maxModes = 100;   // expected max no. of modes (used only for memory allocation)
+    int pWrap[ndims];     // which parameters to have periodic boundary conditions?
+    for (int i = 0; i < ndims; i++)
+        pWrap[i] = 0;
+
+    int seed = -1;    // random no. generator seed, if < 0 then take the seed from system clock
+    int fb = 1;       // need feedback on standard output?
+    int resume = 1;   // resume from a previous job?
+    int outfile = 1;  // write output files?
+    int initMPI = 0;  // initialize MPI routines?, relevant only if compiling with MPI set it to F
+                      // if you want your main program to handle MPI initialization
+    double logZero = -DBL_MAX;  // points with loglike < logZero will be ignored by MultiNest
+    int maxiter = 0;  // max no. of iterations, a non-positive value means infinity. MultiNest will
+                      // terminate if either it has done max no. of iterations or convergence
+                      // criterion (defined through tol) has been satisfied
+    void* context = 0;  // not required by MultiNest, any additional information user wants to pass
+    // printf("Here \n");
+
+    int FloatRedstart = numFitJumps + fitcount + numEFAC + numEQUAD + Reddims - incFloatRed * 2;
+    int FloatDMstart =
+        numFitJumps + fitcount + numEFAC + numEQUAD + Reddims + DMdims - incFloatDM * 2;
+
+    char* chartroot = new char[longname.length() + 1];
+    std::strcpy(chartroot, longname.c_str());
+
+    MNStruct* MNS = init_struct(
+        psr, TempoPriors, npsr, numFitJumps, fitcount, systemcount, numEFAC, numEQUAD,
+        int(numRedCoeff), int(numDMCoeff), int(numScatCoeff), numRedPL, numDMPL, numScatPL,
+        TempoFitNums, TempoJumpNums, numFlags, ndims, incRED, incDM, incScat, incFloatDM,
+        incFloatRed, FloatDMstart, FloatRedstart, doTimeMargin, doJumpMargin, doLinearFit,
+        SampleFreq, numStep, wflag, whitemodel, varyRedCoeff, varyDMCoeff, yearlyDM, incsinusoid,
+        numEPolTerms, incGWB, RedPriorType, DMPriorType, ScatPriorType, EQUADPriorType,
+        EFACPriorType, useOriginalErrors, numSQUAD, incDMEvent, incDMShapeEvent, numDMShapeCoeff,
+        incBandNoise, numBandNoiseCoeff, incRedShapeEvent, numRedShapeCoeff, MarginRedShapeCoeff,
+        incDMScatterShapeEvent, numDMScatterShapeCoeff, incNGJitter, incNGSJitter, incGlitch,
+        incGlitchTerms, incBreakingIndex, FitLowFreqCutoff, useNbitsAlgebra, incGroupNoise,
+        numGroupCoeff, FitForGroup, numGroupstoFit, GroupNoiseSys, FitSolarWind, FitWhiteSolarWind,
+        interpolateProfile, InterpolatedTime, sampler, GPTAnumstocshapecoeff, totalshapestoccoeff,
+        StoreFMatrices, incHighFreqStoc, numNGJitter, numNGSJitter, FitForBand, incProfileEvo,
+        EvoRefFreq, numEvoFitCoeff, incWideBandNoise, incProfileFit, numProfileFitCoeff, incDMEQUAD,
+        FitLinearProfileWidth, offPulseLevel, GroupStartTimes, FitEvoExponent, numProfComponents,
+        totalEvoFitCoeff, totalProfileFitCoeff, numEvoCoeff, totalEvoCoeff, incWidthJitter,
+        JitterProfComp, incProfileEnergyEvo, debug, ProfileBaselineTerms, incProfileNoise,
+        ProfileNoiseCoeff, SubIntToFit, ChannelToFit, NProfileEvoPoly, ProfCompSeps, usecosiprior,
+        PreJumpVals, chartroot, doMax, incWidthEvoTime, incExtraProfComp, incPrecession,
+        incTimeCorrProfileNoise, numTimeCorrCoeff, totalTimeCorrCoeff, phasePriorExpansion,
+        ProfileNoiseMethod, FitPrecAmps, GroupNoiseName, NProfileTimePoly, incProfileScatter,
+        ScatterPBF, FitCompWidths, FitCompPos, NumFitCompWidths, NumFitCompPos, NumCompswithWidth,
+        NumCompswithPos, rank);
+
+    MNS->includeEQsys = includeEQsys;
+
+    /*
+    //	printf("Check NG: %i %i\n", incNGJitter, ndims );
+        if(incNGJitter ==1){
+            //printf("Calling\n");
+            double **NGJitterMatrix;
+            int NumNGEpochs;
+            getNGJitterMatrixEpochs(psr, NumNGEpochs);
+
+            NGJitterMatrix = new double*[psr->nobs];
+            for(int i =0; i < psr->nobs; i++){
+                NGJitterMatrix[i] = new double[NumNGEpochs];
+                for(int j =0; j < NumNGEpochs;  j++){
+                    NGJitterMatrix[i][j] = 0;
+                }
+            }
+            int *NGJitterSysFlags = new int[psr->nobs];
+
+
+            for (int i=0;i<psr->nobs;i++){
+                for (int j=0;j<psr->obsn[i].nFlags;j++){
+                    for (int k=0;k<psr->nTNECORR;k++){
+                        if (strcmp(psr->obsn[i].flagID[j], psr->TNECORRFlagID[k])==0){
+                            if (strcmp(psr->obsn[i].flagVal[j],psr->TNECORRFlagVal[k])==0){
+                                NGJitterSysFlags[i] = k;
+                                //printf("NGFLag? %i %i %s \n", i, k, psr->TNECORRFlagVal[k]);
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            getNGJitterMatrix(psr, NGJitterMatrix, NumNGEpochs);
+
+            int *NGJitterEpochFlags = new int[NumNGEpochs];
+
+            printf("Check: %i %g \n", NumNGEpochs, NGJitterMatrix[0][0]);
+            for(int i =0; i < NumNGEpochs; i++){
+                for(int j=0; j < psr->nobs; j++){
+                    if(NGJitterMatrix[j][i] != 0) {
+                    //	printf("%i %i %i\n", j, i, NGJitterSysFlags[j]);
+                        NGJitterEpochFlags[i]=NGJitterSysFlags[j];
+                    }
+                }
+            }
+            delete[] NGJitterSysFlags;
+            MNS->NGJitterSysFlags=NGJitterEpochFlags;
+            MNS->NGJitterMatrix=NGJitterMatrix;
+            MNS->numNGJitterEpochs=NumNGEpochs;
+            MNS->incNGJitter=numNGJitter;
+        }
+
+    */
+
+    // return 0;
+    context = MNS;
 
 #ifdef HAVE_CULA
-	if(useGPUS==1){
-		culaStatus status;
-		status = culaInitialize();
-		store_factorial();
-	}
-    
+    if (useGPUS == 1) {
+        culaStatus status;
+        status = culaInitialize();
+        store_factorial();
+    }
+
 #endif /* HAVE_CULA */
 
-	double **Dpriors;
-	Dpriors = new double*[ndims]; for(int i = 0; i < ndims; i++){Dpriors[i]=new double[2];};
+    double** Dpriors;
+    Dpriors = new double*[ndims];
+    for (int i = 0; i < ndims; i++) {
+        Dpriors[i] = new double[2];
+    };
 
-	int findbrakeparam=0;
-	if(incBreakingIndex==1){
-		
-		for (int p=0;p<MAX_PARAMS;p++) {
-		      for (int k=0;k<psr[0].param[p].aSize;k++){
-				if(psr[0].param[p].fitFlag[k] == 1 && p != param_dmmodel){
-					findbrakeparam++;			
-					if(p == param_brake){
+    int findbrakeparam = 0;
+    if (incBreakingIndex == 1) {
 
+        for (int p = 0; p < MAX_PARAMS; p++) {
+            for (int k = 0; k < psr[0].param[p].aSize; k++) {
+                if (psr[0].param[p].fitFlag[k] == 1 && p != param_dmmodel) {
+                    findbrakeparam++;
+                    if (p == param_brake) {
 
-						TempoPriors[findbrakeparam][0]=0;
-						TempoPriors[findbrakeparam][1]=1;
-						TempoPriors[findbrakeparam][2]=0;
-						TempoPriors[findbrakeparam][3]=1;
-						Dpriors[findbrakeparam][0] = -3;
-						Dpriors[findbrakeparam][1] = 3;
+                        TempoPriors[findbrakeparam][0] = 0;
+                        TempoPriors[findbrakeparam][1] = 1;
+                        TempoPriors[findbrakeparam][2] = 0;
+                        TempoPriors[findbrakeparam][3] = 1;
+                        Dpriors[findbrakeparam][0] = -3;
+                        Dpriors[findbrakeparam][1] = 3;
 
+                        Tempo2Fit[findbrakeparam] = 0;
 
-						Tempo2Fit[findbrakeparam]=0;
+                        TempoFitNums[findbrakeparam][0] = p;
+                        TempoFitNums[findbrakeparam][1] = k;
+                    }
+                }
+            }
+        }
+    }
 
-						TempoFitNums[findbrakeparam][0]=p;
-						TempoFitNums[findbrakeparam][1]=k;
+    // If using custompriors for errors incase T2 doesnt converge, get those values before doing
+    // anything else
+    if (customPriors == 1) {
+        setTNPriors(ConfigFileName, Dpriors, TempoPriors,
+                    ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps, ndims);
+        update_MNPriors(MNS, Dpriors, TempoPriors, 0);
 
-					}
-				}
-			}
+        context = MNS;
 
-		}
-	}
+        int pcount = 1;
+        for (int j = 1; j < ((MNStruct*)context)->numFitTiming; j++) {
 
-	//If using custompriors for errors incase T2 doesnt converge, get those values before doing anything else
-	if(customPriors == 1){
-		setTNPriors(ConfigFileName,Dpriors, TempoPriors, ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps,ndims);
-		update_MNPriors(MNS,Dpriors, TempoPriors,0);
-
-		context=MNS;
-		
-		int pcount=1;
-		for(int j=1;j<((MNStruct *)context)->numFitTiming;j++){
-			
-			psr[0].param[((MNStruct *)context)->TempoFitNums[j][0]].val[((MNStruct *)context)->TempoFitNums[j][1]] = TempoPriors[pcount][0];
-			pcount++;
-		}
-
-		for(int j=0;j<((MNStruct *)context)->numFitJumps;j++){
-			psr[0].jumpVal[((MNStruct *)context)->TempoJumpNums[j]] =  TempoPriors[pcount][0];
-			pcount++;
-		}
-	}
-
-
-
-
-	//Combine all the priors into one aray: Dpriors
-	int pcount=0;
-
-	for(int i =0; i< numFitJumps+fitcount; i++){
-		Dpriors[pcount][0]=-FitSig;
-		Dpriors[pcount][1]=FitSig;
-		pcount++;
-	}
-
-	if(incBreakingIndex ==1){
-		Dpriors[findbrakeparam][0]=-3;
-		Dpriors[findbrakeparam][1]=3;
-	}
-
-
-	if(numStep>0){
-		for(int i =0; i < numStep; i++){
-			Dpriors[pcount][0]=0;
-			Dpriors[pcount][1]=GroupNoiseSysCount;
-			pcount++;
-			Dpriors[pcount][0]=0;
-			Dpriors[pcount][1]=1;
-			pcount++;
-			Dpriors[pcount][0]=-5*std::pow(10.0, -7);
-			Dpriors[pcount][1]= 5*std::pow(10.0, -7);
-			pcount++;
-
-		}
-	}			
-
-	for(int i =0; i < incGlitch; i++){
-		Dpriors[pcount][0]=start;
-		Dpriors[pcount][1]=end;
-		pcount++;
-		if(incGlitchTerms < 3){
-			for(int j=0; j < incGlitchTerms; j++){
-				Dpriors[pcount][0]=-GlitchFitSig*psr[0].param[param_f].err[j];
-				Dpriors[pcount][1]=GlitchFitSig*psr[0].param[param_f].err[j];
-				pcount++;
-			}
-		}
-		else{
-			Dpriors[pcount][0]=-GlitchFitSig*psr[0].param[param_f].err[0];
-			Dpriors[pcount][1]=GlitchFitSig*psr[0].param[param_f].err[0];
-			pcount++;
-			Dpriors[pcount][0]=-20;
-			Dpriors[pcount][1]=-7;
-			pcount++;
-			Dpriors[pcount][0]=1;
-			Dpriors[pcount][1]=4;
-			pcount++;
-		}
-	}
-
-
-	for(int i =0; i< numEFAC; i++){
-		for(int n=1; n<=numEPolTerms; n++){
-			if(n==1){
-				Dpriors[pcount][0]=EFACPrior[0];
-				Dpriors[pcount][1]=EFACPrior[1];
-				pcount++;
-			}
-			else{
-				Dpriors[pcount][0]=EPolPrior[0];
-            Dpriors[pcount][1]=EPolPrior[1];
+            psr[0]
+                .param[((MNStruct*)context)->TempoFitNums[j][0]]
+                .val[((MNStruct*)context)->TempoFitNums[j][1]] = TempoPriors[pcount][0];
             pcount++;
-			}
-		}
-	}
-	for(int i =0; i< numEQUAD; i++){
-		Dpriors[pcount][0]=EQUADPrior[0];
-		Dpriors[pcount][1]=EQUADPrior[1];
-		pcount++;
-	}	
-	
-	for(int i =0; i< numSQUAD; i++){
-		Dpriors[pcount][0]=EQUADPrior[0];
-		Dpriors[pcount][1]=EQUADPrior[1];
-		pcount++;
-	}
+        }
 
+        for (int j = 0; j < ((MNStruct*)context)->numFitJumps; j++) {
+            psr[0].jumpVal[((MNStruct*)context)->TempoJumpNums[j]] = TempoPriors[pcount][0];
+            pcount++;
+        }
+    }
 
-	for(int i =0; i< incHighFreqStoc; i++){
-		Dpriors[pcount][0]=HighFreqStocPrior[0];
-		Dpriors[pcount][1]=HighFreqStocPrior[1];
-		pcount++;
-	}
+    // Combine all the priors into one aray: Dpriors
+    int pcount = 0;
 
-	for(int i =0; i< numNGJitter; i++){
-		Dpriors[pcount][0]=EQUADPrior[0];
-		Dpriors[pcount][1]=EQUADPrior[1];
-		pcount++;
-	}
+    for (int i = 0; i < numFitJumps + fitcount; i++) {
+        Dpriors[pcount][0] = -FitSig;
+        Dpriors[pcount][1] = FitSig;
+        pcount++;
+    }
 
-	for(int i =0; i< numNGSJitter; i++){
-		Dpriors[pcount][0]=EQUADPrior[0];
-		Dpriors[pcount][1]=EQUADPrior[1];
-		pcount++;
-	}
+    if (incBreakingIndex == 1) {
+        Dpriors[findbrakeparam][0] = -3;
+        Dpriors[findbrakeparam][1] = 3;
+    }
 
-	if(incDMEQUAD == 1){
-		Dpriors[pcount][0]=DMEQUADPrior[0];
-		Dpriors[pcount][1]=DMEQUADPrior[1];
-		pcount++;
-	}
+    if (numStep > 0) {
+        for (int i = 0; i < numStep; i++) {
+            Dpriors[pcount][0] = 0;
+            Dpriors[pcount][1] = GroupNoiseSysCount;
+            pcount++;
+            Dpriors[pcount][0] = 0;
+            Dpriors[pcount][1] = 1;
+            pcount++;
+            Dpriors[pcount][0] = -5 * std::pow(10.0, -7);
+            Dpriors[pcount][1] = 5 * std::pow(10.0, -7);
+            pcount++;
+        }
+    }
 
-	if(incWidthJitter == 1){
-		Dpriors[pcount][0]=WidthJitterPrior[0];
-		Dpriors[pcount][1]=WidthJitterPrior[1];
-		pcount++;
-	}
-
-
-	if(incProfileNoise == 1){
-                Dpriors[pcount][0]=ProfileNoiseAmpPrior[0];
-                Dpriors[pcount][1]=ProfileNoiseAmpPrior[1];
+    for (int i = 0; i < incGlitch; i++) {
+        Dpriors[pcount][0] = start;
+        Dpriors[pcount][1] = end;
+        pcount++;
+        if (incGlitchTerms < 3) {
+            for (int j = 0; j < incGlitchTerms; j++) {
+                Dpriors[pcount][0] = -GlitchFitSig * psr[0].param[param_f].err[j];
+                Dpriors[pcount][1] = GlitchFitSig * psr[0].param[param_f].err[j];
                 pcount++;
-                Dpriors[pcount][0]=ProfileNoiseSpecPrior[0];
-                Dpriors[pcount][1]=ProfileNoiseSpecPrior[1];
+            }
+        } else {
+            Dpriors[pcount][0] = -GlitchFitSig * psr[0].param[param_f].err[0];
+            Dpriors[pcount][1] = GlitchFitSig * psr[0].param[param_f].err[0];
+            pcount++;
+            Dpriors[pcount][0] = -20;
+            Dpriors[pcount][1] = -7;
+            pcount++;
+            Dpriors[pcount][0] = 1;
+            Dpriors[pcount][1] = 4;
+            pcount++;
+        }
+    }
+
+    for (int i = 0; i < numEFAC; i++) {
+        for (int n = 1; n <= numEPolTerms; n++) {
+            if (n == 1) {
+                Dpriors[pcount][0] = EFACPrior[0];
+                Dpriors[pcount][1] = EFACPrior[1];
                 pcount++;
-	}
-	
-	if(incProfileNoise == 2 || incProfileNoise == 3){
-		for(int q = 0; q < ProfileNoiseCoeff; q++){
-			Dpriors[pcount][0] = ProfileNoiseAmpPrior[0];
-			Dpriors[pcount][1] = ProfileNoiseAmpPrior[1];
-			pcount++;
-		}
-	}	
-
-	if(FitSolarWind == 1){
-                Dpriors[pcount][0]=SolarWindPrior[0];
-                Dpriors[pcount][1]=SolarWindPrior[1];
+            } else {
+                Dpriors[pcount][0] = EPolPrior[0];
+                Dpriors[pcount][1] = EPolPrior[1];
                 pcount++;
-	}
+            }
+        }
+    }
+    for (int i = 0; i < numEQUAD; i++) {
+        Dpriors[pcount][0] = EQUADPrior[0];
+        Dpriors[pcount][1] = EQUADPrior[1];
+        pcount++;
+    }
 
-	if(FitWhiteSolarWind == 1){
-                Dpriors[pcount][0]=WhiteSolarWindPrior[0];
-                Dpriors[pcount][1]=WhiteSolarWindPrior[1];
+    for (int i = 0; i < numSQUAD; i++) {
+        Dpriors[pcount][0] = EQUADPrior[0];
+        Dpriors[pcount][1] = EQUADPrior[1];
+        pcount++;
+    }
+
+    for (int i = 0; i < incHighFreqStoc; i++) {
+        Dpriors[pcount][0] = HighFreqStocPrior[0];
+        Dpriors[pcount][1] = HighFreqStocPrior[1];
+        pcount++;
+    }
+
+    for (int i = 0; i < numNGJitter; i++) {
+        Dpriors[pcount][0] = EQUADPrior[0];
+        Dpriors[pcount][1] = EQUADPrior[1];
+        pcount++;
+    }
+
+    for (int i = 0; i < numNGSJitter; i++) {
+        Dpriors[pcount][0] = EQUADPrior[0];
+        Dpriors[pcount][1] = EQUADPrior[1];
+        pcount++;
+    }
+
+    if (incDMEQUAD == 1) {
+        Dpriors[pcount][0] = DMEQUADPrior[0];
+        Dpriors[pcount][1] = DMEQUADPrior[1];
+        pcount++;
+    }
+
+    if (incWidthJitter == 1) {
+        Dpriors[pcount][0] = WidthJitterPrior[0];
+        Dpriors[pcount][1] = WidthJitterPrior[1];
+        pcount++;
+    }
+
+    if (incProfileNoise == 1) {
+        Dpriors[pcount][0] = ProfileNoiseAmpPrior[0];
+        Dpriors[pcount][1] = ProfileNoiseAmpPrior[1];
+        pcount++;
+        Dpriors[pcount][0] = ProfileNoiseSpecPrior[0];
+        Dpriors[pcount][1] = ProfileNoiseSpecPrior[1];
+        pcount++;
+    }
+
+    if (incProfileNoise == 2 || incProfileNoise == 3) {
+        for (int q = 0; q < ProfileNoiseCoeff; q++) {
+            Dpriors[pcount][0] = ProfileNoiseAmpPrior[0];
+            Dpriors[pcount][1] = ProfileNoiseAmpPrior[1];
+            pcount++;
+        }
+    }
+
+    if (FitSolarWind == 1) {
+        Dpriors[pcount][0] = SolarWindPrior[0];
+        Dpriors[pcount][1] = SolarWindPrior[1];
+        pcount++;
+    }
+
+    if (FitWhiteSolarWind == 1) {
+        Dpriors[pcount][0] = WhiteSolarWindPrior[0];
+        Dpriors[pcount][1] = WhiteSolarWindPrior[1];
+        pcount++;
+    }
+
+    if (incDMEvent > 0) {
+        for (int i = 0; i < incDMEvent; i++) {
+
+            Dpriors[pcount][0] = DMEventStartPrior[0];
+            Dpriors[pcount][1] = DMEventStartPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = DMEventLengthPrior[0];
+            Dpriors[pcount][1] = DMEventLengthPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = DMAmpPrior[0];
+            Dpriors[pcount][1] = DMAmpPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = DMAlphaPrior[0];
+            Dpriors[pcount][1] = DMAlphaPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = -std::pow(10.0, -2);
+            Dpriors[pcount][1] = std::pow(10.0, -2);
+            pcount++;
+            Dpriors[pcount][0] = -std::pow(10.0, -2);
+            Dpriors[pcount][1] = std::pow(10.0, -2);
+            pcount++;
+            Dpriors[pcount][0] = -std::pow(10.0, -2);
+            Dpriors[pcount][1] = std::pow(10.0, -2);
+            pcount++;
+        }
+    }
+
+    if (FitLowFreqCutoff > 0) {
+        Dpriors[pcount][0] = -1;
+        Dpriors[pcount][1] = 0;
+        pcount++;
+    }
+
+    if (incRED == 1 || incRED == 3) {
+        for (int i = 0; i < numRedPL; i++) {
+
+            Dpriors[pcount][0] = AmpPrior[0];
+            Dpriors[pcount][1] = AmpPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = AlphaPrior[0];
+            Dpriors[pcount][1] = AlphaPrior[1];
+            pcount++;
+        }
+        if (varyRedCoeff == 1) {
+            Dpriors[pcount][0] = 0;
+            Dpriors[pcount][1] = log10(numRedCoeff);
+            pcount++;
+            Dpriors[pcount][0] = RedCoeffPrior[0];
+            Dpriors[pcount][1] = RedCoeffPrior[1];
+            pcount++;
+        }
+    } else if (incRED == 2) {
+        for (int i = 0; i < numRedCoeff; i++) {
+            Dpriors[pcount][0] = RedCoeffPrior[0];
+            Dpriors[pcount][1] = RedCoeffPrior[1];
+            pcount++;
+        }
+    } else if (incRED == 4) {
+        for (int i = 0; i < numRedPL; i++) {
+
+            Dpriors[pcount][0] = AmpPrior[0];
+            Dpriors[pcount][1] = AmpPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = AlphaPrior[0];
+            Dpriors[pcount][1] = AlphaPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = -2;
+            Dpriors[pcount][1] = 1;
+            pcount++;
+        }
+        if (varyRedCoeff == 1) {
+            Dpriors[pcount][0] = 0;
+            Dpriors[pcount][1] = log10(numRedCoeff);
+            pcount++;
+            Dpriors[pcount][0] = RedCoeffPrior[0];
+            Dpriors[pcount][1] = RedCoeffPrior[1];
+            pcount++;
+        }
+
+    } else if (incRED == 5) {
+
+        for (int i = 0; i < 2 * numRedCoeff; i++) {
+            // printf("Red C %i %g \n", i, psr[0].TNRedCoeffs[i+100]);
+            Dpriors[pcount][0] = -6;
+            Dpriors[pcount][1] = 6;
+            pcount++;
+        }
+
+        Dpriors[pcount][0] = AmpPrior[0];
+        Dpriors[pcount][1] = AmpPrior[1];
+        pcount++;
+        Dpriors[pcount][0] = AlphaPrior[0];
+        Dpriors[pcount][1] = AlphaPrior[1];
+        pcount++;
+    }
+
+    if (incFloatRed > 0) {
+        for (int i = 0; i < incFloatRed; i++) {
+            Dpriors[pcount][0] = RedFreqPrior[0];
+            Dpriors[pcount][1] = RedFreqPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = RedCoeffPrior[0];
+            Dpriors[pcount][1] = RedCoeffPrior[1];
+            pcount++;
+        }
+    }
+    if (incGWB == 1) {
+        Dpriors[pcount][0] = GWBAmpPrior[0];
+        Dpriors[pcount][1] = GWBAmpPrior[1];
+        pcount++;
+    }
+
+    if (incRedShapeEvent > 0) {
+        for (int i = 0; i < incRedShapeEvent; i++) {
+
+            Dpriors[pcount][0] = DMEventStartPrior[0];
+            Dpriors[pcount][1] = DMEventStartPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = DMEventLengthPrior[0];
+            Dpriors[pcount][1] = DMEventLengthPrior[1];
+            pcount++;
+            if (MarginRedShapeCoeff == 0) {
+                for (int c = 0; c < numRedShapeCoeff; c++) {
+                    Dpriors[pcount][0] = RedShapeCoeffPrior[0];
+                    Dpriors[pcount][1] = RedShapeCoeffPrior[1];
+                    pcount++;
+                }
+            }
+        }
+    }
+
+    if (incsinusoid == 1) {
+        Dpriors[pcount][0] = RedCoeffPrior[0];
+        Dpriors[pcount][1] = RedCoeffPrior[1];
+        pcount++;
+        Dpriors[pcount][0] = 0;
+        Dpriors[pcount][1] = 2 * M_PI;
+        pcount++;
+        Dpriors[pcount][0] = 0;
+        Dpriors[pcount][1] = 2;  // log10(numRedCoeff);
+        pcount++;
+    }
+
+    if (incDM == 1 || incDM == 3) {
+        for (int i = 0; i < numDMPL; i++) {
+            Dpriors[pcount][0] = DMAmpPrior[0];
+            Dpriors[pcount][1] = DMAmpPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = DMAlphaPrior[0];
+            Dpriors[pcount][1] = DMAlphaPrior[1];
+            pcount++;
+        }
+        if (varyDMCoeff == 1) {
+            Dpriors[pcount][0] = 0;
+            Dpriors[pcount][1] = log10(numDMCoeff);
+            pcount++;
+            Dpriors[pcount][0] = DMCoeffPrior[0];
+            Dpriors[pcount][1] = DMCoeffPrior[1];
+            pcount++;
+        }
+    } else if (incDM == 2) {
+        for (int i = 0; i < numDMCoeff; i++) {
+            Dpriors[pcount][0] = DMCoeffPrior[0];
+            Dpriors[pcount][1] = DMCoeffPrior[1];
+            pcount++;
+        }
+    }
+
+    else if (incDM == 5) {
+
+        for (int i = 0; i < 2 * numDMCoeff; i++) {
+            // Dpriors[pcount][0]= -0.005;
+            // Dpriors[pcount][1]=  0.005;
+
+            Dpriors[pcount][0] = -10;
+            Dpriors[pcount][1] = 10;
+            pcount++;
+        }
+
+        Dpriors[pcount][0] = DMAmpPrior[0];
+        Dpriors[pcount][1] = DMAmpPrior[1];
+        pcount++;
+        Dpriors[pcount][0] = DMAlphaPrior[0];
+        Dpriors[pcount][1] = DMAlphaPrior[1];
+        pcount++;
+    }
+
+    else if (incDM == 6) {
+
+        for (int i = 0; i < 2 * numDMCoeff; i++) {
+            // Dpriors[pcount][0]= -0.001;
+            // Dpriors[pcount][1]=  0.001;
+
+            Dpriors[pcount][0] = -10;
+            Dpriors[pcount][1] = 10;
+            pcount++;
+        }
+
+        for (int i = 0; i < numDMCoeff; i++) {
+            Dpriors[pcount][0] = DMCoeffPrior[0];
+            Dpriors[pcount][1] = DMCoeffPrior[1];
+
+            pcount++;
+        }
+    }
+
+    if (incScat == 1) {
+        for (int i = 0; i < numScatPL; i++) {
+            Dpriors[pcount][0] = ScatAmpPrior[0];
+            Dpriors[pcount][1] = ScatAmpPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = ScatAlphaPrior[0];
+            Dpriors[pcount][1] = ScatAlphaPrior[1];
+            pcount++;
+        }
+    }
+
+    if (incFloatDM > 0) {
+        for (int i = 0; i < incFloatDM; i++) {
+            Dpriors[pcount][0] = DMFreqPrior[0];
+            Dpriors[pcount][1] = DMFreqPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = DMCoeffPrior[0];
+            Dpriors[pcount][1] = DMCoeffPrior[1];
+            pcount++;
+        }
+    }
+
+    if (incDMShapeEvent > 0) {
+        for (int i = 0; i < incDMShapeEvent; i++) {
+            if (rank == 0)
+                printf("Event = %d p = %lf,%lf \n", i, DMEventStartPrior[0 + i * 2],
+                       DMEventStartPrior[1 + i * 2]);
+            Dpriors[pcount][0] = DMEventStartPrior[0 + i * 2];
+            Dpriors[pcount][1] = DMEventStartPrior[1 + i * 2];
+            pcount++;
+            Dpriors[pcount][0] = DMEventLengthPrior[0 + i * 2];
+            Dpriors[pcount][1] = DMEventLengthPrior[1 + i * 2];
+            pcount++;
+            for (int c = 0; c < numDMShapeCoeff; c++) {
+                Dpriors[pcount][0] = DMShapeCoeffPrior[0];
+                Dpriors[pcount][1] = DMShapeCoeffPrior[1];
                 pcount++;
-	}
-	
-	if(incDMEvent > 0 ){
-		for(int i =0;i < incDMEvent; i++){
+            }
+        }
+    }
 
-                        Dpriors[pcount][0]=DMEventStartPrior[0];
-                        Dpriors[pcount][1]=DMEventStartPrior[1];
-                        pcount++;
-                        Dpriors[pcount][0]=DMEventLengthPrior[0];
-                        Dpriors[pcount][1]=DMEventLengthPrior[1];
-                        pcount++;
-                        Dpriors[pcount][0]=DMAmpPrior[0];
-                        Dpriors[pcount][1]=DMAmpPrior[1];
-                        pcount++;
-                        Dpriors[pcount][0]=DMAlphaPrior[0];
-                        Dpriors[pcount][1]=DMAlphaPrior[1];
-                        pcount++;
-                        Dpriors[pcount][0]=-std::pow(10.0,-2);
-                        Dpriors[pcount][1]=std::pow(10.0,-2);
-                        pcount++;
-                        Dpriors[pcount][0]=-std::pow(10.0,-2);
-                        Dpriors[pcount][1]=std::pow(10.0,-2);
-                        pcount++;
-                        Dpriors[pcount][0]=-std::pow(10.0,-2);
-                        Dpriors[pcount][1]=std::pow(10.0,-2);
-                        pcount++;
-		}
-	}
+    if (incDMScatterShapeEvent > 0) {
+        for (int i = 0; i < incDMScatterShapeEvent; i++) {
 
-	if(FitLowFreqCutoff  > 0){
-		Dpriors[pcount][0]=-1;
-		Dpriors[pcount][1]=0;
-		pcount++;
-	}
-	
-	if(incRED==1 || incRED==3){
-		for(int i =0; i< numRedPL; i++){
+            Dpriors[pcount][0] = DMEventStartPrior[0];
+            Dpriors[pcount][1] = DMEventStartPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = DMEventLengthPrior[0];
+            Dpriors[pcount][1] = DMEventLengthPrior[1];
+            pcount++;
+            // Dpriors[pcount][0]=DMScatterFreqPrior[0];
+            // Dpriors[pcount][1]=DMScatterFreqPrior[1];
+            pcount++;
+            for (int c = 0; c < numDMScatterShapeCoeff; c++) {
+                if (rank == 0)
+                    printf("P %i %i %i %i\n", i, c, pcount, ndims);
+                Dpriors[pcount][0] = DMScatterShapeCoeffPrior[0];
+                Dpriors[pcount][1] = DMScatterShapeCoeffPrior[1];
+                pcount++;
+            }
+        }
+    }
 
-			Dpriors[pcount][0]=AmpPrior[0];
-			Dpriors[pcount][1]=AmpPrior[1];
-			pcount++;
-			Dpriors[pcount][0]=AlphaPrior[0];
-			Dpriors[pcount][1]=AlphaPrior[1];
-			pcount++;
-		}
-		if(varyRedCoeff==1){
-			Dpriors[pcount][0]=0;
-			Dpriors[pcount][1]=log10(numRedCoeff);
-			pcount++;
-			Dpriors[pcount][0]=RedCoeffPrior[0];
-			Dpriors[pcount][1]=RedCoeffPrior[1];
-			pcount++;
-		}	
-	}	
-	else if(incRED==2){	
-		for(int i =0; i< numRedCoeff; i++){
-			Dpriors[pcount][0]=RedCoeffPrior[0];
-			Dpriors[pcount][1]=RedCoeffPrior[1];
-			pcount++;
-		}
-	}	
-	else if(incRED==4){
-                for(int i =0; i< numRedPL; i++){
+    if (yearlyDM == 1) {
+        Dpriors[pcount][0] = DMCoeffPrior[0];
+        Dpriors[pcount][1] = DMCoeffPrior[1];
+        pcount++;
+        Dpriors[pcount][0] = 0;
+        Dpriors[pcount][1] = 2 * M_PI;
+        pcount++;
+    }
 
-                        Dpriors[pcount][0]=AmpPrior[0];
-                        Dpriors[pcount][1]=AmpPrior[1];
-                        pcount++;
-                        Dpriors[pcount][0]=AlphaPrior[0];
-                        Dpriors[pcount][1]=AlphaPrior[1];
-                        pcount++;
-                        Dpriors[pcount][0]=-2;
-                        Dpriors[pcount][1]=1;
-                        pcount++;
+    if (rank == 0)
+        printf("about to do priors for band noise %i %i\n", pcount, ndims);
+    if (incBandNoise > 0) {
+        for (int i = 0; i < incBandNoise; i++) {
+            if (rank == 0)
+                printf("priors for band noise %i %i %i\n", i, pcount, ndims);
+            Dpriors[pcount][0] = BandNoiseAmpPrior[0];
+            Dpriors[pcount][1] = BandNoiseAmpPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = BandNoiseAlphaPrior[0];
+            Dpriors[pcount][1] = BandNoiseAlphaPrior[1];
+            pcount++;
+        }
+    }
 
+    if (incGroupNoise > 0) {
+        for (int i = 0; i < incGroupNoise; i++) {
+
+            if (FitForGroup[i][0] == -1) {
+                Dpriors[pcount][0] = 0;
+                Dpriors[pcount][1] = GroupNoiseSysCount;
+                pcount++;
+            }
+            if (FitForGroup[i][1] == 1) {
+                Dpriors[pcount][0] = 0;
+                Dpriors[pcount][1] = 1;
+                pcount++;
+                Dpriors[pcount][0] = 0;
+                Dpriors[pcount][1] = 1;
+                pcount++;
+            }
+
+            Dpriors[pcount][0] = GroupNoiseAmpPrior[0];
+            Dpriors[pcount][1] = GroupNoiseAmpPrior[1];
+            pcount++;
+            Dpriors[pcount][0] = GroupNoiseAlphaPrior[0];
+            Dpriors[pcount][1] = GroupNoiseAlphaPrior[1];
+            pcount++;
+        }
+    }
+
+    /*
+        numToMargin=0;
+        for(int i=0;i<((MNStruct *)context)->numFitTiming + ((MNStruct *)context)->numFitJumps;i++){
+            if(TempoPriors[i][2]==1){
+                numToMargin++;
+            }
+        }
+    */
+    if (GPTA == 0) {
+
+        int* FitList = new int[ndims];
+        for (int i = 0; i < ndims; i++) {
+            FitList[i] = 0;
+        }
+        numToMargin = 0;
+        for (int i = 0; i < ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps;
+             i++) {
+            if (TempoPriors[i][2] == 1) {
+                FitList[i] = 1;
+                if (rank == 0)
+                    printf("marginalising over timing param: %i \n", i);
+                numToMargin++;
+            }
+        }
+
+        getCustomDMatrix(psr, FitList, TempoFitNums, TempoJumpNums, Dpriors, incDM,
+                         ((MNStruct*)context)->numFitTiming, ((MNStruct*)context)->numFitJumps);
+
+        update_MNPriors(MNS, Dpriors, TempoPriors, 0);
+
+        context = MNS;
+
+        // Finally after doing everything reset custom priors in case overwritten by previous steps.
+        if (customPriors == 1) {
+            if (rank == 0)
+                printf("Set to use custom priors, updating from setPriors function \n");
+            setTNPriors(ConfigFileName, Dpriors, TempoPriors,
+                        ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps,
+                        ndims);
+            paramsfitted = 0;
+        }
+        update_MNPriors(MNS, Dpriors, TempoPriors, 0);
+        context = MNS;
+
+        printPriors(psr, TempoPriors, Dpriors, numEFAC, numEQUAD, incRED, incDM, incScat,
+                    numRedCoeff, numDMCoeff, numScatCoeff, incFloatRed, incFloatDM, fitDMModel,
+                    longname, numStep, varyRedCoeff, varyDMCoeff, yearlyDM, incsinusoid,
+                    numEPolTerms, numSQUAD, context);
+
+        if (rank == 0)
+            printf("\n\n");
+        ndims = ndims - numToMargin;
+        nPar = ndims;
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////get TotalMatrix////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        getArraySizeInfo(context);
+        if (rank == 0)
+            printf("Pre-Computing Matrices: totalsize = %i\n", ((MNStruct*)context)->totalsize);
+
+        for (int p = 1; p < ((MNStruct*)context)->numFitTiming; p++) {
+
+            ((MNStruct*)context)
+                ->pulse->param[((MNStruct*)context)->TempoFitNums[p][0]]
+                .val[((MNStruct*)context)->TempoFitNums[p][1]] =
+                ((MNStruct*)context)->Dpriors[p][0] * (((MNStruct*)context)->LDpriors[p][1]) +
+                (((MNStruct*)context)->LDpriors[p][0]);
+        }
+
+        formBatsAll(((MNStruct*)context)->pulse, ((MNStruct*)context)->numberpulsars);
+        formResiduals(((MNStruct*)context)->pulse, ((MNStruct*)context)->numberpulsars, 1);
+
+        double* TotalMatrix =
+            new double[((MNStruct*)context)->pulse->nobs * ((MNStruct*)context)->totalsize]();
+
+        StoreTMatrix(TotalMatrix, context);
+
+        ((MNStruct*)context)->StoredTMatrix = TotalMatrix;
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////call PolyChord/////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        double* PriorsArray = new double[2 * ndims];
+        int NDerived = 0;
+
+        int p = 0;
+        pcount = 0;
+        while (pcount < ndims) {
+            if (((MNStruct*)context)->Dpriors[p][0] != ((MNStruct*)context)->Dpriors[p][1]) {
+                PriorsArray[pcount] = ((MNStruct*)context)->Dpriors[p][0];
+                PriorsArray[pcount + ndims] = ((MNStruct*)context)->Dpriors[p][1];
+                if (rank == 0)
+                    printf("param %i in, %g %g \n", pcount, PriorsArray[pcount],
+                           PriorsArray[pcount + ndims]);
+                pcount++;
+            }
+
+            p++;
+        }
+
+        double* output = new double[5];
+
+        /////////////////////////Sort Grade stuff////////////////////////////
+
+        int do_grades = 0;
+        int* grades = new int[ndims];
+        for (int i = 0; i < ndims; i++) {
+            grades[i] = 1;
+        }
+
+        int maxgrade = 1;
+
+        int* hypercube_indices = new int[ndims];
+        int* physical_indices = new int[ndims];
+
+        // Set indices, note this is fortran convention -> starts from 1/////
+
+        for (int i = 0; i < ndims; i++) {
+            hypercube_indices[i] = i + 1;
+            physical_indices[i] = i + 1;
+        }
+
+        int numfast = 0;
+        int numslow = 0;
+
+        for (int i = 0; i < ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps;
+             i++) {
+            if (((MNStruct*)context)->LDpriors[i][2] == 0) {
+                numfast++;
+            }
+        }
+
+        numslow = ndims - numfast;
+
+        // if(numfast > 0){
+        //	do_grades = 1;
+        //	maxgrade = 2;
+        // }
+
+        int* grade_repeats = new int[maxgrade];
+        for (int i = 0; i < maxgrade; i++) {
+            grade_repeats[i] = 1;
+        }
+
+        if (do_grades == 1) {  // Deprecated
+
+            int FitRedCoeff = 2 * (((MNStruct*)context)->numFitRedCoeff);
+            int FitDMCoeff = 2 * (((MNStruct*)context)->numFitDMCoeff);
+            int FitBandNoiseCoeff = 2 * (((MNStruct*)context)->numFitBandNoiseCoeff);
+            int FitGroupNoiseCoeff = 2 * ((MNStruct*)context)->numFitGroupNoiseCoeff;
+
+            int totCoeff = 0;
+            if (((MNStruct*)context)->incRED != 0)
+                totCoeff += FitRedCoeff;
+            if (((MNStruct*)context)->incDM != 0)
+                totCoeff += FitDMCoeff;
+            if (((MNStruct*)context)->incBandNoise > 0)
+                totCoeff += ((MNStruct*)context)->incBandNoise * FitBandNoiseCoeff;
+            if (((MNStruct*)context)->incNGJitter > 0)
+                totCoeff += ((MNStruct*)context)->numNGJitterEpochs;
+            if (((MNStruct*)context)->incNGSJitter > 0)
+                totCoeff += ((MNStruct*)context)->numNGSJitterEpochs;
+            if (((MNStruct*)context)->incGroupNoise > 0)
+                totCoeff += ((MNStruct*)context)->incGroupNoise * FitGroupNoiseCoeff;
+
+            ((MNStruct*)context)->totCoeff = totCoeff;
+
+            int TimetoMargin = 0;
+            for (int i = 0;
+                 i < ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps; i++) {
+                if (((MNStruct*)context)->LDpriors[i][2] == 1)
+                    TimetoMargin++;
+            }
+
+            int totalsize = totCoeff + TimetoMargin;
+
+            double* LastParams = new double[ndims];
+            for (int i = 0; i < ndims; i++) {
+                LastParams[i] = 0;
+            }
+
+            double** PreviousTNT = new double*[totalsize];
+            for (int i = 0; i < totalsize; i++) {
+                PreviousTNT[i] = new double[totalsize];
+                for (int j = 0; j < totalsize; j++) {
+                    PreviousTNT[i][j] = 0;
                 }
-                if(varyRedCoeff==1){
-                        Dpriors[pcount][0]=0;
-                        Dpriors[pcount][1]=log10(numRedCoeff);
-                        pcount++;
-                        Dpriors[pcount][0]=RedCoeffPrior[0];
-                        Dpriors[pcount][1]=RedCoeffPrior[1];
-                        pcount++;
+            }
+
+            double** PreviousNT = new double*[((MNStruct*)context)->pulse->nobs];
+            for (int i = 0; i < ((MNStruct*)context)->pulse->nobs; i++) {
+                PreviousNT[i] = new double[totalsize];
+                for (int j = 0; j < totalsize; j++) {
+                    PreviousNT[i][j] = 0;
                 }
-
-	}
-	else if(incRED==5){
-
-		for(int i =0; i < 2*numRedCoeff;i++){
-			//printf("Red C %i %g \n", i, psr[0].TNRedCoeffs[i+100]);
-			Dpriors[pcount][0]=-6;
-			Dpriors[pcount][1]= 6;
-			pcount++;
-		}
-
-		Dpriors[pcount][0]=AmpPrior[0];
-		Dpriors[pcount][1]=AmpPrior[1];
-		pcount++;
-		Dpriors[pcount][0]=AlphaPrior[0];
-		Dpriors[pcount][1]=AlphaPrior[1];
-		pcount++;
-	}	
-	
-	if(incFloatRed>0){
-		for(int i =0; i < incFloatRed; i++){
-			Dpriors[pcount][0]=RedFreqPrior[0];
-			Dpriors[pcount][1]=RedFreqPrior[1];
-			pcount++;
-			Dpriors[pcount][0]=RedCoeffPrior[0];
-			Dpriors[pcount][1]=RedCoeffPrior[1];
-			pcount++;
-		    }
-			
-	}
-	if(incGWB==1){
-		 Dpriors[pcount][0]=GWBAmpPrior[0];
-	         Dpriors[pcount][1]=GWBAmpPrior[1];
-	         pcount++;
-	}
-
-
-
-	if(incRedShapeEvent > 0 ){
-		for(int i =0;i < incRedShapeEvent; i++){
-
-	                Dpriors[pcount][0]=DMEventStartPrior[0];
-	                Dpriors[pcount][1]=DMEventStartPrior[1];
-	                pcount++;
-	                Dpriors[pcount][0]=DMEventLengthPrior[0];
-	                Dpriors[pcount][1]=DMEventLengthPrior[1];
-		        pcount++;
-			if(MarginRedShapeCoeff == 0){
-				for(int c =0;c < numRedShapeCoeff; c++){
-					Dpriors[pcount][0]=RedShapeCoeffPrior[0];
-					Dpriors[pcount][1]=RedShapeCoeffPrior[1];
-					pcount++;
-				}
-			}
-		}
-	}
-
-	if(incsinusoid==1){
-		Dpriors[pcount][0]=RedCoeffPrior[0];
-		Dpriors[pcount][1]=RedCoeffPrior[1];
-		pcount++;
-		Dpriors[pcount][0]=0;
-		Dpriors[pcount][1]=2*M_PI;
-		pcount++;
-		Dpriors[pcount][0]=0;
-		Dpriors[pcount][1]=2;//log10(numRedCoeff);
-       	 	pcount++;
-	}      
-		
-	if(incDM==1 || incDM==3){
-		for(int i =0; i< numDMPL; i++){
-			Dpriors[pcount][0]=DMAmpPrior[0];
-			Dpriors[pcount][1]=DMAmpPrior[1];
-			pcount++;
-			Dpriors[pcount][0]=DMAlphaPrior[0];
-			Dpriors[pcount][1]=DMAlphaPrior[1];
-			pcount++;
-		}
-		if(varyDMCoeff==1){
-			Dpriors[pcount][0]=0;
-			Dpriors[pcount][1]=log10(numDMCoeff);
-			pcount++;
-			Dpriors[pcount][0]=DMCoeffPrior[0];
-			Dpriors[pcount][1]=DMCoeffPrior[1];
-			pcount++;
-		}
-	}	
-	else if(incDM==2){
-	        for(int i =0; i< numDMCoeff; i++){
-	                Dpriors[pcount][0]=DMCoeffPrior[0];
-	                Dpriors[pcount][1]=DMCoeffPrior[1];
-	                pcount++;
-	        }
-	}
-
-	else if(incDM==5){
-
-	        for(int i =0; i < 2*numDMCoeff;i++){
-	                //Dpriors[pcount][0]= -0.005;
-	                //Dpriors[pcount][1]=  0.005;
-
-	                Dpriors[pcount][0]= -10;
-	                Dpriors[pcount][1]= 10;
-	                pcount++;
-	        }
-
-	        Dpriors[pcount][0]=DMAmpPrior[0];
-	        Dpriors[pcount][1]=DMAmpPrior[1];
-	        pcount++;
-	        Dpriors[pcount][0]=DMAlphaPrior[0];
-	        Dpriors[pcount][1]=DMAlphaPrior[1];
-	        pcount++;
-	}
-
-	else if(incDM==6){
-
-	        for(int i =0; i < 2*numDMCoeff;i++){
-	                //Dpriors[pcount][0]= -0.001;
-	                //Dpriors[pcount][1]=  0.001;
-
-	                Dpriors[pcount][0]= -10;
-	                Dpriors[pcount][1]= 10;
-	                pcount++;
-	        }
-
-	        for(int i =0; i < numDMCoeff;i++){
-	                Dpriors[pcount][0]= DMCoeffPrior[0];
-	                Dpriors[pcount][1]=  DMCoeffPrior[1];
-
-	                pcount++;
-	        }
-	}
-
-	if(incScat==1){
-		for(int i =0; i< numScatPL; i++){
-	                Dpriors[pcount][0]=ScatAmpPrior[0];
-			Dpriors[pcount][1]=ScatAmpPrior[1];
-		        pcount++;
-                        Dpriors[pcount][0]=ScatAlphaPrior[0];
-                        Dpriors[pcount][1]=ScatAlphaPrior[1];
-			pcount++;
-		}
-	}
-		
-	if(incFloatDM>0){
-		for(int i =0; i < incFloatDM; i++){
-			Dpriors[pcount][0]=DMFreqPrior[0];
-			Dpriors[pcount][1]=DMFreqPrior[1];
-			pcount++;
-			Dpriors[pcount][0]=DMCoeffPrior[0];
-			Dpriors[pcount][1]=DMCoeffPrior[1];
-			pcount++;
-		    }
-	}
-
-
-
-
-	if(incDMShapeEvent > 0 ){
-	  for(int i =0;i < incDMShapeEvent; i++){
-	    if (rank==0) printf("Event = %d p = %lf,%lf \n", i,DMEventStartPrior[0 + i*2], DMEventStartPrior[1 + i*2]);
-	    Dpriors[pcount][0]=DMEventStartPrior[0 + i*2];
-	    Dpriors[pcount][1]=DMEventStartPrior[1 + i*2];
-	    pcount++;
-	    Dpriors[pcount][0]=DMEventLengthPrior[0 + i*2];
-	    Dpriors[pcount][1]=DMEventLengthPrior[1 + i*2];
-	    pcount++;
-	    for(int c =0;c < numDMShapeCoeff; c++){
-	      Dpriors[pcount][0]=DMShapeCoeffPrior[0];
-	      Dpriors[pcount][1]=DMShapeCoeffPrior[1];
-	      pcount++;
-	    }
-	  }
-	}
-
-	if(incDMScatterShapeEvent > 0 ){
-		for(int i =0;i < incDMScatterShapeEvent; i++){
-
-		
-	                Dpriors[pcount][0]=DMEventStartPrior[0];
-	                Dpriors[pcount][1]=DMEventStartPrior[1];
-	                pcount++;
-	                Dpriors[pcount][0]=DMEventLengthPrior[0];
-	                Dpriors[pcount][1]=DMEventLengthPrior[1];
-		        pcount++;
-	                //Dpriors[pcount][0]=DMScatterFreqPrior[0];
-	                //Dpriors[pcount][1]=DMScatterFreqPrior[1];
-		        pcount++;
-			for(int c =0;c < numDMScatterShapeCoeff; c++){
-				if (rank==0) printf("P %i %i %i %i\n", i,c, pcount, ndims);
-			        Dpriors[pcount][0]=DMScatterShapeCoeffPrior[0];
-			        Dpriors[pcount][1]=DMScatterShapeCoeffPrior[1];
-			        pcount++;
-			}
-		}
-	}
-
-	if(yearlyDM==1){
-		Dpriors[pcount][0]=DMCoeffPrior[0];
-		Dpriors[pcount][1]=DMCoeffPrior[1];
-		pcount++;
-		Dpriors[pcount][0]=0;
-		Dpriors[pcount][1]=2*M_PI;
-		pcount++;
-	}
-
-	if (rank==0) printf("about to do priors for band noise %i %i\n", pcount, ndims);
-	if(incBandNoise > 0){
-		for(int i =0; i < incBandNoise; i++){
-			if (rank==0) printf("priors for band noise %i %i %i\n", i, pcount, ndims);
-			Dpriors[pcount][0]=BandNoiseAmpPrior[0];
-			Dpriors[pcount][1]=BandNoiseAmpPrior[1];
-			pcount++;
-			Dpriors[pcount][0]=BandNoiseAlphaPrior[0];
-			Dpriors[pcount][1]=BandNoiseAlphaPrior[1];
-			pcount++;
-		}
-	}
-
-
-
-	if(incGroupNoise > 0){
-		for(int i =0; i < incGroupNoise; i++){
-
-			if(FitForGroup[i][0]==-1){
-				Dpriors[pcount][0]=0;
-				Dpriors[pcount][1]=GroupNoiseSysCount;
-				pcount++;
-			}
-	                if(FitForGroup[i][1]== 1){
-	                        Dpriors[pcount][0]=0;
-	                        Dpriors[pcount][1]=1;
-	                        pcount++;
-	                        Dpriors[pcount][0]=0;
-	                        Dpriors[pcount][1]=1;
-	                        pcount++;
-
-	                }
-		
-
-
-			Dpriors[pcount][0]=GroupNoiseAmpPrior[0];
-			Dpriors[pcount][1]=GroupNoiseAmpPrior[1];
-			pcount++;
-			Dpriors[pcount][0]=GroupNoiseAlphaPrior[0];
-			Dpriors[pcount][1]=GroupNoiseAlphaPrior[1];
-			pcount++;	
-		}
-	}	
-
-/*
-	numToMargin=0;
-	for(int i=0;i<((MNStruct *)context)->numFitTiming + ((MNStruct *)context)->numFitJumps;i++){
-		if(TempoPriors[i][2]==1){
-			numToMargin++;
-		}
-	}
-*/
-	if(GPTA == 0){
-
-
-
-
-		int *FitList=new int[ndims];
-		for(int i=0;i<ndims;i++){
-			FitList[i]=0;
-		}
-		numToMargin=0;
-		for(int i=0;i<((MNStruct *)context)->numFitTiming + ((MNStruct *)context)->numFitJumps;i++){
-			if(TempoPriors[i][2]==1){
-				FitList[i]=1;
-				if (rank==0) printf("marginalising over timing param: %i \n",i);
-				numToMargin++;
-			}
-		}
-
-		getCustomDMatrix(psr, FitList, TempoFitNums, TempoJumpNums, Dpriors, incDM, ((MNStruct *)context)->numFitTiming, ((MNStruct *)context)->numFitJumps);
-
-		update_MNPriors(MNS,Dpriors, TempoPriors,0);
-
-		context=MNS;
-
-		
-		//Finally after doing everything reset custom priors in case overwritten by previous steps.
-		if(customPriors == 1){
-			if (rank==0) printf("Set to use custom priors, updating from setPriors function \n");
-			setTNPriors(ConfigFileName,Dpriors, TempoPriors,  ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps,ndims);
-			paramsfitted=0;
-		}
-		update_MNPriors(MNS,Dpriors, TempoPriors,0);
-		context=MNS;
-		
-
-		printPriors(psr, TempoPriors, Dpriors, numEFAC, numEQUAD, incRED, incDM, incScat, numRedCoeff, numDMCoeff, numScatCoeff, incFloatRed,incFloatDM, fitDMModel, longname, numStep, varyRedCoeff, varyDMCoeff,yearlyDM, incsinusoid, numEPolTerms,numSQUAD,context);
-
-		if (rank==0) printf("\n\n");
-		ndims=ndims-numToMargin;
-		nPar=ndims;
-
-
-		
-//////////////////////////////////////////////////////////////////////////////////////////  
-///////////////////////get TotalMatrix////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////   
-
-
-
-		getArraySizeInfo(context);
-		if (rank==0) printf("Pre-Computing Matrices: totalsize = %i\n", ((MNStruct *)context)->totalsize);
-	
-	
-		for(int p=1;p<((MNStruct *)context)->numFitTiming;p++){
-	
-			((MNStruct *)context)->pulse->param[((MNStruct *)context)->TempoFitNums[p][0]].val[((MNStruct *)context)->TempoFitNums[p][1]] = ((MNStruct *)context)->Dpriors[p][0]*(((MNStruct *)context)->LDpriors[p][1]) + (((MNStruct *)context)->LDpriors[p][0]);
-
-		}
-
-		formBatsAll(((MNStruct *)context)->pulse,((MNStruct *)context)->numberpulsars);      
-		formResiduals(((MNStruct *)context)->pulse,((MNStruct *)context)->numberpulsars,1);      
-
-		double *TotalMatrix = new double[((MNStruct *)context)->pulse->nobs*((MNStruct *)context)->totalsize]();	
-
-		StoreTMatrix(TotalMatrix, context);
-	
-#ifdef HAVE_CULA	
-		if(useGPUS==1){
-			copy_staticTmat_(TotalMatrix, ((MNStruct *)context)->totalsize, ((MNStruct *)context)->pulse->nobs);
-			delete[] TotalMatrix;
-		}
-#endif
-
-
-
-		((MNStruct *)context)->StoredTMatrix = TotalMatrix;
-
-//////////////////////////////////////////////////////////////////////////////////////////  
-///////////////////////call PolyChord/////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////  
-
-		double *PriorsArray=new double[2*ndims];
-		int NDerived = 0;
-
-
-
-		int p = 0;
-		pcount = 0;
-		while(pcount < ndims){
-			if(((MNStruct *)context)->Dpriors[p][0] != ((MNStruct *)context)->Dpriors[p][1]){
-				PriorsArray[pcount]=((MNStruct *)context)->Dpriors[p][0];
-				PriorsArray[pcount+ndims]=((MNStruct *)context)->Dpriors[p][1];
-				if (rank==0) printf("param %i in, %g %g \n", pcount, PriorsArray[pcount], PriorsArray[pcount+ndims]); 
-				pcount++;
-			}
-	
-			p++;
-		}
-
-		double *output = new double[5];
-
-		/////////////////////////Sort Grade stuff////////////////////////////   
-
-
-		int do_grades = 0;
-		int *grades = new int[ndims];
-		for(int i = 0; i < ndims; i++){
-			grades[i] = 1;
-		}
-
-		int maxgrade = 1;
-
-
-		int *hypercube_indices = new int[ndims];
-		int *physical_indices = new int[ndims];
-
-		//Set indices, note this is fortran convention -> starts from 1/////
-
-		for(int i = 0; i < ndims; i++){
-	        	hypercube_indices[i] = i+1;
-		        physical_indices[i] = i+1;
-		}
-
-
-	       int numfast = 0;
-	       int numslow = 0;
-
-	       for(int i =0; i < ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps; i++){
-			if(((MNStruct *)context)->LDpriors[i][2]==0){
-				numfast++;
-			}
-	       }
-
-		numslow = ndims - numfast;
-
-		//if(numfast > 0){
-		//	do_grades = 1;
-		//	maxgrade = 2;
-		//}
-
-  	        int *grade_repeats = new int[maxgrade];
-	        for(int i = 0; i < maxgrade; i++){
-	                grade_repeats[i] = 1;
-	        }
-
-
-
-
-		if(do_grades == 1){ // Deprecated
-
-
-			int FitRedCoeff=2*(((MNStruct *)context)->numFitRedCoeff);
-			int FitDMCoeff=2*(((MNStruct *)context)->numFitDMCoeff);
-			int FitBandNoiseCoeff=2*(((MNStruct *)context)->numFitBandNoiseCoeff);
-			int FitGroupNoiseCoeff = 2*((MNStruct *)context)->numFitGroupNoiseCoeff;
-
-
-			int totCoeff=0;
-			if(((MNStruct *)context)->incRED != 0)totCoeff+=FitRedCoeff;
-			if(((MNStruct *)context)->incDM != 0)totCoeff+=FitDMCoeff;
-			if(((MNStruct *)context)->incBandNoise > 0) totCoeff += ((MNStruct *)context)->incBandNoise*FitBandNoiseCoeff;
-			if(((MNStruct *)context)->incNGJitter >0)totCoeff+=((MNStruct *)context)->numNGJitterEpochs;
-			if(((MNStruct *)context)->incNGSJitter >0)totCoeff+=((MNStruct *)context)->numNGSJitterEpochs;
-			if(((MNStruct *)context)->incGroupNoise > 0)totCoeff += ((MNStruct *)context)->incGroupNoise*FitGroupNoiseCoeff;
-
-
-			((MNStruct *)context)->totCoeff = totCoeff;
-
-			int TimetoMargin=0;
-			for(int i =0; i < ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps; i++){
-				if(((MNStruct *)context)->LDpriors[i][2]==1)TimetoMargin++;
-			}
-
-			int totalsize = totCoeff + TimetoMargin;
-
-
-			double *LastParams = new double[ndims];
-			for(int i = 0; i < ndims; i++){ LastParams[i] = 0;}
-
-			double **PreviousTNT = new double*[totalsize];
-			for(int i = 0; i < totalsize; i++){
-				PreviousTNT[i] = new double[totalsize];
-				for(int j = 0; j < totalsize; j++){
-					PreviousTNT[i][j] = 0;
-				}
-			}
-
-			double **PreviousNT = new double*[((MNStruct *)context)->pulse->nobs];
-			for(int i = 0; i < ((MNStruct *)context)->pulse->nobs; i++){
-				PreviousNT[i] = new double[totalsize];
-				for(int j = 0; j < totalsize; j++){
-					PreviousNT[i][j] = 0;
-				}
-			}
-
-			double *PreviousNoise = new double[((MNStruct *)context)->pulse->nobs];
-			for(int i = 0; i < ((MNStruct *)context)->pulse->nobs; i++){
-				PreviousNoise[i] = 0;
-			}
-
-
-			((MNStruct *)context)->LastParams = LastParams;
-			((MNStruct *)context)->PreviousTNT = PreviousTNT;
-			((MNStruct *)context)->PreviousNT = PreviousNT;
-			((MNStruct *)context)->PreviousNoise = PreviousNoise;
-			((MNStruct *)context)->PreviousInfo = 0;
-
-			pcount = 0;
-			for(int i =0; i < ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps; i++){
-	        		if(((MNStruct *)context)->LDpriors[i][2]==0){
-					grades[numslow + pcount] = 2;
-					pcount++;
-				}
-			}
-
-
-			grade_repeats[1] = 10;
-
-			for(int i = 0; i < numslow; i++){
-				hypercube_indices[i] = 1 + numfast + i;
-			}
-			for(int i = 0; i < numfast; i++){
-				hypercube_indices[numslow+i] = 1 + i;
-			}
-
-
-		}
-		((MNStruct *)context)->PriorsArray = PriorsArray;
-		((MNStruct *)context)->hypercube_indices = hypercube_indices;	
-		((MNStruct *)context)->doGrades = do_grades;
-		((MNStruct *)context)->PolyChordGrades = grades;	
-
-		assigncontext(context);
-
-#ifdef HAVE_CULA
-		assignGPUcontext(context);
-#endif
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////Call Samplers////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		// Settings for PolyChord
-
-		std::size_t DirPos = longname.find_last_of("/");
-		std::string dir = longname.substr(0, DirPos);
-		std::string sfn = longname.substr(DirPos, longname.length());
-		
-		Settings settings(ndims, NDerived);
-		   settings.nlive         = nlive;
-		   settings.num_repeats   = settings.nDims*5;
-		   settings.do_clustering = false;
-		   settings.precision_criterion = 1e-3;
-		   settings.logzero       = -1e30;
-		   settings.base_dir      = dir;
-		   settings.file_root     = sfn;
-		   settings.write_resume  = true;
-		   settings.read_resume   = true;
-		   settings.write_live    = true;
-		   settings.write_dead    = false;
-		   settings.write_stats   = true;
-		   settings.equals        = true;
-		   settings.posteriors    = true;
-		   settings.cluster_posteriors = false;
-		   settings.feedback      = 1;
-		   settings.compression_factor = 0.36787944117144233; // ad-hoc number take from PC example, TBC
-		   // settings.synchronous = false; //Needed for the new PolyChord version for GD - AP
-		   settings.boost_posterior= 5.0;
-
-		if(sample==1){
-
-#ifdef HAVE_CULA
-			if(useGPUS==1){
-				if(sampler == 0){
-					 nested::run(IS,mmodal, ceff, nlive, tol, efr, ndims, ndims, nClsPar, maxModes, updInt, Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, LRedGPULikeMNWrap, dumper, context);
-				}
-				if(sampler == 1){
-				  run_polychord(NewLRedMarginGPULogLike, TNprior, settings, world_comm);
-				}
-
-			}
-			else{
-				if(sampler == 0){
-					 nested::run(IS,mmodal, ceff, nlive, tol, efr, ndims, ndims, nClsPar, maxModes, updInt, Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, LRedLikeMNWrap, dumper, context);
-				}
-				if(sampler == 1){
-				  run_polychord(NewLRedMarginLogLike, TNprior, settings, world_comm);
-				}
-	      		}   
-#else
-			if(sampler == 0){
-				nested::run(IS,mmodal, ceff, nlive, tol, efr, ndims, ndims, nClsPar, maxModes, updInt, Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, LRedLikeMNWrap, dumper, context);
-                        }
-                        if(sampler == 1){
-			  run_polychord(NewLRedMarginLogLike, TNprior, settings, world_comm);
-			}
-#endif 
-		}
-	}
-/*
-	else if(GPTA == 1){
-
-#ifdef HAVE_PSRCHIVE
-
-
-		//If not marginalising, only need to reget custom priors to overwrite anything done previously
-		if(customPriors == 1){
-			printf("Set to use custom priors, updating from setPriors function \n");
-			setTNPriors(ConfigFileName,Dpriors, TempoPriors,  ((MNStruct *)context)->numFitTiming+((MNStruct *)context)->numFitJumps,ndims);
-		}
-
-		update_MNPriors(MNS,Dpriors, TempoPriors,0);
-		context=MNS;
-	
-		printPriors(psr, TempoPriors, Dpriors, numEFAC, numEQUAD, incRED, incDM, numRedCoeff, numDMCoeff, incFloatRed,incFloatDM,fitDMModel, longname, numStep, varyRedCoeff, varyDMCoeff,yearlyDM, incsinusoid, numEPolTerms,numSQUAD,context);
-
-
-		printf("\n\n");
-		
-
-		//if(GPTA == 1){
-
-
-		long double ***ProfileData = new long double**[((MNStruct *)context)->pulse->nobs];
-		long double **ProfileInfo = new long double*[((MNStruct *)context)->pulse->nobs];
-		std::vector<int> NumChanPerInt;
-		//double weightsum=0;
-		//double weightedfreq = 0;
-		int t=0;
-		//for(int t = 0; t < ((MNStruct *)context)->pulse->nobs; t++){
-
-		int largestNBins = 0;
-		while(t < ((MNStruct *)context)->pulse->nobs){
-			int FoundProfile = 0;
-			std::string ProfileName =  ((MNStruct *)context)->pulse->obsn[t].fname;
-
-			if(debug == 1){printf("loading profile %i %s \n", t, ((MNStruct *)context)->pulse->obsn[t].fname);}
-
-			//std::string fname = "profiles/"+ProfileName+".ASCII"; //"/home/ltl21/scratch/Pulsars/ProfileData/J1909-10cm/profiles/"+ProfileName+".ASCII";
-
-			//std::string archivename = "profiles/"+ProfileName+".new_code"; //"/home/ltl21/scratch/Pulsars/ProfileData/J1909-10cm/profiles/"+ProfileName+".ASCII";
-			Reference::To< Archive > archive = Archive::load(ProfileName.c_str());
-
-			///std::string NewArchiveName = "NewArchive.rf.pcm.dzTf32";						
-			//archive->unload(NewArchiveName);
-			//SaveNewArchive(archive, NewArchiveName);
-
-
-			if( !archive ){
-				printf("Problem opening archive\n");			
-				 return 0;	
-
-			}
-			int npols = 0;
-			npols = archive->get_npol();
-			if(npols > 1){printf("PScrunching Archive to get total Intensity\n"); archive->pscrunch();}
-
-			archive->remove_baseline();
-
-			//if(FitTemplate >0){
-			//	archive->dedisperse();
-			//	archive->centre();
-				
-			//}
-
-			//SetNewAmps(archive);	
-	
-			//return 0;
-
-			npols = archive->get_npol();
-			int nsub = archive->get_nsubint();
-			int nbins = 0;
-			int nchans = 0;
-			
-			double foldingperiod = 0;
-			double inttime = 0;
-			double centerfreq = 0;
-			double chanfreq = 0;
-			int intday = 0;
-			double fracday = 0;
-			int intsec = 0;
-			double fracsecs = 0;
-			bool isdedispersed = 0;
-
-
-			if(debug == 1){printf("Opened: %s, nsub = %i, npol = %i\n", ProfileName.c_str(), nsub, npols);}
-			//std::string telescope = archive->get_telescope();
-			//Tempo2::Observatory *obs = new Tempo2::Observatory(telescope);
-			//printf("telescope code: %s \n", telescope.c_str());
-			if(nsub > 1){
-				//printf("Only one subint per archive supported currently: nsub %i \n", nsub);
-				//return 0;
-			}
-
-			if(FitTemplate == 1){printf("Opening Template to fit: %i subs \n", nsub);}
-			float *pvalues;
-			for(int i=0; i < nsub; i++){
-
-				if(FoundProfile == 1){break;}
-				Integration *subint = archive->get_Integration(i);
-
-				nbins = subint->get_nbin();
-				nchans = subint->get_nchan();
-				npols = subint->get_npol();
-				foldingperiod = subint->get_folding_period();
-				inttime = subint->get_duration();
-				centerfreq = subint->get_centre_frequency(); 
-				MJD firstbin = subint->get_epoch();
-				intday = firstbin.intday();
-				fracday = firstbin.fracday();
-				intsec = firstbin.get_secs();
-				fracsecs = firstbin.get_fracsec();
-				isdedispersed = subint->get_dedispersed();
-
-
-
-
-				if(FitTemplate == 1){printf("Template Details: %i subs %i chans %i pols \n", nsub, nchans, npols);}
-
-                                long double ProfileMJD = intday;    //ds[0];
-                                long double FirstBinSec = intsec+(long double)fracsecs;   //ds[1];
-                                long double FoldingPeriod = foldingperiod;  //ds[2];
-                                int Nbins = nbins;  //(int)ds[6];
-
-				
-			
-				long double SubIntTimeDiff = FirstBinSec-((MNStruct *)context)->pulse->obsn[t].sat_sec*SECDAY;
-				long double PeriodDiff = SubIntTimeDiff*((MNStruct *)context)->pulse->param[param_f].val[0];
-				double DPeriodDiff = (double)PeriodDiff;			
-				int usedchan=0;
-				//printf("in profile %i of %i, channels: %i with %i pol %i subs %g\n", t, ((MNStruct *)context)->pulse->nobs, nchans, npols, nsub, DPeriodDiff);
-
-				if(FitTemplate == 1){printf("Template Details: MJD %.15Lg %.15Lg DPdiff: %.10g \n", ProfileMJD, FirstBinSec/SECDAY, DPeriodDiff);}
-
-
-				if(debug == 1){
-					printf("Details:\n");
-					printf("%i subs %i chans %i pols %i DD \n", nsub, nchans, npols, isdedispersed);
-					printf("TOA: %.15Lg %.15Lg\n", ((MNStruct *)context)->pulse->obsn[t].sat_day, ((MNStruct *)context)->pulse->obsn[t].sat_sec);
-					printf("MJD %.15Lg %.15Lg DPdiff: %.10g \n", ProfileMJD, FirstBinSec/SECDAY, DPeriodDiff);	
-				}
-
-
-
-				if(fabs(DPeriodDiff) < 2.0){
-					
-					for(int j = 0; j < nchans; j++){
-				//		printf("in profile %i of %i, channel: %i of %i with %i pol\n", t, ((MNStruct *)context)->pulse->nobs, j, nchans, npols);
-
-						int ipol = 0; //only want total Intensity
-						Profile *prof = subint->get_Profile(ipol, j);
-						
-						//prof->remove_baseline();
-
-						pvalues = prof->get_amps();
-						chanfreq = subint->get_centre_frequency(j);
-						double toafreq = ((MNStruct *)context)->pulse->obsn[t].freq;
-						double checkfreq = 0;
-	//					if(isdedispersed == 0){
-							checkfreq = chanfreq;				     
-	//					}
-	//					else{
-	//						checkfreq = centerfreq;
-	//					}
-	 
-						double oneflux = 0;	
-						for(int b =0; b < Nbins; b++){
-							oneflux = oneflux + pvalues[b];
-						}   
-
-						if(FitTemplate == 1){printf("Template Details: %.10g Freq %.10g flux \n", chanfreq, oneflux);}
-
-
-						if(debug == 1){
-							printf("Chan Details:\n");
-							printf("%.10g Freq %.10g flux \n", chanfreq, oneflux);
-							printf("freq toa %.10g prof %.10g flux %g\n", toafreq, checkfreq, oneflux);	
-						}
-
-
-						//printf("checks: freq toa %.10g prof %.10g flux %g\n", toafreq, checkfreq, oneflux);
-						if(oneflux == 0){
-			//				printf("Profile %i: subint %i, channel %i is all zeros, not including it in the analysis\n", t, i, j);
-						}
-						else{
-							if(fabs(toafreq - checkfreq) < 0.001){
-								if(debug ==1){printf("Including: ToA %i SubInt %i Chan %i details: %.20Lg %.20Lg %.10g\n", t, i, j, ((MNStruct *)context)->pulse->obsn[t].sat_day, ((MNStruct *)context)->pulse->obsn[t].sat_sec, toafreq);}
-
-								ProfileData[t] = new long double*[Nbins];
-								for(int b = 0; b < Nbins; b++){
-									ProfileData[t][b] = new long double[2];
-								}
-
-
-								ProfileInfo[t] = new long double[7];
-
-								ProfileInfo[t][0] = FoldingPeriod;
-								ProfileInfo[t][1] = (long double)nbins;     //ds[6];
-
-								if(nbins > largestNBins){ largestNBins = nbins;}
-								//printf("Profile bins: %i %i %i \n", t, nbins, largestNBins);
-								double minval=pow(10.0, 100);
-								for(int b =0; b < Nbins; b++){
-									if(pvalues[b] < minval){ minval=pvalues[b];}
-								}
-								for(int b =0; b < Nbins; b++){
-									ProfileData[t][b][1] = pvalues[b];    //prof[1];
-									//printf("%i %i %g \n", t, b, pvalues[b]);
-									
-									if(removeBaseline == 1){
-										ProfileData[t][b][1] -= minval;
-									}
-								}   
-
-
-								double Tobs = inttime;
-
-								double PNoiseVal = 0;
-
-								ProfileInfo[t][2] = (long double) Tobs;
-								ProfileInfo[t][3] = (long double) PNoiseVal;
-								ProfileInfo[t][4] = ((MNStruct *)context)->pulse->obsn[t].sat_day;
-								ProfileInfo[t][5] = ((MNStruct *)context)->pulse->obsn[t].sat_sec;
-								ProfileInfo[t][6] = ProfileMJD;
-
-
-								long double pulsesamplerate = FoldingPeriod/Nbins/SECDAY;
-								long double pulsesamplerateSec = FoldingPeriod/Nbins;
-								long double *ProfileSATS = new long double[Nbins];
-
-								if(FirstBinSec/SECDAY > 1){ printf("GREATER THAN A DAY! \n");}
-
-								for(int b =0; b < Nbins; b++){
-									ProfileData[t][b][0] = FirstBinSec/SECDAY + pulsesamplerate*b + pulsesamplerate*0.5;
-								}
-
-								t=t+1;
-								usedchan++;
-								if(t ==  ((MNStruct *)context)->pulse->nobs){printf("got them all \n"); FoundProfile = 1; break;}
-							}
-						}
-					}
-					if(usedchan > 0){
-						//printf("num used chan is %i \n", usedchan);
-						NumChanPerInt.push_back(usedchan);
-					}
-				}
-				
-				
-			}
-		}
-
-		//printf("weighted average freq: %g \n", weightedfreq/weightsum);
-		printf("Loaded  %i  Profiles, %i Epochs\n", t, NumChanPerInt.size());
-		//return 0;
-
-		int *numchanperint = new int[NumChanPerInt.size()];
-		for(int p = 0; p < NumChanPerInt.size(); p++){
-			numchanperint[p] = NumChanPerInt[p];
-		}
-	
-		for(int p = 0; p < ((MNStruct *)context)->pulse->nobs; p++){
-			((MNStruct *)context)->pulse->obsn[p].origsat = ((MNStruct *)context)->pulse->obsn[p].sat;
-		}
-
-		((MNStruct *)context)->ProfileData = ProfileData;
-		((MNStruct *)context)->ProfileInfo = ProfileInfo;
-		((MNStruct *)context)->ReferencePeriod = ProfileInfo[0][0];
-		((MNStruct *)context)->numChanPerInt = numchanperint;
-		((MNStruct *)context)->numProfileEpochs = NumChanPerInt.size();
-		((MNStruct *)context)->LargestNBins = largestNBins;
-
-		printf("Most Bins: %i \n", ((MNStruct *)context)->LargestNBins);
-
-		if(SubIntToFit >= ((MNStruct *)context)->numProfileEpochs){ printf("Not that many subints %i %i \n", SubIntToFit, ((MNStruct *)context)->numProfileEpochs); return 0;}
-
-		int totshapecoeff = 0;	
-		for(int i = 0; i < numProfComponents; i++){
-			totshapecoeff += GPTAnumshapecoeff[i];	
-		}
-		//int nprofcoeff = GPTAnumshapecoeff;
-		//int numshapestoccoeff = totalshapestoccoeff;
-
-		int shapedims = totshapecoeff + totalshapestoccoeff;
-
-		int maxshapecoeff = 0;
-		if(totshapecoeff+1>=totalshapestoccoeff+1){
-			maxshapecoeff=totshapecoeff+1;
-		}
-		if(totalshapestoccoeff+1 > totshapecoeff+1){
-			maxshapecoeff=totalshapestoccoeff+1;
-		}
-
-
-		//int nprofcoeff = 1;
-		((MNStruct *)context)->numshapecoeff = GPTAnumshapecoeff;
-		((MNStruct *)context)->totshapecoeff = totshapecoeff;
-		//((MNStruct *)context)->numshapestoccoeff = numshapestoccoeff;
-
-		double *Factorials=new double[maxshapecoeff];
-		double *Binomials=new double[maxshapecoeff];
-		for(int i = 0; i < maxshapecoeff; i++){
-			Factorials[i] = iter_factorial(i);
-//			printf("%i %g \n", i, Factorials[i]);
-		}
-		for(int i =0; i < maxshapecoeff; i=i+2){
-			double bsum=1;
-			for(int j = 1; j <= i/2; j++){
-				bsum *= double(i + 1 - j)/j;
-//				printf("%i %i %g \n", i, j, bsum);
-			}
-			Binomials[i] = bsum;
-		}
-		((MNStruct *)context)->Factorials = Factorials;
-		((MNStruct *)context)->Binomial = Binomials;
-
-		int profevodims = 0;
-		if(incProfileEvo == 0){
-			profevodims = 0; 
-			totalEvoFitCoeff = 0;
-			for(int i =0; i < numProfComponents; i++){
-				numEvoFitCoeff[i] = 0;
-			}
-		}
-		if(incProfileEvo == 1){profevodims = totalEvoFitCoeff*NProfileEvoPoly;}
-		if(incProfileEvo == 2){profevodims = 1*NProfileEvoPoly;}
-		if(FitEvoExponent == 1 && incProfileEvo > 0){profevodims++;}
-
-		int ProfTimeEvoDims=0;
-		if(NProfileTimePoly > 0){
-
-			int TimeEvoEpochSize = 200;
-			double startEvoEpoch = pow(10.0,10.0);
-			double endEvoEpoch = 0;
-			for(int ob = 0; ob < ((MNStruct *)context)->pulse->nobs; ob++){
-                                        double sat = (double) ((MNStruct *)context)->pulse->obsn[ob].sat;
-					if(sat < startEvoEpoch){ startEvoEpoch = sat-1;}
-					if(sat > endEvoEpoch){ endEvoEpoch = sat+1;}
-			}
-	
-			
-			int NumTimeEvoEpochs = floor((endEvoEpoch - startEvoEpoch)/TimeEvoEpochSize +1);
-
-			printf("start: %g end : %g NumEpochs: %i New End: %g \n", startEvoEpoch, endEvoEpoch, NumTimeEvoEpochs, startEvoEpoch + NumTimeEvoEpochs*TimeEvoEpochSize);
-			if(startEvoEpoch + NumTimeEvoEpochs*TimeEvoEpochSize < endEvoEpoch){ NumTimeEvoEpochs++; printf("one short\n");}
-
-			int *TimeEpochIndex = new int[((MNStruct *)context)->pulse->nobs]();
-			double *TimeEpochs = new double[NumTimeEvoEpochs]();
-
-			for(int ep = 0; ep < NumTimeEvoEpochs; ep++){
-
-				TimeEpochs[ep] = startEvoEpoch+(ep+0.5)*TimeEvoEpochSize;
-				for(int ob = 0; ob < ((MNStruct *)context)->pulse->nobs; ob++){
-					double sat = (double) ((MNStruct *)context)->pulse->obsn[ob].sat;
-					if(sat >= startEvoEpoch+ep*TimeEvoEpochSize && sat < startEvoEpoch+(ep+1)*TimeEvoEpochSize){
-						TimeEpochIndex[ob] = ep;
-					}
-				}
-			}
-				
-			
-
-			ProfTimeEvoDims = NProfileTimePoly*(numProfComponents-1)*NumTimeEvoEpochs;
-			((MNStruct *)context)->ProfTimeEvoDims = ProfTimeEvoDims;
-			
-			((MNStruct *)context)->TimeEpochIndex = TimeEpochIndex;
-			((MNStruct *)context)->TimeEpochs = TimeEpochs;
-			((MNStruct *)context)->NumTimeEvoEpochs = NumTimeEvoEpochs;
-	
-			double *PrecRefMJDs = new double[numProfComponents]();
-
-			PrecRefMJDs[0] = 53900;
-			PrecRefMJDs[1] = 53900;
-			PrecRefMJDs[2] = 51600;
-			PrecRefMJDs[3] = 53900;
-			PrecRefMJDs[4] = 53900;
-			PrecRefMJDs[5] = 53900;
-			PrecRefMJDs[6] = 53900;
-			
-			((MNStruct *)context)->PrecRefMJDs = PrecRefMJDs;
-		}
-
-
-		int profEnergyEvoDims=0;
-		if(incProfileEnergyEvo == 2){profEnergyEvoDims = 1;}
-
-		int proffitdims = 0;
-		if(incProfileFit == 0){
-			proffitdims = 0; 
-			totalProfileFitCoeff = 0;
-			for(int i =0; i < numProfComponents; i++){
-                                numProfileFitCoeff[i] = 0;
-                        }
-		}
-		if(incProfileFit == 1){proffitdims = totalProfileFitCoeff;}
-
-		int NumExtraCompCoeffs = 2;
-
-		int ExtraCompDims = 0;
-
-		for(int i = 0; i < incExtraProfComp; i++){
-			if(FitForExtraComp[i][0] == 1){
-				ExtraCompDims += 3+FitForExtraComp[i][1];
-			}
-			if(FitForExtraComp[i][0] == 2){
-				ExtraCompDims += 4+FitForExtraComp[i][1];
-			}
-			if(FitForExtraComp[i][0] == 3){
-				ExtraCompDims += 4+FitForExtraComp[i][1];
-			}
-			
-			if(FitForExtraComp[i][2] == 1){
-				ExtraCompDims++;
-			}
-		}
-
-		int PrecDims = 0;
-		if(incPrecession == 1){
-			PrecDims = proffitdims + 1;
-		}
-
-		if(incPrecession == 2){
-			PrecDims = numProfComponents + (numProfComponents-1);// + (numProfComponents-1)*((MNStruct *)context)->pulse->nobs;
-			if(FitPrecAmps >= 0){PrecDims += (FitPrecAmps+1)*(numProfComponents-1);}
-		}
-
-		int TimeCorrProfileNoiseDims = 0;
-
-		if(incTimeCorrProfileNoise == 1){			
-			TimeCorrProfileNoiseDims = 3*totalTimeCorrCoeff;
-		}
-
-
-		int olddims=numFitJumps+fitcount+numEFAC+numEQUAD+numSQUAD+Reddims+DMdims+incHighFreqStoc+incDMEQUAD+incWidthJitter + pnoisedims + 2*yearlyDM;
-		ndims = totshapecoeff+1+numFitJumps+fitcount+numEFAC+numEQUAD+numSQUAD+totalshapestoccoeff+Reddims+DMdims+incHighFreqStoc+profevodims+proffitdims+incDMEQUAD+FitLinearProfileWidth+incWidthJitter+profEnergyEvoDims + pnoisedims  + 2*yearlyDM + incWidthEvoTime + ExtraCompDims + PrecDims+ TimeCorrProfileNoiseDims + ProfTimeEvoDims + ScatterDims+NumFitCompWidths+NumFitCompPos;
-		nPar = 0;
-
-
-		if(FixProfile == 1){ndims -= (totshapecoeff+1);}
-		if(FitTemplate > 0){
-			ndims = 3*numProfComponents; 
-			if(incProfileScatter > 0){ ndims++;}
-			shapedims=0;
-			olddims = 0;
-		}
-
-
-
-		printf("Starting GPTA %i %i %i %i\n", ndims, totshapecoeff, totalshapestoccoeff, PrecDims);
-		double *PriorsArray=new double[2*ndims];
-		int NDerived = 0;
-		//assigncontext(context);
-
-
-		pcount = 0;
-		for(int p = 0; p < olddims; p++){
-
-		        printf("Prior %i %.10g %.10g \n", p,Dpriors[p][0], Dpriors[p][1]);
-
-	                PriorsArray[p]=((MNStruct *)context)->Dpriors[p][0];
-	                PriorsArray[p+ndims]=((MNStruct *)context)->Dpriors[p][1];
-			pcount++;
-
-		}
-
-
-		double *output = new double[5];
-
-		/////////////////////////Sort Grade stuff////////////////////////////   
-
-
-		int do_grades = 0;
-		int *grades = new int[ndims];
-		for(int i = 0; i < ndims; i++){
-			grades[i] = 1;
-		}
-
-		int maxgrade = 1;
-		int *grade_repeats = new int[maxgrade];
-		for(int i = 0; i < maxgrade; i++){
-			grade_repeats[i] = 1;
-		}
-
-
-		int *hypercube_indices = new int[ndims];
-		int *physical_indices = new int[ndims];
-
-		//Set indices, note this is fortran convention -> starts from 1/////
-
-		for(int i = 0; i < ndims; i++){
-			hypercube_indices[i] = i+1;
-			physical_indices[i] = i+1;
-		}
-
-	
-
-		double **shapecoeffprior = new double*[shapedims];
-		for(int i=0; i < shapedims; i++){
-			shapecoeffprior[i] = new double[2];
-			for(int j=0; j < 2; j++){
-				shapecoeffprior[i][j] = 0.0;
-			}
-		}
-
-		double betaminp = 0;
-		double betamaxp = 0;
-		double **BetaPrior = new double*[numProfComponents];
-		for(int b = 0; b < numProfComponents; b++){BetaPrior[b] = new double[2]();}
-		double *MeanBeta= new double[numProfComponents]();
-
-		int ReadProfFile = 1;
-		if(FitTemplate > 0){ReadProfFile = 0;}
-
-
-		double *MeanProfileShape;
-		double **MeanProfileEvo;
-		double *MeanProfileStoc;
-
-		if(ReadProfFile == 1){
-			
-			printf("Reading File: %s\n", ProfileFileName.c_str());
-
-			std::ifstream MeanProfileFile;
-			std::string MeanProfileFilename = ProfileFileName;
-			MeanProfileFile.open(MeanProfileFilename.c_str());
-
-			std::string line;
-		        getline(MeanProfileFile,line);
-		        std::istringstream myStream( line );
-		        std::istream_iterator< double > begin(myStream),eof;
-		        std::vector<double> ProfileVal(begin,eof);
-
-			int numMeanCoeff = ProfileVal[0];
-			int numMeanEvoCoeff = ProfileVal[1];
-			printf("Read File: num coeffs = %i %i\n", numMeanCoeff,numEvoCoeff[0]);
-
-			MeanProfileShape  = new double[numMeanCoeff];
-			MeanProfileEvo    = new double*[NProfileEvoPoly];
-			for(int i = 0; i < NProfileEvoPoly; i++){	
-				MeanProfileEvo[i] = new double[numMeanEvoCoeff];
-			}
-			MeanProfileStoc = new double[totalshapestoccoeff];
-			for(int i = 0; i < numMeanCoeff; i++){
-				std::string line;
-				getline(MeanProfileFile,line);
-				std::istringstream myStream( line );
-				std::istream_iterator< double > begin(myStream),eof;
-				std::vector<double> ProfileVal(begin,eof);
-				MeanProfileShape[i] = ProfileVal[0];
-				printf("Read File: coeff %i = %g \n", i, MeanProfileShape[i]);
-				
-			}
-
-			for(int i = 0; i < numProfComponents; i++){
-				getline(MeanProfileFile,line);
-				std::istringstream myStream( line );
-				std::istream_iterator< double > begin(myStream),eof;
-				std::vector<double> ProfileVal(begin,eof);
-				MeanBeta[i] = ProfileVal[0];
-				printf("Read File: Beta = %g \n", MeanBeta[i]);
-				
-			}
-			for(int p = 0; p < NProfileEvoPoly; p++){		
-				for(int i = 0; i < numMeanEvoCoeff; i++){
-					std::string line;
-					getline(MeanProfileFile,line);
-					std::istringstream myStream( line );
-					std::istream_iterator< double > begin(myStream),eof;
-					std::vector<double> ProfileVal(begin,eof);
-					MeanProfileEvo[p][i] = ProfileVal[0];
-					printf("Read File: Evo coeff %i = %g \n", i, MeanProfileEvo[p][i]);
-
-				}
-			}
-			for(int i = 0; i < totalshapestoccoeff; i++){
-				std::string line;
-				getline(MeanProfileFile,line);
-				std::istringstream myStream( line );
-				std::istream_iterator< double > begin(myStream),eof;
-				std::vector<double> ProfileVal(begin,eof);
-				MeanProfileStoc[i] = ProfileVal[0];
-				printf("Read File: Stoc coeff %i = %g \n", i, MeanProfileStoc[i]);
-				
-			}
-			//return 0;
-							
-		}
-		printf("File Read \n");
-		setShapePriors(ConfigFileName, shapecoeffprior, BetaPrior, shapedims, numProfComponents);
-		printf("Set Shape Priors\n");
-
-
-
-		for(int p = 0; p < totshapecoeff; p++){
-
-			if(FixProfile == 0 && FitTemplate == 0){
-				printf("Shape Prior %i %.10g %.10g \n", pcount,shapecoeffprior[p][0], shapecoeffprior[p][1]);
-				PriorsArray[pcount]=shapecoeffprior[p][0];
-				PriorsArray[pcount+ndims]=shapecoeffprior[p][1];
-				pcount++;
-			}
-
-		}
-
-		if(FitTemplate > 0){
-
-			pcount = 0;
-			for(int c = 0; c < numProfComponents; c++){
-				PriorsArray[pcount] = 0.3;
-				PriorsArray[pcount+ndims] = 0.4;
-				pcount++;
-			}
-			for(int c = 0; c < numProfComponents; c++){
-				PriorsArray[pcount] = -4;
-				PriorsArray[pcount+ndims] = -2;//log10(0.15);	
-				pcount++;
-			}
-			for(int c = 0; c < numProfComponents; c++){
-				PriorsArray[pcount] = 0;
-				PriorsArray[pcount+ndims] = log10(GPTAnumshapecoeff[c]);	
-				pcount++;
-			}
-
-			if(incProfileScatter > 0){ 
-				PriorsArray[pcount] = -10;
-				PriorsArray[pcount+ndims] = -10;	
-				pcount++;
-			}
-		}
-
-
-			
-		for(int p = 0; p < totalshapestoccoeff; p++){
-			printf("p %i %i %i\n", p, pcount, ndims);
-			printf("Shape Power Prior %i %i %i %.10g %.10g \n", p,pcount, totalshapestoccoeff, shapecoeffprior[totshapecoeff+p][0], shapecoeffprior[totshapecoeff+p][1]);
-
-                        PriorsArray[pcount]=-5;//shapecoeffprior[totshapecoeff+p][0];
-                        PriorsArray[pcount+ndims]= -0.2;//shapecoeffprior[totshapecoeff+p][1];
-
-			//if(p==0){
-	                    //    PriorsArray[pcount] = -10;
-                       		//PriorsArray[pcount+ndims] = -10;	
-			//}
-                        pcount++;
-
+            }
+
+            double* PreviousNoise = new double[((MNStruct*)context)->pulse->nobs];
+            for (int i = 0; i < ((MNStruct*)context)->pulse->nobs; i++) {
+                PreviousNoise[i] = 0;
+            }
+
+            ((MNStruct*)context)->LastParams = LastParams;
+            ((MNStruct*)context)->PreviousTNT = PreviousTNT;
+            ((MNStruct*)context)->PreviousNT = PreviousNT;
+            ((MNStruct*)context)->PreviousNoise = PreviousNoise;
+            ((MNStruct*)context)->PreviousInfo = 0;
+
+            pcount = 0;
+            for (int i = 0;
+                 i < ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps; i++) {
+                if (((MNStruct*)context)->LDpriors[i][2] == 0) {
+                    grades[numslow + pcount] = 2;
+                    pcount++;
                 }
-		printf("Here before change \n"); 
-		int psum=0;
-		for(int p2 = 0; p2 < numProfComponents; p2++){
-			for(int p3 = 0; p3 < numProfileFitCoeff[p2]; p3++){
-		//		printf("fit %i %i\n", p2, p3);
-		//		printf("fit Prior %i %i %.10g %.10g %.10g %.10g\n", pcount, proffitdims, ProfileFitPrior[0], ProfileFitPrior[1], shapecoeffprior[psum+p3][0], shapecoeffprior[psum+p3][1]);
-
-		                PriorsArray[pcount] = ProfileFitPrior[0];
-		                PriorsArray[pcount+ndims] = ProfileFitPrior[1];
-
-				if(shapecoeffprior[psum+p3][0] != 0 || shapecoeffprior[psum+p3][1] != 0){
-			                PriorsArray[pcount] = shapecoeffprior[psum+p3][0];
-		     		        PriorsArray[pcount+ndims] = shapecoeffprior[psum+p3][1];	
-					printf("change fit Prior %i %i %i %i %.10g %.10g %.10g %.10g\n", p2, p3, pcount, proffitdims, ProfileFitPrior[0], ProfileFitPrior[1], shapecoeffprior[psum+p3][0], shapecoeffprior[psum+p3][1]);
-				}		
-
-		                pcount++;
-			}
-			psum += GPTAnumshapecoeff[p2];
-
-                }
-
-		if(FitLinearProfileWidth == 1){
-			printf("fit Linear Width Prior %.10g %.10g \n", LinearProfileWidthPrior[0], LinearProfileWidthPrior[1]);
-
-                        PriorsArray[pcount] = LinearProfileWidthPrior[0];
-                        PriorsArray[pcount+ndims] = LinearProfileWidthPrior[1];
-			pcount++;
-		}
-		
-		for(int p1 = 0;  p1 < NumFitCompWidths; p1++){
-			printf("fit Comp Linear Width Prior %.10g %.10g \n", LinearProfileWidthPrior[0], LinearProfileWidthPrior[1]);
-
-                        PriorsArray[pcount] = LinearProfileWidthPrior[0];
-                        PriorsArray[pcount+ndims] = LinearProfileWidthPrior[1];
-			pcount++;
-		}
-		for(int p1 = 0;  p1 < NumFitCompPos; p1++){
-			printf("fit Comp Linear Pos Prior %.10g %.10g \n", 0.001, 0.001);
-
-                        PriorsArray[pcount] =  -0.001;
-                        PriorsArray[pcount+ndims] = 0.001;
-			pcount++;
-		}
-                if(incWidthEvoTime > 0){
-                        printf("fit Temporal Width Evo Prior %.10g %.10g \n", LinearProfileWidthPrior[0], LinearProfileWidthPrior[1]);
-			for(int i = 0; i < incWidthEvoTime; i++){
-				PriorsArray[pcount] = LinearProfileWidthPrior[0];
-				PriorsArray[pcount+ndims] = LinearProfileWidthPrior[1];
-				pcount++;
-			}
-                }
-
-
-		int evopcount = 0;
-		if(FitEvoExponent == 1){
-			printf("Fit Evo Exponent\n");
-                        PriorsArray[pcount] = 0;
-     		        PriorsArray[pcount+ndims] = 4;
-			pcount++;
-			evopcount++;
-		}
-
-		for(int p1 = 0; p1 < NProfileEvoPoly; p1++){
-			for(int p2 = 0; p2 < numProfComponents; p2++){
-				for(int p3 = 0; p3 < numEvoFitCoeff[p2]; p3++){
-
-					printf("evo %i %i %i\n", p1, p2, p3);
-					printf("evo Prior %i %i %.10g %.10g \n", pcount, profevodims, ProfileEvoPrior[0], ProfileEvoPrior[1]);
-
-					PriorsArray[pcount] = ProfileEvoPrior[0];
-					PriorsArray[pcount+ndims] = ProfileEvoPrior[1];
-
-				        pcount++;
-				}
-			}
-
-                }
-
-		if(incProfileEnergyEvo == 2){
-			printf("fit energy Width Prior %.10g %.10g \n", ProfileEnergyEvoPrior[0], ProfileEnergyEvoPrior[1]);
-
-                        PriorsArray[pcount] = ProfileEnergyEvoPrior[0];
-                        PriorsArray[pcount+ndims] = ProfileEnergyEvoPrior[1];
-			pcount++;
-		}
-
-
-		if(ProfTimeEvoDims > 0){
-
-			std::ifstream MeanProfileFile;
-			std::string MeanProfileFilename = "PrecParams3.dat";
-			MeanProfileFile.open(MeanProfileFilename.c_str());
-
-			for(int p1 = 0; p1 < ProfTimeEvoDims; p1++){
-
-				std::string line;
-				getline(MeanProfileFile,line);
-				std::istringstream myStream( line );
-				std::istream_iterator< double > begin(myStream),eof;
-				std::vector<double> ProfileVal(begin,eof);
-
-
-				PriorsArray[pcount] = ProfileVal[0] + 3;
-				PriorsArray[pcount+ndims] = ProfileVal[0] - 3;
-				pcount++;
-				printf("reading: %i  %g \n", pcount, ProfileVal[0]);
-
-			}
-			MeanProfileFile.close();
-		}
-	
-
-
-		for(int i = 0; i < incExtraProfComp; i++){
-			if(FitForExtraComp[i][0] == 1){
-				//Step Model, time, width, amp
-				PriorsArray[pcount] = 57050;
-				PriorsArray[pcount+ndims] = 57420;
-				pcount++;
-				PriorsArray[pcount] =  0.06;
-				PriorsArray[pcount+ndims] = 0.07;
-				pcount++;
-				PriorsArray[pcount] = -3;
-				PriorsArray[pcount+ndims] = -1;
-				pcount++;
-
-				for(int c = 0; c < FitForExtraComp[i][1]; c++){
-					PriorsArray[pcount] = 0;
-					PriorsArray[pcount+ndims] = 0;
-					pcount++;
-				}
-				
-				if(FitForExtraComp[i][2] == 1){
-					PriorsArray[pcount] = -pow(10.0, -5);
-                                        PriorsArray[pcount+ndims] = pow(10.0, -5);
-                                        pcount++;
-
-				}
-			
-			}
-			if(FitForExtraComp[i][0] == 2){
-				//Gaussian decay model: time, comp width, max comp amp, log decay width
-				PriorsArray[pcount] = 56900;
-				PriorsArray[pcount+ndims] = 57300;
-				pcount++;
-				PriorsArray[pcount] = 0.03;
-				PriorsArray[pcount+ndims] = 0.07;
-				pcount++;
-				PriorsArray[pcount] = -4;
-				PriorsArray[pcount+ndims] = -1;
-				pcount++;
-				PriorsArray[pcount] = -3;
-				PriorsArray[pcount+ndims] = -0.3;
-				pcount++;
-				PriorsArray[pcount] = 1;
-				PriorsArray[pcount+ndims] = 3;
-				pcount++;
-
-			}
-
-			if(FitForExtraComp[i][0] == 3){
-				//exponential decay: time, comp width, max comp amp, log decay timescale
-				PriorsArray[pcount] = 57050;// 57050;
-				PriorsArray[pcount+ndims] = 57100;//57100;
-				pcount++;
-				PriorsArray[pcount] =    0.06;
-				PriorsArray[pcount+ndims] = 0.07;
-				pcount++;
-				PriorsArray[pcount] = -3;
-				PriorsArray[pcount+ndims] = -1;
-				pcount++;
-				for(int c = 0; c < FitForExtraComp[i][1]; c++){
-					PriorsArray[pcount] = 0;
-					PriorsArray[pcount+ndims] = 0;
-
-				//	if(c==3){PriorsArray[pcount] = 0; PriorsArray[pcount+ndims] = 0;}
-					pcount++;
-				}
-				PriorsArray[pcount] = 1;
-				PriorsArray[pcount+ndims] = 3;
-				pcount++;
-				if(FitForExtraComp[i][2] == 1){
-					PriorsArray[pcount] = -4*pow(10.0, -5);
-					PriorsArray[pcount+ndims] = 4*pow(10.0, -5);
-					pcount++;
-				}
-
-
-			}
-
-			if(FitForExtraComp[i][0] == 4){
-				PriorsArray[pcount] = 57000;
-				PriorsArray[pcount+ndims] = 57150;
-				pcount++;
-				PriorsArray[pcount] = 1;
-				PriorsArray[pcount+ndims] = 3;
-				pcount++;
-				for(int c = 0; c < 5; c++){
-					PriorsArray[pcount] = -0.5;
-					PriorsArray[pcount+ndims] = 0.5;
-					pcount++;
-					
-				}
-
-
-			}
-		}
-		printf("Here before prec\n");
-		if(incPrecession == 1){
-
-
-
-			double *PrecAmps = new double[2*proffitdims];				
-
-			std::ifstream MeanProfileFile;
-			std::string MeanProfileFilename = "PrecAmps.dat";
-			MeanProfileFile.open(MeanProfileFilename.c_str());
-
-
-			for(int i = 0; i < 2*proffitdims; i++){
-				std::string line;
-				getline(MeanProfileFile,line);
-				std::istringstream myStream( line );
-				std::istream_iterator< double > begin(myStream),eof;
-				std::vector<double> ProfileVal(begin,eof);
-				PrecAmps[i] = ProfileVal[0];
-				printf("Read File: Prec coeff %i of %i = %g \n", i, proffitdims, PrecAmps[i]);
-
-			}
-
-			MeanProfileFile.close();
-
-			((MNStruct *)context)->PrecAmps = PrecAmps;
-
-                        PriorsArray[pcount] = 2;//1;
-                        PriorsArray[pcount+ndims] = 2;//3;
-                        pcount++;
-
-
-			for(int p2 = 0; p2 < numProfComponents; p2++){
-				for(int p3 = 0; p3 < numProfileFitCoeff[p2]; p3++){
-					PriorsArray[pcount] = ProfileFitPrior[0];
-					PriorsArray[pcount+ndims] = ProfileFitPrior[1];
-					printf("Prec Prior %i %g %g\n", pcount, PriorsArray[pcount], PriorsArray[pcount+ndims]);
-					pcount++;
-				}
-
-			}
-
-                }
-
-		if(incPrecession == 2){
-
-			double *PrecRefMJDs = new double[numProfComponents]();
-			PrecRefMJDs[0] = 52200; //53900;
-			PrecRefMJDs[1] = 52200; //53900;
-			PrecRefMJDs[2] = 52200; //51600;
-			PrecRefMJDs[3] = 52200; //53900;
-			PrecRefMJDs[4] = 52200; //53900;
-			PrecRefMJDs[5] = 52200; //53900;
-			PrecRefMJDs[6] = 52200; //53900;
-			
-			((MNStruct *)context)->PrecRefMJDs = PrecRefMJDs;
-
-			int *PrecNPoly = new int[numProfComponents]();
-			PrecNPoly[0] = 0;
-			PrecNPoly[1] = 4;
-			PrecNPoly[2] = 4;
-			PrecNPoly[3] = 4;
-			PrecNPoly[4] = 4;
-			PrecNPoly[5] = 4;
-			PrecNPoly[6] = 4;
-
-
-			double errscale = 1;
-			std::ifstream MeanProfileFile;
-			std::string MeanProfileFilename = "PrecParams2.dat";
-			MeanProfileFile.open(MeanProfileFilename.c_str());
-
-			for(int p2 = 0; p2 < numProfComponents; p2++){
-//				PriorsArray[pcount] = -4;
-//				PriorsArray[pcount+ndims] = -2;
-
-				std::string line;
-				getline(MeanProfileFile,line);
-				std::istringstream myStream( line );
-                                std::istream_iterator< double > begin(myStream),eof;
-                                std::vector<double> ProfileVal(begin,eof);
-
-				PriorsArray[pcount] = ProfileVal[0];
-				PriorsArray[pcount+ndims] = ProfileVal[1];
-		
-
-//				if(p2==0){PriorsArray[pcount] = -2.55; PriorsArray[pcount+ndims] = -2.45;}
-//				if(p2==1){PriorsArray[pcount] = -2.85; PriorsArray[pcount+ndims] = -2.65;}
-//				if(p2==2){PriorsArray[pcount] = -3.15; PriorsArray[pcount+ndims] = -2.95;}
-//				if(p2==3){PriorsArray[pcount] = -2.9; PriorsArray[pcount+ndims] = -2.65;}
-//				if(p2==4){PriorsArray[pcount] = -2.8; PriorsArray[pcount+ndims] = -2.6;}
-//				if(p2==5){PriorsArray[pcount] = -2.64; PriorsArray[pcount+ndims] = -2.44;}
-//				if(p2==6){PriorsArray[pcount] = -2.82; PriorsArray[pcount+ndims] = -2.62;}
-
-				pcount++;
-			}
-			for(int p2 = 0; p2 < numProfComponents-1; p2++){
-                         //       PriorsArray[pcount] = -0.05;
-                           //     PriorsArray[pcount+ndims] = 0.05;
-
-			//	if(p2==0){PriorsArray[pcount] = 0.019; PriorsArray[pcount+ndims] = 0.023;}
-			//	if(p2==1){PriorsArray[pcount] = 0.01; PriorsArray[pcount+ndims] = 0.04;}
-			//	if(p2==2){PriorsArray[pcount] = 0.025; PriorsArray[pcount+ndims] = 0.029;}
-			//	if(p2==3){PriorsArray[pcount] = 0.012; PriorsArray[pcount+ndims] = 0.015;}
-			//	if(p2==4){PriorsArray[pcount] = 0.031; PriorsArray[pcount+ndims] = 0.038;}
-			//	if(p2==5){PriorsArray[pcount] = 0.0; PriorsArray[pcount+ndims] = 0.012;}
-
-
-				std::string line;
-                                getline(MeanProfileFile,line);
-                                std::istringstream myStream( line );
-                                std::istream_iterator< double > begin(myStream),eof;
-                                std::vector<double> ProfileVal(begin,eof);
-
-                                PriorsArray[pcount] = ProfileVal[0];
-                                PriorsArray[pcount+ndims] = ProfileVal[1];
-
-
-                                pcount++;
-                        }
-			for(int a = 0; a <= FitPrecAmps; a++){ 
-				for(int p2 = 0; p2 < (numProfComponents-1); p2++){
-			//		PriorsArray[pcount] = -3;
-			//	        PriorsArray[pcount+ndims] = 2;
-					std::string line;
-					getline(MeanProfileFile,line);
-					std::istringstream myStream( line );
-					std::istream_iterator< double > begin(myStream),eof;
-					std::vector<double> ProfileVal(begin,eof);
-
-					PriorsArray[pcount] = ProfileVal[0];
-					PriorsArray[pcount+ndims] = ProfileVal[1];
-
-//	//				if(errscale != 0 && PriorsArray[pcount] < -3){PriorsArray[pcount] = -3;}
-	//				if(errscale != 0 && PriorsArray[pcount+ndims] < 0){PriorsArray[pcount+ndims] = 0;}
-
-				        pcount++;
-				}
-			}
-
-		}
-
-		int numTimeCorrFreqs = 1;
-		if(incTimeCorrProfileNoise == 1){
-			for(int p2 = 0; p2 < numProfComponents; p2++){
-                                for(int p3 = 0; p3 < numTimeCorrCoeff[p2]; p3++){
-
-					PriorsArray[pcount] = -5;
-					PriorsArray[pcount+ndims] = 5;
-					pcount++;
-					PriorsArray[pcount] = -5;
-					PriorsArray[pcount+ndims] = 5;
-					pcount++;
-					PriorsArray[pcount] = -7;
-					PriorsArray[pcount+ndims] = -2.0;
-						
-
-					pcount++;
-				}
-			}
-		}
-
-
-		if(incProfileScatter == 1 && FitTemplate == 0){
-	
-			if(ScatterPBF != 5){
-				for(int s = 0; s < ScatterDims; s++){
-					PriorsArray[pcount] = -10;
-					PriorsArray[pcount+ndims] = 0;
-					
-
-					pcount++;	
-				}
-			}
-			else{
-
-				for(int s = 0; s < ScatterDims; s += 2){
-					PriorsArray[pcount] = -10;
-					PriorsArray[pcount+ndims] = -2;
-					
-					PriorsArray[pcount+ 1] = 0;
-					PriorsArray[pcount + 1 + ndims] = 1;
-					pcount+=2;	
-				}
-	
-			}
-
-			int *ScatterIndex = new int[psr[0].nobs]();
-
-			for(int i = 0; i < psr[0].nobs; i++){
-
-				for (int k=0; k<psr[0].nSx; k++){ 
-
-					if ((psr[0].obsn[i].sat > psr[0].param[param_sxr1].val[k]) && (psr[0].obsn[i].sat < psr[0].param[param_sxr2].val[k])){
-						ScatterIndex[i] = k;
-						printf("Scatter Index: %i %i \n", i, k);
-					}
-				}
-
-			}
-
-			((MNStruct *)context)->ScatterIndex = ScatterIndex;
-		}			
-
-		printf("do linear: %i \n", ((MNStruct *)context)->doLinear);;
-		if(((MNStruct *)context)->doLinear > 0 && sampler != 2){
-
-			int TimingDims = ((MNStruct *)context)->numFitTiming + ((MNStruct *)context)->numFitJumps;
-			double **PhysDMatrix = new double*[((MNStruct *)context)->pulse->nobs];
-			for(int i = 0; i < ((MNStruct *)context)->pulse->nobs; i++){ PhysDMatrix[i] = new double[TimingDims];}
-			double *PhysDMatrixVec = new double[((MNStruct *)context)->pulse->nobs*TimingDims];
-
-			int *TimingGradientSigns = new int[TimingDims]();
-
-			getPhysDVector(context, PhysDMatrix, ((MNStruct *)context)->pulse->nobs, TimingGradientSigns);
-
-			delete[] TimingGradientSigns;
-
-			for(int i = 0; i < ((MNStruct *)context)->pulse->nobs; i++){
-				for(int j = 0; j < TimingDims; j++){
-					PhysDMatrixVec[i+j*((MNStruct *)context)->pulse->nobs] = PhysDMatrix[i][j];
-				}
-			}
-			((MNStruct *)context)->DMatrixVec = PhysDMatrixVec;
-
-			for(int i = 0; i < ((MNStruct *)context)->pulse->nobs; i++){	
-				delete[] PhysDMatrix[i];
-			}
-			delete[] PhysDMatrix;
-
-		}
-
-
-		printf("set priors \n");
-		((MNStruct *)context)->NumExtraCompCoeffs = NumExtraCompCoeffs;
-		((MNStruct *)context)->PriorsArray = PriorsArray;
-		((MNStruct *)context)->FixProfile = FixProfile;
-		((MNStruct *)context)->MeanProfileShape = MeanProfileShape;	
-		((MNStruct *)context)->MeanProfileEvo = MeanProfileEvo;	
-		((MNStruct *)context)->MeanProfileBeta = MeanBeta;
-		((MNStruct *)context)->MeanProfileStoc = MeanProfileStoc;
-		((MNStruct *)context)->FitForExtraComp =  FitForExtraComp;
-		//outputProfile(ndims);
-		//return 0;
-
-		assigncontext(context);
-		printf("totalProfileFitCoeff %i \n", ((MNStruct *)context)->totalProfileFitCoeff);
-		//return 0;
-		if(interpolateProfile == 1){
-
-			int Nbin = ((MNStruct *)context)->LargestNBins;
-			long double timetointerpolate = pow(10.0, -9)*InterpolatedTime;
-			int numtointerpolate = int(ceil(((MNStruct *)context)->ReferencePeriod/Nbin/timetointerpolate));
-			long double finalInterpTime = ((MNStruct *)context)->ReferencePeriod/Nbin/numtointerpolate;
-			((MNStruct *)context)->InterpolatedTime = finalInterpTime;
-
-			int *numShapeToSave = new int[numProfComponents];
-			int totalShapeToSave = 0;
-			for(int i = 0; i < numProfComponents; i++){
-				printf("num to save: %i %i %i %i \n", i, totalshapestoccoeff, numEvoCoeff[i],numProfileFitCoeff[i]); 
-				numShapeToSave[i] = GPTAnumshapecoeff[i];
-				if(numEvoCoeff[i] >  numShapeToSave[i]){numShapeToSave[i] = numEvoCoeff[i];}
-				if(numProfileFitCoeff[i] >  numShapeToSave[i]){numShapeToSave[i] = numProfileFitCoeff[i];}
-				totalShapeToSave += numShapeToSave[i];
-			}
-
-			printf("Final interp time %.10g %.10Lg %i\n", InterpolatedTime, finalInterpTime, numtointerpolate);
-
-
-			printf("allocate 1 %i %i %i \n", numtointerpolate, totalShapeToSave, Nbin);
-			double **StoredShapeletsVec = new double*[numtointerpolate];
-			double **StoredShapeletsJitterVec = new double*[numtointerpolate];
-			double **StoredShapeletsWidthVec;
-
-			int needWidth = 0;
-			if(((MNStruct *)context)->FitLinearProfileWidth == 1 || ((MNStruct *)context)->incWidthEvoTime > 0){
-				needWidth = 1;
-				StoredShapeletsWidthVec = new double*[numtointerpolate];
-			}
-
-			for(int i = 0; i < numtointerpolate; i++){
-				StoredShapeletsJitterVec[i] = new double[Nbin*totalShapeToSave];
-				StoredShapeletsVec[i] = new double[Nbin*totalShapeToSave];
-
-				if(needWidth ==1){
-					StoredShapeletsWidthVec[i] = new double[Nbin*totalShapeToSave];
-				}
-
-				for(int j = 0; j < Nbin*totalShapeToSave; j++){
-					StoredShapeletsJitterVec[i][j] = 0;
-					StoredShapeletsVec[i][j] = 0;
-
-					if(needWidth ==1){
-						StoredShapeletsWidthVec[i][j] = 0;
-					}
-
-				}
-			}
-
-			printf("allocate 2 %i %i %i \n", numtointerpolate, totalShapeToSave, Nbin);
-			double **InterpolatedMeanProfile = new double *[numtointerpolate];
-			double **InterpolatedJitterProfile = new double *[numtointerpolate];
-			double **InterpolatedWidthProfile = new double *[numtointerpolate];
-
-			
-
-
-			for(int i = 0; i < numtointerpolate; i++){
-				InterpolatedMeanProfile[i] = new double[Nbin];
-				InterpolatedJitterProfile[i] = new double[Nbin];
-				InterpolatedWidthProfile[i] = new double[Nbin*(1+NumCompswithWidth+NumCompswithPos)];
-				for(int j = 0; j < Nbin; j++){
-					InterpolatedMeanProfile[i][j] = 0;
-					InterpolatedJitterProfile[i][j] = 0;
-					
-				}	
-				for(int j = 0; j < Nbin*(1+NumCompswithWidth+NumCompswithPos); j++){
-					InterpolatedWidthProfile[i][j] = 0;
-				}
-			}
-
-			double MaxShapeAmp = 0;
-			PreComputeShapelets(StoredShapeletsVec, StoredShapeletsJitterVec, StoredShapeletsWidthVec, InterpolatedMeanProfile, InterpolatedJitterProfile, InterpolatedWidthProfile, finalInterpTime, numtointerpolate, MeanBeta, MaxShapeAmp);
-
-
-
-			((MNStruct *)context)->InterpolatedShapeletsVec = StoredShapeletsVec;
-			((MNStruct *)context)->InterpolatedJitterProfileVec = StoredShapeletsJitterVec;
-			((MNStruct *)context)->InterpolatedWidthProfileVec = StoredShapeletsWidthVec;
-			((MNStruct *)context)->NumToInterpolate = numtointerpolate;
-
-			((MNStruct *)context)->InterpolatedMeanProfile = InterpolatedMeanProfile;
-			((MNStruct *)context)->InterpolatedJitterProfile = InterpolatedJitterProfile;
-			((MNStruct *)context)->InterpolatedWidthProfile = InterpolatedWidthProfile;
-			
-			((MNStruct *)context)->MaxShapeAmp = MaxShapeAmp;
-			//return 0;
-		}
-
-		if(FitTemplate > 0){
-
-			int Nbin = ((MNStruct *)context)->LargestNBins;
-			long double timetointerpolate = pow(10.0, -9)*InterpolatedTime;
-			int numtointerpolate = int(ceil(((MNStruct *)context)->ReferencePeriod/Nbin/timetointerpolate));
-			long double finalInterpTime = ((MNStruct *)context)->ReferencePeriod/Nbin/numtointerpolate;
-			((MNStruct *)context)->InterpolatedTime = finalInterpTime;
-			((MNStruct *)context)->NumToInterpolate = numtointerpolate;
-
-
-			int numTempFreqs = 0;
-			getNumTempFreqs(numTempFreqs, context, TemplateChanWidth);
-
-			double *TemplateFreqs = new double[numTempFreqs];
-			double *TemplateChans = new double[numTempFreqs*Nbin];
-			double *TemplateNoise = new double[numTempFreqs]();
-
-			((MNStruct *)context)->TemplateFreqs = TemplateFreqs;
-			((MNStruct *)context)->TemplateChans = TemplateChans;
-			((MNStruct *)context)->numTempFreqs = numTempFreqs;
-			((MNStruct *)context)->TemplateNoise = TemplateNoise;
-			
-			getNumTempFreqs(numTempFreqs, context, TemplateChanWidth);
-			Tscrunch(context, TemplateChanWidth);
-			//return 0;
-		}
-
-		if(incProfileNoise == 3 || incProfileNoise == 4){
-
-			std::ifstream ProfileNoiseFile;
-			std::string ProfileNoiseFilename = "Powers.dat";
-			ProfileNoiseFile.open(ProfileNoiseFilename.c_str());
-
-			double **MLProfileNoise  = new double*[((MNStruct *)context)->numProfileEpochs];
-			for(int i = 0; i < ((MNStruct *)context)->numProfileEpochs; i++){
-				MLProfileNoise[i] = new double[ProfileNoiseCoeff+1];
-			}
-
-			for(int i = 0; i <  ((MNStruct *)context)->numProfileEpochs; i++){
-				std::string line;
-				getline(ProfileNoiseFile,line);
-				std::istringstream myStream( line );
-				std::istream_iterator< double > begin(myStream),eof;
-				std::vector<double> ProfileNoiseVal(begin,eof);
-				for(int j = 0; j < ProfileNoiseCoeff + 1; j++){
-					MLProfileNoise[i][j] = ProfileNoiseVal[j];
-					if(j==0)MLProfileNoise[i][j] = pow(10.0, MLProfileNoise[i][j]);	
-					printf("Read NoiseFile: %i coeff %i = %g \n", i, j, MLProfileNoise[i][j]);
-				}
-			}
-			((MNStruct *)context)->MLProfileNoise = MLProfileNoise;
-		}
-		else{
-                        double **MLProfileNoise  = new double*[((MNStruct *)context)->numProfileEpochs];
-                        for(int i = 0; i < ((MNStruct *)context)->numProfileEpochs; i++){
-                                MLProfileNoise[i] = new double[1];
-				MLProfileNoise[i][0] = 1;
-                        }
-			((MNStruct *)context)->MLProfileNoise = MLProfileNoise;
-
-		}
-
-		 ((MNStruct *)context)->Tspan = maxtspan;
-		((MNStruct *)context)->numdims = ndims;
-
-	
-//		double *StoredDMVals = new double[100];
-//		readDMVals(StoredDMVals);
-//		((MNStruct *)context)->StoredDMVals = StoredDMVals;
-
-		assigncontext(context);
-
-		getProfileNoiseLevels(context);
-
-
-		if(doMax == 1){
-			NelderMeadOptimum(ndims);
-			return 0;
-		}
-
-		if(sample==1){
-			if(FitTemplate > 0){
-				if(sampler == 0){
-					nested::run(IS,mmodal, ceff, nlive, tol, efr, ndims, ndims, nClsPar, maxModes, updInt, Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, Template2DProfLikeMNWrap, dumper, context);
-			//		WriteTemplate2DProfLike(longname, ndims);
-			//		return 0;
-
-				}
-				if(sampler == 1){
-					chord::Sample(TemplateProfLike, ndims, NDerived, nlive, Nchords,  PriorsArray, root, context, output, do_grades, maxgrade, grades, grade_repeats, hypercube_indices, physical_indices);
-				}
-			}
-			else{
-
-				if(sampler == 0){
-					//nested::run(IS,mmodal, ceff, nlive, tol, efr, ndims, ndims, nClsPar, maxModes, updInt, Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, SubIntStocProfLikeMNWrap, dumper, context);
-					nested::run(IS,mmodal, ceff, nlive, tol, efr, ndims, ndims, nClsPar, maxModes, updInt, Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, ProfileDomainLikeMNWrap, dumper, context);
-				}
-				if(sampler == 1){
-					chord::Sample(ProfileDomainLike, ndims, NDerived, nlive, Nchords,  PriorsArray, root, context, output, do_grades, maxgrade, grades, grade_repeats, hypercube_indices, physical_indices);
-
-					//chord::Sample(SubIntStocProfLike, ndims, NDerived, nlive, Nchords,  PriorsArray, root, context, output, do_grades, maxgrade, grades, grade_repeats, hypercube_indices, physical_indices);
-				}
-			}
-		}
-
-		if(FitTemplate > 0){
-			WriteTemplate2DProfLike(longname, ndims);
-			GetInterpVectors(context);
-			double MLPhase = FitPhase();
-			printf("The maximum likelihood phase is: %.10g \n", MLPhase);
-//			WriteMaxTemplateProf(longname, ndims);
-			return 0;
-		}
-		else{
-			WriteProfileDomainLike(longname, ndims);
-			//AllTOAWriteMaxLike(longname, ndims);
-			//WriteSubIntStocProfLike(longname, ndims);
-		}
-
-
-#else
-		printf("No installation of PSRCHIVE detected, cannot use GPTA likelihoods.  Please install PSRCHIVE, and set $PSRCHIVE to be the location of the installation directory\n");
-
-#endif
-//		return 0;
-		
-
-		//}
-
-	
-	}
-	*/
-	
-
-	if(rank == 0){
-		readsummary(psr,longname, ndims,context,  Tempo2Fit,incRED, ndims, doTimeMargin, doJumpMargin,doLinearFit);
-
-
-
-		time(&rawstoptime);
-		rawstoptimeinfo = localtime(&rawstoptime);
-		time_t stoptime = mktime(rawstoptimeinfo);
-		double seconds = difftime(stoptime, starttime);
-	        printf ( "The stop date/time was: %s", asctime(rawstoptimeinfo) );
-
-		printf("Total Wall clock run time: %g \n", seconds);
-	}
-
+            }
+
+            grade_repeats[1] = 10;
+
+            for (int i = 0; i < numslow; i++) {
+                hypercube_indices[i] = 1 + numfast + i;
+            }
+            for (int i = 0; i < numfast; i++) {
+                hypercube_indices[numslow + i] = 1 + i;
+            }
+        }
+        ((MNStruct*)context)->PriorsArray = PriorsArray;
+        ((MNStruct*)context)->hypercube_indices = hypercube_indices;
+        ((MNStruct*)context)->doGrades = do_grades;
+        ((MNStruct*)context)->PolyChordGrades = grades;
+
+        assigncontext(context);
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////Call
+        /// Samplers////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        if (sample == 1) {
+
+            nested::run(IS, mmodal, ceff, nlive, tol, efr, ndims, ndims, nClsPar, maxModes, updInt,
+                        Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter,
+                        LRedLikeMNWrap, dumper, context);
+        }
+    }
+
+    if (rank == 0) {
+        readsummary(psr, longname, ndims, context, Tempo2Fit, incRED, ndims, doTimeMargin,
+                    doJumpMargin, doLinearFit);
+
+        time(&rawstoptime);
+        rawstoptimeinfo = localtime(&rawstoptime);
+        time_t stoptime = mktime(rawstoptimeinfo);
+        double seconds = difftime(stoptime, starttime);
+        printf("The stop date/time was: %s", asctime(rawstoptimeinfo));
+
+        printf("Total Wall clock run time: %g \n", seconds);
+    }
 
     return EXIT_SUCCESS;
-} 
-
-
-
-
+}
 
 // redwards function to force linkage with library functions used by
 // plugins
-void
-thwart_annoying_dynamic_library_stuff(int never_call_me, float or_sink)
+void thwart_annoying_dynamic_library_stuff(int never_call_me, float or_sink)
 {
-  ChebyModel *cm;
-  T2Predictor *t2p;
-  ChebyModel_Init(cm, 0, 0);
-  T2Predictor_GetPhase(t2p, 0, 0);
+    ChebyModel* cm;
+    T2Predictor* t2p;
+    ChebyModel_Init(cm, 0, 0);
+    T2Predictor_GetPhase(t2p, 0, 0);
 }
