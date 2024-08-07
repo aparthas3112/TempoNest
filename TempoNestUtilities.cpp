@@ -40,24 +40,6 @@
 #include "eigen_config.h"
 #include "tempo2.h"
 
-int UtWrap(int kX, int const kLowerBound, int const kUpperBound)
-{
-    int range_size = kUpperBound - kLowerBound + 1;
-
-    if (kX < kLowerBound)
-        kX += range_size * ((kLowerBound - kX) / range_size + 1);
-
-    return kLowerBound + (kX - kLowerBound) % range_size;
-}
-
-double iter_factorial(unsigned int n)
-{
-    double ret = 1;
-    for (unsigned int i = 1; i <= n; ++i)
-        ret *= i;
-    return ret;
-}
-
 void readtxtoutput(std::string longname, int ndim, double** paramarray)
 {
 

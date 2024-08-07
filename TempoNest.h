@@ -38,13 +38,6 @@ typedef struct {
     double** Dpriors;
     double** DMatrix;
     double** FMatrix;
-    double** GMatrix;
-    double**
-        staticGMatrix;  // staticGMatrix and staicTimedet for speeding up when no fitted white noise
-    double staticTimeDet;
-    double** UMatrix;  // UMatrix and SVec are for speeding up when only have 1EFAC and 1EQUAD
-    double* SVec;
-    double* maxLikeRes;
     int numberpulsars;
     int doLinear;
     int numFitJumps;
@@ -66,8 +59,6 @@ typedef struct {
     int incRED;
     int incDM;
 
-    int Gsize;
-    int Dsize;
     int** TempoFitNums;
     int* TempoJumpNums;
     int* sysFlags;
@@ -75,7 +66,6 @@ typedef struct {
     int systemcount;
     int TimeMargin;
     int JumpMargin;
-    std::string* name;
 
     char* whiteflag;
 
@@ -95,8 +85,6 @@ typedef struct {
 
     int storeFMatrices;
     double* StoredTMatrix;
-    double* StoredDMVals;
-    int* TimingGradientSigns;
     int usecosiprior;
     double* PreJumpVals;
     int doMax;

@@ -543,44 +543,6 @@ void update_MNPriors(MNStruct* MNS, double** DPriorsval, long double** priorsval
     MNS->LDpriors = priorsval;
 }
 
-void update_MNGdata(MNStruct* MNS, int Gsizeval, double** GMatrixval)
-{
-
-    MNS->Gsize = Gsizeval;
-    MNS->GMatrix = GMatrixval;
-}
-
-void update_MNDdata(MNStruct* MNS, int Dsizeval, double** DMatrixval)
-{
-
-    MNS->Dsize = Dsizeval;
-    MNS->DMatrix = DMatrixval;
-}
-
-void update_MNGDdata(MNStruct* MNS, int Dsizeval, double** DMatrixval, int Gsizeval,
-                     double** GMatrixval)
-{
-
-    MNS->Dsize = Dsizeval;
-    MNS->DMatrix = DMatrixval;
-    MNS->Gsize = Gsizeval;
-    MNS->GMatrix = GMatrixval;
-}
-
-void update_MNstaticG(MNStruct* MNS, double** staticGMatrixVal, double staticdetval)
-{
-
-    MNS->staticGMatrix = staticGMatrixVal;
-    MNS->staticTimeDet = staticdetval;
-}
-
-void update_MNstaticDiagG(MNStruct* MNS, double** UMatrixVal, double* SVecval)
-{
-
-    MNS->UMatrix = UMatrixVal;
-    MNS->SVec = SVecval;
-}
-
 /************************************************* dumper routine
  * ******************************************************/
 
