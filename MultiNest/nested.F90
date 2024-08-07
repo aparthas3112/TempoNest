@@ -8,11 +8,16 @@ module Nested
   use xmeans_clstr
   use posterior
   use priors
-  implicit none
 
 #ifdef MPI
-  include 'mpif.h'
-  integer mpi_status(MPI_STATUS_SIZE), errcode
+  use mpi
+#endif
+
+  implicit none
+
+
+#ifdef MPI
+  integer mpi_status(MPI_STATUS_SIZE), errcode, ierror
 #endif
   integer my_rank
   integer maxCls,maxeCls
@@ -82,7 +87,7 @@ contains
 		call MPI_INIT(errcode)
 		if (errcode/=MPI_SUCCESS) then
      			write(*,*)'Error starting MPI. Terminating.'
-     			call MPI_ABORT(MPI_COMM_WORLD,errcode)
+     			call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
   		end if
 	endif
 	call MPI_COMM_RANK(MPI_COMM_WORLD, my_rank, errcode)
@@ -118,7 +123,7 @@ contains
 			write(*,*)"Aborting"
 		endif
 #ifdef MPI
-		call MPI_ABORT(MPI_COMM_WORLD,errcode)
+		call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
             	stop
 	endif
@@ -181,7 +186,7 @@ contains
 				write(*,*)"Aborting"
 			endif
 #ifdef MPI
-			call MPI_ABORT(MPI_COMM_WORLD,errcode)
+			call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
             		stop
 		endif
@@ -305,7 +310,7 @@ contains
 				  	write(*,*)"ERROR: no. of live points in the resume file is not equal to the the no. passed to nestRun."
 					write(*,*)"Aborting"
 #ifdef MPI
-					call MPI_ABORT(MPI_COMM_WORLD,errcode)
+					call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
 					stop
 				endif
@@ -331,7 +336,7 @@ contains
 					write(*,*)"ERROR: no. of points in ev.dat file is not equal to the no. specified in resume file."
 					write(*,*)"Aborting"
 #ifdef MPI
-					call MPI_ABORT(MPI_COMM_WORLD,errcode)
+					call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
 					stop
 				endif
@@ -447,7 +452,7 @@ contains
 							write(*,*)"ERROR: more than ",nlive," points in the live points file."
 							write(*,*)"Aborting"
 #ifdef MPI
-							call MPI_ABORT(MPI_COMM_WORLD,errcode)
+							call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
 	                        			stop
 						endif
@@ -519,7 +524,7 @@ contains
 			write(*,*)"Aborting"
 		endif
 #ifdef MPI
-            	call MPI_ABORT(MPI_COMM_WORLD,errcode)
+            	call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
             	stop
 	endif
@@ -914,7 +919,7 @@ contains
                   				write(*,*)"ERROR: live points file has less than ",nlive," points."
 						write(*,*)"Aborting"
 #ifdef MPI
-						call MPI_ABORT(MPI_COMM_WORLD,errcode)
+						call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
                         			stop
 					endif
@@ -924,7 +929,7 @@ contains
 					write(*,*)"ERROR: live points file has greater than ",nlive," points."
 					write(*,*)"Aborting"
 #ifdef MPI
-					call MPI_ABORT(MPI_COMM_WORLD,errcode)
+					call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
                         		stop
 				endif
@@ -943,7 +948,7 @@ contains
                   				write(*,*)"ERROR: phys live points file has less than ",nlive," points."
 						write(*,*)"Aborting"
 #ifdef MPI
-						call MPI_ABORT(MPI_COMM_WORLD,errcode)
+						call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
                         			stop
 					endif
@@ -953,7 +958,7 @@ contains
 					write(*,*)"ERROR: phys live points file has greater than ",nlive," points."
 					write(*,*)"Aborting"
 #ifdef MPI
-					call MPI_ABORT(MPI_COMM_WORLD,errcode)
+					call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
                         		stop
 				endif
@@ -980,7 +985,7 @@ contains
 						write(*,*)"ERROR: Not enough points in ",IS_Files(2)
 						write(*,*)"Aborting"
 #ifdef MPI
-						call MPI_ABORT(MPI_COMM_WORLD,errcode)
+						call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
 						stop
 					endif
@@ -996,7 +1001,7 @@ contains
 						write(*,*)"ERROR: Not enough points in ",IS_Files(1)
 						write(*,*)"Aborting"
 #ifdef MPI
-						call MPI_ABORT(MPI_COMM_WORLD,errcode)
+						call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
 						stop
 					endif
@@ -1013,7 +1018,7 @@ contains
 						write(*,*)"ERROR: Not enough points in ",IS_Files(3)
 						write(*,*)"Aborting"
 #ifdef MPI
-						call MPI_ABORT(MPI_COMM_WORLD,errcode)
+						call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
 						stop
 					endif
@@ -3085,7 +3090,7 @@ contains
 					write(*,*)"Increase maxmodes in the call to nestrun and run MultiNest again."
 					write(*,*)"Aborting"
 #ifdef MPI
-					call MPI_ABORT(MPI_COMM_WORLD,errcode)
+					call MPI_ABORT(MPI_COMM_WORLD,errcode, ierror)
 #endif
                         		stop
 				endif

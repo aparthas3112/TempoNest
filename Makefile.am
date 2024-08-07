@@ -20,8 +20,11 @@ EXTRA_DIST = $(xtra_dist_sources)
 plugindir=@TEMPO2_PLUG_INSTALL@
 
 # Optimization flags
-AM_CXXFLAGS = -O3 -march=native -mtune=native -ffast-math
+AM_CXXFLAGS = -O3 -march=native -mtune=native -ffast-math $(OPENMP_CXXFLAGS)
 AM_CFLAGS = $(AM_CXXFLAGS)
+
+AM_CXXFLAGS += @MPI_CXXFLAGS@
+AM_CFLAGS += @MPI_CFLAGS@
 
 # Warning flags
 AM_CXXFLAGS += -Wall -Wextra -Wpedantic
@@ -47,17 +50,14 @@ temponest_@T2ARCH@_plug_la_SOURCES = $(common_sources)
 temponest_@T2ARCH@_plug_la_CXXFLAGS = $(AM_CXXFLAGS)
 temponest_@T2ARCH@_plug_la_CFLAGS = $(AM_CFLAGS)
 
-temponest_@T2ARCH@_plug_la_LIBADD = -lgfortran -ltempo2 -lsofa @MULTINEST_LIBS@ @GSL_LIBS@ @BLAS_LIBS@ @LIBS_LAPACK@ @TEMPO2_LIBS@
-temponest_@T2ARCH@_plug_la_CPPFLAGS = @MULTINEST_CFLAGS@ @GSL_CFLAGS@ @TEMPO2_CFLAGS@ @EIGEN_CPPFLAGS@
+AM_CXXFLAGS += $(MPI_CXXFLAGS)
+AM_CFLAGS += $(MPI_CXXFLAGS)
 
-if HAVE_CULA
-temponest_@T2ARCH@_plug_la_SOURCES += TempoNestGPUFuncs.cu TempoNestGPULikeFuncs.cpp
-temponest_@T2ARCH@_plug_la_LIBADD += -lTNGPU @CULA_LIBS@
-temponest_@T2ARCH@_plug_la_CPPFLAGS += @CULA_CFLAGS@
-endif
+temponest_@T2ARCH@_plug_la_LIBADD = -lgfortran -ltempo2 -lsofa @MULTINEST_LIBS@ @GSL_LIBS@ @BLAS_LIBS@ @LIBS_LAPACK@ @TEMPO2_LIBS@ $(MPI_CXXLIBS)
 
-# This sets the options that are needed to build nice modules with libtool
-temponest_@T2ARCH@_plug_la_LDFLAGS = -shared -module -avoid-version -shrext .t2
+temponest_@T2ARCH@_plug_la_CPPFLAGS = @MULTINEST_CFLAGS@ @GSL_CFLAGS@ @TEMPO2_CFLAGS@ @EIGEN_CPPFLAGS@ $(MPI_CXXFLAGS)
+
+temponest_@T2ARCH@_plug_la_LDFLAGS = -fopenmp  -shared -module -avoid-version -shrext .t2 $(MPI_CXXLDFLAGS) 
 
 temponest: temponest_@T2ARCH@_plug.la
 

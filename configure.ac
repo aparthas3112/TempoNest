@@ -4,6 +4,22 @@
 AC_PREREQ(2.57)
 AC_INIT([TempoNest],[0.1],[ltl21@mrao.cam.ac.uk])
 
+# Check for MPI
+AC_LANG_PUSH([C++])
+AC_LANG_POP([C++])
+
+# Set MPI flags
+AC_SUBST(MPI_CXXFLAGS)
+AC_SUBST(MPI_CXXLIBS)
+AC_SUBST(MPI_CXXLDFLAGS)
+
+# Capture MPI compiler flags
+if test "x$MPICXX" != "x"; then
+    MPI_CXXFLAGS=`$MPICXX -showme:compile`
+    MPI_CXXLIBS=`$MPICXX -showme:link`
+    MPI_CXXLDFLAGS=`$MPICXX -showme:link | sed 's/-l[^ ]*//g'`
+fi
+
 AC_ARG_VAR([TEMPO2], [Default TEMPO2 installation directory])
 AC_PREFIX_DEFAULT([${TEMPO2:-"/usr/local"}])
 
@@ -19,11 +35,11 @@ AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([autoconf])
 
 # Checks for programs.
-AC_PROG_CXX([g++])
-AC_PROG_CXXCPP([g++])
-AC_PROG_CC([gcc])
-AC_PROG_CPP([g++])
-AM_PROG_CC_C_O([gcc])
+AC_PROG_CXX([mpicxx])
+AC_PROG_CXXCPP([mpicxx])
+AC_PROG_CC([mpicc])
+AC_PROG_CPP([mpicxx])
+AM_PROG_CC_C_O([mpicc])
 AC_PROG_F77([gfortran])
 AC_PROG_F77_C_O([gfortran])
 AC_F77_LIBRARY_LDFLAGS
@@ -51,6 +67,10 @@ AS_IF([test "x$enable_debug" = xyes], [
 # Add warning flags
 CFLAGS="$CFLAGS -Wall -Wextra -Wpedantic"
 CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wpedantic"
+
+# Add MPI flags
+CXXFLAGS="$CXXFLAGS $MPI_CXXFLAGS"
+LDFLAGS="$LDFLAGS $MPI_CXXLDFLAGS"
 
 # Respect user-set flags
 if test "x$user_set_cxxflags" = xyes; then
@@ -175,6 +195,15 @@ fi
 # Add Eigen CPPFLAGS to the global CPPFLAGS
 CPPFLAGS="$CPPFLAGS $EIGEN_CPPFLAGS"
 AC_SUBST([EIGEN_CPPFLAGS])
+
+# Check for OpenMP
+AC_OPENMP
+if test "x$ac_cv_openmp" != "xno"; then
+    OPENMP_CXXFLAGS="$OPENMP_CXXFLAGS"
+else
+    AC_MSG_WARN([OpenMP not found. Eigen will run single-threaded.])
+fi
+AC_SUBST(OPENMP_CXXFLAGS)
 
 # test for LAPACK acceleration
 ACX_LAPACK(have_lapack=yes, have_lapack=no)

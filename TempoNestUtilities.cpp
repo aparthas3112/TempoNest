@@ -25,7 +25,6 @@
 
 #include <gsl/gsl_sf_gamma.h>
 #include <math.h>
-#include <Eigen/Dense>
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -38,6 +37,7 @@
 #include <vector>
 #include "T2toolkit.h"
 #include "TempoNest.h"
+#include "eigen_config.h"
 #include "tempo2.h"
 
 int UtWrap(int kX, int const kLowerBound, int const kUpperBound)

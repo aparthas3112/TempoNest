@@ -34,7 +34,6 @@
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
-#include <Eigen/Dense>
 #include <cstring>
 #include <fstream>
 #include <iomanip>
@@ -43,6 +42,7 @@
 #include <vector>
 #include "T2toolkit.h"
 #include "TempoNest.h"
+#include "eigen_config.h"
 #include "tempo2.h"
 
 #ifdef HAVE_MLAPACK
