@@ -176,169 +176,40 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     }
 
     pcount = fitcount;
-    if (((MNStruct*)globalcontext)->incStep > 0) {
-        for (int i = 0; i < ((MNStruct*)globalcontext)->incStep; i++) {
-
-            int GrouptoFit = 0;
-            double GroupStartTime = 0;
-
-            GrouptoFit = floor(Cube[pcount]);
-            pcount++;
-
-            double GLength = ((MNStruct*)globalcontext)->GroupStartTimes[GrouptoFit][1] -
-                             ((MNStruct*)globalcontext)->GroupStartTimes[GrouptoFit][0];
-            GroupStartTime =
-                ((MNStruct*)globalcontext)->GroupStartTimes[GrouptoFit][0] + Cube[pcount] * GLength;
-            pcount++;
-
-            double StepAmp = Cube[pcount];
-            pcount++;
-
-            // printf("Step details: Group %i S %g F %g SS %g A %g \n", GrouptoFit, ((MNStruct
-            // *)globalcontext)->GroupStartTimes[GrouptoFit][0],((MNStruct
-            // *)globalcontext)->GroupStartTimes[GrouptoFit][1],GroupStartTime,StepAmp);
-
-            for (int o1 = 0; o1 < ((MNStruct*)globalcontext)->pulse->nobs; o1++) {
-                if (((MNStruct*)globalcontext)->pulse->obsn[o1].sat > GroupStartTime &&
-                    ((MNStruct*)globalcontext)->GroupNoiseFlags[o1] == GrouptoFit) {
-                    Resvec[o1] += StepAmp;
-                }
-            }
-        }
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////Subtract GLitches/////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////
-
-    for (int i = 0; i < ((MNStruct*)globalcontext)->incGlitch; i++) {
-        double GlitchMJD = Cube[pcount];
-        pcount++;
-
-        double* GlitchAmps = new double[3];
-        if (((MNStruct*)globalcontext)->incGlitchTerms == 1) {
-            GlitchAmps[0] = Cube[pcount];
-            pcount++;
-        } else if (((MNStruct*)globalcontext)->incGlitchTerms == 2) {
-            GlitchAmps[0] = Cube[pcount];
-            pcount++;
-            GlitchAmps[1] = Cube[pcount];
-            pcount++;
-        } else if (((MNStruct*)globalcontext)->incGlitchTerms == 3) {
-            GlitchAmps[0] = Cube[pcount];
-            pcount++;
-            GlitchAmps[1] = pow(10.0, Cube[pcount]);  // Decay Amp
-            pcount++;
-            GlitchAmps[2] = pow(10.0, Cube[pcount]);  // Decay Timescale
-            pcount++;
-        }
-
-        for (int o1 = 0; o1 < ((MNStruct*)globalcontext)->pulse->nobs; o1++) {
-            if (((MNStruct*)globalcontext)->pulse->obsn[o1].bat > GlitchMJD) {
-
-                if (((MNStruct*)globalcontext)->incGlitchTerms == 1) {
-
-                    long double arg = 0;
-                    arg = ((((MNStruct*)globalcontext)->pulse->obsn[o1].bat - GlitchMJD) /
-                           ((MNStruct*)globalcontext)->pulse->param[param_f].val[0]) *
-                          86400.0;
-                    double darg = (double)arg;
-                    Resvec[o1] += GlitchAmps[0] * darg;
-
-                } else if (((MNStruct*)globalcontext)->incGlitchTerms == 2) {
-                    for (int j = 0; j < ((MNStruct*)globalcontext)->incGlitchTerms; j++) {
-
-                        long double arg = 0;
-                        if (j == 0) {
-                            arg = ((((MNStruct*)globalcontext)->pulse->obsn[o1].bat - GlitchMJD) /
-                                   ((MNStruct*)globalcontext)->pulse->param[param_f].val[0]) *
-                                  86400.0;
-                        }
-                        if (j == 1) {
-                            arg =
-                                0.5 *
-                                pow((((MNStruct*)globalcontext)->pulse->obsn[o1].bat - GlitchMJD) *
-                                        86400.0,
-                                    2) /
-                                ((MNStruct*)globalcontext)->pulse->param[param_f].val[0];
-                        }
-                        double darg = (double)arg;
-                        Resvec[o1] += GlitchAmps[j] * darg;
-                    }
-                } else if (((MNStruct*)globalcontext)->incGlitchTerms == 3) {
-                    long double arg = 0;
-                    double time = (((MNStruct*)globalcontext)->pulse->obsn[o1].bat - GlitchMJD);
-                    arg = ((((MNStruct*)globalcontext)->pulse->obsn[o1].bat - GlitchMJD) /
-                           ((MNStruct*)globalcontext)->pulse->param[param_f].val[0]) *
-                          86400.0;
-                    double darg = (double)arg;
-                    Resvec[o1] += GlitchAmps[0] * darg +
-                                  GlitchAmps[1] * darg * exp(-1 * time / GlitchAmps[2]);
-                }
-            }
-        }
-
-        delete[] GlitchAmps;
-    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////Get White Noise vector///////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     if (((MNStruct*)globalcontext)->numFitEFAC == 0) {
-        EFAC = new double*[((MNStruct*)globalcontext)->EPolTerms];
-        for (int n = 1; n <= ((MNStruct*)globalcontext)->EPolTerms; n++) {
-            EFAC[n - 1] = new double[((MNStruct*)globalcontext)->systemcount];
-            if (n == 1) {
-                for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-                    EFAC[n - 1][o] = 1;
-                }
-            } else {
-                for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-                    EFAC[n - 1][o] = 0;
-                }
-            }
+        EFAC = new double*[1];
+        EFAC[0] = new double[((MNStruct*)globalcontext)->systemcount];
+        for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
+            EFAC[0][o] = 1;
         }
+
     } else if (((MNStruct*)globalcontext)->numFitEFAC == 1) {
-        EFAC = new double*[((MNStruct*)globalcontext)->EPolTerms];
-        for (int n = 1; n <= ((MNStruct*)globalcontext)->EPolTerms; n++) {
+        EFAC = new double*[1];
 
-            EFAC[n - 1] = new double[((MNStruct*)globalcontext)->systemcount];
-            if (n == 1) {
-                for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-                    EFAC[n - 1][o] = pow(10.0, Cube[pcount]);
-                    if (((MNStruct*)globalcontext)->EFACPriorType == 1) {
-                        uniformpriorterm += log(EFAC[n - 1][o]);
-                    }
-                }
-                pcount++;
-            } else {
-                for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-
-                    EFAC[n - 1][o] = pow(10.0, Cube[pcount]);
-                }
-                pcount++;
+        EFAC[0] = new double[((MNStruct*)globalcontext)->systemcount];
+        for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
+            EFAC[0][o] = pow(10.0, Cube[pcount]);
+            if (((MNStruct*)globalcontext)->EFACPriorType == 1) {
+                uniformpriorterm += log(EFAC[0][o]);
             }
         }
+        pcount++;
 
     } else if (((MNStruct*)globalcontext)->numFitEFAC > 1) {
-        EFAC = new double*[((MNStruct*)globalcontext)->EPolTerms];
-        for (int n = 1; n <= ((MNStruct*)globalcontext)->EPolTerms; n++) {
-            EFAC[n - 1] = new double[((MNStruct*)globalcontext)->systemcount];
-            if (n == 1) {
-                for (int p = 0; p < ((MNStruct*)globalcontext)->systemcount; p++) {
-                    EFAC[n - 1][p] = pow(10.0, Cube[pcount]);
-                    if (((MNStruct*)globalcontext)->EFACPriorType == 1) {
-                        uniformpriorterm += log(EFAC[n - 1][p]);
-                    }
-                    pcount++;
-                }
-            } else {
-                for (int p = 0; p < ((MNStruct*)globalcontext)->systemcount; p++) {
-                    EFAC[n - 1][p] = pow(10.0, Cube[pcount]);
-                    pcount++;
-                }
+        EFAC = new double*[1];
+        EFAC[0] = new double[((MNStruct*)globalcontext)->systemcount];
+
+        for (int p = 0; p < ((MNStruct*)globalcontext)->systemcount; p++) {
+            EFAC[0][p] = pow(10.0, Cube[pcount]);
+            if (((MNStruct*)globalcontext)->EFACPriorType == 1) {
+                uniformpriorterm += log(EFAC[0][p]);
             }
+            pcount++;
         }
     }
 
@@ -378,11 +249,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     double* Noise;
     double* BATvec;
     Noise = new double[((MNStruct*)globalcontext)->pulse->nobs];
-    // BATvec=new double[((MNStruct *)globalcontext)->pulse->nobs];
-
-    // for(int o=0;o<((MNStruct *)globalcontext)->pulse->nobs; o++){
-    // BATvec[o]=(double)((MNStruct *)globalcontext)->pulse->obsn[o].bat;
-    //}
 
     double DMKappa = 2.410 * pow(10.0, -16);
     if (((MNStruct*)globalcontext)->whitemodel == 0) {
@@ -397,11 +263,8 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
                 noiseval = ((MNStruct*)globalcontext)->pulse->obsn[o].origErr;
             }
 
-            for (int n = 1; n <= ((MNStruct*)globalcontext)->EPolTerms; n++) {
-                EFACterm =
-                    EFACterm + pow((noiseval * pow(10.0, -6)) / pow(pow(10.0, -7), n - 1), n) *
-                                   EFAC[n - 1][((MNStruct*)globalcontext)->sysFlags[o]];
-            }
+            EFACterm =
+                (noiseval * pow(10.0, -6)) * EFAC[0][((MNStruct*)globalcontext)->sysFlags[o]];
 
             // printf("Noise: %i %g %g %g %g %g \n", EFACterm, EQUAD[((MNStruct
             // *)globalcontext)->sysFlags[o]], ShannonJitterTerm, SWTerm, DMEQUADTerm);
@@ -463,7 +326,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     double freqdet = 0;
     int startpos = 0;
 
-    if (((MNStruct*)globalcontext)->incRED > 0 || ((MNStruct*)globalcontext)->incGWB == 1) {
+    if (((MNStruct*)globalcontext)->incRED > 0) {
 
         if (((MNStruct*)globalcontext)->FitLowFreqCutoff == 1) {
             double fLow = pow(10.0, Cube[pcount]);
@@ -501,7 +364,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
             }
         }
 
-        for (int i = 0; i < FitRedCoeff / 2 - ((MNStruct*)globalcontext)->incFloatRed; i++) {
+        for (int i = 0; i < FitRedCoeff / 2; i++) {
 
             freqs[startpos + i] = (double)((MNStruct*)globalcontext)->sampleFreq[i] / maxtspan;
             freqs[startpos + i + FitRedCoeff / 2] = freqs[startpos + i];
@@ -566,7 +429,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
             }
 
             double Agw = redamp;
-            for (int i = 0; i < FitRedCoeff / 2 - ((MNStruct*)globalcontext)->incFloatRed; i++) {
+            for (int i = 0; i < FitRedCoeff / 2; i++) {
 
                 double rho = 0;
                 if (((MNStruct*)globalcontext)->incRED == 3) {
@@ -588,37 +451,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
         int coefftovary = 0;
         double amptovary = 0.0;
-        if (((MNStruct*)globalcontext)->varyRedCoeff == 1) {
-            coefftovary = int(pow(10.0, Cube[pcount])) - 1;
-            pcount++;
-            amptovary = pow(10.0, Cube[pcount]);
-            pcount++;
-
-            powercoeff[coefftovary] = amptovary;
-            powercoeff[coefftovary + FitRedCoeff / 2] = amptovary;
-        }
-
-        startpos = FitRedCoeff;
-    }
-
-    if (((MNStruct*)globalcontext)->incGWB == 1) {
-        double GWBAmp = pow(10.0, Cube[pcount]);
-        pcount++;
-        uniformpriorterm += log(GWBAmp);
-        double Tspan = maxtspan;
-
-        if (((MNStruct*)globalcontext)->FitLowFreqCutoff == 2) {
-            Tspan = Tspan / ((MNStruct*)globalcontext)->sampleFreq[0];
-        }
-
-        double f1yr = 1.0 / 3.16e7;
-        for (int i = 0; i < FitRedCoeff / 2 - ((MNStruct*)globalcontext)->incFloatRed; i++) {
-            double rho = (GWBAmp * GWBAmp / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) *
-                         pow(freqs[i] * 365.25, (-4.333)) / (Tspan * 24 * 60 * 60);
-            powercoeff[i] += rho;
-            powercoeff[i + FitRedCoeff / 2] += rho;
-            // printf("%i %g %g \n", i, freqs[i], powercoeff[i]);
-        }
 
         startpos = FitRedCoeff;
     }
@@ -641,9 +473,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
         for (int i = 0; i < FitDMCoeff / 2; i++) {
 
             freqs[startpos + i] =
-                ((MNStruct*)globalcontext)
-                    ->sampleFreq[startpos / 2 - ((MNStruct*)globalcontext)->incFloatRed + i] /
-                maxtspan;
+                ((MNStruct*)globalcontext)->sampleFreq[startpos / 2 + i] / maxtspan;
             freqs[startpos + i + FitDMCoeff / 2] = freqs[startpos + i];
 
             if (((MNStruct*)globalcontext)->storeFMatrices == 0) {
@@ -699,15 +529,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
         int coefftovary = 0;
         double amptovary = 0.0;
-        if (((MNStruct*)globalcontext)->varyDMCoeff == 1) {
-            coefftovary = int(pow(10.0, Cube[pcount])) - 1;
-            pcount++;
-            amptovary = pow(10.0, Cube[pcount]) / (maxtspan * 24 * 60 * 60);
-            pcount++;
-
-            powercoeff[startpos + coefftovary] = amptovary;
-            powercoeff[startpos + coefftovary + FitDMCoeff / 2] = amptovary;
-        }
 
         for (int i = 0; i < FitDMCoeff / 2; i++) {
             freqdet = freqdet + 2 * log(powercoeff[startpos + i]);
@@ -777,17 +598,12 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     delete[] DMVec;
 
-    for (int i = 0; i < ((MNStruct*)globalcontext)->EPolTerms; i++)
-        delete[] EFAC[i];
+    delete[] EFAC[0];
     delete[] EFAC;
     delete[] EQUAD;
     delete[] powercoeff;
     delete[] freqs;
     delete[] Noise;
-
-    ((MNStruct*)globalcontext)->PreviousJointDet = jointdet;
-    ((MNStruct*)globalcontext)->PreviousFreqDet = freqdet;
-    ((MNStruct*)globalcontext)->PreviousUniformPrior = uniformpriorterm;
 
     // printf("tdet %g, jointdet %g, freqdet %g, lnew %g, timelike %g, freqlike %g\n", tdet,
     // jointdet, freqdet, lnew, timelike, freqlike);

@@ -50,28 +50,22 @@ typedef struct {
     int numFitJumps;
     int numFitTiming;
     int numFitEFAC;
-    int EPolTerms;
+
     int numFitEQUAD;
     int incDMEQUAD;
     int* includeEQsys;
     int numFitRedCoeff;
     int numFitDMCoeff;
-    int numFitScatCoeff;
+
     int totCoeff;
     int numFitRedPL;
     int numFitDMPL;
-    int numFitScatPL;
+
     double* sampleFreq;
     int numdims;
     int incRED;
     int incDM;
-    int incScat;
-    int incFloatDM;
-    int incFloatRed;
-    int yearlyDM;
-    int incsinusoid;
-    int FloatDMstart;
-    int FloatRedstart;
+
     int Gsize;
     int Dsize;
     int** TempoFitNums;
@@ -82,53 +76,23 @@ typedef struct {
     int TimeMargin;
     int JumpMargin;
     std::string* name;
-    int incStep;
+
     char* whiteflag;
-    char* GroupNoiseName;
+
     int whitemodel;
-    int varyRedCoeff;
-    int varyDMCoeff;
-    int incGWB;
-    int incDMEvent;
-    int incDMShapeEvent;
-    int numDMShapeCoeff;
-    int incRedShapeEvent;
-    int MarginRedShapeCoeff;
-    int numRedShapeCoeff;
-    int incDMScatterShapeEvent;
-    int numDMScatterShapeCoeff;
+
     int RedPriorType;
     int DMPriorType;
-    int ScatPriorType;
+
     int EQUADPriorType;
     int EFACPriorType;
     int useOriginalErrors;
-    int incShannonJitter;
-    int incNGJitter;
-    int incNGSJitter;
-    int numNGJitterEpochs;
-    int numNGSJitterEpochs;
-    double** NGJitterMatrix;
-    double** NGSJitterMatrix;
-    int* NGJitterSysFlags;
-    int* NGSJitterSysFlags;
-    int incGlitch;
-    int incGlitchTerms;
-    int incBreakingIndex;
+
     int FitLowFreqCutoff;
     int useNbitsAlgebra;
-    int incGroupNoise;
-    int numFitGroupNoiseCoeff;
-    int** FitForGroup;
-    int numGroupstoFit;
-    double** GroupStartTimes;
-    int incBandNoise;
-    int numFitBandNoiseCoeff;
-    int** FitForBand;
+
     int printResiduals;
-    int* GroupNoiseFlags;
-    int FitSolarWind;
-    int FitWhiteSolarWind;
+
     int storeFMatrices;
     double* StoredTMatrix;
     double* StoredDMVals;
@@ -136,144 +100,9 @@ typedef struct {
     int usecosiprior;
     double* PreJumpVals;
     int doMax;
-    double** FitForExtraComp;
-    int incExtraProfComp;
-    int incTimeCorrProfileNoise;
-    double* PrecAmps;
-    double* PrecRefMJDs;
-    int* PrecNPoly;
-    int* TimeEpochIndex;
-    double* TimeEpochs;
-    int NumTimeEvoEpochs;
-    int HighSNEQUAD;
-    int* HighSNStocProfPriors;
-    /*GPTA stuff*/
 
-    int incProfileScatter;
-    int ScatterPBF;
-    int* ScatterIndex;
-
-    int incWideBandNoise;
-    int* numshapecoeff;
-    int totshapecoeff;
-    int* numshapestoccoeff;
-    int totalshapestoccoeff;
-    int TOAnumber;
-    int FixProfile;
-    int InterpolateProfile;
-    int NumToInterpolate;
-    double InterpolatedTime;
-    double PrecN;
-    double* PrecD;
-    double* PrecBasis;
-    int FitPrecAmps;
     double* DMatrixVec;
-
-    // double ***InterpolatedShapelets;
-    int SparseNBin;
-    int* SparseMap;
-    double** SparseShapeletsVec;
-    double** SparseJitterProfileVec;
-    double** InterpolatedShapeletsVec;
-    double** InterpolatedJitterProfileVec;
-    double** InterpolatedWidthProfileVec;
-    double** InterpolatedMeanProfile;
-    double** InterpolatedJitterProfile;
-    double** InterpolatedWidthProfile;
-    double** InterpolatedFBasis;
-    double** InterpolatedFJitterBasis;
-    int NFBasis;
-    double** FourierProfileData;
-    int* numChanPerInt;
-    int numProfileEpochs;
-    int TotalProfiles;
-    double* MeanProfileShape;
-    double** MeanProfileEvo;
-    double* MeanProfileStoc;
-    double* MeanProfileBeta;
-    double MeanScatter;
-    long double** ProfileInfo;
-    long double*** ProfileData;
-    long double ReferencePeriod;
-    double* Factorials;
-    double* Binomial;
-    double MaxShapeAmp;
-    double offPulseLevel;
-    int incHighFreqStoc;
-    int incProfileEvo;
-    int FitEvoExponent;
-    double EvoRefFreq;
-    int* numEvoCoeff;
-    int totalEvoCoeff;
-    int* numEvoFitCoeff;
-    int totalEvoFitCoeff;
-    int incProfileFit;
-    int* numProfileFitCoeff;
-    int totalProfileFitCoeff;
-    int totalCoeffForMult;
-    int FitLinearProfileWidth;
-    int numProfComponents;
-    int incWidthJitter;
-    int incWidthEvoTime;
-    int JitterProfComp;
-    int incProfileEnergyEvo;
-    int ProfileBaselineTerms;
-    int incProfileNoise;
-    int ProfileNoiseCoeff;
-    int SubIntToFit;
-    int ChannelToFit;
-    double** MLProfileNoise;
-    int NProfileEvoPoly;
-    int NProfileTimePoly;
-    int ProfTimeEvoDims;
-    double* ProfCompSeps;
-    int diagonalGHS;
-    double PhasePrior;
-    int WriteNewML;
-    int LargestNBins;
-    int FitProfParams;
-    double ProfEvoTimeRef;
-    int NumExtraCompCoeffs;
-    int incPrecession;
-    int* numTimeCorrCoeff;
-    int totalTimeCorrCoeff;
-    double phasePriorExpansion;
-    int ProfileNoiseMethod;
-    int* FitCompWidths;
-    int* FitCompPos;
-    int NumFitCompWidths;
-    int NumFitCompPos;
-    int NumCompswithWidth;
-    int NumCompswithPos;
-
-    int GHSperProfDims;
-    int GHSperEpochDims;
-    int GHSepochpriordims;
-    int GHSglobaldims;
-
-    /*Template Stuff*/
-
-    int numTempFreqs;
-    double* TemplateFreqs;
-    double* TemplateChans;
-    double* TemplateNoise;
-
-    /*Grade Stuff: Need to track Grades and store previous likelihood things for hierarchial
-     * evaluation*/
-
-    int sampler;
-    int doGrades;
-    int* PolyChordGrades;
     double* PriorsArray;
-    int PreviousInfo;
-    double PreviousJointDet;
-    double PreviousFreqDet;
-    double PreviousUniformPrior;
-    double* LastParams;
-    double** PreviousTNT;
-    double** PreviousNT;
-    double* PreviousNoise;
-    int* hypercube_indices;
 
     int debug;
     int rank;
@@ -397,41 +226,15 @@ void readsummary(pulsar* psr, std::string longname, int ndim, void* context, lon
 void setupMNparams(char* ConfigFileName, int& sampler, int& IS, int& modal, int& ceff, int& nlive,
                    double& efr, int& sample, int& updInt, int& nClsPar, int& Nchords, int& NBurn,
                    int& NSamp, int& GHSresume);
-void setupparams(
-    char* ConfigFileName, int& useGPUS, char* root, int& numTempo2its, int& doLinearFit, int& doMax,
-    int& incEFAC, int& EPolyTerms, int& incEQUAD, int& incRED, int& incDM, int& incScat,
-    int& doTimeMargin, int& doJumpMargin, double& FitSig, int& customPriors, double* EFACPrior,
-    double* EPolyPriors, double* EQUADPrior, double* AlphaPrior, double* AmpPrior,
-    double* DMAlphaPrior, double* DMAmpPrior, double* ScatAlphaPrior, double* ScatAmpPrior,
-    double& numRedCoeff, double& numDMCoeff, double& numScatCoeff, int& numRedPL, int& numDMPL,
-    int& numScatPL, double* RedCoeffPrior, double* DMCoeffPrior, double* ScatCoeffPrior,
-    int& FloatingDM, double* DMFreqPrior, int& yearlyDM, int& incsinusoid, int& FloatingRed,
-    double* RedFreqPrior, double& FourierSig, int& incStep, double* StepAmpPrior, char* whiteflag,
-    int& whitemodel, int& varyRedCoeff, int& varyDMCoeff, int& incGWB, double* GWBAmpPrior,
-    int& RedPriorType, int& DMPriorType, int& ScatPriorType, int& EQUADPriorType,
-    int& EFACPriorType, int& useOriginalErrors, int& incShannonJitter, int& incDMEvent,
-    double* DMEventStartPrior, double* DMEventLengthPrior, int& incDMShapeEvent,
-    int& numDMShapeCoeff, double* DMShapeCoeffPrior, int& incRedShapeEvent, int& numRedShapeCoeff,
-    int& MarginRedShapeCoeff, double* RedShapeCoeffPrior, int& incDMScatterShapeEvent,
-    int& numDMScatterShapeCoeff, double* DMScatterShapeCoeffPrior, int& incBandNoise,
-    int& numBandNoiseCoeff, double* BandNoiseAmpPrior, double* BandNoiseAlphaPrior,
-    int& incNGJitter, int& incNGSJitter, int& incGlitch, int& incGlitchTerms, double& GlitchFitSig,
-    int& incBreakingIndex, int& FitLowFreqCutoff, int& useNbitsAlgebra, int& incGroupNoise,
-    int& numGroupCoeff, double* GroupNoiseAmpPrior, double* GroupNoiseAlphaPrior, int& FitSolarWind,
-    int& FitWhiteSolarWind, double* SolarWindPrior, double* WhiteSolarWindPrior, int& GPTA,
-    char* GroupNoiseFlag, int& FixProfile, int& FitTemplate, int& InterpolateProfile,
-    double& InterpolatedTime, int& StoreTMatrix, int& incHighFreqStoc, double* HighFreqStocPrior,
-    int& incProfileEvo, double& EvoRefFreq, double* ProfileEvoPrior, int& FitEvoExponent,
-    int& incWideBandNoise, int& incProfileFit, double* ProfileFitPrior, int& FitLinearProfileWidth,
-    double* LinearProfileWidthPrior, int& incDMEQUAD, double* DMEQUADPrior, double& offPulseLevel,
-    char* ProfFile, int& numProfComponents, int& incWidthJitter, double* WidthJitterPrior,
-    int& JitterProfCompint, int& incProfileEnergyEvo, double* ProfileEnergyEvoPrior, int& debug,
-    int& ProfileBaselineTerms, int& incProfileNoise, int& ProfileNoiseCoeff,
-    double* ProfileNoiseAmpPrior, double* ProfileNoiseSpecPrior, int& SubIntToFit,
-    int& ChannelToFit, int& NProfileEvoPoly, int& usecosiprior, int& incWidthEvoTime,
-    int& incExtraProfComp, int& removeBaseline, int& incPrecession, int& incTimeCorrProfileNoise,
-    double& phasePriorExpansion, int& ProfileNoiseMethod, int& FitPrecAmps, int& NProfileTimePoly,
-    int& incProfileScatter, int& ScatterPBF);
+void setupparams(char* ConfigFileName, int& useGPUS, char* root, int& numTempo2its,
+                 int& doLinearFit, int& doMax, int& incEFAC, int& incEQUAD, int& incRED, int& incDM,
+                 int& doTimeMargin, int& doJumpMargin, double& FitSig, int& customPriors,
+                 double* EFACPrior, double* EQUADPrior, double* AlphaPrior, double* AmpPrior,
+                 double* DMAlphaPrior, double* DMAmpPrior, double& numRedCoeff, double& numDMCoeff,
+                 double& numScatCoeff, int& numRedPL, int& numDMPL, double& FourierSig,
+                 char* whiteflag, int& whitemodel, int& RedPriorType, int& DMPriorType,
+                 int& EQUADPriorType, int& EFACPriorType, int& useOriginalErrors,
+                 int& FitLowFreqCutoff, int& useNbitsAlgebra, int& StoreTMatrix, int& debug);
 
 void setTNPriors(char* ConfigFileName, double** Dpriors, long double** TempoPriors, int TPsize,
                  int DPsize);

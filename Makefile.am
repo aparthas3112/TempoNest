@@ -43,8 +43,7 @@ common_sources = tempo2pred_int.h T2accel.h tempo2pred.h tempo2Util.h constraint
                  TempoNest.h  \
                  TempoNestLikeFuncs.cpp   multinest.h \
                  TempoNestTextOutput.cpp  MultiNestParams.cpp\
-                 TempoNestPlugin.cpp TempoNestParams.cpp TempoNestUtilities.cpp \
-                 TNpriors.cpp 
+                 TempoNestPlugin.cpp TempoNestParams.cpp TempoNestUtilities.cpp
 
 temponest_@T2ARCH@_plug_la_SOURCES = $(common_sources)
 temponest_@T2ARCH@_plug_la_CXXFLAGS = $(AM_CXXFLAGS)
