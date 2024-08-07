@@ -142,13 +142,22 @@ AC_MSG_RESULT($have_blas)
 AM_CONDITIONAL(HAVE_BLAS, [test x$have_blas = xyes])
 
 # Check for Eigen
+AC_ARG_WITH([eigen],
+    [AS_HELP_STRING([--with-eigen=DIR],
+        [prefix for Eigen headers])],
+    [EIGEN_CPPFLAGS="-I$withval"],
+    [EIGEN_CPPFLAGS='-I/usr/include/eigen3'])
+
 AC_MSG_CHECKING([for Eigen])
+save_CPPFLAGS=$CPPFLAGS
+CPPFLAGS="$CPPFLAGS $EIGEN_CPPFLAGS"
 AC_LANG_PUSH([C++])
 AC_TRY_COMPILE([#include <Eigen/Dense>],
                [Eigen::MatrixXd m(2,2);],
                [have_eigen=yes],
                [have_eigen=no])
 AC_LANG_POP([C++])
+CPPFLAGS=$save_CPPFLAGS
 AC_MSG_RESULT([$have_eigen])
 
 if test "x$have_eigen" = xno; then
@@ -158,17 +167,13 @@ if test "x$have_eigen" = xno; then
     or
     ./configure --with-eigen=/path/to/eigen
     
-    Current CPPFLAGS: $CPPFLAGS
+    Current EIGEN_CPPFLAGS: $EIGEN_CPPFLAGS
     Current compile command: $CXX $CPPFLAGS $CXXFLAGS
     ])
 fi
 
-# Add option to specify Eigen include directory
-AC_ARG_WITH([eigen],
-    [AS_HELP_STRING([--with-eigen=DIR],
-        [prefix for Eigen headers])],
-    [EIGEN_CPPFLAGS="-I$withval"],
-    [EIGEN_CPPFLAGS='-I/usr/include/eigen3'])
+# Add Eigen CPPFLAGS to the global CPPFLAGS
+CPPFLAGS="$CPPFLAGS $EIGEN_CPPFLAGS"
 AC_SUBST([EIGEN_CPPFLAGS])
 
 # test for LAPACK acceleration
