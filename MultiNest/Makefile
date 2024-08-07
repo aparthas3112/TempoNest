@@ -1,10 +1,13 @@
 FC = mpif90# -fc=gfortran
 CC = mpicc 
 CXX = mpicxx 
-FFLAGS += -O3 -DMPI -fPIC -ffree-line-length-none -fallow-argument-mismatch
-CFLAGS += -O3 -DMPI
 
-LAPACKLIB = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread
+
+
+FFLAGS += -O3 -DMPI -fPIC -ffree-line-length-none
+CFLAGS += -O3 -DMPI -fPIC
+
+LAPACKLIB = -llapack -lpthread -lmpi -lmpi_mpifh
 
 NESTLIBDIR = ./
 
@@ -12,7 +15,7 @@ export FC CC CXX FFLAGS CFLAGS LAPACKLIB
 
  
 AR = ar r  
-LINKLIB = ld -shared
+LINKLIB = $(FC) -shared
  
 NSOBJECTS = utils.o utils1.o priors.o kmeans_clstr.o xmeans_clstr.o posterior.o nested.o
 
@@ -28,7 +31,7 @@ all: libnest3.a obj_detect eggbox eggboxC eggboxC++ gaussian gauss_shell \
 rosenbrock himmelblau ackley
  
 libnest3.so: $(NSOBJECTS) 
-	$(LINKLIB) -o $(LIBS) $@ $^ 
+	$(LINKLIB) -o $@ $^ $(LAPACKLIB)
  
 libnest3.a: $(NSOBJECTS) 
 	$(AR) $@ $^ 

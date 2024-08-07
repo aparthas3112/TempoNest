@@ -4,6 +4,23 @@
 AC_PREREQ(2.57)
 AC_INIT([TempoNest],[0.1],[ltl21@mrao.cam.ac.uk])
 
+# Check for MPI
+AC_LANG_PUSH([C++])
+AC_LANG_POP([C++])
+
+# Set MPI flags
+AC_SUBST(MPI_CXXFLAGS)
+AC_SUBST(MPI_CXXLIBS)
+AC_SUBST(MPI_CXXLDFLAGS)
+
+# Capture MPI compiler flags
+if test "x$MPICXX" != "x"; then
+    MPI_CXXFLAGS=`$MPICXX -showme:compile`
+    MPI_CXXLIBS=`$MPICXX -showme:link`
+    MPI_CXXLDFLAGS=`$MPICXX -showme:link | sed 's/-l[^ ]*//g'`
+fi
+
+
 AC_ARG_VAR([TEMPO2], [Default TEMPO2 installation directory])
 AC_PREFIX_DEFAULT([${TEMPO2:-"/usr/local"}])
 
@@ -19,11 +36,11 @@ AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([autoconf])
 
 # Checks for programs.
-AC_PROG_CXX([g++])
-AC_PROG_CXXCPP([g++])
-AC_PROG_CC([gcc])
-AC_PROG_CPP([g++])
-AM_PROG_CC_C_O([gcc])
+AC_PROG_CXX([mpicxx])
+AC_PROG_CXXCPP([mpicxx])
+AC_PROG_CC([mpicc])
+AC_PROG_CPP([mpicxx])
+AM_PROG_CC_C_O([mpicc])
 AC_PROG_F77([gfortran])
 AC_PROG_F77_C_O([gfortran])
 AC_F77_LIBRARY_LDFLAGS
@@ -31,6 +48,31 @@ AC_PROG_FC
 
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
+
+# Optimization flags
+AC_ARG_ENABLE([debug],
+    [AS_HELP_STRING([--enable-debug], [Enable debug build])],
+    [enable_debug=$enableval],
+    [enable_debug=no])
+
+AS_IF([test "x$enable_debug" = xyes], [
+    CFLAGS="-g -O0"
+    CXXFLAGS="-g -O0"
+    FFLAGS="-g -O0 -DHAVE_CONFIG_H"
+], [
+    CFLAGS="-O3 -march=native -mtune=native -ffast-math"
+    CXXFLAGS="-O3 -march=native -mtune=native -ffast-math"
+    FFLAGS="-O3 -march=native -mtune=native -ffast-math -DHAVE_CONFIG_H"
+])
+
+# Add warning flags
+CFLAGS="$CFLAGS -Wall -Wextra -Wpedantic"
+CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wpedantic"
+
+# Add MPI flags
+CXXFLAGS="$CXXFLAGS $MPI_CXXFLAGS"
+LDFLAGS="$LDFLAGS $MPI_CXXLDFLAGS"
+
 
 if test X$user_set_cxxflags != Xyes; then
 	CXXFLAGS="-O3"
@@ -123,6 +165,16 @@ AC_MSG_CHECKING([for BLAS])
 AC_MSG_RESULT($have_blas)
 AM_CONDITIONAL(HAVE_BLAS, [test x$have_blas = xyes])
 
+# Check for OpenMP
+AC_OPENMP
+if test "x$ac_cv_openmp" != "xno"; then
+    OPENMP_CXXFLAGS="$OPENMP_CXXFLAGS"
+else
+    AC_MSG_WARN([OpenMP not found. Eigen will run single-threaded.])
+fi
+AC_SUBST(OPENMP_CXXFLAGS)
+
+
 # test for LAPACK acceleration
 ACX_LAPACK(have_lapack=yes, have_lapack=no)
 AC_MSG_CHECKING([for LAPACK])
@@ -171,6 +223,14 @@ AC_CONFIG_FILES([Makefile])
 #		 unsupported_plugins/toasim/Makefile
 #		 unsupported_plugins/ppta/Makefile
 #		 unsupported_plugins/glast/Makefile])
+
+AC_MSG_NOTICE([Summary of build options:])
+AC_MSG_NOTICE([  Debug mode: $enable_debug])
+AC_MSG_NOTICE([  CFLAGS: $CFLAGS])
+AC_MSG_NOTICE([  CXXFLAGS: $CXXFLAGS])
+AC_MSG_NOTICE([  FFLAGS: $FFLAGS])
+AC_MSG_NOTICE([  Eigen include flags: $EIGEN_CPPFLAGS])
+
 
 AC_OUTPUT
 
