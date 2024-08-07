@@ -49,6 +49,7 @@
     #include <mpblas_mpfr.h>
     #include <mplapack_mpfr.h>
 #endif
+#include <iostream>
 
 using namespace std;
 
@@ -428,6 +429,13 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     Eigen::MatrixXd TotalMatrix(((MNStruct*)context)->pulse->nobs, ((MNStruct*)context)->totalsize);
 
+    for (int i = 0; i < ((MNStruct*)globalcontext)->pulse->nobs; i++) {
+        for (int j = 0; j < ((MNStruct*)globalcontext)->totalsize; j++) {
+            TotalMatrix(i, j) = ((MNStruct*)globalcontext)
+                                    ->StoredTMatrix[i + j * ((MNStruct*)context)->pulse->nobs];
+        }
+    }
+
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////Set up Coefficients///////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -733,6 +741,8 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
         }
     }
 
+    // std::cout << TotalMatrix << std::endl;
+
     Eigen::MatrixXd TNT = TotalMatrix.transpose() * NT;
     Eigen::VectorXd NTd = NT.transpose() * Resvec;
 
@@ -761,6 +771,9 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     }
 
     double lnewChol = -0.5 * (tdet + jointdet + freqdet + timelike - freqlike) + uniformpriorterm;
+
+    // std::cout << "lnew " << lnewChol << " " << tdet << " " << jointdet << " " << freqdet << " "
+    //          << timelike << " " << freqlike << " " << uniformpriorterm << std::endl;
 
     delete[] DMVec;
 

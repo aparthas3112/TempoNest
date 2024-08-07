@@ -1187,10 +1187,16 @@ void StoreTMatrix(double* TotalMatrix, void* context)
         // Perform SVD
         Eigen::BDCSVD<Eigen::MatrixXd> svd(DMatrix, Eigen::ComputeThinU | Eigen::ComputeThinV);
 
+        std::cout << "SVD: " << svd.singularValues() << std::endl;
+        std::cout << "SVD U: " << svd.matrixU() << std::endl;
+        std::cout << "SVD V: " << svd.matrixV() << std::endl;
+
         Eigen::MatrixXd U = svd.matrixU();
         for (int i = 0; i < ((MNStruct*)context)->pulse->nobs; i++) {
             for (int j = 0; j < TimetoMargin; j++) {
                 TotalMatrix[i + j * ((MNStruct*)context)->pulse->nobs] = U(i, j);
+                std::cout << "setting TotalMatrix[" << i << " + " << j << " * "
+                          << ((MNStruct*)context)->pulse->nobs << "] = " << U(i, j) << std::endl;
             }
         }
     }
