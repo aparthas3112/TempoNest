@@ -237,46 +237,43 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     if (((MNStruct*)globalcontext)->incRED == 3) {
 
-        for (int pl = 0; pl < ((MNStruct*)globalcontext)->numFitRedPL; pl++) {
+        double Tspan = maxtspan;
+        double f1yr = 1.0 / 3.16e7;
 
-            double Tspan = maxtspan;
-            double f1yr = 1.0 / 3.16e7;
+        double redamp = Cube[pcount];
+        pcount++;
+        double redindex = Cube[pcount];
+        pcount++;
 
-            double redamp = Cube[pcount];
+        double cornerfreq = 0;
+        if (((MNStruct*)globalcontext)->incRED == 4) {
+            cornerfreq = pow(10.0, Cube[pcount]) / Tspan;
             pcount++;
-            double redindex = Cube[pcount];
-            pcount++;
+        }
 
-            double cornerfreq = 0;
+        redamp = pow(10.0, redamp);
+        if (((MNStruct*)globalcontext)->RedPriorType == 1) {
+            uniformpriorterm += log(redamp);
+        }
+
+        double Agw = redamp;
+        for (int i = 0; i < FitRedCoeff / 2; i++) {
+
+            double rho = 0;
+            if (((MNStruct*)globalcontext)->incRED == 3) {
+                rho = (Agw * Agw / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) *
+                      pow(freqs[i] * 365.25, (-redindex)) / (Tspan * 24 * 60 * 60);
+            }
             if (((MNStruct*)globalcontext)->incRED == 4) {
-                cornerfreq = pow(10.0, Cube[pcount]) / Tspan;
-                pcount++;
+
+                rho = pow((1 + (pow((1.0 / 365.25) / cornerfreq, redindex / 2))), 2) *
+                      (Agw * Agw / 12.0 / (M_PI * M_PI)) /
+                      pow((1 + (pow(freqs[i] / cornerfreq, redindex / 2))), 2) /
+                      (Tspan * 24 * 60 * 60) * pow(f1yr, -3.0);
             }
-
-            redamp = pow(10.0, redamp);
-            if (((MNStruct*)globalcontext)->RedPriorType == 1) {
-                uniformpriorterm += log(redamp);
-            }
-
-            double Agw = redamp;
-            for (int i = 0; i < FitRedCoeff / 2; i++) {
-
-                double rho = 0;
-                if (((MNStruct*)globalcontext)->incRED == 3) {
-                    rho = (Agw * Agw / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) *
-                          pow(freqs[i] * 365.25, (-redindex)) / (Tspan * 24 * 60 * 60);
-                }
-                if (((MNStruct*)globalcontext)->incRED == 4) {
-
-                    rho = pow((1 + (pow((1.0 / 365.25) / cornerfreq, redindex / 2))), 2) *
-                          (Agw * Agw / 12.0 / (M_PI * M_PI)) /
-                          pow((1 + (pow(freqs[i] / cornerfreq, redindex / 2))), 2) /
-                          (Tspan * 24 * 60 * 60) * pow(f1yr, -3.0);
-                }
-                // if(rho > pow(10.0,15))rho=pow(10.0,15);
-                powercoeff[i] += rho;
-                powercoeff[i + FitRedCoeff / 2] += rho;
-            }
+            // if(rho > pow(10.0,15))rho=pow(10.0,15);
+            powercoeff[i] += rho;
+            powercoeff[i + FitRedCoeff / 2] += rho;
         }
 
         startpos = FitRedCoeff;
@@ -318,26 +315,23 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     if (((MNStruct*)globalcontext)->incDM == 3) {
 
-        for (int pl = 0; pl < ((MNStruct*)globalcontext)->numFitDMPL; pl++) {
-            double DMamp = Cube[pcount];
-            pcount++;
-            double DMindex = Cube[pcount];
-            pcount++;
+        double DMamp = Cube[pcount];
+        pcount++;
+        double DMindex = Cube[pcount];
+        pcount++;
 
-            double f1yr = 1.0 / 3.16e7;
+        double f1yr = 1.0 / 3.16e7;
 
-            DMamp = pow(10.0, DMamp);
-            if (((MNStruct*)globalcontext)->DMPriorType == 1) {
-                uniformpriorterm += log(DMamp);
-            }
-            for (int i = 0; i < FitDMCoeff / 2; i++) {
+        DMamp = pow(10.0, DMamp);
+        if (((MNStruct*)globalcontext)->DMPriorType == 1) {
+            uniformpriorterm += log(DMamp);
+        }
+        for (int i = 0; i < FitDMCoeff / 2; i++) {
 
-                double rho = (DMamp * DMamp) * pow(f1yr, (-3)) *
-                             pow(freqs[startpos + i] * 365.25, (-DMindex)) /
-                             (maxtspan * 24 * 60 * 60);
-                powercoeff[startpos + i] += rho;
-                powercoeff[startpos + i + FitDMCoeff / 2] += rho;
-            }
+            double rho = (DMamp * DMamp) * pow(f1yr, (-3)) *
+                         pow(freqs[startpos + i] * 365.25, (-DMindex)) / (maxtspan * 24 * 60 * 60);
+            powercoeff[startpos + i] += rho;
+            powercoeff[startpos + i + FitDMCoeff / 2] += rho;
         }
 
         int coefftovary = 0;

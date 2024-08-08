@@ -34,12 +34,8 @@ typedef struct {
     int totalsize;
 
     char* rootName;
-    long double** LDpriors;
     double** Dpriors;
-    double** DMatrix;
-    double** FMatrix;
 
-    int doLinear;
     int numFitJumps;
     int numFitTiming;
     int numFitEFAC;
@@ -50,8 +46,6 @@ typedef struct {
     int numFitDMCoeff;
 
     int totCoeff;
-    int numFitRedPL;
-    int numFitDMPL;
 
     double* sampleFreq;
     int numdims;
@@ -88,66 +82,15 @@ typedef struct {
 } MNStruct;
 
 void assigncontext(void* context);
-void assignGPUcontext(void* context);
-void assignGHScontext(void* context);
-
-void callGHS(int NBurn, int NSamp, int GHSresume);
-void callFourierDomainGHS(int NBurn, int NSamp, int GHSresume);
-
-double iter_factorial(unsigned int n);
-void store_factorial();
 void fastephemeris_routines(pulsar* psr, int npsr);
 void fastSubIntephemeris_routines(pulsar* psr, int npsr);
 void fastformBatsAll(pulsar* psr, int npsr);
 void fastformSubIntBatsAll(pulsar* psr, int npsr);
-void outputProfile(int ndim);
 
-void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, void* context,
-                  int incRED, int ndims, std::vector<double> paramlist, double Evidence,
-                  int MarginTime, int MarginJumps, int doLinear, std::string longname,
+void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int incRED, int ndims,
+                  std::vector<double> paramlist, double Evidence, std::string longname,
                   double** paramarray);
-void getmaxlikeDM(pulsar* pulse, std::string longname, int ndim, void* context,
-                  double** paramsarray);
-void getProfileNoiseLevels(void* context);
 
-double AllTOALike(int& ndim, double* Cube, int& npars, double* DerivedParams, void* context);
-double AllTOAJitterLike(int& ndim, double* Cube, int& npars, double* DerivedParams, void* context);
-double AllTOASim(int& ndim, double* Cube, int& npars, double* DerivedParams, void* context);
-double AllTOAStocProfLike(int& ndim, double* Cube, int& npars, double* DerivedParams,
-                          void* context);
-double AllTOAMaxLike(int& ndim, double* Cube, int& npars, double* DerivedParams, void* context);
-double AllTOAWriteMaxLike(std::string longname, int& ndim);
-double AllTOAMarginStocProfLike(int& ndim, double* Cube, int& npars, double* DerivedParams,
-                                void* context);
-double TemplateProfLike(int& ndim, double* Cube, int& npars, double* DerivedParams, void* context);
-void WriteMaxTemplateProf(std::string longname, int& ndim);
-void WriteSubIntStocProfLike(std::string longname, int& ndim);
-void PreComputeShapelets(double** StoredShapelet, double** StoredJitter, double** StoredWidth,
-                         double** InterpolatedMeanProfile, double** InterpolatedJitterProfile,
-                         double** InterpolatedWidthProfile, long double finalInterpTime,
-                         int numtointerpolate, double* MeanBeta, double& MaxShapeAmp);
-void Tscrunch(void* globalcontext, double TemplateChanWidth);
-void Tscrunch2(void* globalcontext, double TemplateChanWidth);
-void getNumTempFreqs(int& NumFreqs, void* context, double TemplateChanWidth);
-// void FFTProfileData(double **StoredFourierShapelets, double **StoredFourierJitterShapelets, int
-// &NFBasis, int FindThreshold, double **FourierProfileData, void *context);
-
-double ProfileDomainLike(int& ndim, double* Cube, int& npars, double* DerivedParams, void* context);
-void ProfileDomainLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context);
-void WriteProfileDomainLike(std::string longname, int& ndim);
-
-double Template2DProfLike(int& ndim, double* Cube, int& npars, double* DerivedParams,
-                          void* context);
-void Template2DProfLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context);
-void WriteTemplate2DProfLike(std::string longname, int& ndim);
-void WriteDMSignal(std::string longname, int& ndim);
-void TemplateProfLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context);
-double FitPhase();
-void GetInterpVectors(void* context);
-
-double SubIntStocProfLike(int& ndim, double* Cube, int& npars, double* DerivedParams,
-                          void* context);
-void SubIntStocProfLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context);
 // non linear timing model likelihood functions
 // double  WhiteLogLike(int &ndim, double *Cube, int &npars, double *DerivedParams, void *context);
 // double NewLRedMarginLogLike(int &ndim, double *Cube, int &npars, double *DerivedParams, void
@@ -158,62 +101,22 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 // *context);
 
 void LRedLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context);
-void LRedGPULikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context);
-// non-Gaussian noise likelihoods
-void subtractMLsolution(void* context);
-void processPDF(void* context, std::string longname);
-void TempoNestNGConvolvedLikeFunc(double* Cube, int& ndim, int& npars, double& lnew, void* context);
-void TempoNestNGLikeFunc(double* Cube, int& ndim, int& npars, double& lnew, void* context);
-
-// GPU non linear timing model likelihood functions
-// void WhiteMarginGPULogLike(double *Cube, int &ndim, int &npars, double &lnew, void *context);
-// void LRedGPULogLike(double *Cube, int &ndim, int &npars, double &lnew, void *context);
-double NewLRedMarginGPULogLike(int& ndim, double* Cube, int& npars, double* DerivedParams,
-                               void* globalcontext);
-void NelderMeadOptimum(int nParameters);
-
-// Functions to calculate the design matrices or 'G' marginalisation matrices
-// void makeGDesign(pulsar *pulse, int &Gsize, int numtofit, double** staticGMatrix, double
-// **oneDesign); void getDMatrix(pulsar *pulse, int TimeToFit, int JumptoFit, int numToMargin, int
-// **TempoFitNums, int *TempoJumpNums, double **Dpriors, int doJumpMargin, int doTimeMargin, double
-// **TNDM); void getMarginDMatrix(pulsar *pulse, int TimetoFit, int JumptoFit, int numToMargin, int
-// **TempoFitNums, int *TempoJumpNums, double **Dpriors, int doJumpMargin, int doTimeMargin, double
-// **TNDM, int linearFit);
-void getCustomDMatrix(pulsar* pulse, int* MarginList, int** TempoFitNums, int* TempoJumpNums,
-                      double** Dpriors, int incDM, int TimetoFit, int JumptoFit);
-// void makeStaticGMatrix(pulsar *pulse, int Gsize, double **GMatrix, double** staticGMatrix, double
-// &tdet); void makeStaticDiagGMatrix(pulsar *pulse, int Gsize, double **GMatrix, double** UMatrix,
-// double *SVec);
-void getCustomDMatrixLike(void* context, double** TNDM);
-void getCustomDVectorLike(void* context, double* TNDM, int nobs, int TimeToMargin, int TotalSize);
-
-void getNGJitterMatrix(pulsar* pulse, double** JitterMatrix, int& NumEpochs);
-void getNGSJitterMatrix(pulsar* pulse, double** JitterMatrix, int& NumEpochs);
-
-void getNGJitterMatrixEpochs(pulsar* pulse, int& NumEpochs);
-void getNGSJitterMatrixEpochs(pulsar* pulse, int& NumEpochs);
 
 void StoreTMatrix(double* TMatrix, void* context);
 void getArraySizeInfo(void* context);
-void getPhysDVector(void* context, double** TNDM, int Nobs, int* TimingGradientSigns);
-void UpdatePhysDVector(void* context, double** TNDM, int Nobs);
 void OutputMLFiles(int nParameters, double* pdParameterEstimates, double MLike, int startDim);
 
-void readsummary(pulsar* psr, std::string longname, int ndim, void* context, long double* Tempo2Fit,
-                 int incRED, int ndims, int MarginTime, int MarginJumps, int doLinear);
+void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int incRED, int ndims);
 
 void setupMNparams(char* ConfigFileName, int& sampler, int& IS, int& modal, int& ceff, int& nlive,
                    double& efr, int& sample, int& updInt, int& nClsPar, int& Nchords, int& NBurn,
                    int& NSamp, int& GHSresume);
-void setupparams(char* ConfigFileName, int& useGPUS, char* root, int& numTempo2its,
-                 int& doLinearFit, int& doMax, int& incEFAC, int& incEQUAD, int& incRED, int& incDM,
-                 int& doTimeMargin, int& doJumpMargin, double& FitSig, int& customPriors,
-                 double* EFACPrior, double* EQUADPrior, double* AlphaPrior, double* AmpPrior,
-                 double* DMAlphaPrior, double* DMAmpPrior, double& numRedCoeff, double& numDMCoeff,
-                 double& numScatCoeff, int& numRedPL, int& numDMPL, double& FourierSig,
-                 char* whiteflag, int& whitemodel, int& RedPriorType, int& DMPriorType,
-                 int& EQUADPriorType, int& EFACPriorType, int& useOriginalErrors,
-                 int& FitLowFreqCutoff, int& useNbitsAlgebra, int& StoreTMatrix, int& debug);
+void setupparams(char* ConfigFileName, char* root, int& numTempo2its, int& incEFAC, int& incEQUAD,
+                 int& incRED, int& incDM, double* EFACPrior, double* EQUADPrior, double* AlphaPrior,
+                 double* AmpPrior, double* DMAlphaPrior, double* DMAmpPrior, double& numRedCoeff,
+                 double& numDMCoeff, double& FourierSig, char* whiteflag, int& RedPriorType,
+                 int& DMPriorType, int& EQUADPriorType, int& EFACPriorType, int& useOriginalErrors,
+                 int& StoreTMatrix, int& debug);
 
 void setTNPriors(char* ConfigFileName, double** Dpriors, long double** TempoPriors, int TPsize,
                  int DPsize);
@@ -221,17 +124,6 @@ void setTNPriors(char* ConfigFileName, double** Dpriors, long double** TempoPrio
 // int numRedLogFreqs, int numDMLogFreqs, double RedLowFreq, double DMLowFreq, double RedMidFreq,
 // double DMMidFreq);
 void setFrequencies(char* ConfigFileName, double* SampleFreq, int numRedfreqs, int numDMfreqs,
-                    int numScatfreqs, int numRedLogFreqs, int numDMLogFreqs, int numScatLogFreqs,
-                    double RedLowFreq, double DMLowFreq, double ScatLowFreq, double RedMidFreq,
-                    double DMMidFreq, double ScatMidFreq);
-void GetGroupsToFit(char* ConfigFileName, int incGroupNoise, int** FitForGroup, int incBandNoise,
-                    int** FitForBand);
-void setShapePriors(char* ConfigFileName, double** ShapePriors, double** BetaPrior, int numcoeff,
-                    int numcomps);
-void GetProfileFitInfo(char* ConfigFileName, int numProfComponents, int* numGPTAshapecoeff,
-                       int* numProfileFitCoeff, int* numEvoCoeff, int* numFitEvoCoeff,
-                       int* numGPTAstocshapecoeff, double* ProfCompSeps, double& TemplateChanWidth,
-                       int* TimeCorrShapeCoeff, int incExtraComp, double** FitForExtraComp,
-                       int* FitCompWidths, int* FitCompPos);
-
-void TNprior(double cube[], double theta[], int nDims, void* context);
+                    int numRedLogFreqs, int numDMLogFreqs, int numScatLogFreqs, double RedLowFreq,
+                    double DMLowFreq, double ScatLowFreq, double RedMidFreq, double DMMidFreq,
+                    double ScatMidFreq);

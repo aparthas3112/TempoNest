@@ -124,9 +124,8 @@ int longturn_dms(long double turn, char* dms)
     return 0;
 }
 
-void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, void* context,
-                  int incRED, int ndim, std::vector<double> paramlist, double Evidence,
-                  int doTimeMargin, int doJumpMargin, int doLinear, std::string longname,
+void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int incRED, int ndim,
+                  std::vector<double> paramlist, double Evidence, std::string longname,
                   double** paramarray)
 {
     double rms_pre = 0.0, rms_post = 0.0;
@@ -192,8 +191,6 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, voi
         }
         int pcount = 1;
         int fitcount = 0;
-        if (((MNStruct*)context)->LDpriors[0][2] == 0)
-            fitcount++;
 
         printf("\n\n");
         printf(
@@ -217,21 +214,6 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, voi
                     else
                         printf("%-15.15s ", psr[p].param[i].label[k]);
 
-                    /* Pre-fit value */
-                    if ((i == param_raj || i == param_decj) && psr[p].eclCoord == 1)
-                        printf("%-25.15g ", (double)Tempo2Fit[pcount] * 180.0 / M_PI);
-                    else if (i == param_sini && psr[p].param[param_sini].nLinkTo != 0)
-                        printf("%-25.15g ", (double)sin(Tempo2Fit[pcount] / 180.0 * M_PI));
-                    else if (i == param_ephver) {
-                        if (psr[p].param[i].prefit[k] == 2)
-                            printf("%-25.25s ", "TEMPO1");
-                        if (psr[p].param[i].prefit[k] == 5)
-                            printf("%-25.25s ", "TEMPO2");
-                        else
-                            printf("%-25.25g ", (double)Tempo2Fit[pcount]);
-                    } else
-                        printf("%-25.15g ", (double)Tempo2Fit[pcount]);
-
                     /* Post-fit value */
                     if (i == param_pmra) /* Convert from radian/sec to mas/yr */
                         printf("%-25.15g ", (double)psr[p].param[i].val[k]);
@@ -252,59 +234,13 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, voi
                     } else
                         printf("%-25.15g ", (double)getParameterValue(&psr[p], i, k));
 
-                    if ((i == param_raj || i == param_decj) && psr[p].eclCoord == 1) {
-                        printf("%-13.5g ", (double)psr[p].param[i].err[k] * 180.0 / M_PI);
-                        printf("%-13.5g ",
-                               180.0 / M_PI *
-                                   ((double)psr[p].param[i].val[k] - (double)Tempo2Fit[pcount]));
-                    } else {
-                        printf("%-13.5g ", (double)psr[p].param[i].err[k]);
-                        printf("%-13.5g ", (double)getParameterValue(&psr[p], i, k) -
-                                               (double)Tempo2Fit[pcount]);
-                    }
-                    if (doTimeMargin == 0) {
-                        printf("Y");
-                    } else if (doTimeMargin == 1) {
-                        if (i == param_f) {
-                            printf("M");
-                        } else {
-                            printf("Y");
-                        }
-                    } else if (doTimeMargin == 2) {
-
-                        printf("M");
-                    }
-
                     printf("\n");
 
                     if (i == param_tzrfrq) {
                         if (strcmp(psr[p].tzrsite, "NULL") != 0)
                             printf("%-15.15s %-25.25s\n", "TZRSITE", psr[p].tzrsite);
                     }
-                    if (i == param_raj && psr[p].eclCoord == 0) {
-                        char hmsstr[100];
-                        longturn_hms(psr[p].param[param_raj].val[0] / (2 * M_PI), hmsstr);
-                        strcpy(psr[p].rajStrPost, hmsstr);
 
-                        printf("%-15.15s %-25.25s %-25.25s %-13.5g %-13.5g\n", "RAJ (hms)",
-                               psr[p].rajStrPre, psr[p].rajStrPost,
-                               (double)psr[p].param[i].err[k] * 12.0 * 60.0 * 60.0 / M_PI,
-                               ((double)psr[p].param[i].val[k] - (double)Tempo2Fit[pcount]) * 12.0 *
-                                   60.0 * 60.0 / M_PI);
-                    } else if (i == param_decj && psr[p].eclCoord == 0) {
-                        char hmsstr[100];
-                        longturn_dms(psr[p].param[param_decj].val[0] / (2 * M_PI), hmsstr);
-                        strcpy(psr[p].decjStrPost, hmsstr);
-
-                        printf("%-15.15s %-25.25s %-25.25s %-13.5g %-13.5g\n", "DECJ (dms)",
-                               psr[p].decjStrPre, psr[p].decjStrPost,
-                               (double)psr[p].param[i].err[k] * 180.0 * 60.0 * 60.0 / M_PI,
-                               ((double)psr[p].param[i].val[k] - (double)Tempo2Fit[pcount]) *
-                                   180.0 * 60.0 * 60.0 / M_PI);
-                    }
-
-                    if (((MNStruct*)context)->LDpriors[pcount][2] == 0)
-                        fitcount++;
                     pcount++;
                 }
             }
@@ -327,12 +263,7 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, voi
                 printf("Jump %d (%s): %.14g %.14g ", i, psr[p].jumpStr[i], psr[p].jumpVal[i],
                        psr[p].jumpValErr[i]);
                 if (psr[p].fitJump[i] == 1) {
-                    if (doJumpMargin == 0) {
-                        printf("Y\n");
-                        fitcount++;
-                    } else if (doJumpMargin == 1) {
-                        printf("M\n");
-                    }
+
                     pcount++;
 
                 } else

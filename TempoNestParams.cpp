@@ -28,15 +28,12 @@
 #include <string.h>
 #include "configfile.h"
 
-void setupparams(char* ConfigFileName, int& useGPUS, char* root, int& numTempo2its,
-                 int& doLinearFit, int& doMax, int& incEFAC, int& incEQUAD, int& incRED, int& incDM,
-                 int& doTimeMargin, int& doJumpMargin, double& FitSig, int& customPriors,
-                 double* EFACPrior, double* EQUADPrior, double* AlphaPrior, double* AmpPrior,
-                 double* DMAlphaPrior, double* DMAmpPrior, double& numRedCoeff, double& numDMCoeff,
-                 double& numScatCoeff, int& numRedPL, int& numDMPL, double& FourierSig,
-                 char* whiteflag, int& whitemodel, int& RedPriorType, int& DMPriorType,
-                 int& EQUADPriorType, int& EFACPriorType, int& useOriginalErrors,
-                 int& FitLowFreqCutoff, int& useNbitsAlgebra, int& StoreTMatrix, int& debug)
+void setupparams(char* ConfigFileName, char* root, int& numTempo2its, int& incEFAC, int& incEQUAD,
+                 int& incRED, int& incDM, double* EFACPrior, double* EQUADPrior, double* AlphaPrior,
+                 double* AmpPrior, double* DMAlphaPrior, double* DMAmpPrior, double& numRedCoeff,
+                 double& numDMCoeff, double& FourierSig, char* whiteflag, int& RedPriorType,
+                 int& DMPriorType, int& EQUADPriorType, int& EFACPriorType, int& useOriginalErrors,
+                 int& StoreTMatrix, int& debug)
 {
 
     // General parameters:
@@ -54,18 +51,6 @@ void setupparams(char* ConfigFileName, int& useGPUS, char* root, int& numTempo2i
     // Should only be set to 0 if all the priors are set in setTNPriors
     numTempo2its = 1;
 
-    // doLinearFit:  Switches between the full non linear timing model (doLinearFit=0) and the
-    // linear approximation for the timing model based on the initial Tempo2 Fit (= 1).
-
-    doLinearFit = 0;
-
-    // doMax: Find maximum likelihood values for non linear timing model for the stochastic model
-    // chosen. Will find maximum in the full un marginalised problem in order to find the best
-    // values to then marginalise over. Start point of non linear search will be performed at this
-    // maximum if chosen unless set otherwise in custom priors. Central point of prior for non
-    // linear search will be set at this value unless set otherwise in custom priors.
-    doMax = 0;
-
     // ModelChoices
 
     // White noise
@@ -75,31 +60,12 @@ void setupparams(char* ConfigFileName, int& useGPUS, char* root, int& numTempo2i
         0;  // include EFAC: 0 = none, 1 = one for all residuals, 2 = one for each observing system
     incEQUAD = 0;  // include EQUAD: 0 = no, 1 = yes
 
-    whitemodel = 0;
-
     incRED = 0;  // include Red Noise model: 0 = no, 1 = power law model (vHL2013), 2 = model
                  // independent (L2013)
     incDM = 0;   // include Red Noise model: 0 = no, 1 = power law model (vHL2013), 2 = model
                  // independent (L2013)
 
-    FitLowFreqCutoff = 0;  // Include f_low as a free parameter
-
-    doTimeMargin = 0;  // 0=No Analytical Marginalisation over Timing Model. 1=Marginalise over QSD.
-                       // 2=Marginalise over all Model params excluding jumps.
-    doJumpMargin = 0;  // 0=No Analytical Marginalisation over Jumps. 1=Marginalise over Jumps.
-
     // Priors
-
-    // Which priors to use: customPriors=0 uses the Priors from tempo2 fit, along with values set in
-    // this function, =1:set priors for specific parameters in setTNPriors
-    customPriors = 0;
-
-    // FitSig sets the priors for all timing model and jump parameters for both non linear and
-    // linear timing models. For the non linear fit, Fitsig multiples the error returned by Tempo2,
-    // and sets the prior to be the best fit value returned by tempo2 +/- the scaled error.
-    //  For the linear fit, multiplies the ratio of the rms of the designmatrix vector for each
-    //  timing model parameter, and the rms of the residuals returned by Tempo2.
-    FitSig = 5;
 
     // Remaining priors for the stochastic parameters.
 
@@ -113,9 +79,6 @@ void setupparams(char* ConfigFileName, int& useGPUS, char* root, int& numTempo2i
 
     EQUADPrior[0] = -10;
     EQUADPrior[1] = -5;
-
-    numRedPL = 1;
-    numDMPL = 1;
 
     numRedCoeff = 10;
     numDMCoeff = 10;
@@ -153,24 +116,16 @@ void setupparams(char* ConfigFileName, int& useGPUS, char* root, int& numTempo2i
          *
          * Note: the timing model parameters are not done implemented yet
          */
-        parameters.readInto(useGPUS, "useGPUS", useGPUS);
-        parameters.readInto(useNbitsAlgebra, "useNbitsAlgebra", useNbitsAlgebra);
         parameters.readInto(StoreTMatrix, "StoreTMatrix", StoreTMatrix);
 
         parameters.readInto(strBuf, "root", string("results/Example1"));
         strcpy(root, strBuf.data());
         parameters.readInto(numTempo2its, "numTempo2its", numTempo2its);
-        parameters.readInto(doLinearFit, "doLinearFit", doLinearFit);
-        parameters.readInto(doMax, "doMax", doMax);
         parameters.readInto(incEFAC, "incEFAC", incEFAC);
         parameters.readInto(incEQUAD, "incEQUAD", incEQUAD);
 
         parameters.readInto(incRED, "incRED", incRED);
         parameters.readInto(incDM, "incDM", incDM);
-        parameters.readInto(doTimeMargin, "doTimeMargin", doTimeMargin);
-        parameters.readInto(doJumpMargin, "doJumpMargin", doJumpMargin);
-        parameters.readInto(customPriors, "customPriors", customPriors);
-        parameters.readInto(FitSig, "FitSig", FitSig);
         parameters.readInto(EFACPrior[0], "EFACPrior[0]", EFACPrior[0]);
         parameters.readInto(EFACPrior[1], "EFACPrior[1]", EFACPrior[1]);
         parameters.readInto(EQUADPrior[0], "EQUADPrior[0]", EQUADPrior[0]);
@@ -182,8 +137,6 @@ void setupparams(char* ConfigFileName, int& useGPUS, char* root, int& numTempo2i
         parameters.readInto(numRedCoeff, "numRedCoeff", numRedCoeff);
         parameters.readInto(numDMCoeff, "numDMCoeff", numDMCoeff);
 
-        parameters.readInto(numRedPL, "numRedPL", numRedPL);
-        parameters.readInto(numDMPL, "numDMPL", numDMPL);
         parameters.readInto(DMAlphaPrior[0], "DMAlphaPrior[0]", DMAlphaPrior[0]);
         parameters.readInto(DMAlphaPrior[1], "DMAlphaPrior[1]", DMAlphaPrior[1]);
         parameters.readInto(DMAmpPrior[0], "DMAmpPrior[0]", DMAmpPrior[0]);
@@ -191,7 +144,6 @@ void setupparams(char* ConfigFileName, int& useGPUS, char* root, int& numTempo2i
 
         parameters.readInto(strBuf, "whiteflag", string("-sys"));
         strcpy(whiteflag, strBuf.data());
-        parameters.readInto(whitemodel, "whitemodel", whitemodel);
 
         parameters.readInto(RedPriorType, "RedPriorType", RedPriorType);
         parameters.readInto(DMPriorType, "DMPriorType", DMPriorType);
@@ -289,9 +241,9 @@ void setTNPriors(char* ConfigFileName, double** Dpriors, long double** TempoPrio
 }
 
 void setFrequencies(char* ConfigFileName, double* SampleFreq, int numRedfreqs, int numDMfreqs,
-                    int numScatfreqs, int numRedLogFreqs, int numDMLogFreqs, int numScatLogFreqs,
-                    double RedLowFreq, double DMLowFreq, double ScatLowFreq, double RedMidFreq,
-                    double DMMidFreq, double ScatMidFreq)
+                    int numRedLogFreqs, int numDMLogFreqs, int numScatLogFreqs, double RedLowFreq,
+                    double DMLowFreq, double ScatLowFreq, double RedMidFreq, double DMMidFreq,
+                    double ScatMidFreq)
 {
 
     // This function sets or overwrites the default values for the sampled frequencies sent to
@@ -312,11 +264,6 @@ void setFrequencies(char* ConfigFileName, double* SampleFreq, int numRedfreqs, i
         // printf("making freqs %i %g\n", startpoint-1, SampleFreq[startpoint-1]);
     }
     for (int i = 0; i < numDMfreqs; i++) {
-        SampleFreq[startpoint] = i + 1;
-        startpoint++;
-        // printf("making freqs %i %g", startpoint+i, SampleFreq[startpoint+i]);
-    }
-    for (int i = 0; i < numScatfreqs; i++) {
         SampleFreq[startpoint] = i + 1;
         startpoint++;
         // printf("making freqs %i %g", startpoint+i, SampleFreq[startpoint+i]);

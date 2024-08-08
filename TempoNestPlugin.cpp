@@ -148,44 +148,32 @@ void fastformSubIntBatsAll(pulsar* psr, int npsr)
     secularMotion(psr, npsr);
 }
 
-MNStruct* init_struct(pulsar* pulseval, long double** LDpriorsval, int numberpulsarsval,
-                      int numFitJumpsval, int numFitTimingval, int systemcountval,
-                      int numFitEFACval, int numFitEQUADval, int numFitRedCoeffval,
-                      int numFitDMCoeffval, int numFitScatCoeffval, int numFitRedPLval,
-                      int numFitDMPLval, int** TempoFitNumsval, int* TempoJumpNumsval,
-                      int* sysFlagsval, int numdimsval, int incREDval, int incDMval,
-                      int DMFloatstartval, int RedFloatstartval, int TimeMarginVal,
-                      int JumpMarginVal, int doLinearVal, double* SampleFreqsVal,
-                      char* whiteflagval, int whitemodelval, int RedPriorType, int DMPriorType,
-                      int EQUADPriorType, int EFACPriorType, int useOriginalErrors,
+MNStruct* init_struct(pulsar* pulseval, int numberpulsarsval, int timing_model_params,
+                      int systemcountval, int numFitEFACval, int numFitEQUADval,
+                      int numFitRedCoeffval, int numFitDMCoeffval, int* sysFlagsval, int numdimsval,
+                      int incREDval, int incDMval, double* SampleFreqsVal, char* whiteflagval,
+                      int RedPriorType, int DMPriorType, int EQUADPriorType, int EFACPriorType,
+                      int useOriginalErrors,
 
-                      int FitLowFreqCutoff, int useNbitsAlgebra, int sampler, int StoreFMatrices,
-                      int debug, double* PreJumpVals, char* rootName, int doMax, int rank)
+                      int sampler, int StoreFMatrices, int debug, char* rootName, int rank)
 {
     MNStruct* MNS = (MNStruct*)malloc(sizeof(MNStruct));
 
     MNS->pulse = pulseval;
-    MNS->LDpriors = LDpriorsval;
     MNS->numberpulsars = numberpulsarsval;
-    MNS->numFitJumps = numFitJumpsval;
-    MNS->numFitTiming = numFitTimingval;
+    MNS->TimetoMargin = timing_model_params;
+
     MNS->systemcount = systemcountval;
     MNS->numFitEFAC = numFitEFACval;
     MNS->numFitEQUAD = numFitEQUADval;
     MNS->numFitRedCoeff = numFitRedCoeffval;
     MNS->numFitDMCoeff = numFitDMCoeffval;
-    MNS->numFitRedPL = numFitRedPLval;
-    MNS->numFitDMPL = numFitDMPLval;
-    MNS->TempoFitNums = TempoFitNumsval;
-    MNS->TempoJumpNums = TempoJumpNumsval;
+
     MNS->sysFlags = sysFlagsval;
     MNS->numdims = numdimsval;
     MNS->incRED = incREDval;
     MNS->incDM = incDMval;
 
-    MNS->TimeMargin = TimeMarginVal;
-    MNS->JumpMargin = JumpMarginVal;
-    MNS->doLinear = doLinearVal;
     MNS->sampleFreq = SampleFreqsVal;
     MNS->whiteflag = whiteflagval;
 
@@ -198,10 +186,8 @@ MNStruct* init_struct(pulsar* pulseval, long double** LDpriorsval, int numberpul
     MNS->storeFMatrices = StoreFMatrices;
 
     MNS->debug = debug;
-    MNS->PreJumpVals = PreJumpVals;
     MNS->rootName = rootName;
     MNS->Tspan = 0;
-    MNS->TimetoMargin = 0;
     MNS->totCoeff = 0;
     MNS->totalsize = 0;
 
@@ -209,9 +195,9 @@ MNStruct* init_struct(pulsar* pulseval, long double** LDpriorsval, int numberpul
     return MNS;
 }
 
-void printPriors(pulsar* psr, long double** TempoPriors, double** Dpriors, int incEFAC,
-                 int incEQUAD, int incRED, int incDM, int numRedCoeff, int numDMCoeff,
-                 int numScatCoeff, int fitDMModel, std::string longname, void* context)
+void printPriors(pulsar* psr, double** Dpriors, int incEFAC, int incEQUAD, int incRED, int incDM,
+                 int numRedCoeff, int numDMCoeff, int fitDMModel, std::string longname,
+                 void* context)
 {
 
     std::ofstream getdistparamnames;
@@ -219,111 +205,9 @@ void printPriors(pulsar* psr, long double** TempoPriors, double** Dpriors, int i
     std::string latexvar;
     getdistparamnames.open(gdpnfname.c_str());
 
-    if (TempoPriors[0][2] == 0) {
-        getdistparamnames << "Phase \\phi\n";
-    }
-
     if (((MNStruct*)context)->rank == 0)
         printf("\nPriors:\n");
     int paramsfitted = 0;
-    if (TempoPriors[0][2] == 0) {
-        if (((MNStruct*)context)->rank == 0)
-            printf("Prior on Phase : %.25Lg -> %.25Lg\n",
-                   TempoPriors[paramsfitted][0] +
-                       Dpriors[paramsfitted][0] * TempoPriors[paramsfitted][1],
-                   TempoPriors[paramsfitted][0] +
-                       Dpriors[paramsfitted][1] * TempoPriors[paramsfitted][1]);
-    }
-    paramsfitted++;
-
-    for (int p = 0; p < MAX_PARAMS; p++) {
-        for (int k = 0; k < psr[0].param[p].aSize; k++) {
-            if (p == param_raj)
-                latexvar = "\\alpha";
-            else if (p == param_decj)
-                latexvar = "\\delta";
-            else if (p == param_pmra)
-                latexvar = "\\mu_\\alpha";
-            else if (p == param_pmdec)
-                latexvar = "\\mu_\\delta";
-            else if (p == param_px)
-                latexvar = "\\pi";
-            else if (p == param_sini)
-                latexvar = "\\sin i";
-            else if (p == param_pb)
-                latexvar = "P_b";
-            else if (p == param_t0)
-                latexvar = "T_0";
-            else if (p == param_ecc)
-                latexvar = "e";
-            else if (p == param_pbdot)
-                latexvar = "\\dot{P_bb}";
-            else if (p == param_om)
-                latexvar = "\\omega";
-            else if (p == param_omdot)
-                latexvar = "\\dot{\\omega}";
-            else if (p == param_tasc)
-                latexvar = "T_{asc}";
-            else if (p == param_m2)
-                latexvar = "m_2";
-            else if (p == param_eps1)
-                latexvar = "\\kappa";
-            else if (p == param_eps2)
-                latexvar = "\\eta";
-            else if (p == param_gamma)
-                latexvar = "\\gamma";
-            else if (p == param_f && k == 0)
-                latexvar = "\\nu";
-            else if (p == param_f && k == 1)
-                latexvar = "\\dot{\\nu}";
-            else if (p == param_f && k == 2)
-                latexvar = "\\ddot{\\nu}";
-            else if (p == param_dm && k == 0)
-                latexvar = "";
-            else if (p == param_dm && k == 1)
-                latexvar = "";
-            else if (p == param_dm && k == 2)
-                latexvar = "";
-            else
-                latexvar = psr[0].param[p].shortlabel[k];
-
-            if (psr[0].param[p].fitFlag[k] == 1 && p != param_dmmodel) {
-                if (TempoPriors[paramsfitted][2] == 0 && ((MNStruct*)context)->rank == 0) {
-                    printf("Prior on %s : %.25Lg -> %.25Lg\n", psr[0].param[p].shortlabel[k],
-                           TempoPriors[paramsfitted][0] +
-                               Dpriors[paramsfitted][0] * TempoPriors[paramsfitted][1],
-                           TempoPriors[paramsfitted][0] +
-                               Dpriors[paramsfitted][1] * TempoPriors[paramsfitted][1]);
-                }
-
-                if (TempoPriors[paramsfitted][2] == 0) {
-                    getdistparamnames << psr[0].param[p].shortlabel[k] << " " << latexvar << "\n";
-                }
-                paramsfitted++;
-            }
-        }
-    }
-
-    int jumpsfitted = 0;
-    for (int i = 0; i <= psr[0].nJumps; i++) {
-        if (psr[0].fitJump[i] == 1) {
-
-            if (TempoPriors[paramsfitted][2] == 0) {
-
-                if (((MNStruct*)context)->rank == 0)
-                    printf("Prior on Jump %i : %.25Lg -> %.25Lg\n", jumpsfitted + 1,
-                           TempoPriors[paramsfitted][0] +
-                               Dpriors[paramsfitted][0] * TempoPriors[paramsfitted][1],
-                           TempoPriors[paramsfitted][0] +
-                               Dpriors[paramsfitted][1] * TempoPriors[paramsfitted][1]);
-
-                getdistparamnames << "Jump" << jumpsfitted + 1 << "\n";
-            }
-
-            paramsfitted++;
-            jumpsfitted++;
-        }
-    }
 
     if (incEFAC > 0) {
         int EFACnum = 1;
@@ -376,137 +260,7 @@ void printPriors(pulsar* psr, long double** TempoPriors, double** Dpriors, int i
         paramsfitted++;
     }
 
-    if (fitDMModel == 1) {
-        for (int i = 0; i < psr[0].dmoffsDMnum; i++) {
-            getdistparamnames << "DMModel" << i + 1 << "\n";
-            if (((MNStruct*)context)->rank == 0)
-                printf("Prior for DMModel: %i %g %g \n", i, Dpriors[paramsfitted][0],
-                       Dpriors[paramsfitted][1]);
-            paramsfitted++;
-        }
-    }
-
     getdistparamnames.close();
-}
-
-void update_MNPriors(MNStruct* MNS, double** DPriorsval, long double** priorsval, int linearPriors)
-{
-
-    int paramsfitted = 1;
-
-    if (linearPriors != 2) {
-        // printf("lin p is 0\n");
-        for (int p = 0; p < MAX_PARAMS; p++) {
-            for (int k = 0; k < MNS->pulse->param[p].aSize; k++) {
-                if (MNS->pulse->param[p].fitFlag[k] == 1 && p != param_dmmodel) {
-                    if (p == param_ecc || p == param_px || p == param_m2 ||
-                        p == param_dm && k == 0) {
-                        long double minprior =
-                            priorsval[paramsfitted][0] +
-                            DPriorsval[paramsfitted + linearPriors][0] * priorsval[paramsfitted][1];
-                        if (minprior < 0 && priorsval[paramsfitted][2] == 0) {
-                            //				printf("%.10Lg %.10Lg %g %g
-                            //\n",priorsval[paramsfitted][0],priorsval[paramsfitted][1],DPriorsval[paramsfitted+linearPriors][0],DPriorsval[paramsfitted+linearPriors][1]);
-                            long double newprior =
-                                -priorsval[paramsfitted][0] / priorsval[paramsfitted][1];
-                            DPriorsval[paramsfitted + linearPriors][0] = (double)newprior;
-                            printf(
-                                "Prior on %s updated to be physical (was <0) : %.25Lg -> %.25Lg\n",
-                                MNS->pulse->param[p].shortlabel[k],
-                                priorsval[paramsfitted][0] +
-                                    DPriorsval[paramsfitted + linearPriors][0] *
-                                        priorsval[paramsfitted][1],
-                                priorsval[paramsfitted][0] +
-                                    DPriorsval[paramsfitted + linearPriors][1] *
-                                        priorsval[paramsfitted][1]);
-                            //              		printf("%.10Lg %.10Lg %g %g
-                            //              \n",priorsval[paramsfitted][0],priorsval[paramsfitted][1],DPriorsval[paramsfitted+linearPriors][0],DPriorsval[paramsfitted+linearPriors][1]);
-                        }
-                    }
-                    if (p == param_stig) {
-                        long double minprior =
-                            priorsval[paramsfitted][0] +
-                            DPriorsval[paramsfitted + linearPriors][0] * priorsval[paramsfitted][1];
-                        long double maxprior =
-                            priorsval[paramsfitted][0] +
-                            DPriorsval[paramsfitted + linearPriors][1] * priorsval[paramsfitted][1];
-
-                        if (minprior < 0 && priorsval[paramsfitted][2] == 0) {
-                            long double newprior =
-                                -priorsval[paramsfitted][0] / priorsval[paramsfitted][1];
-                            DPriorsval[paramsfitted + linearPriors][0] = (double)newprior;
-                            printf(
-                                "Prior on %s updated to be physical (was <0) : %.25Lg -> %.25Lg\n",
-                                MNS->pulse->param[p].shortlabel[k],
-                                priorsval[paramsfitted][0] +
-                                    DPriorsval[paramsfitted + linearPriors][0] *
-                                        priorsval[paramsfitted][1],
-                                priorsval[paramsfitted][0] +
-                                    DPriorsval[paramsfitted + linearPriors][1] *
-                                        priorsval[paramsfitted][1]);
-                        }
-                        if (maxprior > 1 && priorsval[paramsfitted][2] == 0) {
-                            long double newprior =
-                                (1.0 - priorsval[paramsfitted][0]) / priorsval[paramsfitted][1];
-                            DPriorsval[paramsfitted + linearPriors][1] = (double)newprior;
-                            printf(
-                                "Prior on %s updated to be physical (was >1) : %.25Lg -> %.25Lg\n",
-                                MNS->pulse->param[p].shortlabel[k],
-                                priorsval[paramsfitted][0] +
-                                    DPriorsval[paramsfitted + linearPriors][0] *
-                                        priorsval[paramsfitted][1],
-                                priorsval[paramsfitted][0] +
-                                    DPriorsval[paramsfitted + linearPriors][1] *
-                                        priorsval[paramsfitted][1]);
-                        }
-                    }
-                    if (p == param_sini) {
-
-                        long double minprior =
-                            priorsval[paramsfitted][0] +
-                            DPriorsval[paramsfitted + linearPriors][0] * priorsval[paramsfitted][1];
-                        long double maxprior =
-                            priorsval[paramsfitted][0] +
-                            DPriorsval[paramsfitted + linearPriors][1] * priorsval[paramsfitted][1];
-
-                        if (minprior < 0 && priorsval[paramsfitted][2] == 0) {
-                            long double newprior =
-                                -priorsval[paramsfitted][0] / priorsval[paramsfitted][1];
-                            DPriorsval[paramsfitted + linearPriors][0] = (double)newprior;
-                            printf(
-                                "Prior on %s updated to be physical (was <0) : %.25Lg -> %.25Lg\n",
-                                MNS->pulse->param[p].shortlabel[k],
-                                priorsval[paramsfitted][0] +
-                                    DPriorsval[paramsfitted + linearPriors][0] *
-                                        priorsval[paramsfitted][1],
-                                priorsval[paramsfitted][0] +
-                                    DPriorsval[paramsfitted + linearPriors][1] *
-                                        priorsval[paramsfitted][1]);
-                        }
-                        if (maxprior > 1 && priorsval[paramsfitted][2] == 0) {
-                            long double newprior =
-                                (1.0 - priorsval[paramsfitted][0]) / priorsval[paramsfitted][1];
-                            DPriorsval[paramsfitted + linearPriors][1] = (double)newprior;
-                            printf(
-                                "Prior on %s updated to be physical (was >1) : %.25Lg -> %.25Lg\n",
-                                MNS->pulse->param[p].shortlabel[k],
-                                priorsval[paramsfitted][0] +
-                                    DPriorsval[paramsfitted + linearPriors][0] *
-                                        priorsval[paramsfitted][1],
-                                priorsval[paramsfitted][0] +
-                                    DPriorsval[paramsfitted + linearPriors][1] *
-                                        priorsval[paramsfitted][1]);
-                        }
-                    }
-                    paramsfitted++;
-                }
-            }
-        }
-    }
-
-    MNS->Dpriors = DPriorsval;
-
-    MNS->LDpriors = priorsval;
 }
 
 /************************************************* dumper routine
@@ -538,40 +292,6 @@ void update_MNPriors(MNStruct* MNS, double** DPriorsval, long double** priorsval
 void dumper(int& nSamples, int& nlive, int& nPar, double** physLive, double** posterior,
             double** paramConstr, double& maxLogLike, double& logZ, double& logZerr, void* context)
 {
-    // convert the 2D Fortran arrays to C++ arrays
-
-    // the posterior distribution
-    // postdist will have nPar parameters in the first nPar columns & loglike value & the posterior
-    // probability in the last two columns
-    // printf("enter dump %i %i \n", nSamples, nPar);
-    //	int i, j;
-    //
-    //	double **postdist=new double*[nSamples];
-    //	for(int m1=0; m1<nSamples; m1++){
-    //		postdist[m1]=new double[nPar+2];
-    //	}
-    //	for( i = 0; i < nPar + 2; i++ ){
-    //		printf("%i\n",i);
-    //		for( j = 0; j < nSamples; j++ )
-    //			postdist[j][i] = posterior[0][i * nSamples + j];
-    //	}
-
-    // printf("mid dump \n");
-
-    // last set of live points
-    // pLivePts will have nPar parameters in the first nPar columns & loglike value in the last
-    // column
-
-    //	double pLivePts[nlive][nPar + 1];
-    //	for( i = 0; i < nPar + 1; i++ )
-    //		for( j = 0; j < nlive; j++ )
-    //			pLivePts[j][i] = physLive[0][i * nlive + j];
-    //
-    ////	printf("exit dump\n");
-    //	 for(int m1=0; m1<nSamples; m1++){
-    //              free(postdist[m1]);
-    //    }
-    //	free(postdist);
 }
 
 /* The main function of a plugin called from Tempo2 is 'graphicalInterface'
@@ -680,25 +400,15 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         logdbg("Number of pulsars = %d", npsr);
     }
 
-    int useGPUS;
-    int useNbitsAlgebra = 0;
-
     int StoreFMatrices = 1;
     char root[100];
     int numTempo2its;
-    int doLinearFit;
-    int doMax;
     int incEFAC;
     int incEQUAD;
 
     int incRED;
-    int FitLowFreqCutoff = 0;
     int incDM;
 
-    int doTimeMargin;
-    int doJumpMargin;
-    double FitSig;
-    int customPriors;
     int Reddims = 0;
     int DMdims = 0;
     int DMModeldims = 0;
@@ -711,16 +421,13 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     double* DMAmpPrior;
     double numRedCoeff;
     double numDMCoeff;
-    double numScatCoeff;
-    int numRedPL;
-    int numDMPL;
+
     double FourierSig;
     double* SampleFreq;
     int numEFAC = 0;
     int numEQUAD = 0;
 
     char wflag[100];
-    int whitemodel;
     int RedPriorType;
     int DMPriorType;
 
@@ -739,24 +446,10 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     int debug = 0;
 
-    setupparams(ConfigFileName, useGPUS, Type, numTempo2its, doLinearFit, doMax, incEFAC, incEQUAD,
-                incRED, incDM, doTimeMargin, doJumpMargin, FitSig, customPriors, EFACPrior,
+    setupparams(ConfigFileName, Type, numTempo2its, incEFAC, incEQUAD, incRED, incDM, EFACPrior,
                 EQUADPrior, AlphaPrior, AmpPrior, DMAlphaPrior, DMAmpPrior, numRedCoeff, numDMCoeff,
-                numScatCoeff, numRedPL, numDMPL, FourierSig, WhiteName, whitemodel, RedPriorType,
-                DMPriorType, EQUADPriorType, EFACPriorType, useOriginalErrors, FitLowFreqCutoff,
-                useNbitsAlgebra, StoreFMatrices, debug);
-
-    if (rank == 0) {
-
-#ifdef HAVE_MLAPACK
-        if (useNbitsAlgebra > 0) {
-            printf(
-                "Using the MPLAPACK library with MPFR library for arbitrary decimal calculations");
-            printf("MLAPACK: Set the linear algebra precision to %d bits\n", useNbitsAlgebra);
-            mpfr_set_default_prec(useNbitsAlgebra);
-        }
-#endif
-    }
+                FourierSig, WhiteName, RedPriorType, DMPriorType, EQUADPriorType, EFACPriorType,
+                useOriginalErrors, StoreFMatrices, debug);
 
     formBatsAll(psr, npsr); /* Form Barycentric arrival times */
     logdbg("calling formResiduals");
@@ -794,13 +487,10 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     int Reddaysincoeffs = int(floor(maxtspan / numRedCoeff));
     int DMdaysincoeffs = int(floor(maxtspan / numDMCoeff));
-    int Scatdaysincoeffs = int(floor(maxtspan / numScatCoeff));
 
     if (numRedCoeff < mindays) {
         numRedCoeff = mincoeff;
-        if (FitLowFreqCutoff > 0) {
-            numRedCoeff = mincoeff + 10;  // int(Reddaysincoeffs);
-        }
+
     } else {
         numRedCoeff = int(Reddaysincoeffs);  // Reddaysincoeffs;
     }
@@ -811,19 +501,13 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         numDMCoeff = int(DMdaysincoeffs);  // DMdaysincoeffs;
     }
 
-    if (numScatCoeff < mindays)
-        numScatCoeff = mincoeff;
-    else
-        numScatCoeff = int(Scatdaysincoeffs);  // Scatdaysincoeffs;
-
     if (incRED == 0)
         numRedCoeff = 0;
     if (incDM == 0)
         numDMCoeff = 0;
 
-    SampleFreq = new double[int(numRedCoeff + numDMCoeff + numScatCoeff)];
-    setFrequencies(ConfigFileName, SampleFreq, numRedCoeff, numDMCoeff, numScatCoeff, 0, 0, 0, 1, 1,
-                   1, 1, 1, 1);
+    SampleFreq = new double[int(numRedCoeff + numDMCoeff)];
+    setFrequencies(ConfigFileName, SampleFreq, numRedCoeff, numDMCoeff, 0, 0, 0, 1, 1, 1, 1, 1, 1);
 
     if (rank == 0)
         printf("Num T2 its %i \n", numTempo2its);
@@ -929,41 +613,19 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     if (incRED == 0)
         Reddims = 0;
-    if (incRED == 1)
-        Reddims = 2;
-    if (incRED == 2)
-        Reddims = numRedCoeff;
     if (incRED == 3)
-        Reddims = 2 * numRedPL;
-    if (incRED == 4)
-        Reddims = 3 * numRedPL;
-    if (incRED == 5)
-        Reddims = 2 * numRedCoeff + 2;
-
-    if (FitLowFreqCutoff > 0)
-        Reddims += 1;
+        Reddims = 2;
 
     if (incDM == 0)
         DMdims = 0;
-    if (incDM == 1)
-        DMdims = 2;
-    if (incDM == 2)
-        DMdims = numDMCoeff;
     if (incDM == 3)
-        DMdims = 2 * numDMPL;
+        DMdims = 2;
 
     // printf("DMModel flag: %i \n",psr[0].param[param_dmmodel].fitFlag[0]);
     if (psr[0].param[param_dmmodel].fitFlag[0] == 1) {
         //	printf("Fitting for DMModel using %i structure functions \n",psr[0].dmoffsDMnum);
         DMModeldims = psr[0].dmoffsDMnum;
         fitDMModel = 1;
-    }
-
-    if (fitDMModel == 1 && (doTimeMargin != 0 || doJumpMargin != 0 || doLinearFit != 0)) {
-        if (rank == 0)
-            printf(
-                "DMModel currently only supports doTimeMargin= 0, doJumpMargin = 0, doLinear = 0");
-        // 			return 0;
     }
 
     if ((incRED == 1 && incDM != 1 && incDM != 0) || (incRED != 1 && incRED != 0 && incDM == 1)) {
@@ -1019,6 +681,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         printf("Details of the fit:\n");
         printf("file root set to %s \n", root);
     }
+
     int systemcount = 0;
     int* numFlags = new int[psr[0].nobs];
     for (int o = 0; o < psr[0].nobs; o++) {
@@ -1096,33 +759,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         includeEQsys[l] = 1;
     }
 
-    if (incEQUAD == 3) {
-        for (int i = 0; i < psr[0].nTNEQ; i++) {
-            if (rank == 0)
-                printf("Including for EQUAD==3 %i %s \n", i, psr->TNEQFlagVal[i]);
-            for (int l = 0; l < systemcount; l++) {
-                if (psr->TNEQFlagVal[i] == systemnames[l]) {
-                    if (rank == 0)
-                        printf("This corresponds to system %i \n", l);
-                    includeEQsys[l] = 0;
-                }
-            }
-        }
-
-        for (int l = 0; l < systemcount; l++) {
-            int changed = 0;
-            if (includeEQsys[l] == 0) {
-                includeEQsys[l] = 1;
-                changed = 1;
-            }
-            if (includeEQsys[l] == 1 && changed == 0) {
-                includeEQsys[l] = 0;
-            }
-            if (rank == 0)
-                printf("Including? %i %i \n", l, includeEQsys[l]);
-        }
-    }
-
     if (incEFAC == 1) {
         if (rank == 0)
             printf("Including One EFAC for all observations\n");
@@ -1143,198 +779,33 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
             printf("Including One EQUAD for each %s\n", wflag);
         numEQUAD = systemcount;
     }
-    if (incEQUAD == 3) {
-        if (rank == 0)
-            printf("Including One EQUAD for the %i included TNEQ in par file\n", psr[0].nTNEQ);
-        numEQUAD = psr[0].nTNEQ;
-    }
 
     if (rank == 0) {
 
-        if (incRED == 1)
-            printf("Including Red Noise : Power Law Model\n");
-        if (incRED == 2) {
-            printf("Including Red Noise : Model Independant - Fitting %i Coefficients\n",
-                   int(numRedCoeff));
-        }
         if (incRED == 3) {
             printf("Including Red Noise: Power Law Model to %i Coefficients \n", int(numRedCoeff));
         }
-        if (incRED == 4) {
-            printf("Including Red Noise: Power Law Model with Corner Freq to %i Coefficients\n \n",
-                   int(numRedCoeff));
-        }
-        if (incRED == 5) {
-            printf("Including Red Noise Numerically: Power Law Model to %i Coefficients \n",
-                   int(numRedCoeff));
-        }
-        if (incDM == 1) {
-            printf("Including DM : Power Law Model\n");
-        }
-        if (incDM == 2) {
-            printf("Including DM : Model Independant - Fitting %i Coefficients\n", int(numDMCoeff));
-        }
         if (incDM == 3) {
-            printf("Including DM: %i Component Power Law Model to %i Coefficients \n", numDMPL,
+            printf("Including DM: Component Power Law Model to %i Coefficients \n",
                    int(numDMCoeff));
         }
     }
 
-    int fitcount = 0;
-    if (rank == 0)
-        printf("fitting for: Arbitrary Phase \n");
-    fitcount++;
+    int timing_model_params = 0;
+    timing_model_params++;
     for (int p = 0; p < MAX_PARAMS; p++) {
         for (int k = 0; k < psr[0].param[p].aSize; k++) {
-            if (psr[0].param[p].fitFlag[k] == 1 && p != param_dmmodel) {
+            if (psr[0].param[p].fitFlag[k] == 1) {
                 if (rank == 0)
                     printf("fitting for: %s \n", psr[0].param[p].shortlabel[k]);
-                fitcount++;
-            }
-            if (psr[0].param[p].fitFlag[k] == 1 && p == param_dmmodel) {
-                if (rank == 0)
-                    printf("fitting for: %s \n", psr[0].param[p].shortlabel[k]);
+                timing_model_params++;
             }
         }
     }
 
-    numFitJumps = 0;
     for (int i = 0; i <= psr[0].nJumps; i++) {
         if (psr[0].fitJump[i] == 1)
-            numFitJumps++;
-        // 		  printf("%i %i %g %g \n",i,psr[0].fitJump[i],
-        // psr[0].jumpVal[i],psr[0].jumpValErr[i]/sqrt(psr[0].fitChisq/psr[0].fitNfree));
-    }
-    if (rank == 0) {
-        printf("Found %i jumps to fit \n", numFitJumps);
-        printf("total Timing Model params to fit:  %i \n", numFitJumps + fitcount);
-    }
-
-    long double** TempoPriors;
-    long double* Tempo2Fit = new long double[numFitJumps + fitcount];
-    int** TempoFitNums;
-    int* TempoJumpNums;
-    TempoPriors = new long double*[numFitJumps + fitcount];
-    for (int i = 0; i < numFitJumps + fitcount; i++) {
-        TempoPriors[i] = new long double[4];
-        for (int j = 0; j < 4; j++) {
-            TempoPriors[i][j] = 0;
-        }
-    }
-    TempoFitNums = new int*[fitcount + numFitJumps];
-    for (int i = 0; i < fitcount + numFitJumps; i++) {
-        TempoFitNums[i] = new int[2];
-        TempoFitNums[i][0] = -1;
-        TempoFitNums[i][1] = -1;
-    }
-    TempoJumpNums = new int[numFitJumps];
-    // printf("allocated\n");
-    int paramsfitted = 0;
-    //	printf("Offset and error: %g %g %g\n", psr[0].offset, psr[0].offset_e,
-    // psr[0].offset_e/sqrt(psr[0].fitChisq/psr[0].fitNfree));
-    TempoPriors[paramsfitted][0] = 0;  // psr[0].offset;
-    TempoPriors[paramsfitted][1] =
-        psr[0].offset_e;  // offset_e/sqrt(psr[0].fitChisq/psr[0].fitNfree);
-
-    /*
-    if(GPTA == 1){
-        TempoPriors[paramsfitted][0]=0;
-            TempoPriors[paramsfitted][1]=1;//offset_e/sqrt(psr[0].fitChisq/psr[0].fitNfree);
-    }
-    */
-
-    TempoFitNums[paramsfitted][0] = 0;
-    TempoFitNums[paramsfitted][1] = 0;
-    // if(doTimeMargin != 0 || doJumpMargin != 0)TempoPriors[paramsfitted][2]=1;
-    TempoPriors[paramsfitted][2] =
-        1;  // always marginalise over phase. @TODO: make an option to allow fitting for
-    paramsfitted++;
-    for (int p = 0; p < MAX_PARAMS; p++) {
-        for (int k = 0; k < psr[0].param[p].aSize; k++) {
-            if (psr[0].param[p].fitFlag[k] == 1 && p != param_dmmodel) {
-
-                TempoPriors[paramsfitted][0] = psr[0].param[p].prefit[k];
-                TempoPriors[paramsfitted][1] =
-                    psr[0].param[p].err[k] / std::sqrt(psr[0].fitChisq / psr[0].fitNfree);
-                Tempo2Fit[paramsfitted] = psr[0].param[p].val[k];
-
-                TempoFitNums[paramsfitted][0] = p;
-                TempoFitNums[paramsfitted][1] = k;
-
-                if (strcasecmp(psr[0].param[p].shortlabel[0], "F0") == 0) {
-                    if (doTimeMargin != 0)
-                        TempoPriors[paramsfitted][2] = 1;
-                }
-                if (doTimeMargin == 2)
-                    TempoPriors[paramsfitted][2] = 1;
-
-                paramsfitted++;
-            }
-        }
-    }
-    int jumpsfitted = 0;
-    double* PreJumpVals = new double[psr[0].nJumps + 1]();
-    if (rank == 0)
-        printf("There are %i jumps \n", psr[0].nJumps);
-    for (int i = 0; i <= psr[0].nJumps; i++) {
-
-        char str1[100], str2[100], str3[100], str4[100], str5[100];
-        int nread = sscanf(psr[0].jumpStr[i], "%s %s %s %s %s", str1, str2, str3, str4, str5);
-        // printf("Jump String %s %s %s %s %s \n", str1, str2, str3, str4, str5);
-
-        double prejump = 0;
-        if (strcasecmp(str1, "MJD") == 0) {
-            prejump = atof(str4);
-            if (rank == 0)
-                printf("MJD PreJump: %i %g \n", i, prejump);
-        } else {
-            prejump = atof(str3);
-            if (rank == 0)
-                printf("Not an MJD PreJump: %i %g \n", i, prejump);
-        }
-        PreJumpVals[i] = prejump;
-        if (psr[0].fitJump[i] == 1) {
-
-            //			printf("gonna read jump %i %s \n",i,psr[0].jumpStr[i]);
-            char str1[100], str2[100], str3[100], str4[100], str5[100];
-            int nread = sscanf(psr[0].jumpStr[i], "%s %s %s %s %s", str1, str2, str3, str4, str5);
-
-            double prejump = 0;
-
-            if (strcasecmp(str1, "MJD") == 0) {
-                prejump = atof(str4);
-            } else {
-                prejump = atof(str3);
-            }
-            // printf(" Fitted Pre jump %i %g %g\n",i,prejump,psr[0].jumpVal[i]);
-            // if(GPTA==0){
-            if (numTempo2its > 1) {
-                TempoPriors[paramsfitted][0] = psr[0].jumpVal[i];
-                TempoPriors[paramsfitted][1] =
-                    psr[0].jumpValErr[i] / std::sqrt(psr[0].fitChisq / psr[0].fitNfree);
-                Tempo2Fit[paramsfitted] = psr[0].jumpVal[i];
-            } else {
-                TempoPriors[paramsfitted][0] = prejump;
-                TempoPriors[paramsfitted][1] =
-                    psr[0].jumpValErr[i] / std::sqrt(psr[0].fitChisq / psr[0].fitNfree);
-                Tempo2Fit[paramsfitted] = prejump;
-            }
-            //}
-            // else{
-
-            //        TempoPriors[paramsfitted][0]=prejump;
-            ///        TempoPriors[paramsfitted][1]=psr[0].jumpValErr[i]/sqrt(psr[0].fitChisq/psr[0].fitNfree);
-            //         Tempo2Fit[paramsfitted]=prejump;
-
-            //}
-            TempoJumpNums[jumpsfitted] = i;
-
-            if (doJumpMargin == 1)
-                TempoPriors[paramsfitted][2] = 1;
-
-            paramsfitted++;
-            jumpsfitted++;
-        }
+            timing_model_params++;
     }
 
     // set the MultiNest sampling parameters
@@ -1358,10 +829,9 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     setupMNparams(ConfigFileName, sampler, IS, mmodal, ceff, nlive, efr, sample, updInt, nClsPar,
                   Nchords, NBurn, NSamp, GHSresume);
 
-    double tol = 0.5;  // tol, defines the stopping criteria
-    int ndims = numFitJumps + fitcount + numEFAC + numEQUAD + Reddims + DMdims +
-                DMModeldims;  // dimensionality (no. of free parameters)
-    int nPar = ndims;         // total no. of parameters including free & derived parameters
+    double tol = 0.5;                                   // tol, defines the stopping criteria
+    int ndims = numEFAC + numEQUAD + Reddims + DMdims;  // dimensionality (no. of free parameters)
+    int nPar = ndims;  // total no. of parameters including free & derived parameters
                        // note: posterior files are updated & dumper routine is called after every
                        // updInt*10 iterations
     double Ztol = -1E90;  // all the modes with logZ < Ztol are ignored
@@ -1383,63 +853,29 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     void* context = 0;  // not required by MultiNest, any additional information user wants to pass
     // printf("Here \n");
 
-    int FloatRedstart = numFitJumps + fitcount + numEFAC + numEQUAD + Reddims;
-    int FloatDMstart = numFitJumps + fitcount + numEFAC + numEQUAD + Reddims + DMdims;
-
     char* chartroot = new char[longname.length() + 1];
     std::strcpy(chartroot, longname.c_str());
 
-    MNStruct* MNS = init_struct(
-        psr, TempoPriors, npsr, numFitJumps, fitcount, systemcount, numEFAC, numEQUAD,
-        int(numRedCoeff), int(numDMCoeff), int(numScatCoeff), numRedPL, numDMPL, TempoFitNums,
-        TempoJumpNums, numFlags, ndims, incRED, incDM, FloatDMstart, FloatRedstart, doTimeMargin,
-        doJumpMargin, doLinearFit, SampleFreq, wflag, whitemodel, RedPriorType, DMPriorType,
-        EQUADPriorType, EFACPriorType, useOriginalErrors, FitLowFreqCutoff, useNbitsAlgebra,
-        sampler, StoreFMatrices, debug, PreJumpVals, chartroot, doMax, rank);
+    MNStruct* MNS =
+        init_struct(psr, npsr, timing_model_params, systemcount, numEFAC, numEQUAD,
+                    int(numRedCoeff), int(numDMCoeff), numFlags, ndims, incRED, incDM, SampleFreq,
+                    wflag, RedPriorType, DMPriorType, EQUADPriorType, EFACPriorType,
+                    useOriginalErrors, sampler, StoreFMatrices, debug, chartroot, rank);
 
     MNS->includeEQsys = includeEQsys;
 
     // return 0;
     context = MNS;
 
+    std::cout << "allocate dpriors " << ndims << std::endl;
     double** Dpriors;
     Dpriors = new double*[ndims];
     for (int i = 0; i < ndims; i++) {
         Dpriors[i] = new double[2];
     };
 
-    // If using custompriors for errors incase T2 doesnt converge, get those values before doing
-    // anything else
-    if (customPriors == 1) {
-        setTNPriors(ConfigFileName, Dpriors, TempoPriors,
-                    ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps, ndims);
-        update_MNPriors(MNS, Dpriors, TempoPriors, 0);
-
-        context = MNS;
-
-        int pcount = 1;
-        for (int j = 1; j < ((MNStruct*)context)->numFitTiming; j++) {
-
-            psr[0]
-                .param[((MNStruct*)context)->TempoFitNums[j][0]]
-                .val[((MNStruct*)context)->TempoFitNums[j][1]] = TempoPriors[pcount][0];
-            pcount++;
-        }
-
-        for (int j = 0; j < ((MNStruct*)context)->numFitJumps; j++) {
-            psr[0].jumpVal[((MNStruct*)context)->TempoJumpNums[j]] = TempoPriors[pcount][0];
-            pcount++;
-        }
-    }
-
     // Combine all the priors into one aray: Dpriors
     int pcount = 0;
-
-    for (int i = 0; i < numFitJumps + fitcount; i++) {
-        Dpriors[pcount][0] = -FitSig;
-        Dpriors[pcount][1] = FitSig;
-        pcount++;
-    }
 
     for (int i = 0; i < numEFAC; i++) {
         Dpriors[pcount][0] = EFACPrior[0];
@@ -1452,74 +888,36 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         pcount++;
     }
 
-    if (FitLowFreqCutoff > 0) {
-        Dpriors[pcount][0] = -1;
-        Dpriors[pcount][1] = 0;
+    if (incRED == 3) {
+
+        Dpriors[pcount][0] = AmpPrior[0];
+        Dpriors[pcount][1] = AmpPrior[1];
+        pcount++;
+        Dpriors[pcount][0] = AlphaPrior[0];
+        Dpriors[pcount][1] = AlphaPrior[1];
         pcount++;
     }
 
-    if (incRED == 1 || incRED == 3) {
-        for (int i = 0; i < numRedPL; i++) {
-
-            Dpriors[pcount][0] = AmpPrior[0];
-            Dpriors[pcount][1] = AmpPrior[1];
-            pcount++;
-            Dpriors[pcount][0] = AlphaPrior[0];
-            Dpriors[pcount][1] = AlphaPrior[1];
-            pcount++;
-        }
+    if (incDM == 3) {
+        Dpriors[pcount][0] = DMAmpPrior[0];
+        Dpriors[pcount][1] = DMAmpPrior[1];
+        pcount++;
+        Dpriors[pcount][0] = DMAlphaPrior[0];
+        Dpriors[pcount][1] = DMAlphaPrior[1];
+        pcount++;
     }
-
-    if (incDM == 1 || incDM == 3) {
-        for (int i = 0; i < numDMPL; i++) {
-            Dpriors[pcount][0] = DMAmpPrior[0];
-            Dpriors[pcount][1] = DMAmpPrior[1];
-            pcount++;
-            Dpriors[pcount][0] = DMAlphaPrior[0];
-            Dpriors[pcount][1] = DMAlphaPrior[1];
-            pcount++;
-        }
-    }
-
-    int* FitList = new int[ndims];
-    for (int i = 0; i < ndims; i++) {
-        FitList[i] = 0;
-    }
-    numToMargin = 0;
-    for (int i = 0; i < ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps;
-         i++) {
-        if (TempoPriors[i][2] == 1) {
-            FitList[i] = 1;
-            if (rank == 0)
-                printf("marginalising over timing param: %i \n", i);
-            numToMargin++;
-        }
-    }
-
-    getCustomDMatrix(psr, FitList, TempoFitNums, TempoJumpNums, Dpriors, incDM,
-                     ((MNStruct*)context)->numFitTiming, ((MNStruct*)context)->numFitJumps);
-
-    update_MNPriors(MNS, Dpriors, TempoPriors, 0);
 
     context = MNS;
 
-    // Finally after doing everything reset custom priors in case overwritten by previous steps.
-    if (customPriors == 1) {
-        if (rank == 0)
-            printf("Set to use custom priors, updating from setPriors function \n");
-        setTNPriors(ConfigFileName, Dpriors, TempoPriors,
-                    ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps, ndims);
-        paramsfitted = 0;
-    }
-    update_MNPriors(MNS, Dpriors, TempoPriors, 0);
-    context = MNS;
+    ((MNStruct*)context)->Dpriors = Dpriors;
 
-    printPriors(psr, TempoPriors, Dpriors, numEFAC, numEQUAD, incRED, incDM, numRedCoeff,
-                numDMCoeff, numScatCoeff, fitDMModel, longname, context);
+    printPriors(psr, Dpriors, numEFAC, numEQUAD, incRED, incDM, numRedCoeff, numDMCoeff, fitDMModel,
+                longname, context);
 
     if (rank == 0)
         printf("\n\n");
-    ndims = ndims - numToMargin;
+
+    ndims = ndims;
     nPar = ndims;
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -1529,15 +927,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     getArraySizeInfo(context);
     if (rank == 0)
         printf("Pre-Computing Matrices: totalsize = %i\n", ((MNStruct*)context)->totalsize);
-
-    for (int p = 1; p < ((MNStruct*)context)->numFitTiming; p++) {
-
-        ((MNStruct*)context)
-            ->pulse->param[((MNStruct*)context)->TempoFitNums[p][0]]
-            .val[((MNStruct*)context)->TempoFitNums[p][1]] =
-            ((MNStruct*)context)->Dpriors[p][0] * (((MNStruct*)context)->LDpriors[p][1]) +
-            (((MNStruct*)context)->LDpriors[p][0]);
-    }
 
     formBatsAll(((MNStruct*)context)->pulse, ((MNStruct*)context)->numberpulsars);
     formResiduals(((MNStruct*)context)->pulse, ((MNStruct*)context)->numberpulsars, 1);
@@ -1549,6 +938,8 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     ((MNStruct*)context)->StoredTMatrix = TotalMatrix;
 
+    std::cout << "Stored t matrix " << ndims << std::endl;
+
     //////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////call PolyChord/////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -1559,6 +950,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     int p = 0;
     pcount = 0;
     while (pcount < ndims) {
+        std::cout << "adding prior for pcount " << pcount << std::endl;
         if (((MNStruct*)context)->Dpriors[p][0] != ((MNStruct*)context)->Dpriors[p][1]) {
             PriorsArray[pcount] = ((MNStruct*)context)->Dpriors[p][0];
             PriorsArray[pcount + ndims] = ((MNStruct*)context)->Dpriors[p][1];
@@ -1572,6 +964,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     }
 
     ((MNStruct*)context)->PriorsArray = PriorsArray;
+    std::cout << "assign context " << std::endl;
 
     assigncontext(context);
 
@@ -1584,14 +977,15 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     if (sample == 1) {
 
+        std::cout << "run " << std::endl;
+
         nested::run(IS, mmodal, ceff, nlive, tol, efr, ndims, ndims, nClsPar, maxModes, updInt,
                     Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter,
                     LRedLikeMNWrap, dumper, context);
     }
 
     if (rank == 0) {
-        readsummary(psr, longname, ndims, context, Tempo2Fit, incRED, ndims, doTimeMargin,
-                    doJumpMargin, doLinearFit);
+        readsummary(psr, longname, ndims, context, incRED, ndims);
 
         time(&rawstoptime);
         rawstoptimeinfo = localtime(&rawstoptime);

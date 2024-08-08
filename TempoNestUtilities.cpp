@@ -189,8 +189,7 @@ void readphyslive(std::string longname, int ndim, double** paramarray, int sampl
     summaryfile.close();
 }
 
-void readsummary(pulsar* psr, std::string longname, int ndim, void* context, long double* Tempo2Fit,
-                 int incRED, int ndims, int doTimeMargin, int doJumpMargin, int doLinear)
+void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int incRED, int ndims)
 {
 
     int pcount = 0;
@@ -205,191 +204,22 @@ void readsummary(pulsar* psr, std::string longname, int ndim, void* context, lon
 
     readtxtoutput(longname, ndim, paramarray);
     readphyslive(longname, ndim, paramarray, 0);
-    int numlongparams = ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps;
-    long double* LDP = new long double[numlongparams];
-    pcount = 0;
-    fitcount = 0;
-    for (int j = 0; j < ((MNStruct*)context)->numFitTiming; j++) {
-        if (((MNStruct*)context)->Dpriors[pcount][0] != ((MNStruct*)context)->Dpriors[pcount][1]) {
-            double val = 0;
-            if (((MNStruct*)context)->LDpriors[pcount][3] == 0) {
-                val = paramarray[fitcount][2];
-            }
-            if (((MNStruct*)context)->LDpriors[pcount][3] == 1) {
-                val = pow(10.0, paramarray[fitcount][2]);
-            }
-
-            LDP[j] = val * (((MNStruct*)context)->LDpriors[pcount][1]) +
-                     (((MNStruct*)context)->LDpriors[pcount][0]);
-
-            if (((MNStruct*)context)->TempoFitNums[pcount][0] == param_sini &&
-                ((MNStruct*)context)->usecosiprior == 1) {
-                val = paramarray[fitcount][2];
-                LDP[j] = sqrt(1.0 - val * val);
-            }
-
-            fitcount++;
-        } else if (((MNStruct*)context)->Dpriors[pcount][0] ==
-                   ((MNStruct*)context)->Dpriors[pcount][1]) {
-            LDP[j] = ((MNStruct*)context)->Dpriors[pcount][0] *
-                         (((MNStruct*)context)->LDpriors[pcount][1]) +
-                     (((MNStruct*)context)->LDpriors[pcount][0]);
-        }
-        //	printf("LD: %.25Lg %g %g \n",LDP[j], ((MNStruct
-        //*)context)->Dpriors[pcount][0],((MNStruct *)context)->Dpriors[pcount][1]);
-        pcount++;
-    }
-
-    for (int j = 0; j < ((MNStruct*)context)->numFitJumps; j++) {
-        if (((MNStruct*)context)->Dpriors[pcount][0] != ((MNStruct*)context)->Dpriors[pcount][1]) {
-            LDP[pcount] = paramarray[fitcount][2] * (((MNStruct*)context)->LDpriors[pcount][1]) +
-                          (((MNStruct*)context)->LDpriors[pcount][0]);
-            fitcount++;
-        } else if (((MNStruct*)context)->Dpriors[pcount][0] ==
-                   ((MNStruct*)context)->Dpriors[pcount][1]) {
-            LDP[pcount] = ((MNStruct*)context)->Dpriors[pcount][0] *
-                              (((MNStruct*)context)->LDpriors[pcount][1]) +
-                          (((MNStruct*)context)->LDpriors[pcount][0]);
-        }
-        pcount++;
-    }
-
-    pcount = 0;
-    int jj = 0;
-    pcount = 1;
-    fitcount = 0;
-    if (((MNStruct*)context)->LDpriors[0][2] == 0)
-        fitcount++;
-    for (int j = 1; j < ((MNStruct*)context)->numFitTiming; j++) {
-
-        long double value;
-        long double error;
-
-        value = LDP[pcount];
-
-        if (((MNStruct*)context)->LDpriors[j][2] == 0) {
-            error = paramarray[fitcount][1] * (((MNStruct*)context)->LDpriors[pcount][1]);
-            fitcount++;
-        } else if (((MNStruct*)context)->LDpriors[j][2] == 1) {
-            error = 0;
-        }
-
-        ((MNStruct*)context)
-            ->pulse->param[((MNStruct*)context)->TempoFitNums[pcount][0]]
-            .val[((MNStruct*)context)->TempoFitNums[pcount][1]] = value;
-        ((MNStruct*)context)
-            ->pulse->param[((MNStruct*)context)->TempoFitNums[pcount][0]]
-            .err[((MNStruct*)context)->TempoFitNums[pcount][1]] = error;
-        pcount++;
-    }
-
-    for (int j = 0; j < ((MNStruct*)context)->numFitJumps; j++) {
-
-        long double value;
-        long double error;
-
-        value = LDP[pcount];
-
-        if (((MNStruct*)context)->LDpriors[pcount][2] == 0) {
-            error = paramarray[fitcount][1] * (((MNStruct*)context)->LDpriors[pcount][1]);
-            fitcount++;
-        } else if (((MNStruct*)context)->LDpriors[pcount][2] == 1) {
-            error = 0;
-        }
-
-        ((MNStruct*)context)->pulse->jumpVal[((MNStruct*)context)->TempoJumpNums[j]] = value;
-        ((MNStruct*)context)->pulse->jumpValErr[((MNStruct*)context)->TempoJumpNums[j]] = error;
-        pcount++;
-    }
 
     formBatsAll(((MNStruct*)context)->pulse, 1);  // Form Barycentric arrival times
     // printf("formed bats \n");
     formResiduals(((MNStruct*)context)->pulse, 1, 1);  // Form residuals
-    // printf("done bats and stuff \n");
-    std::ofstream designfile;
-    std::string dname = longname + "T2scaling.txt";
 
-    designfile.open(dname.c_str());
-    double pdParamDeriv[MAX_PARAMS];
-    int numtofit = ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps;
-    for (int i = 1; i < ((MNStruct*)context)->numFitTiming; i++) {
-        designfile << psr->param[((MNStruct*)context)->TempoFitNums[i][0]]
-                          .label[((MNStruct*)context)->TempoFitNums[i][1]];
-        designfile << " ";
-        std::stringstream ss;
-        ss.precision(std::numeric_limits<long double>::digits);  // override the default
-
-        ss << ((MNStruct*)context)->LDpriors[i][0];
-        ss << " ";
-        ss << ((MNStruct*)context)->LDpriors[i][1];
-        designfile << ss.str();
-        designfile << "\n";
-    }
-
-    designfile.close();
-    printf("text output\n");
     double Evidence = 0;
-    TNtextOutput(((MNStruct*)context)->pulse, 1, 0, Tempo2Fit, context, incRED, ndims, paramlist,
-                 Evidence, doTimeMargin, doJumpMargin, doLinear, longname, paramarray);
+    TNtextOutput(((MNStruct*)context)->pulse, 1, 0, context, incRED, ndims, paramlist, Evidence,
+                 longname, paramarray);
 
     printf("finished output \n");
-}
-
-void getCustomDMatrix(pulsar* pulse, int* MarginList, int** TempoFitNums, int* TempoJumpNums,
-                      double** Dpriors, int incDM, int TimetoFit, int JumptoFit)
-{
-
-    double pdParamDeriv[MAX_PARAMS], dMultiplication;
-
-    // Unset all fit flags for parameters we arn't marginalising over so they arn't in the design
-    // Matrix
-
-    int pcount = 1;
-    int numToMargin = 1;
-
-    Dpriors[0][0] = 0;
-    Dpriors[0][1] = 0;
-
-    for (int p = 1; p < TimetoFit; p++) {
-        if (MarginList[pcount] != 1) {
-            pulse[0].param[TempoFitNums[p][0]].fitFlag[TempoFitNums[p][1]] = 0;
-        } else if (MarginList[pcount] == 1) {
-            pulse[0].param[TempoFitNums[p][0]].fitFlag[TempoFitNums[p][1]] = 1;
-            Dpriors[pcount][0] = 0;
-            Dpriors[pcount][1] = 0;
-            numToMargin++;
-        }
-        pcount++;
-    }
-
-    for (int i = 0; i < JumptoFit; i++) {
-        if (MarginList[pcount] != 1) {
-            pulse[0].fitJump[TempoJumpNums[i]] = 0;
-        } else if (MarginList[pcount] == 1) {
-            pulse[0].fitJump[TempoJumpNums[i]] = 1;
-            Dpriors[pcount][0] = 0;
-            Dpriors[pcount][1] = 0;
-            numToMargin++;
-        }
-        pcount++;
-    }
-
-    // Now set fit flags back to how they were
-
-    for (int p = 1; p < TimetoFit; p++) {
-        pulse[0].param[TempoFitNums[p][0]].fitFlag[TempoFitNums[p][1]] = 1;
-    }
-
-    for (int i = 0; i < JumptoFit; i++) {
-        pulse[0].fitJump[TempoJumpNums[i]] = 1;
-    }
 }
 
 void getEigenDVectorLike(void* context, Eigen::MatrixXd& TNDM, int Nobs, int TimeToMargin,
                          int TotalSize)
 {
 
-    int pcount = 0;
     int imargin = 0;
 
     pulsar* psr = ((MNStruct*)context)->pulse;
@@ -408,34 +238,19 @@ void getEigenDVectorLike(void* context, Eigen::MatrixXd& TNDM, int Nobs, int Tim
     for (int iparam = 0; iparam < fitinfo->nParams; ++iparam) {
         // this is something we want to marginalise over
         param_label p = fitinfo->paramIndex[iparam];
-        // skip over parameters that are part of the TN model
-        if (p == param_red_sin)
-            continue;
-        if (p == param_red_cos)
-            continue;
-        if (p == param_jitter)
-            continue;
-        if (p == param_red_dm_sin)
-            continue;
-        if (p == param_red_dm_cos)
-            continue;
 
         // skip over jumps here. Note that jumps are at the start, so we skip without incrementing
         // pcount.
         if (p == param_JUMP)
             continue;
 
-        if (((MNStruct*)context)->LDpriors[pcount][2] == 1) {
+        const int k = fitinfo->paramCounters[iparam];
+        for (int iobs = 0; iobs < psr->nobs; ++iobs) {
+            const double x = psr->obsn[iobs].bat - psr->param[param_pepoch].val[0];
 
-            const int k = fitinfo->paramCounters[iparam];
-            for (int iobs = 0; iobs < psr->nobs; ++iobs) {
-                const double x = psr->obsn[iobs].bat - psr->param[param_pepoch].val[0];
-
-                TNDM(iobs, imargin) = fitinfo->paramDerivs[iparam](psr, 0, x, iobs, p, k);
-            }
-            ++imargin;
+            TNDM(iobs, imargin) = fitinfo->paramDerivs[iparam](psr, 0, x, iobs, p, k);
         }
-        ++pcount;
+        ++imargin;
     }
 
     // temponest has jumps at the end, so do NOT reset pcount!
@@ -443,30 +258,16 @@ void getEigenDVectorLike(void* context, Eigen::MatrixXd& TNDM, int Nobs, int Tim
 
     for (int iparam = 0; iparam < fitinfo->nParams; ++iparam) {
         param_label p = fitinfo->paramIndex[iparam];
-        if (p == param_red_sin)
-            continue;
-        if (p == param_red_cos)
-            continue;
-        if (p == param_jitter)
-            continue;
-        if (p == param_red_dm_sin)
-            continue;
-        if (p == param_red_dm_cos)
-            continue;
 
         if (p == param_JUMP) {
-            if (((MNStruct*)context)->LDpriors[pcount][2] == 1) {
 
-                const int k = fitinfo->paramCounters[iparam];
-                for (int iobs = 0; iobs < psr->nobs; ++iobs) {
-                    const double x = psr->obsn[iobs].bat - psr->param[param_pepoch].val[0];
-
-                    TNDM(iobs, imargin) = fitinfo->paramDerivs[iparam](psr, 0, x, iobs, p, k);
-                }
-
-                ++imargin;
+            const int k = fitinfo->paramCounters[iparam];
+            for (int iobs = 0; iobs < psr->nobs; ++iobs) {
+                const double x = psr->obsn[iobs].bat - psr->param[param_pepoch].val[0];
+                TNDM(iobs, imargin) = fitinfo->paramDerivs[iparam](psr, 0, x, iobs, p, k);
             }
-            ++pcount;
+
+            ++imargin;
         }
     }
 }
@@ -585,7 +386,7 @@ void StoreTMatrix(double* TotalMatrix, void* context)
 void getArraySizeInfo(void* context)
 {
 
-    int TimetoMargin = ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps;
+    std::cout << "Time to margin " << ((MNStruct*)context)->TimetoMargin << std::endl;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////Set up Coefficients///////////////////////////////////////
@@ -619,10 +420,9 @@ void getArraySizeInfo(void* context)
     if (((MNStruct*)context)->incDM != 0)
         totCoeff += FitDMCoeff;
 
-    int totalsize = TimetoMargin + totCoeff;
+    int totalsize = ((MNStruct*)context)->TimetoMargin + totCoeff;
 
     ((MNStruct*)context)->Tspan = maxtspan;
-    ((MNStruct*)context)->TimetoMargin = TimetoMargin;
     ((MNStruct*)context)->totCoeff = totCoeff;
     ((MNStruct*)context)->totalsize = totalsize;
 }
