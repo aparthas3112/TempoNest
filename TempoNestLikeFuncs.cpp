@@ -94,194 +94,84 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     double uniformpriorterm = 0;
     clock_t startClock, endClock;
 
-    double** EFAC;
-    double* EQUAD;
-    int pcount = 0;
-
-    int numfit = ((MNStruct*)globalcontext)->numFitTiming + ((MNStruct*)globalcontext)->numFitJumps;
     int TimetoMargin = ((MNStruct*)globalcontext)->TimetoMargin;
-    long double LDparams[numfit];
-    for (int i = 0; i < numfit; i++) {
-        LDparams[i] = 0;
-    }
-    double Fitparams[numfit];
-    Eigen::VectorXd Resvec(((MNStruct*)globalcontext)->pulse->nobs);
-    int fitcount = 0;
 
-    pcount = 0;
+    Eigen::VectorXd Resvec = Eigen::VectorXd::Zero(((MNStruct*)globalcontext)->pulse->nobs);
+    Eigen::VectorXd EQUAD = Eigen::VectorXd::Zero(((MNStruct*)globalcontext)->systemcount);
+    Eigen::VectorXd EFAC = Eigen::VectorXd::Ones(((MNStruct*)globalcontext)->systemcount);
 
-    // Convert priors to physical units (here only for timing parameters and jumps)
-    for (int p = 0;
-         p < ((MNStruct*)globalcontext)->numFitTiming + ((MNStruct*)globalcontext)->numFitJumps;
-         p++) {
-        if (((MNStruct*)globalcontext)->Dpriors[p][1] !=
-            ((MNStruct*)globalcontext)->Dpriors[p][0]) {
-            double val = 0;
-            if ((((MNStruct*)globalcontext)->LDpriors[p][3]) == 0) {
-                val = Cube[fitcount];
-            }
-            if ((((MNStruct*)globalcontext)->LDpriors[p][3]) == 1) {
-                val = pow(10.0, Cube[fitcount]);
-            }
-            if ((((MNStruct*)globalcontext)->LDpriors[p][3]) == 2) {
-                val = pow(10.0, Cube[fitcount]);
-                uniformpriorterm += log(val);
-            }
-
-            LDparams[p] = val * (((MNStruct*)globalcontext)->LDpriors[p][1]) +
-                          (((MNStruct*)globalcontext)->LDpriors[p][0]);
-
-            if (((MNStruct*)globalcontext)->TempoFitNums[p][0] == param_sini &&
-                ((MNStruct*)globalcontext)->usecosiprior == 1) {
-                val = Cube[fitcount];
-                LDparams[p] = std::sqrt(1.0 - val * val);
-            }
-
-            fitcount++;
-
-        } else if (((MNStruct*)globalcontext)->Dpriors[p][1] ==
-                   ((MNStruct*)globalcontext)->Dpriors[p][0]) {
-            LDparams[p] = ((MNStruct*)globalcontext)->Dpriors[p][0] *
-                              (((MNStruct*)globalcontext)->LDpriors[p][1]) +
-                          (((MNStruct*)globalcontext)->LDpriors[p][0]);
-        }
-    }
-
-    pcount = 0;
-    double phase = (double)LDparams[0];
-    pcount++;
-    for (int p = 1; p < ((MNStruct*)globalcontext)->numFitTiming; p++) {
-        ((MNStruct*)globalcontext)
-            ->pulse->param[((MNStruct*)globalcontext)->TempoFitNums[p][0]]
-            .val[((MNStruct*)globalcontext)->TempoFitNums[p][1]] = LDparams[pcount];
-        pcount++;
-    }
-    for (int p = 0; p < ((MNStruct*)globalcontext)->numFitJumps; p++) {
-        ((MNStruct*)globalcontext)->pulse->jumpVal[((MNStruct*)globalcontext)->TempoJumpNums[p]] =
-            LDparams[pcount];
-        pcount++;
-    }
-
-    if (TimetoMargin != numfit) {
-        fastformBatsAll(
-            ((MNStruct*)globalcontext)->pulse,
-            ((MNStruct*)globalcontext)->numberpulsars); /* Form Barycentric arrival times */
-        formResiduals(((MNStruct*)globalcontext)->pulse, ((MNStruct*)globalcontext)->numberpulsars,
-                      1); /* Form residuals */
-    }
+    int pcount = 0;
 
     for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
 
-        Resvec[o] = (double)((MNStruct*)globalcontext)->pulse->obsn[o].residual + phase;
+        Resvec[o] = (double)((MNStruct*)globalcontext)->pulse->obsn[o].residual;
     }
-
-    pcount = fitcount;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////Get White Noise vector///////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    if (((MNStruct*)globalcontext)->numFitEFAC == 0) {
-        EFAC = new double*[1];
-        EFAC[0] = new double[((MNStruct*)globalcontext)->systemcount];
-        for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-            EFAC[0][o] = 1;
-        }
+    if (((MNStruct*)globalcontext)->numFitEFAC == 1) {
 
-    } else if (((MNStruct*)globalcontext)->numFitEFAC == 1) {
-        EFAC = new double*[1];
-
-        EFAC[0] = new double[((MNStruct*)globalcontext)->systemcount];
         for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-            EFAC[0][o] = pow(10.0, Cube[pcount]);
+            EFAC(o) = pow(10.0, Cube[pcount]);
             if (((MNStruct*)globalcontext)->EFACPriorType == 1) {
-                uniformpriorterm += log(EFAC[0][o]);
+                uniformpriorterm += log(EFAC(o));
             }
         }
         pcount++;
 
     } else if (((MNStruct*)globalcontext)->numFitEFAC > 1) {
-        EFAC = new double*[1];
-        EFAC[0] = new double[((MNStruct*)globalcontext)->systemcount];
 
-        for (int p = 0; p < ((MNStruct*)globalcontext)->systemcount; p++) {
-            EFAC[0][p] = pow(10.0, Cube[pcount]);
+        for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
+            EFAC(o) = pow(10.0, Cube[pcount]);
             if (((MNStruct*)globalcontext)->EFACPriorType == 1) {
-                uniformpriorterm += log(EFAC[0][p]);
+                uniformpriorterm += log(EFAC(o));
             }
             pcount++;
         }
     }
 
     // printf("Equad %i \n", ((MNStruct *)globalcontext)->numFitEQUAD);
-    if (((MNStruct*)globalcontext)->numFitEQUAD == 0) {
-        EQUAD = new double[((MNStruct*)globalcontext)->systemcount];
+    if (((MNStruct*)globalcontext)->numFitEQUAD == 1) {
         for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-            EQUAD[o] = 0;
-        }
-    } else if (((MNStruct*)globalcontext)->numFitEQUAD == 1) {
-        EQUAD = new double[((MNStruct*)globalcontext)->systemcount];
-        for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-            EQUAD[o] = pow(10.0, 2 * Cube[pcount]);
+            EQUAD(o) = pow(10.0, 2 * Cube[pcount]);
             if (((MNStruct*)globalcontext)->EQUADPriorType == 1) {
                 uniformpriorterm += log(pow(10.0, Cube[pcount]));
             }
         }
         pcount++;
     } else if (((MNStruct*)globalcontext)->numFitEQUAD > 1) {
-        EQUAD = new double[((MNStruct*)globalcontext)->systemcount];
         for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
 
             if (((MNStruct*)globalcontext)->includeEQsys[o] == 1) {
                 // printf("Cube: %i %i %g \n", o, pcount, Cube[pcount]);
-                EQUAD[o] = pow(10.0, 2 * Cube[pcount]);
+                EQUAD(o) = pow(10.0, 2 * Cube[pcount]);
                 if (((MNStruct*)globalcontext)->EQUADPriorType == 1) {
                     uniformpriorterm += log(pow(10.0, Cube[pcount]));
                 }
                 pcount++;
-            } else {
-                EQUAD[o] = 0;
             }
-            // printf("Equad? %i %g \n", o, EQUAD[o]);
         }
     }
 
-    double* Noise;
-    double* BATvec;
-    Noise = new double[((MNStruct*)globalcontext)->pulse->nobs];
+    Eigen::VectorXd Noise = Eigen::VectorXd::Zero(((MNStruct*)globalcontext)->pulse->nobs);
 
     double DMKappa = 2.410 * pow(10.0, -16);
-    if (((MNStruct*)globalcontext)->whitemodel == 0) {
 
-        for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
-            double EFACterm = 0;
-            double noiseval = 0;
+    for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
+        double EFACterm = 0;
+        double noiseval = 0;
 
-            if (((MNStruct*)globalcontext)->useOriginalErrors == 0) {
-                noiseval = ((MNStruct*)globalcontext)->pulse->obsn[o].toaErr;
-            } else if (((MNStruct*)globalcontext)->useOriginalErrors == 1) {
-                noiseval = ((MNStruct*)globalcontext)->pulse->obsn[o].origErr;
-            }
-
-            EFACterm =
-                (noiseval * pow(10.0, -6)) * EFAC[0][((MNStruct*)globalcontext)->sysFlags[o]];
-
-            // printf("Noise: %i %g %g %g %g %g \n", EFACterm, EQUAD[((MNStruct
-            // *)globalcontext)->sysFlags[o]], ShannonJitterTerm, SWTerm, DMEQUADTerm);
-            Noise[o] = 1.0 / (pow(EFACterm, 2) + EQUAD[((MNStruct*)globalcontext)->sysFlags[o]]);
+        if (((MNStruct*)globalcontext)->useOriginalErrors == 0) {
+            noiseval = ((MNStruct*)globalcontext)->pulse->obsn[o].toaErr;
+        } else if (((MNStruct*)globalcontext)->useOriginalErrors == 1) {
+            noiseval = ((MNStruct*)globalcontext)->pulse->obsn[o].origErr;
         }
 
-    } else if (((MNStruct*)globalcontext)->whitemodel == 1) {
+        EFACterm = (noiseval * pow(10.0, -6)) * EFAC(((MNStruct*)globalcontext)->sysFlags[o]);
 
-        for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
-
-            Noise[o] =
-                1.0 /
-                (EFAC[0][((MNStruct*)globalcontext)->sysFlags[o]] *
-                 EFAC[0][((MNStruct*)globalcontext)->sysFlags[o]] *
-                 (pow(((((MNStruct*)globalcontext)->pulse->obsn[o].toaErr) * pow(10.0, -6)), 2) +
-                  EQUAD[((MNStruct*)globalcontext)->sysFlags[o]]));
-        }
+        Noise[o] = 1.0 / (pow(EFACterm, 2) + EQUAD(((MNStruct*)globalcontext)->sysFlags[o]));
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -311,58 +201,19 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     int totCoeff = ((MNStruct*)globalcontext)->totCoeff;
 
-    double* powercoeff = new double[totCoeff];
-    for (int o = 0; o < totCoeff; o++) {
-        powercoeff[o] = 0;
-    }
+    Eigen::VectorXd powercoeff = Eigen::VectorXd::Zero(totCoeff);
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////Red Noise///////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    double* freqs = new double[totCoeff];
-    double* DMVec = new double[((MNStruct*)globalcontext)->pulse->nobs];
+    Eigen::VectorXd freqs = Eigen::VectorXd::Zero(totCoeff);
+    Eigen::VectorXd DMVec = Eigen::VectorXd::Zero(((MNStruct*)globalcontext)->pulse->nobs);
 
     double freqdet = 0;
     int startpos = 0;
 
     if (((MNStruct*)globalcontext)->incRED > 0) {
-
-        if (((MNStruct*)globalcontext)->FitLowFreqCutoff == 1) {
-            double fLow = pow(10.0, Cube[pcount]);
-            pcount++;
-
-            double deltaLogF = 0.1;
-            double RedMidFreq = 2.0;
-
-            double RedLogDiff = log10(RedMidFreq) - log10(fLow);
-            int LogLowFreqs = floor(RedLogDiff / deltaLogF);
-
-            double RedLogSampledDiff = LogLowFreqs * deltaLogF;
-            double sampledFLow = floor(log10(fLow) / deltaLogF) * deltaLogF;
-
-            int freqStartpoint = 0;
-
-            for (int i = 0; i < LogLowFreqs; i++) {
-                ((MNStruct*)globalcontext)->sampleFreq[freqStartpoint] =
-                    pow(10.0, sampledFLow + i * RedLogSampledDiff / LogLowFreqs);
-                freqStartpoint++;
-            }
-
-            for (int i = 0; i < FitRedCoeff / 2 - LogLowFreqs; i++) {
-                ((MNStruct*)globalcontext)->sampleFreq[freqStartpoint] = i + RedMidFreq;
-                freqStartpoint++;
-            }
-        }
-
-        if (((MNStruct*)globalcontext)->FitLowFreqCutoff == 2) {
-            double fLow = pow(10.0, Cube[pcount]);
-            pcount++;
-
-            for (int i = 0; i < FitRedCoeff / 2; i++) {
-                ((MNStruct*)globalcontext)->sampleFreq[i] = ((double)(i + 1)) * fLow;
-            }
-        }
 
         for (int i = 0; i < FitRedCoeff / 2; i++) {
 
@@ -384,33 +235,12 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
         }
     }
 
-    if (((MNStruct*)globalcontext)->incRED == 2) {
-
-        for (int i = 0; i < FitRedCoeff / 2; i++) {
-            int pnum = pcount;
-            double pc = Cube[pcount];
-
-            if (((MNStruct*)globalcontext)->RedPriorType == 1) {
-                uniformpriorterm += log(pow(10.0, pc));
-            }
-
-            powercoeff[i] = pow(10.0, 2 * pc);
-            powercoeff[i + FitRedCoeff / 2] = powercoeff[i];
-            pcount++;
-        }
-
-        startpos = FitRedCoeff;
-
-    } else if (((MNStruct*)globalcontext)->incRED == 3 || ((MNStruct*)globalcontext)->incRED == 4) {
+    if (((MNStruct*)globalcontext)->incRED == 3) {
 
         for (int pl = 0; pl < ((MNStruct*)globalcontext)->numFitRedPL; pl++) {
 
             double Tspan = maxtspan;
             double f1yr = 1.0 / 3.16e7;
-
-            if (((MNStruct*)globalcontext)->FitLowFreqCutoff == 2) {
-                Tspan = Tspan / ((MNStruct*)globalcontext)->sampleFreq[0];
-            }
 
             double redamp = Cube[pcount];
             pcount++;
@@ -449,9 +279,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
             }
         }
 
-        int coefftovary = 0;
-        double amptovary = 0.0;
-
         startpos = FitRedCoeff;
     }
 
@@ -489,20 +316,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
         }
     }
 
-    if (((MNStruct*)globalcontext)->incDM == 2) {
-
-        for (int i = 0; i < FitDMCoeff / 2; i++) {
-            int pnum = pcount;
-            double pc = Cube[pcount];
-
-            powercoeff[startpos + i] = pow(10.0, 2 * pc);
-            powercoeff[startpos + i + FitDMCoeff / 2] = powercoeff[startpos + i];
-            freqdet = freqdet + 2 * log(powercoeff[startpos + i]);
-            pcount++;
-        }
-        startpos += FitDMCoeff;
-
-    } else if (((MNStruct*)globalcontext)->incDM == 3) {
+    if (((MNStruct*)globalcontext)->incDM == 3) {
 
         for (int pl = 0; pl < ((MNStruct*)globalcontext)->numFitDMPL; pl++) {
             double DMamp = Cube[pcount];
@@ -510,7 +324,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
             double DMindex = Cube[pcount];
             pcount++;
 
-            double Tspan = maxtspan;
             double f1yr = 1.0 / 3.16e7;
 
             DMamp = pow(10.0, DMamp);
@@ -544,7 +357,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     double timelike = 0;
 
     for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
-        // printf("Res: %i  %g %g \n", o, Resvec[o], sqrt(Noise[o]));
         timelike += Resvec[o] * Resvec[o] * Noise[o];
         tdet -= log(Noise[o]);
     }
@@ -596,19 +408,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     // std::cout << "lnew " << lnewChol << " " << tdet << " " << jointdet << " " << freqdet << " "
     //          << timelike << " " << freqlike << " " << uniformpriorterm << std::endl;
 
-    delete[] DMVec;
-
-    delete[] EFAC[0];
-    delete[] EFAC;
-    delete[] EQUAD;
-    delete[] powercoeff;
-    delete[] freqs;
-    delete[] Noise;
-
-    // printf("tdet %g, jointdet %g, freqdet %g, lnew %g, timelike %g, freqlike %g\n", tdet,
-    // jointdet, freqdet, lnew, timelike, freqlike);
-
-    // printf("CPUChisq: %g %g %g %g %g %g \n",lnew,jointdet,tdet,freqdet,timelike,freqlike);
     logtchk("Exiting TempoNest Likelihood");
 
     return lnewChol;

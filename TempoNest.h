@@ -28,9 +28,9 @@
 
 typedef struct {
     pulsar* pulse;
+    int numberpulsars;
     double Tspan;
     int TimetoMargin;
-    int totRedShapeCoeff;
     int totalsize;
 
     char* rootName;
@@ -38,14 +38,13 @@ typedef struct {
     double** Dpriors;
     double** DMatrix;
     double** FMatrix;
-    int numberpulsars;
+
     int doLinear;
     int numFitJumps;
     int numFitTiming;
     int numFitEFAC;
 
     int numFitEQUAD;
-    int incDMEQUAD;
     int* includeEQsys;
     int numFitRedCoeff;
     int numFitDMCoeff;
@@ -62,14 +61,11 @@ typedef struct {
     int** TempoFitNums;
     int* TempoJumpNums;
     int* sysFlags;
-    double* TobsInfo;
     int systemcount;
     int TimeMargin;
     int JumpMargin;
 
     char* whiteflag;
-
-    int whitemodel;
 
     int RedPriorType;
     int DMPriorType;
@@ -77,17 +73,12 @@ typedef struct {
     int EQUADPriorType;
     int EFACPriorType;
     int useOriginalErrors;
-
-    int FitLowFreqCutoff;
-    int useNbitsAlgebra;
-
     int printResiduals;
 
     int storeFMatrices;
     double* StoredTMatrix;
     int usecosiprior;
     double* PreJumpVals;
-    int doMax;
 
     double* DMatrixVec;
     double* PriorsArray;

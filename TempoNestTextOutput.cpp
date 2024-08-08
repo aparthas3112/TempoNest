@@ -380,7 +380,7 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, voi
         std::vector<int> groupflag;
         std::vector<std::string> groupnames;
 
-               if (incRED != 0 || ((MNStruct*)context)->incDM != 0 ||
+        if (incRED != 0 || ((MNStruct*)context)->incDM != 0 ||
             ((MNStruct*)context)->numFitEFAC > 0 || ((MNStruct*)context)->numFitEQUAD > 0) {
             whitefitcount = fitcount;
             printf(
@@ -419,18 +419,8 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, voi
                 }
             }
 
-            if (((MNStruct*)context)->incDMEQUAD > 0) {
-                fitcount++;
-            }
-
-            if (((MNStruct*)context)->FitLowFreqCutoff > 0) {
-                printf("Red Noise Model Low Frequency Cutoff: %g +/- %g \n",
-                       paramarray[fitcount][0], paramarray[fitcount][1]);
-                fitcount++;
-            }
-
             //		printf("fit counts %i %i \n", whitefitcount, fitcount);
-            if (incRED == 1 || incRED == 3) {
+            if (incRED == 3) {
                 printf("Power Law Red Noise Model:\n");
                 printf("Log Amplitude: %g +/- %g\n", paramarray[fitcount][0],
                        paramarray[fitcount][1]);
@@ -439,31 +429,8 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, voi
                        paramarray[fitcount][1]);
                 fitcount++;
             }
-            if (incRED == 4) {
-                printf("Power Law Red Noise Model with Corner Frequency:\n");
-                printf("Log Amplitude: %g +/- %g\n", paramarray[fitcount][0],
-                       paramarray[fitcount][1]);
-                fitcount++;
-                printf("Spectral Index: %g +/- %g\n", paramarray[fitcount][0],
-                       paramarray[fitcount][1]);
-                fitcount++;
-                printf("Log Corner Frequency: %g +/- %g\n", paramarray[fitcount][0],
-                       paramarray[fitcount][1]);
-                fitcount++;
 
-            } else if (incRED == 2) {
-                printf("Model Independant Red Noise, %i Coefficients used:\n",
-                       ((MNStruct*)context)->numFitRedCoeff);
-                int coeff = 1;
-                for (int i = 0; i < ((MNStruct*)context)->numFitRedCoeff; i++) {
-                    printf("Log Amplitude Coefficient %i: %g +/- %g\n", coeff,
-                           paramarray[fitcount][0], paramarray[fitcount][1]);
-                    fitcount++;
-                    coeff++;
-                }
-            }
-
-            if (((MNStruct*)context)->incDM == 1 || ((MNStruct*)context)->incDM == 3) {
+            if (((MNStruct*)context)->incDM == 3) {
                 printf("Power Law DM Model:\n");
                 printf("Log Amplitude: %g +/- %g\n", paramarray[fitcount][0],
                        paramarray[fitcount][1]);
@@ -471,16 +438,6 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, voi
                 printf("Spectral Index: %g +/- %g\n", paramarray[fitcount][0],
                        paramarray[fitcount][1]);
                 fitcount++;
-            } else if (((MNStruct*)context)->incDM == 2) {
-                printf("Model Independant DM, %i Coefficients used:\n",
-                       ((MNStruct*)context)->numFitDMCoeff);
-                int coeff = 1;
-                for (int i = 0; i < ((MNStruct*)context)->numFitDMCoeff; i++) {
-                    printf("Log Amplitude Coefficient %i: %g +/- %g\n", coeff,
-                           paramarray[fitcount][0], paramarray[fitcount][1]);
-                    fitcount++;
-                    coeff++;
-                }
             }
         }
 
@@ -1335,19 +1292,7 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, voi
                     }
                 }
 
-                if (((MNStruct*)context)->incDMEQUAD > 0) {
-                    whitefitcount++;
-                }
-
-                //	printf("end of White parms %i\n", whitefitcount);
-                if (((MNStruct*)context)->FitLowFreqCutoff > 0) {
-                    fprintf(fout2, "TNRedFLow %g\n", paramarray[whitefitcount][2]);
-                    fprintf(fout2, "TNRedFMid %g\n", 2.0);
-                    tablefile << "Red FLow \\dotfill & " << paramarray[whitefitcount][0]
-                              << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";
-                    whitefitcount++;
-                }
-                if (incRED == 1 || incRED == 3) {
+                if (incRED == 3) {
                     //		printf("STart of Red 3 parms %i \n", whitefitcount);
                     fprintf(fout2, "TNRedAmp %g\n", paramarray[whitefitcount][2]);
                     tablefile << "Log$_{10}$[Red Amp] \\dotfill & " << paramarray[whitefitcount][0]
@@ -1360,25 +1305,9 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, long double* Tempo2Fit, voi
                     whitefitcount++;
                     //		printf("end of Red3 parms\n");
                 }
-                if (incRED == 4) {
-                    fprintf(fout2, "TNRedAmp %g\n", paramarray[whitefitcount][2]);
-                    tablefile << "Log$_{10}$[Red Amp] \\dotfill & " << paramarray[whitefitcount][0]
-                              << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";
-                    whitefitcount++;
-                    fprintf(fout2, "TNRedGam %g\n", paramarray[whitefitcount][2]);
-                    tablefile << "Red Index \\dotfill & " << paramarray[whitefitcount][0]
-                              << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";
-                    whitefitcount++;
-                    fprintf(fout2, "TNRedCorner %g\n", pow(10, paramarray[whitefitcount][2]));
-                    tablefile << "Red Corner Freq \\dotfill & " << paramarray[whitefitcount][0]
-                              << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";
-                    whitefitcount++;
-
-                    fprintf(fout2, "TNRedC %i\n", ((MNStruct*)context)->numFitRedCoeff);
-                }
 
                 //	printf("end of Red parms\n");
-                if (((MNStruct*)context)->incDM == 1 || ((MNStruct*)context)->incDM == 3) {
+                if (((MNStruct*)context)->incDM == 3) {
                     fprintf(fout2, "TNDMAmp %g\n", paramarray[whitefitcount][2]);
                     tablefile << "Log$_{10}$[DM Amp] \\dotfill & " << paramarray[whitefitcount][0]
                               << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";

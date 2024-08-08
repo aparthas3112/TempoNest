@@ -188,7 +188,6 @@ MNStruct* init_struct(pulsar* pulseval, long double** LDpriorsval, int numberpul
     MNS->doLinear = doLinearVal;
     MNS->sampleFreq = SampleFreqsVal;
     MNS->whiteflag = whiteflagval;
-    MNS->whitemodel = whitemodelval;
 
     MNS->RedPriorType = RedPriorType;
     MNS->DMPriorType = DMPriorType;
@@ -196,19 +195,14 @@ MNStruct* init_struct(pulsar* pulseval, long double** LDpriorsval, int numberpul
     MNS->EFACPriorType = EFACPriorType;
     MNS->useOriginalErrors = useOriginalErrors;
 
-    MNS->FitLowFreqCutoff = FitLowFreqCutoff;
-    MNS->useNbitsAlgebra = useNbitsAlgebra;
-
     MNS->storeFMatrices = StoreFMatrices;
 
     MNS->debug = debug;
     MNS->PreJumpVals = PreJumpVals;
     MNS->rootName = rootName;
-    MNS->doMax = doMax;
     MNS->Tspan = 0;
     MNS->TimetoMargin = 0;
     MNS->totCoeff = 0;
-    MNS->totRedShapeCoeff = 0;
     MNS->totalsize = 0;
 
     MNS->rank = rank;
@@ -355,15 +349,7 @@ void printPriors(pulsar* psr, long double** TempoPriors, double** Dpriors, int i
         }
     }
 
-    if (((MNStruct*)context)->FitLowFreqCutoff > 0) {
-        if (((MNStruct*)context)->rank == 0)
-            printf("Prior on Red LF Cutoff %g -> %g \n", Dpriors[paramsfitted][0],
-                   Dpriors[paramsfitted][1]);
-        paramsfitted++;
-        getdistparamnames << "LFC\n";
-    }
-
-    if (incRED == 1 || incRED == 3) {
+    if (incRED == 3) {
         if (((MNStruct*)context)->rank == 0)
             printf("Prior on Red Noise Log Amplitude : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
                    Dpriors[paramsfitted][1]);
@@ -375,19 +361,9 @@ void printPriors(pulsar* psr, long double** TempoPriors, double** Dpriors, int i
 
         getdistparamnames << "RedAmp\n";
         getdistparamnames << "RedSlope\n";
-
-    } else if (incRED == 2) {
-        int Coeffnum = 1;
-        for (int i = 0; i < numRedCoeff; i++) {
-            if (((MNStruct*)context)->rank == 0)
-                printf("Prior on Red Noise Coefficient %i Log Amplitude : %.5g -> %.5g\n", Coeffnum,
-                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
-            getdistparamnames << "RedC" << i + 1 << "\n";
-            paramsfitted++;
-        }
     }
 
-    if (incDM == 1 || incDM == 3) {
+    if (incDM == 3) {
         getdistparamnames << "DMAmp\n";
         getdistparamnames << "DMSlope\n";
         if (((MNStruct*)context)->rank == 0)
@@ -398,16 +374,6 @@ void printPriors(pulsar* psr, long double** TempoPriors, double** Dpriors, int i
             printf("Prior on DM Slope : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
                    Dpriors[paramsfitted][1]);
         paramsfitted++;
-
-    } else if (incDM == 2) {
-        int Coeffnum = 1;
-        for (int i = 0; i < numDMCoeff; i++) {
-            if (((MNStruct*)context)->rank == 0)
-                printf("Prior on DM Coefficient %i Log Amplitude : %.5g -> %.5g\n", Coeffnum,
-                       Dpriors[paramsfitted][0], Dpriors[paramsfitted][1]);
-            getdistparamnames << "DMC" << i + 1 << "\n";
-            paramsfitted++;
-        }
     }
 
     if (fitDMModel == 1) {

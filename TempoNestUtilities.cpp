@@ -374,14 +374,6 @@ void getCustomDMatrix(pulsar* pulse, int* MarginList, int** TempoFitNums, int* T
         pcount++;
     }
 
-    //		for(int i=0; i < pulse->nobs; i++) {
-    //			FITfuncs(pulse[0].obsn[i].bat - pulse[0].param[param_pepoch].val[0], pdParamDeriv,
-    // numToMargin, pulse, i,0); 			for(int j=0; j<numToMargin; j++) {
-    // TNDM[i][j]=pdParamDeriv[j];
-    //					//printf("Dmatrix: %i %i %22.20e \n", i,j,pdParamDeriv[j]);
-    //			}
-    //		}
-
     // Now set fit flags back to how they were
 
     for (int p = 1; p < TimetoFit; p++) {
@@ -470,96 +462,6 @@ void getEigenDVectorLike(void* context, Eigen::MatrixXd& TNDM, int Nobs, int Tim
                     const double x = psr->obsn[iobs].bat - psr->param[param_pepoch].val[0];
 
                     TNDM(iobs, imargin) = fitinfo->paramDerivs[iparam](psr, 0, x, iobs, p, k);
-                }
-
-                ++imargin;
-            }
-            ++pcount;
-        }
-    }
-}
-
-void getCustomDVectorLike(void* context, double* TNDM, int Nobs, int TimeToMargin, int TotalSize)
-{
-
-    int pcount = 0;
-    int imargin = 0;
-
-    pulsar* psr = ((MNStruct*)context)->pulse;
-    FitInfo* fitinfo = &(psr->fitinfo);
-
-    // we have to loop over parameters first then jumps
-    // being careful to keep track of where we are.
-    // This is because temponest keeps jumps at the end
-    // but otherwise the parameters are in the same order.
-    //
-    // In tempo2 the jumps come before most parameters so we
-    // skip over the part with the jumps without incrementing
-    // the temponest index. Later we start from the total number
-    // of parameters excluding jumps and only loop over the jumps
-
-    for (int iparam = 0; iparam < fitinfo->nParams; ++iparam) {
-        // this is something we want to marginalise over
-        param_label p = fitinfo->paramIndex[iparam];
-        // skip over parameters that are part of the TN model
-        if (p == param_red_sin)
-            continue;
-        if (p == param_red_cos)
-            continue;
-        if (p == param_jitter)
-            continue;
-        if (p == param_red_dm_sin)
-            continue;
-        if (p == param_red_dm_cos)
-            continue;
-
-        // skip over jumps here. Note that jumps are at the start, so we skip without incrementing
-        // pcount.
-        if (p == param_JUMP)
-            continue;
-
-        if (((MNStruct*)context)->LDpriors[pcount][2] == 1) {
-
-            const int k = fitinfo->paramCounters[iparam];
-            for (int iobs = 0; iobs < psr->nobs; ++iobs) {
-                const double x = psr->obsn[iobs].bat - psr->param[param_pepoch].val[0];
-
-                TNDM[iobs + imargin * ((MNStruct*)context)->pulse->nobs] =
-                    fitinfo->paramDerivs[iparam](psr, 0, x, iobs, p, k);
-                /// mjk - comment this out to make the code a lot faster
-                // printf("TNDM: %i %i %i %g \n", iobs, imargin, iobs+imargin*((MNStruct
-                // *)context)->pulse->nobs, fitinfo->paramDerivs[iparam](psr,0,x,iobs,p,k));
-            }
-            ++imargin;
-        }
-        ++pcount;
-    }
-
-    // temponest has jumps at the end, so do NOT reset pcount!
-    // pcount should be positioned at the first jump
-
-    for (int iparam = 0; iparam < fitinfo->nParams; ++iparam) {
-        param_label p = fitinfo->paramIndex[iparam];
-        if (p == param_red_sin)
-            continue;
-        if (p == param_red_cos)
-            continue;
-        if (p == param_jitter)
-            continue;
-        if (p == param_red_dm_sin)
-            continue;
-        if (p == param_red_dm_cos)
-            continue;
-
-        if (p == param_JUMP) {
-            if (((MNStruct*)context)->LDpriors[pcount][2] == 1) {
-
-                const int k = fitinfo->paramCounters[iparam];
-                for (int iobs = 0; iobs < psr->nobs; ++iobs) {
-                    const double x = psr->obsn[iobs].bat - psr->param[param_pepoch].val[0];
-
-                    TNDM[iobs + imargin * ((MNStruct*)context)->pulse->nobs] =
-                        fitinfo->paramDerivs[iparam](psr, 0, x, iobs, p, k);
                 }
 
                 ++imargin;
@@ -683,12 +585,7 @@ void StoreTMatrix(double* TotalMatrix, void* context)
 void getArraySizeInfo(void* context)
 {
 
-    int TimetoMargin = 0;
-    for (int i = 0; i < ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps;
-         i++) {
-        if (((MNStruct*)context)->LDpriors[i][2] == 1)
-            TimetoMargin++;
-    }
+    int TimetoMargin = ((MNStruct*)context)->numFitTiming + ((MNStruct*)context)->numFitJumps;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////Set up Coefficients///////////////////////////////////////
@@ -715,10 +612,6 @@ void getArraySizeInfo(void* context)
 
     int FitRedCoeff = 2 * (((MNStruct*)context)->numFitRedCoeff);
     int FitDMCoeff = 2 * (((MNStruct*)context)->numFitDMCoeff);
-
-    int NumNGEpochs = 0;
-
-    int NumNGSEpochs = 0;
 
     int totCoeff = 0;
     if (((MNStruct*)context)->incRED != 0)
