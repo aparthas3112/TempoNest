@@ -192,9 +192,6 @@ void readphyslive(std::string longname, int ndim, double** paramarray, int sampl
 void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int incRED, int ndims)
 {
 
-    int pcount = 0;
-    int fitcount = 0;
-
     std::vector<double> paramlist(2 * ndims);
 
     double** paramarray = new double*[ndims];
@@ -216,8 +213,7 @@ void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int
     printf("finished output \n");
 }
 
-void getEigenDVectorLike(void* context, Eigen::MatrixXd& TNDM, int Nobs, int TimeToMargin,
-                         int TotalSize)
+void getEigenDVectorLike(void* context, Eigen::MatrixXd& TNDM)
 {
 
     int imargin = 0;
@@ -288,8 +284,7 @@ void StoreTMatrix(double* TotalMatrix, void* context)
     int TimetoMargin = ((MNStruct*)context)->TimetoMargin;
     if (TimetoMargin > 0) {
         Eigen::MatrixXd DMatrix(((MNStruct*)context)->pulse->nobs, TimetoMargin);
-        getEigenDVectorLike(context, DMatrix, ((MNStruct*)context)->pulse->nobs, TimetoMargin,
-                            totalsize);
+        getEigenDVectorLike(context, DMatrix);
 
         // Perform SVD
         Eigen::BDCSVD<Eigen::MatrixXd> svd(DMatrix, Eigen::ComputeThinU | Eigen::ComputeThinV);
@@ -385,8 +380,6 @@ void StoreTMatrix(double* TotalMatrix, void* context)
 
 void getArraySizeInfo(void* context)
 {
-
-    std::cout << "Time to margin " << ((MNStruct*)context)->TimetoMargin << std::endl;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////Set up Coefficients///////////////////////////////////////

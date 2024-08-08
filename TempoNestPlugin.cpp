@@ -56,10 +56,6 @@
 
 #include <mpi.h>
 
-#ifdef HAVE_MLAPACK
-    #include <mpblas_mpfr.h>
-#endif
-
 void ephemeris_routines(pulsar* psr, int npsr);
 void clock_corrections(pulsar* psr, int npsr);
 void extra_delays(pulsar* psr, int npsr);
@@ -89,7 +85,7 @@ void fastformBatsAll(pulsar* psr, int npsr)
     // clock_corrections(psr,npsr); /* Clock corrections ... */
 
     int dotime = 0;
-    struct timeval tval_before, tval_after, tval_resultone, tval_resulttwo;
+    struct timeval tval_before, tval_after, tval_resultone;
     if (dotime == 1) {
         gettimeofday(&tval_before, NULL);
     }
@@ -155,7 +151,7 @@ MNStruct* init_struct(pulsar* pulseval, int numberpulsarsval, int timing_model_p
                       int RedPriorType, int DMPriorType, int EQUADPriorType, int EFACPriorType,
                       int useOriginalErrors,
 
-                      int sampler, int StoreFMatrices, int debug, char* rootName, int rank)
+                      int StoreFMatrices, int debug, char* rootName, int rank)
 {
     MNStruct* MNS = (MNStruct*)malloc(sizeof(MNStruct));
 
@@ -196,13 +192,11 @@ MNStruct* init_struct(pulsar* pulseval, int numberpulsarsval, int timing_model_p
 }
 
 void printPriors(pulsar* psr, double** Dpriors, int incEFAC, int incEQUAD, int incRED, int incDM,
-                 int numRedCoeff, int numDMCoeff, int fitDMModel, std::string longname,
-                 void* context)
+                 std::string longname, void* context)
 {
 
     std::ofstream getdistparamnames;
     std::string gdpnfname = longname + ".paramnames";
-    std::string latexvar;
     getdistparamnames.open(gdpnfname.c_str());
 
     if (((MNStruct*)context)->rank == 0)
@@ -306,27 +300,17 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     char outputSO[MAX_FILELEN];
     char str[MAX_FILELEN];
     char newparname[MAX_FILELEN];
-    longdouble coeff[MAX_COEFF]; /* For polynomial coefficients in polyco */
-    int npsr = *pnpsr;           /* The number of pulsars */
-    int noWarnings = 1;
+    int npsr = *pnpsr; /* The number of pulsars */
     double globalParameter = 0.0;
-    int displayParams;
     int nGlobal, i, flagPolyco = 0, it, k;
     char polyco_args[128];
     char polyco_file[128];
     int newpar = 0;
     int onlypre = 0;
-    //  char tempo2MachineType[MAX_FILELEN]="";
-    FILE* alias;
     char** commandLine;
-    clock_t startClock, endClock;
     time_t rawstarttime, rawstoptime;
     struct tm* rawstarttimeinfo;
     struct tm* rawstoptimeinfo;
-    const char* CVS_verNum = "$Revision: 1.28 $";
-    int numFitJumps;
-    int numToMargin = 0;
-    int nprocs = 0;
     char* ConfigFileName;
 
     int rank, size;
@@ -341,8 +325,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         printf("This is free software, and you are welcome to redistribute it\n");
         printf("under conditions of GPL license.\n\n");
     }
-
-    startClock = clock();
 
     time(&rawstarttime);
     rawstarttimeinfo = localtime(&rawstarttime);
@@ -369,7 +351,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     strcpy(outputSO, "");
     npsr = 0; /* Initialise the number of pulsars */
-    displayParams = 0;
     nGlobal = 0;
     /* Obtain command line arguments */
     logdbg("Running getInputs %d", psr[0].nits);
@@ -377,8 +358,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     getInputs(psr, argc, commandLine, timFile, parFile, &listparms, &npsr, &nGlobal, &outRes,
               &writeModel, outputSO, &flagPolyco, polyco_args, polyco_file, &newpar, &onlypre,
               dcmFile, covarFuncFile, newparname);
-
-    int doMaxLike = 0;
 
     logdbg("Reading par file");
     readParfile(psr, parFile, timFile,
@@ -411,8 +390,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     int Reddims = 0;
     int DMdims = 0;
-    int DMModeldims = 0;
-    int fitDMModel = 0;
     double* EFACPrior;
     double* EQUADPrior;
     double* AlphaPrior;
@@ -511,6 +488,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     if (rank == 0)
         printf("Num T2 its %i \n", numTempo2its);
+
     for (it = 0; it < numTempo2its; it++) /* Why pulsar 0 should select the iterations? */
     {
         if (it > 0) /* Copy post-fit values to pre-fit values */
@@ -602,12 +580,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
             psr[0].noWarnings = 2;
             if (onlypre == 1)
                 iteration = 2;
-            /*	  textOutput(psr,npsr,globalParameter,nGlobal,outRes,newpar,"new.par");*/ /* Output
-                                                                                             results
-                                                                                             to the
-                                                                                             screen
-                                                                                           */
-            /*	  printf("Next iteration\n");*/
         }
     }
 
@@ -620,13 +592,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         DMdims = 0;
     if (incDM == 3)
         DMdims = 2;
-
-    // printf("DMModel flag: %i \n",psr[0].param[param_dmmodel].fitFlag[0]);
-    if (psr[0].param[param_dmmodel].fitFlag[0] == 1) {
-        //	printf("Fitting for DMModel using %i structure functions \n",psr[0].dmoffsDMnum);
-        DMModeldims = psr[0].dmoffsDMnum;
-        fitDMModel = 1;
-    }
 
     if ((incRED == 1 && incDM != 1 && incDM != 0) || (incRED != 1 && incRED != 0 && incDM == 1)) {
         if (rank == 0)
@@ -642,7 +607,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     if (longname.size() >= 100) {
         if (rank == 0)
             printf("Root Name is too long, needs to be less than 100 characters, currently %i .\n",
-                   longname.size());
+                   (int)longname.size());
         return 0;
     }
 
@@ -657,7 +622,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
             printf(
                 "white noise flag is too long, needs to be less than 100 characters, currently %i "
                 ".\n",
-                wname.size());
+                (int)wname.size());
         return 0;
     }
 
@@ -754,11 +719,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         }
     }
 
-    int* includeEQsys = new int[systemcount];
-    for (int l = 0; l < systemcount; l++) {
-        includeEQsys[l] = 1;
-    }
-
     if (incEFAC == 1) {
         if (rank == 0)
             printf("Including One EFAC for all observations\n");
@@ -812,7 +772,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     // 	return 0;
     int sampler = 1;
-    int Nchords = 1;
     int IS = 1;        // do Nested Importance Sampling?
     int mmodal = 0;    // do mode separation?
     int ceff = 0;      // run in constant efficiency mode?
@@ -822,18 +781,12 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     int nClsPar = 1;    // no. of parameters to do mode separation on
     int updInt = 2000;  // after how many iterations feedback is required & the output files should
                         // be updated
-    int NBurn = 100;
-    int NSamp = 10000;
-    int GHSresume = 0;
 
-    setupMNparams(ConfigFileName, sampler, IS, mmodal, ceff, nlive, efr, sample, updInt, nClsPar,
-                  Nchords, NBurn, NSamp, GHSresume);
+    setupMNparams(ConfigFileName, sampler, IS, mmodal, ceff, nlive, efr, sample, updInt, nClsPar);
 
     double tol = 0.5;                                   // tol, defines the stopping criteria
     int ndims = numEFAC + numEQUAD + Reddims + DMdims;  // dimensionality (no. of free parameters)
-    int nPar = ndims;  // total no. of parameters including free & derived parameters
-                       // note: posterior files are updated & dumper routine is called after every
-                       // updInt*10 iterations
+
     double Ztol = -1E90;  // all the modes with logZ < Ztol are ignored
     int maxModes = 100;   // expected max no. of modes (used only for memory allocation)
     int pWrap[ndims];     // which parameters to have periodic boundary conditions?
@@ -860,9 +813,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         init_struct(psr, npsr, timing_model_params, systemcount, numEFAC, numEQUAD,
                     int(numRedCoeff), int(numDMCoeff), numFlags, ndims, incRED, incDM, SampleFreq,
                     wflag, RedPriorType, DMPriorType, EQUADPriorType, EFACPriorType,
-                    useOriginalErrors, sampler, StoreFMatrices, debug, chartroot, rank);
-
-    MNS->includeEQsys = includeEQsys;
+                    useOriginalErrors, StoreFMatrices, debug, chartroot, rank);
 
     // return 0;
     context = MNS;
@@ -911,14 +862,10 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     ((MNStruct*)context)->Dpriors = Dpriors;
 
-    printPriors(psr, Dpriors, numEFAC, numEQUAD, incRED, incDM, numRedCoeff, numDMCoeff, fitDMModel,
-                longname, context);
+    printPriors(psr, Dpriors, numEFAC, numEQUAD, incRED, incDM, longname, context);
 
     if (rank == 0)
         printf("\n\n");
-
-    ndims = ndims;
-    nPar = ndims;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////get TotalMatrix////////////////////////////////////////////////////
@@ -945,7 +892,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     //////////////////////////////////////////////////////////////////////////////////////////
 
     double* PriorsArray = new double[2 * ndims];
-    int NDerived = 0;
 
     int p = 0;
     pcount = 0;

@@ -28,8 +28,7 @@
  */
 
 void setupMNparams(char* ConfigFileName, int& sampler, int& IS, int& modal, int& ceff, int& nlive,
-                   double& efr, int& sample, int& updInt, int& nClsPar, int& Nchords, int& NBurn,
-                   int& NSamp, int& GHSresume)
+                   double& efr, int& sample, int& updInt, int& nClsPar)
 {
 
     // sampler flag chooses which sampler to use, 0 = MultiNest, 1 = PolyChord
@@ -77,12 +76,6 @@ void setupMNparams(char* ConfigFileName, int& sampler, int& IS, int& modal, int&
     // nClsPar:  Number of parameters to cluster over when doing multi modal analysis
     nClsPar = 1;
 
-    Nchords = 1;
-
-    NBurn = 100;
-    NSamp = 10000;
-    GHSresume = 0;
-
     // Use a configfile, if we can, to overwrite the defaults set in this file.
     try {
         string strBuf;
@@ -98,10 +91,6 @@ void setupMNparams(char* ConfigFileName, int& sampler, int& IS, int& modal, int&
         parameters.readInto(sample, "sample", sample);
         parameters.readInto(updInt, "updInt", updInt);
         parameters.readInto(nClsPar, "nClsPar", nClsPar);
-        parameters.readInto(Nchords, "Nchords", Nchords);
-        parameters.readInto(NBurn, "NBurn", NBurn);
-        parameters.readInto(NSamp, "NSamp", NSamp);
-        parameters.readInto(GHSresume, "GHSresume", GHSresume);
 
     } catch (ConfigFile::file_not_found oError) {
         printf("WARNING: parameters file '%s' not found. Using defaults.\n",

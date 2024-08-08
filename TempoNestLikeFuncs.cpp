@@ -92,7 +92,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     logtchk("Entering TempoNest likelihood");
 
     double uniformpriorterm = 0;
-    clock_t startClock, endClock;
 
     int TimetoMargin = ((MNStruct*)globalcontext)->TimetoMargin;
 
@@ -144,14 +143,11 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     } else if (((MNStruct*)globalcontext)->numFitEQUAD > 1) {
         for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
 
-            if (((MNStruct*)globalcontext)->includeEQsys[o] == 1) {
-                // printf("Cube: %i %i %g \n", o, pcount, Cube[pcount]);
-                EQUAD(o) = pow(10.0, 2 * Cube[pcount]);
-                if (((MNStruct*)globalcontext)->EQUADPriorType == 1) {
-                    uniformpriorterm += log(pow(10.0, Cube[pcount]));
-                }
-                pcount++;
+            EQUAD(o) = pow(10.0, 2 * Cube[pcount]);
+            if (((MNStruct*)globalcontext)->EQUADPriorType == 1) {
+                uniformpriorterm += log(pow(10.0, Cube[pcount]));
             }
+            pcount++;
         }
     }
 
@@ -194,7 +190,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     //////////////////////////////////////////////////////////////////////////////////////////
 
     double maxtspan = ((MNStruct*)globalcontext)->Tspan;
-    double averageTSamp = 2 * maxtspan / ((MNStruct*)globalcontext)->pulse->nobs;
 
     int FitRedCoeff = 2 * (((MNStruct*)globalcontext)->numFitRedCoeff);
     int FitDMCoeff = 2 * (((MNStruct*)globalcontext)->numFitDMCoeff);
@@ -333,9 +328,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
             powercoeff[startpos + i] += rho;
             powercoeff[startpos + i + FitDMCoeff / 2] += rho;
         }
-
-        int coefftovary = 0;
-        double amptovary = 0.0;
 
         for (int i = 0; i < FitDMCoeff / 2; i++) {
             freqdet = freqdet + 2 * log(powercoeff[startpos + i]);

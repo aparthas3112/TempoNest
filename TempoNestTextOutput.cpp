@@ -340,13 +340,10 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int incRED, 
                 fitcount++;
             } else if (((MNStruct*)context)->numFitEQUAD > 1) {
                 for (int o = 0; o < ((MNStruct*)context)->systemcount; o++) {
-                    if (((MNStruct*)context)->includeEQsys[o] == 1) {
-                        printf(
-                            "EQUAD for %s %s: %g +/- %g\n", ((MNStruct*)context)->whiteflag,
-                            ((MNStruct*)context)->pulse[0].obsn[systempos[o]].flagVal[sysflag[o]],
-                            paramarray[fitcount][0], paramarray[fitcount][1]);
-                        fitcount++;
-                    }
+                    printf("EQUAD for %s %s: %g +/- %g\n", ((MNStruct*)context)->whiteflag,
+                           ((MNStruct*)context)->pulse[0].obsn[systempos[o]].flagVal[sysflag[o]],
+                           paramarray[fitcount][0], paramarray[fitcount][1]);
+                    fitcount++;
                 }
             }
 
@@ -1196,30 +1193,16 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int incRED, 
                 \\\\ \n"; whitefitcount++; system++;
                     }*/
                     for (int o = 0; o < ((MNStruct*)context)->systemcount; o++) {
-                        if (((MNStruct*)context)->includeEQsys[o] == 1) {
-                            fprintf(fout2, "TNEQ %s %s %g\n", ((MNStruct*)context)->whiteflag,
-                                    ((MNStruct*)context)
-                                        ->pulse[0]
-                                        .obsn[systempos[o]]
-                                        .flagVal[sysflag[o]],
-                                    paramarray[whitefitcount][2]);
-                            tablefile
-                                << "Log$_{10}$[EQUAD] " << ((MNStruct*)context)->whiteflag << " "
-                                << ((MNStruct*)context)
-                                       ->pulse[0]
-                                       .obsn[systempos[o]]
-                                       .flagVal[sysflag[o]]
-                                << " \\dotfill & " << paramarray[whitefitcount][0] << " $\\pm$ "
-                                << paramarray[whitefitcount][1] << "  \\\\ \n";
-                            whitefitcount++;
-                        } else {
-                            fprintf(fout2, "TNEQ %s %s %g\n", ((MNStruct*)context)->whiteflag,
-                                    ((MNStruct*)context)
-                                        ->pulse[0]
-                                        .obsn[systempos[o]]
-                                        .flagVal[sysflag[o]],
-                                    -10.0);
-                        }
+                        fprintf(
+                            fout2, "TNEQ %s %s %g\n", ((MNStruct*)context)->whiteflag,
+                            ((MNStruct*)context)->pulse[0].obsn[systempos[o]].flagVal[sysflag[o]],
+                            paramarray[whitefitcount][2]);
+                        tablefile
+                            << "Log$_{10}$[EQUAD] " << ((MNStruct*)context)->whiteflag << " "
+                            << ((MNStruct*)context)->pulse[0].obsn[systempos[o]].flagVal[sysflag[o]]
+                            << " \\dotfill & " << paramarray[whitefitcount][0] << " $\\pm$ "
+                            << paramarray[whitefitcount][1] << "  \\\\ \n";
+                        whitefitcount++;
                     }
                 }
 

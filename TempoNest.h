@@ -36,15 +36,11 @@ typedef struct {
     char* rootName;
     double** Dpriors;
 
-    int numFitJumps;
-    int numFitTiming;
     int numFitEFAC;
-
     int numFitEQUAD;
-    int* includeEQsys;
+
     int numFitRedCoeff;
     int numFitDMCoeff;
-
     int totCoeff;
 
     double* sampleFreq;
@@ -52,13 +48,8 @@ typedef struct {
     int incRED;
     int incDM;
 
-    int** TempoFitNums;
-    int* TempoJumpNums;
     int* sysFlags;
     int systemcount;
-    int TimeMargin;
-    int JumpMargin;
-
     char* whiteflag;
 
     int RedPriorType;
@@ -71,8 +62,6 @@ typedef struct {
 
     int storeFMatrices;
     double* StoredTMatrix;
-    int usecosiprior;
-    double* PreJumpVals;
 
     double* DMatrixVec;
     double* PriorsArray;
@@ -92,13 +81,7 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int incRED, 
                   double** paramarray);
 
 // non linear timing model likelihood functions
-// double  WhiteLogLike(int &ndim, double *Cube, int &npars, double *DerivedParams, void *context);
-// double NewLRedMarginLogLike(int &ndim, double *Cube, int &npars, double *DerivedParams, void
-// *context);
 double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived, void* context);
-// void LRedLogLike(double *Cube, int &ndim, int &npars, double &lnew, void *context);
-// double LRedNumericalLogLike(int &ndim, double *Cube, int &npars, double *DerivedParams, void
-// *context);
 
 void LRedLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context);
 
@@ -109,8 +92,7 @@ void OutputMLFiles(int nParameters, double* pdParameterEstimates, double MLike, 
 void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int incRED, int ndims);
 
 void setupMNparams(char* ConfigFileName, int& sampler, int& IS, int& modal, int& ceff, int& nlive,
-                   double& efr, int& sample, int& updInt, int& nClsPar, int& Nchords, int& NBurn,
-                   int& NSamp, int& GHSresume);
+                   double& efr, int& sample, int& updInt, int& nClsPar);
 void setupparams(char* ConfigFileName, char* root, int& numTempo2its, int& incEFAC, int& incEQUAD,
                  int& incRED, int& incDM, double* EFACPrior, double* EQUADPrior, double* AlphaPrior,
                  double* AmpPrior, double* DMAlphaPrior, double* DMAmpPrior, double& numRedCoeff,
@@ -120,9 +102,7 @@ void setupparams(char* ConfigFileName, char* root, int& numTempo2its, int& incEF
 
 void setTNPriors(char* ConfigFileName, double** Dpriors, long double** TempoPriors, int TPsize,
                  int DPsize);
-// void setFrequencies(char *ConfigFileName, double *SampleFreq, int numRedfreqs, int numDMfreqs,
-// int numRedLogFreqs, int numDMLogFreqs, double RedLowFreq, double DMLowFreq, double RedMidFreq,
-// double DMMidFreq);
+
 void setFrequencies(char* ConfigFileName, double* SampleFreq, int numRedfreqs, int numDMfreqs,
                     int numRedLogFreqs, int numDMLogFreqs, int numScatLogFreqs, double RedLowFreq,
                     double DMLowFreq, double ScatLowFreq, double RedMidFreq, double DMMidFreq,
