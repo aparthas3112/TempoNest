@@ -280,24 +280,16 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     //////////////////////////////////////////////////////////////////////////////////////////
     logtchk("Starting algebra");
 
-    Eigen::MatrixXd NT = TotalMatrix;
-
-    for (int i = 0; i < ((MNStruct*)globalcontext)->pulse->nobs; i++) {
-        for (int j = 0; j < totalsize; j++) {
-            NT(i, j) *= Noise[i];
-        }
-    }
-
-    // std::cout << TotalMatrix << std::endl;
+    Eigen::MatrixXd NT = TotalMatrix.array().colwise() * Noise.array();
 
     Eigen::MatrixXd TNT = TotalMatrix.transpose() * NT;
+
     Eigen::VectorXd NTd = NT.transpose() * Resvec;
 
     logtchk("Finishing main algebra");
 
-    for (int j = 0; j < totCoeff; j++) {
-        TNT(TimetoMargin + j, (TimetoMargin + j)) += 1.0 / powercoeff[j];
-    }
+    if (totCoeff > 0)
+        TNT.diagonal().tail(totCoeff) += powercoeff.cwiseInverse();
 
     // Perform Cholesky decomposition
     Eigen::LLT<Eigen::MatrixXd> llt(TNT);
@@ -306,16 +298,9 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     Eigen::VectorXd chol_solution = llt.solve(NTd);
 
     // Calculate log determinant
-    double jointdet = 0;
-    for (int i = 0; i < TNT.rows(); ++i) {
-        jointdet += std::log(llt.matrixL()(i, i));
-    }
-    jointdet *= 2;  // Because det(A) = det(L)^2 for Cholesky A = LL^T
+    double jointdet = 2 * llt.matrixLLT().diagonal().array().log().sum();
 
-    double freqlike = 0;
-    for (int j = 0; j < totalsize; j++) {
-        freqlike += NTd[j] * chol_solution[j];
-    }
+    double freqlike = NTd.dot(chol_solution);
 
     double lnewChol = -0.5 * (tdet + jointdet + freqdet + timelike - freqlike) + uniformpriorterm;
 
