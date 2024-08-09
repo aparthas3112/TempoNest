@@ -39,6 +39,7 @@
 #include "TempoNest.h"
 #include "eigen_config.h"
 #include "tempo2.h"
+#include "types/model.h"
 
 void readtxtoutput(std::string longname, int ndim, double** paramarray)
 {
@@ -189,7 +190,7 @@ void readphyslive(std::string longname, int ndim, double** paramarray, int sampl
     summaryfile.close();
 }
 
-void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int incRED, int ndims)
+void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int ndims)
 {
 
     std::vector<double> paramlist(2 * ndims);
@@ -207,8 +208,8 @@ void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int
     formResiduals(((MNStruct*)context)->pulse, 1, 1);  // Form residuals
 
     double Evidence = 0;
-    TNtextOutput(((MNStruct*)context)->pulse, 1, 0, context, incRED, ndims, paramlist, Evidence,
-                 longname, paramarray);
+    TNtextOutput(((MNStruct*)context)->pulse, 1, 0, context, ndims, paramlist, Evidence, longname,
+                 paramarray);
 
     printf("finished output \n");
 }
@@ -323,7 +324,7 @@ void StoreTMatrix(double* TotalMatrix, void* context)
     double DMKappa = 2.410 * std::pow(10.0, -16);
     int startpos = 0;
 
-    if (((MNStruct*)context)->incRED > 0) {
+    if (model::pl_red_noise.has_value()) {
         for (int i = 0; i < FitRedCoeff / 2; i++) {
 
             freqs[startpos + i] = (double)((MNStruct*)context)->sampleFreq[i] / maxtspan;
@@ -348,7 +349,7 @@ void StoreTMatrix(double* TotalMatrix, void* context)
     /////////////////////////DM Variations////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    if (((MNStruct*)context)->incDM > 0) {
+    if (model::pl_dm_noise.has_value()) {
 
         for (int o = 0; o < ((MNStruct*)context)->pulse->nobs; o++) {
             DMVec[o] =
@@ -408,9 +409,9 @@ void getArraySizeInfo(void* context)
     int FitDMCoeff = 2 * (((MNStruct*)context)->numFitDMCoeff);
 
     int totCoeff = 0;
-    if (((MNStruct*)context)->incRED != 0)
+    if (model::pl_red_noise.has_value())
         totCoeff += FitRedCoeff;
-    if (((MNStruct*)context)->incDM != 0)
+    if (model::pl_dm_noise.has_value())
         totCoeff += FitDMCoeff;
 
     int totalsize = ((MNStruct*)context)->TimetoMargin + totCoeff;

@@ -114,6 +114,9 @@ void json_loader::load_from_json(const string_t& filename)
             if (element_name == "Power Law Red Noise") {
                 model::pl_red_noise = std::move(element);
                 model::pl_red_noise.value()->print();
+            } else if (element_name == "Power Law DM Noise") {
+                model::pl_dm_noise = std::move(element);
+                model::pl_dm_noise.value()->print();
             } else if (element_name == "EFAC") {
                 model::efac = std::move(element);
                 model::efac.value()->print();

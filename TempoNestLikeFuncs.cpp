@@ -202,28 +202,28 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
         for (int i = 0; i < FitRedCoeff / 2; i++) {
 
-            double rho = 0;
-            if (((MNStruct*)globalcontext)->incRED == 3) {
-                rho = (redamp * redamp / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) *
-                      pow(freqs[i] * 365.25, (-redindex)) / (Tspan * 24 * 60 * 60);
-            }
+            double rho = (redamp * redamp / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) *
+                         pow(freqs[i] * 365.25, (-redindex)) / (Tspan * 24 * 60 * 60);
 
             powercoeff[i] += rho;
             powercoeff[i + FitRedCoeff / 2] += rho;
         }
 
         startpos = FitRedCoeff;
-    }
 
-    for (int i = 0; i < FitRedCoeff / 2; i++) {
-        freqdet = freqdet + 2 * log(powercoeff[i]);
+        for (int i = 0; i < FitRedCoeff / 2; i++) {
+            freqdet = freqdet + 2 * log(powercoeff[i]);
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////DM Variations////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    if (((MNStruct*)globalcontext)->incDM > 0) {
+    if (model::pl_dm_noise.has_value()) {
+
+        pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
+
         double DMKappa = 2.410 * pow(10.0, -16);
 
         for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
@@ -237,21 +237,18 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
                 ((MNStruct*)globalcontext)->sampleFreq[startpos / 2 + i] / maxtspan;
             freqs[startpos + i + FitDMCoeff / 2] = freqs[startpos + i];
         }
-    }
 
-    if (((MNStruct*)globalcontext)->incDM == 3) {
-
-        double DMamp = Cube[pcount];
+        double DMamp = pl->amplitude.get_exp_value(Cube[pcount]);
         pcount++;
-        double DMindex = Cube[pcount];
+        double DMindex = pl->spectral_index.get_value(Cube[pcount]);
         pcount++;
 
         double f1yr = 1.0 / 3.16e7;
 
-        DMamp = pow(10.0, DMamp);
-        if (((MNStruct*)globalcontext)->DMPriorType == 1) {
+        if (pl->amplitude.prior_type == prior_type_t::uniform) {
             uniformpriorterm += log(DMamp);
         }
+
         for (int i = 0; i < FitDMCoeff / 2; i++) {
 
             double rho = (DMamp * DMamp) * pow(f1yr, (-3)) *

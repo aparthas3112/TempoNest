@@ -41,6 +41,7 @@
 #include "TempoNest.h"
 #include "constraints.h"
 #include "tempo2.h"
+#include "types/model.h"
 
 // #define TSUN (4.925490947e-6L) (Should be tempo2.h now).
 
@@ -124,7 +125,7 @@ int longturn_dms(long double turn, char* dms)
     return 0;
 }
 
-void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int incRED, int ndim,
+void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim,
                   std::vector<double> paramlist, double Evidence, std::string longname,
                   double** paramarray)
 {
@@ -311,44 +312,26 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int incRED, 
         std::vector<int> groupflag;
         std::vector<std::string> groupnames;
 
-        if (incRED != 0 || ((MNStruct*)context)->incDM != 0 ||
-            ((MNStruct*)context)->numFitEFAC > 0 || ((MNStruct*)context)->numFitEQUAD > 0) {
+        if (model::pl_red_noise.has_value() || model::pl_dm_noise.has_value() ||
+            model::efac.has_value() || model::equad.has_value()) {
             whitefitcount = fitcount;
             printf(
                 "------------------------------------------------------------------------------\n");
             printf("Stochastic Parameters:\n");
-            if (((MNStruct*)context)->numFitEFAC == 1) {
+            if (model::efac.has_value()) {
                 whitefitcount = fitcount;
                 printf("Global EFAC: %g +/- %g\n", paramarray[fitcount][0],
                        paramarray[fitcount][1]);
                 fitcount++;
-            } else if (((MNStruct*)context)->numFitEFAC > 1) {
-                int system = 1;
-                whitefitcount = fitcount;
-                for (int i = 0; i < ((MNStruct*)context)->numFitEFAC; i++) {
-                    printf("EFAC for %s %s: %g +/- %g\n", ((MNStruct*)context)->whiteflag,
-                           ((MNStruct*)context)->pulse[0].obsn[systempos[i]].flagVal[sysflag[i]],
-                           paramarray[fitcount][0], paramarray[fitcount][1]);
-                    fitcount++;
-                    system++;
-                }
             }
 
-            if (((MNStruct*)context)->numFitEQUAD == 1) {
+            if (model::equad.has_value()) {
                 printf("Global EQUAD: %g +/- %g\n", paramarray[fitcount][0],
                        paramarray[fitcount][1]);
                 fitcount++;
-            } else if (((MNStruct*)context)->numFitEQUAD > 1) {
-                for (int o = 0; o < ((MNStruct*)context)->systemcount; o++) {
-                    printf("EQUAD for %s %s: %g +/- %g\n", ((MNStruct*)context)->whiteflag,
-                           ((MNStruct*)context)->pulse[0].obsn[systempos[o]].flagVal[sysflag[o]],
-                           paramarray[fitcount][0], paramarray[fitcount][1]);
-                    fitcount++;
-                }
             }
 
-            //		printf("fit counts %i %i \n", whitefitcount, fitcount);
-            if (incRED == 3) {
+            if (model::pl_red_noise.has_value()) {
                 printf("Power Law Red Noise Model:\n");
                 printf("Log Amplitude: %g +/- %g\n", paramarray[fitcount][0],
                        paramarray[fitcount][1]);
@@ -358,7 +341,7 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int incRED, 
                 fitcount++;
             }
 
-            if (((MNStruct*)context)->incDM == 3) {
+            if (model::pl_dm_noise.has_value()) {
                 printf("Power Law DM Model:\n");
                 printf("Log Amplitude: %g +/- %g\n", paramarray[fitcount][0],
                        paramarray[fitcount][1]);
@@ -1154,59 +1137,17 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int incRED, 
                 //	printf("end of T2 parms %i \n", whitefitcount);
 
                 // Add EFACS/EQUADS
-                if (((MNStruct*)context)->numFitEFAC == 1) {
+                if (model::efac.has_value()) {
                     fprintf(fout2, "TNGlobalEF %g\n", pow(10.0, paramarray[whitefitcount][2]));
                     whitefitcount++;
-                } else if (((MNStruct*)context)->numFitEFAC > 1) {
-                    int system = 1;
-                    for (int i = 0; i < ((MNStruct*)context)->numFitEFAC; i++) {
-                        fprintf(
-                            fout2, "TNEF %s %s %g\n", ((MNStruct*)context)->whiteflag,
-                            ((MNStruct*)context)->pulse[0].obsn[systempos[i]].flagVal[sysflag[i]],
-                            pow(10.0, paramarray[whitefitcount][2]));
-                        printf(
-                            "Writing efac to par file: %i %s %g %g \n", i,
-                            ((MNStruct*)context)->pulse[0].obsn[systempos[i]].flagVal[sysflag[i]],
-                            paramarray[whitefitcount][2], pow(10.0, paramarray[whitefitcount][2]));
-                        tablefile
-                            << "EFAC " << ((MNStruct*)context)->whiteflag << " "
-                            << ((MNStruct*)context)->pulse[0].obsn[systempos[i]].flagVal[sysflag[i]]
-                            << " \\dotfill & " << paramarray[whitefitcount][0] << " $\\pm$ "
-                            << paramarray[whitefitcount][1] << "  \\\\ \n";
-                        whitefitcount++;
-                        system++;
-                    }
                 }
 
-                if (((MNStruct*)context)->numFitEQUAD == 1) {
+                if (model::equad.has_value()) {
                     fprintf(fout2, "TNGLobalEQ %g\n", paramarray[whitefitcount][2]);
                     whitefitcount++;
-                } else if (((MNStruct*)context)->numFitEQUAD > 1) {
-                    /*int system=1;
-                    for(int i =0;i<((MNStruct *)context)->numFitEFAC; i++){
-                            fprintf(fout2, "TNEQ %s %s %g\n", ((MNStruct *)context)->whiteflag,
-                ((MNStruct
-                *)context)->pulse[0].obsn[systempos[i]].flagVal[sysflag[i]],paramarray[whitefitcount][2]);
-                tablefile <<  "Log$_{10}$[EQUAD] "<< ((MNStruct *)context)->whiteflag <<" "<<
-                ((MNStruct *)context)->pulse[0].obsn[systempos[i]].flagVal[sysflag[i]] <<" \\dotfill
-                & "<< paramarray[whitefitcount][0] <<" $\\pm$ "<< paramarray[whitefitcount][1] <<"
-                \\\\ \n"; whitefitcount++; system++;
-                    }*/
-                    for (int o = 0; o < ((MNStruct*)context)->systemcount; o++) {
-                        fprintf(
-                            fout2, "TNEQ %s %s %g\n", ((MNStruct*)context)->whiteflag,
-                            ((MNStruct*)context)->pulse[0].obsn[systempos[o]].flagVal[sysflag[o]],
-                            paramarray[whitefitcount][2]);
-                        tablefile
-                            << "Log$_{10}$[EQUAD] " << ((MNStruct*)context)->whiteflag << " "
-                            << ((MNStruct*)context)->pulse[0].obsn[systempos[o]].flagVal[sysflag[o]]
-                            << " \\dotfill & " << paramarray[whitefitcount][0] << " $\\pm$ "
-                            << paramarray[whitefitcount][1] << "  \\\\ \n";
-                        whitefitcount++;
-                    }
                 }
 
-                if (incRED == 3) {
+                if (model::pl_red_noise.has_value()) {
                     //		printf("STart of Red 3 parms %i \n", whitefitcount);
                     fprintf(fout2, "TNRedAmp %g\n", paramarray[whitefitcount][2]);
                     tablefile << "Log$_{10}$[Red Amp] \\dotfill & " << paramarray[whitefitcount][0]
@@ -1221,7 +1162,7 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int incRED, 
                 }
 
                 //	printf("end of Red parms\n");
-                if (((MNStruct*)context)->incDM == 3) {
+                if (model::pl_dm_noise.has_value()) {
                     fprintf(fout2, "TNDMAmp %g\n", paramarray[whitefitcount][2]);
                     tablefile << "Log$_{10}$[DM Amp] \\dotfill & " << paramarray[whitefitcount][0]
                               << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";

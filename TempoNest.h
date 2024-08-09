@@ -34,10 +34,6 @@ typedef struct {
     int totalsize;
 
     char* rootName;
-    double** Dpriors;
-
-    int numFitEFAC;
-    int numFitEQUAD;
 
     int numFitRedCoeff;
     int numFitDMCoeff;
@@ -45,26 +41,16 @@ typedef struct {
 
     double* sampleFreq;
     int numdims;
-    int incRED;
-    int incDM;
 
     int* sysFlags;
     int systemcount;
     char* whiteflag;
 
-    int RedPriorType;
-    int DMPriorType;
-
-    int EQUADPriorType;
-    int EFACPriorType;
     int useOriginalErrors;
-    int printResiduals;
 
-    int storeFMatrices;
     double* StoredTMatrix;
 
     double* DMatrixVec;
-    double* PriorsArray;
 
     int debug;
     int rank;
@@ -76,7 +62,7 @@ void fastSubIntephemeris_routines(pulsar* psr, int npsr);
 void fastformBatsAll(pulsar* psr, int npsr);
 void fastformSubIntBatsAll(pulsar* psr, int npsr);
 
-void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int incRED, int ndims,
+void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndims,
                   std::vector<double> paramlist, double Evidence, std::string longname,
                   double** paramarray);
 
@@ -89,19 +75,12 @@ void StoreTMatrix(double* TMatrix, void* context);
 void getArraySizeInfo(void* context);
 void OutputMLFiles(int nParameters, double* pdParameterEstimates, double MLike, int startDim);
 
-void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int incRED, int ndims);
+void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int ndims);
 
 void setupMNparams(char* ConfigFileName, int& sampler, int& IS, int& modal, int& ceff, int& nlive,
                    double& efr, int& sample, int& updInt, int& nClsPar);
-void setupparams(char* ConfigFileName, char* root, int& numTempo2its, int& incEFAC, int& incEQUAD,
-                 int& incRED, int& incDM, double* EFACPrior, double* EQUADPrior, double* AlphaPrior,
-                 double* AmpPrior, double* DMAlphaPrior, double* DMAmpPrior, double& numRedCoeff,
-                 double& numDMCoeff, double& FourierSig, char* whiteflag, int& RedPriorType,
-                 int& DMPriorType, int& EQUADPriorType, int& EFACPriorType, int& useOriginalErrors,
-                 int& StoreTMatrix, int& debug);
-
-void setTNPriors(char* ConfigFileName, double** Dpriors, long double** TempoPriors, int TPsize,
-                 int DPsize);
+void setupparams(char* ConfigFileName, char* root, int& numTempo2its, double& numRedCoeff,
+                 double& numDMCoeff, char* whiteflag, int& useOriginalErrors, int& debug);
 
 void setFrequencies(char* ConfigFileName, double* SampleFreq, int numRedfreqs, int numDMfreqs,
                     int numRedLogFreqs, int numDMLogFreqs, int numScatLogFreqs, double RedLowFreq,

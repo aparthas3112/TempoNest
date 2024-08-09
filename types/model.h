@@ -11,6 +11,7 @@ namespace model {
 
 // model elements
 extern optional_element_t pl_red_noise;
+extern optional_element_t pl_dm_noise;
 extern optional_element_t efac;
 extern optional_element_t equad;
 

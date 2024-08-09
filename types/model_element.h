@@ -5,12 +5,6 @@
 #include "basic_types.h"
 #include "parameter.h"
 
-// Forward declarations of all model element types
-class model_element_t;
-class efac_element;
-class equad_element;
-class power_law_red_noise_element;
-
 class model_element_t {
 public:
 
@@ -39,6 +33,8 @@ public:
     }
 };
 
+// we need to include all the model elements here to avoid circular dependencies
 #include "model_elements/efac.h"
 #include "model_elements/equad.h"
+#include "model_elements/power_law_dm_noise.h"
 #include "model_elements/power_law_red_noise.h"

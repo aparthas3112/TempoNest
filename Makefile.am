@@ -45,7 +45,8 @@ common_sources = tempo2pred_int.h T2accel.h tempo2pred.h tempo2Util.h constraint
                  TempoNestTextOutput.cpp  MultiNestParams.cpp\
                  TempoNestPlugin.cpp TempoNestParams.cpp TempoNestUtilities.cpp \
                  types/model.h types/model.cpp types/basic_types.h types/model_element.h types/parameter.h \
-                 model_elements/efac.h model_elements/equad.h model_elements/model_elements.h model_elements/power_law_red_noise.h
+                 model_elements/efac.h model_elements/equad.h model_elements/power_law_red_noise.h \
+                 model_elements/power_law_dm_noise.h
 
 
 temponest_@T2ARCH@_plug_la_SOURCES = $(common_sources)

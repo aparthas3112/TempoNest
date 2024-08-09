@@ -146,13 +146,9 @@ void fastformSubIntBatsAll(pulsar* psr, int npsr)
 }
 
 MNStruct* init_struct(pulsar* pulseval, int numberpulsarsval, int timing_model_params,
-                      int systemcountval, int numFitEFACval, int numFitEQUADval,
-                      int numFitRedCoeffval, int numFitDMCoeffval, int* sysFlagsval, int numdimsval,
-                      int incREDval, int incDMval, double* SampleFreqsVal, char* whiteflagval,
-                      int RedPriorType, int DMPriorType, int EQUADPriorType, int EFACPriorType,
-                      int useOriginalErrors,
-
-                      int StoreFMatrices, int debug, char* rootName, int rank)
+                      int systemcountval, int numFitRedCoeffval, int numFitDMCoeffval,
+                      int* sysFlagsval, int numdimsval, double* SampleFreqsVal, char* whiteflagval,
+                      int useOriginalErrors, int debug, char* rootName, int rank)
 {
     MNStruct* MNS = (MNStruct*)malloc(sizeof(MNStruct));
 
@@ -161,26 +157,16 @@ MNStruct* init_struct(pulsar* pulseval, int numberpulsarsval, int timing_model_p
     MNS->TimetoMargin = timing_model_params;
 
     MNS->systemcount = systemcountval;
-    MNS->numFitEFAC = numFitEFACval;
-    MNS->numFitEQUAD = numFitEQUADval;
     MNS->numFitRedCoeff = numFitRedCoeffval;
     MNS->numFitDMCoeff = numFitDMCoeffval;
 
     MNS->sysFlags = sysFlagsval;
     MNS->numdims = numdimsval;
-    MNS->incRED = incREDval;
-    MNS->incDM = incDMval;
 
     MNS->sampleFreq = SampleFreqsVal;
     MNS->whiteflag = whiteflagval;
 
-    MNS->RedPriorType = RedPriorType;
-    MNS->DMPriorType = DMPriorType;
-    MNS->EQUADPriorType = EQUADPriorType;
-    MNS->EFACPriorType = EFACPriorType;
     MNS->useOriginalErrors = useOriginalErrors;
-
-    MNS->storeFMatrices = StoreFMatrices;
 
     MNS->debug = debug;
     MNS->rootName = rootName;
@@ -192,67 +178,32 @@ MNStruct* init_struct(pulsar* pulseval, int numberpulsarsval, int timing_model_p
     return MNS;
 }
 
-void printPriors(pulsar* psr, double** Dpriors, int incEFAC, int incEQUAD, int incRED, int incDM,
-                 std::string longname, void* context)
+void printPriors(std::string longname)
 {
 
     std::ofstream getdistparamnames;
     std::string gdpnfname = longname + ".paramnames";
     getdistparamnames.open(gdpnfname.c_str());
 
-    if (((MNStruct*)context)->rank == 0)
-        printf("\nPriors:\n");
-    int paramsfitted = 0;
+    if (model::efac.has_value()) {
 
-    if (incEFAC > 0) {
-        int EFACnum = 1;
-        for (int i = 0; i < incEFAC; i++) {
-            if (((MNStruct*)context)->rank == 0)
-                printf("Prior on EFAC %i : %.5g -> %.5g\n", EFACnum, Dpriors[paramsfitted][0],
-                       Dpriors[paramsfitted][1]);
-            getdistparamnames << "EFAC" << i + 1 << "\n";
-            paramsfitted++;
-            EFACnum++;
-        }
+        getdistparamnames << "EFAC\n";
     }
 
-    if (incEQUAD > 0) {
-        int EQUADnum = 1;
-        for (int i = 0; i < incEQUAD; i++) {
-            if (((MNStruct*)context)->rank == 0)
-                printf("Prior on EQUAD %i: %.5g -> %.5g\n", EQUADnum, Dpriors[paramsfitted][0],
-                       Dpriors[paramsfitted][1]);
-            getdistparamnames << "EQUAD" << i + 1 << "\n";
-            paramsfitted++;
-            EQUADnum++;
-        }
+    if (model::equad.has_value()) {
+
+        getdistparamnames << "EQUAD\n";
     }
 
-    if (incRED == 3) {
-        if (((MNStruct*)context)->rank == 0)
-            printf("Prior on Red Noise Log Amplitude : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
-                   Dpriors[paramsfitted][1]);
-        paramsfitted++;
-        if (((MNStruct*)context)->rank == 0)
-            printf("Prior on Red Noise Slope : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
-                   Dpriors[paramsfitted][1]);
-        paramsfitted++;
+    if (model::pl_red_noise) {
 
         getdistparamnames << "RedAmp\n";
         getdistparamnames << "RedSlope\n";
     }
 
-    if (incDM == 3) {
+    if (model::pl_dm_noise.has_value()) {
         getdistparamnames << "DMAmp\n";
         getdistparamnames << "DMSlope\n";
-        if (((MNStruct*)context)->rank == 0)
-            printf("Prior on DM Log Amplitude : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
-                   Dpriors[paramsfitted][1]);
-        paramsfitted++;
-        if (((MNStruct*)context)->rank == 0)
-            printf("Prior on DM Slope : %.5g -> %.5g\n", Dpriors[paramsfitted][0],
-                   Dpriors[paramsfitted][1]);
-        paramsfitted++;
     }
 
     getdistparamnames.close();
@@ -388,17 +339,8 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     int incEFAC;
     int incEQUAD;
 
-    int incRED;
-    int incDM;
-
     int Reddims = 0;
     int DMdims = 0;
-    double* EFACPrior;
-    double* EQUADPrior;
-    double* AlphaPrior;
-    double* AmpPrior;
-    double* DMAlphaPrior;
-    double* DMAmpPrior;
     double numRedCoeff;
     double numDMCoeff;
 
@@ -408,28 +350,16 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     int numEQUAD = 0;
 
     char wflag[100];
-    int RedPriorType;
-    int DMPriorType;
 
-    int EQUADPriorType;
-    int EFACPriorType;
     int useOriginalErrors;
 
     char* Type = new char[100];
     char* WhiteName = new char[100];
-    EFACPrior = new double[2];
-    EQUADPrior = new double[2];
-    AlphaPrior = new double[2];
-    AmpPrior = new double[2];
-    DMAlphaPrior = new double[2];
-    DMAmpPrior = new double[2];
 
     int debug = 0;
 
-    setupparams(ConfigFileName, Type, numTempo2its, incEFAC, incEQUAD, incRED, incDM, EFACPrior,
-                EQUADPrior, AlphaPrior, AmpPrior, DMAlphaPrior, DMAmpPrior, numRedCoeff, numDMCoeff,
-                FourierSig, WhiteName, RedPriorType, DMPriorType, EQUADPriorType, EFACPriorType,
-                useOriginalErrors, StoreFMatrices, debug);
+    setupparams(ConfigFileName, Type, numTempo2its, numRedCoeff, numDMCoeff, WhiteName,
+                useOriginalErrors, debug);
 
     formBatsAll(psr, npsr); /* Form Barycentric arrival times */
     logdbg("calling formResiduals");
@@ -481,11 +411,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         numDMCoeff = int(DMdaysincoeffs);  // DMdaysincoeffs;
     }
 
-    if (incRED == 0)
-        numRedCoeff = 0;
-    if (incDM == 0)
-        numDMCoeff = 0;
-
     SampleFreq = new double[int(numRedCoeff + numDMCoeff)];
     setFrequencies(ConfigFileName, SampleFreq, numRedCoeff, numDMCoeff, 0, 0, 0, 1, 1, 1, 1, 1, 1);
 
@@ -505,7 +430,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
                 }
             }
         }
-        //      long seed = TKsetSeed();
+
         for (iteration = 0; iteration < 2; iteration++) /* Do pre- and post- fit analysis */
         {
             logdbg("iteration %d", iteration);
@@ -523,14 +448,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
                 logdbg("calling doFit");
 
                 t2Fit(psr, npsr, covarFuncFile);
-                // if (strcmp(dcmFile,"NULL")==0 && strcmp(covarFuncFile,"NULL")==0)
-                // doFit(psr,npsr,writeModel); /* Fit to the residuals to obtain updated parameters
-                // */ else
-                // doFitDCM(psr,dcmFile,covarFuncFile,npsr,writeModel);
-                /* doFitGlobal(psr,npsr,&globalParameter,nGlobal,writeModel);*/ /* Fit to the
-                                                                                   residuals to
-                                                                                   obtain updated
-                                                                                   parameters  */
+
                 logdbg("completed doFit");
             }
             if (iteration == 1 || onlypre == 1) {
@@ -584,24 +502,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
             if (onlypre == 1)
                 iteration = 2;
         }
-    }
-
-    if (incRED == 0)
-        Reddims = 0;
-    if (incRED == 3)
-        Reddims = 2;
-
-    if (incDM == 0)
-        DMdims = 0;
-    if (incDM == 3)
-        DMdims = 2;
-
-    if ((incRED == 1 && incDM != 1 && incDM != 0) || (incRED != 1 && incRED != 0 && incDM == 1)) {
-        if (rank == 0)
-            printf(
-                "Different methods for DM and red noise not currently supported, please use the "
-                "same option for both");
-        return 0;
     }
 
     std::string pulsarname = psr[0].name;
@@ -669,9 +569,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         }
     }
 
-    //	if(incEFAC > 0 || incEQUAD > 0 || incShannonJitter > 0){printf("using white noise model
-    //%i\n", whitemodel);}
-
     std::vector<std::string> systemnames;
     for (int o = 0; o < psr[0].nobs; o++) {
         int found = 0;
@@ -722,38 +619,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         }
     }
 
-    if (incEFAC == 1) {
-        if (rank == 0)
-            printf("Including One EFAC for all observations\n");
-        numEFAC = 1;
-    }
-    if (incEFAC == 2) {
-        if (rank == 0)
-            printf("Including One EFAC for each %s\n", wflag);
-        numEFAC = systemcount;
-    }
-    if (incEQUAD == 1) {
-        if (rank == 0)
-            printf("Including One EQUAD for all observations\n");
-        numEQUAD = 1;
-    }
-    if (incEQUAD == 2) {
-        if (rank == 0)
-            printf("Including One EQUAD for each %s\n", wflag);
-        numEQUAD = systemcount;
-    }
-
-    if (rank == 0) {
-
-        if (incRED == 3) {
-            printf("Including Red Noise: Power Law Model to %i Coefficients \n", int(numRedCoeff));
-        }
-        if (incDM == 3) {
-            printf("Including DM: Component Power Law Model to %i Coefficients \n",
-                   int(numDMCoeff));
-        }
-    }
-
     int timing_model_params = 0;
     timing_model_params++;
     for (int p = 0; p < MAX_PARAMS; p++) {
@@ -787,8 +652,8 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     setupMNparams(ConfigFileName, sampler, IS, mmodal, ceff, nlive, efr, sample, updInt, nClsPar);
 
-    double tol = 0.5;                                   // tol, defines the stopping criteria
-    int ndims = numEFAC + numEQUAD + Reddims + DMdims;  // dimensionality (no. of free parameters)
+    double tol = 0.5;  // tol, defines the stopping criteria
+    int ndims = 4;
 
     double Ztol = -1E90;  // all the modes with logZ < Ztol are ignored
     int maxModes = 100;   // expected max no. of modes (used only for memory allocation)
@@ -813,59 +678,15 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     std::strcpy(chartroot, longname.c_str());
 
     MNStruct* MNS =
-        init_struct(psr, npsr, timing_model_params, systemcount, numEFAC, numEQUAD,
-                    int(numRedCoeff), int(numDMCoeff), numFlags, ndims, incRED, incDM, SampleFreq,
-                    wflag, RedPriorType, DMPriorType, EQUADPriorType, EFACPriorType,
-                    useOriginalErrors, StoreFMatrices, debug, chartroot, rank);
+        init_struct(psr, npsr, timing_model_params, systemcount, int(numRedCoeff), int(numDMCoeff),
+                    numFlags, ndims, SampleFreq, wflag, useOriginalErrors, debug, chartroot, rank);
 
     // return 0;
     context = MNS;
 
-    std::cout << "allocate dpriors " << ndims << std::endl;
-    double** Dpriors;
-    Dpriors = new double*[ndims];
-    for (int i = 0; i < ndims; i++) {
-        Dpriors[i] = new double[2];
-    };
-
-    // Combine all the priors into one aray: Dpriors
-    int pcount = 0;
-
-    for (int i = 0; i < numEFAC; i++) {
-        Dpriors[pcount][0] = EFACPrior[0];
-        Dpriors[pcount][1] = EFACPrior[1];
-        pcount++;
-    }
-    for (int i = 0; i < numEQUAD; i++) {
-        Dpriors[pcount][0] = EQUADPrior[0];
-        Dpriors[pcount][1] = EQUADPrior[1];
-        pcount++;
-    }
-
-    if (incRED == 3) {
-
-        Dpriors[pcount][0] = AmpPrior[0];
-        Dpriors[pcount][1] = AmpPrior[1];
-        pcount++;
-        Dpriors[pcount][0] = AlphaPrior[0];
-        Dpriors[pcount][1] = AlphaPrior[1];
-        pcount++;
-    }
-
-    if (incDM == 3) {
-        Dpriors[pcount][0] = DMAmpPrior[0];
-        Dpriors[pcount][1] = DMAmpPrior[1];
-        pcount++;
-        Dpriors[pcount][0] = DMAlphaPrior[0];
-        Dpriors[pcount][1] = DMAlphaPrior[1];
-        pcount++;
-    }
-
     context = MNS;
 
-    ((MNStruct*)context)->Dpriors = Dpriors;
-
-    printPriors(psr, Dpriors, numEFAC, numEQUAD, incRED, incDM, longname, context);
+    printPriors(longname);
 
     if (rank == 0)
         printf("\n\n");
@@ -894,27 +715,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     ///////////////////////call PolyChord/////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    double* PriorsArray = new double[2 * ndims];
-
-    int p = 0;
-    pcount = 0;
-    while (pcount < ndims) {
-        std::cout << "adding prior for pcount " << pcount << std::endl;
-        if (((MNStruct*)context)->Dpriors[p][0] != ((MNStruct*)context)->Dpriors[p][1]) {
-            PriorsArray[pcount] = ((MNStruct*)context)->Dpriors[p][0];
-            PriorsArray[pcount + ndims] = ((MNStruct*)context)->Dpriors[p][1];
-            if (rank == 0)
-                printf("param %i in, %g %g \n", pcount, PriorsArray[pcount],
-                       PriorsArray[pcount + ndims]);
-            pcount++;
-        }
-
-        p++;
-    }
-
-    ((MNStruct*)context)->PriorsArray = PriorsArray;
-    std::cout << "assign context " << std::endl;
-
     assigncontext(context);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -934,7 +734,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     }
 
     if (rank == 0) {
-        readsummary(psr, longname, ndims, context, incRED, ndims);
+        readsummary(psr, longname, ndims, context, ndims);
 
         time(&rawstoptime);
         rawstoptimeinfo = localtime(&rawstoptime);
