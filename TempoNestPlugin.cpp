@@ -55,6 +55,7 @@
 #include <gsl/gsl_sf_gamma.h>
 
 #include <mpi.h>
+#include "types/model.h"
 
 void ephemeris_routines(pulsar* psr, int npsr);
 void clock_corrections(pulsar* psr, int npsr);
@@ -378,6 +379,8 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         logdbg("Maximum number of parameters = %d", MAX_PARAMS);
         logdbg("Number of pulsars = %d", npsr);
     }
+
+    model::load_from_json("model_config.json");
 
     int StoreFMatrices = 1;
     char root[100];

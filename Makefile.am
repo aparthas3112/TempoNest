@@ -40,10 +40,13 @@ plugin_LTLIBRARIES = temponest_@T2ARCH@_plug.la
 
 common_sources = tempo2pred_int.h T2accel.h tempo2pred.h tempo2Util.h constraints.h \
                  TKmatrix.h TKfit.h T2toolkit.h tempo2.h config.h configfile.h configfile.cpp \
-                 TempoNest.h  \
+                 TempoNest.h json_loader.h json_loader.cpp \
                  TempoNestLikeFuncs.cpp   multinest.h \
                  TempoNestTextOutput.cpp  MultiNestParams.cpp\
-                 TempoNestPlugin.cpp TempoNestParams.cpp TempoNestUtilities.cpp
+                 TempoNestPlugin.cpp TempoNestParams.cpp TempoNestUtilities.cpp \
+                 types/model.h types/model.cpp types/basic_types.h types/model_element.h types/parameter.h \
+                 model_elements/efac.h model_elements/equad.h model_elements/model_elements.h model_elements/power_law_red_noise.h
+
 
 temponest_@T2ARCH@_plug_la_SOURCES = $(common_sources)
 temponest_@T2ARCH@_plug_la_CXXFLAGS = $(AM_CXXFLAGS)

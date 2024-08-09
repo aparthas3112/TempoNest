@@ -1,0 +1,15 @@
+#include "model.h"
+#include "../json_loader.h"
+
+namespace model {
+
+optional_element_t red_noise;
+optional_element_t efac;
+optional_element_t equad;
+
+void load_from_json(const string_t& filename)
+{
+    json_loader::load_from_json(filename);
+}
+
+}  // namespace model

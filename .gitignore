@@ -52,5 +52,5 @@ autoconf/lt~obsolete.m4
 build.log
 lbfgs/compile
 .idea/*
-
+*.dirstamp
 
