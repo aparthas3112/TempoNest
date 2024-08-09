@@ -43,10 +43,12 @@ common_sources = tempo2pred_int.h T2accel.h tempo2pred.h tempo2Util.h constraint
                  TempoNest.h json_loader.h json_loader.cpp \
                  TempoNestLikeFuncs.cpp   multinest.h \
                  TempoNestTextOutput.cpp  MultiNestParams.cpp\
-                 TempoNestPlugin.cpp TempoNestParams.cpp TempoNestUtilities.cpp \
-                 types/model.h types/model.cpp types/basic_types.h types/model_element.h types/parameter.h \
-                 model_elements/efac.h model_elements/equad.h model_elements/power_law_red_noise.h \
-                 model_elements/power_law_dm_noise.h
+                 TempoNestPlugin.cpp TempoNestParams.cpp TempoNestUtilities.cpp
+                 
+common_sources += $(wildcard $(srcdir)/types/*.h) 
+common_sources += $(wildcard $(srcdir)/model_elements/*.h) 
+common_sources += types/model.cpp
+                 
 
 
 temponest_@T2ARCH@_plug_la_SOURCES = $(common_sources)
