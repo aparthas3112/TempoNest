@@ -1,4 +1,5 @@
 #pragma once
+#include <math.h> /* pow */
 #include "basic_types.h"
 
 enum class prior_type_t { uniform, log_uniform, categorical };
@@ -24,5 +25,23 @@ public:
         std::cout << "Fit: " << fit << std::endl;
         std::cout << "Min value: " << min_value << std::endl;
         std::cout << "Max value: " << max_value << std::endl;
+    }
+
+    double get_value(double& cube_value) const
+    {
+        double scaled_value = (max_value - min_value) * cube_value + min_value;
+        cube_value = scaled_value;
+
+        return scaled_value;
+    }
+
+    double get_exp_value(double& cube_value) const
+    {
+        double scaled_value = (max_value - min_value) * cube_value + min_value;
+        cube_value = scaled_value;
+
+        scaled_value = pow(10, scaled_value);
+
+        return scaled_value;
     }
 };

@@ -51,9 +51,6 @@ using namespace std;
 
 void* globalcontext;
 
-// void SmallNelderMeadOptimum(int nParameters, double *ML);
-// void  WriteProfileFreqEvo(std::string longname, int &ndim, int profiledimstart);
-
 void assigncontext(void* context)
 {
     globalcontext = context;
@@ -62,17 +59,8 @@ void assigncontext(void* context)
 void LRedLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context)
 {
 
-    for (int p = 0; p < ndim; p++) {
-
-        Cube[p] = (((MNStruct*)globalcontext)->PriorsArray[p + ndim] -
-                   ((MNStruct*)globalcontext)->PriorsArray[p]) *
-                      Cube[p] +
-                  ((MNStruct*)globalcontext)->PriorsArray[p];
-    }
-
     double* DerivedParams = new double[npars];
 
-    // double result = NewLRedMarginLogLike(ndim, Cube, npars, DerivedParams, context);
     double result = NewLRedMarginLogLike(Cube, ndim, DerivedParams, npars, context);
 
     delete[] DerivedParams;
@@ -80,8 +68,6 @@ void LRedLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* con
     lnew = result;
 }
 
-// double  NewLRedMarginLogLike(int &ndim, double *Cube, int &npars, double *DerivedParams, void
-// *context){
 double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived, void* context)
 {
 
@@ -107,11 +93,13 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     if (model::efac.has_value()) {
+        efac_element* efac = model::efac.value()->as<efac_element>();
+        double value = efac->global.value().get_exp_value(Cube[pcount]);
 
         for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-            EFAC(o) = pow(10.0, Cube[pcount]);
-            if (((MNStruct*)globalcontext)->EFACPriorType == 1) {
-                uniformpriorterm += log(EFAC(o));
+            EFAC(o) = value;
+            if (efac->global.value().prior_type == prior_type_t::uniform) {
+                uniformpriorterm += log(value);
             }
         }
         pcount++;
@@ -119,18 +107,20 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     // printf("Equad %i \n", ((MNStruct *)globalcontext)->numFitEQUAD);
     if (model::equad.has_value()) {
+        equad_element* equad = model::equad.value()->as<equad_element>();
+        double value = equad->global.value().get_exp_value(Cube[pcount]);
+        value = value * value;
+
         for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-            EQUAD(o) = pow(10.0, 2 * Cube[pcount]);
-            if (((MNStruct*)globalcontext)->EQUADPriorType == 1) {
-                uniformpriorterm += log(pow(10.0, Cube[pcount]));
+            EQUAD(o) = value;
+            if (equad->global.value().prior_type == prior_type_t::uniform) {
+                uniformpriorterm += 0.5 * log(value);
             }
         }
         pcount++;
     }
 
     Eigen::VectorXd Noise = Eigen::VectorXd::Zero(((MNStruct*)globalcontext)->pulse->nobs);
-
-    double DMKappa = 2.410 * pow(10.0, -16);
 
     for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
         double EFACterm = 0;
@@ -201,24 +191,20 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
         double Tspan = maxtspan;
         double f1yr = 1.0 / 3.16e7;
 
-        double redamp = Cube[pcount];
+        double redamp = pl->amplitude.get_exp_value(Cube[pcount]);
         pcount++;
-        double redindex = Cube[pcount];
+        double redindex = pl->spectral_index.get_value(Cube[pcount]);
         pcount++;
 
-        double cornerfreq = 0;
-
-        redamp = pow(10.0, redamp);
         if (pl->amplitude.prior_type == prior_type_t::uniform) {
             uniformpriorterm += log(redamp);
         }
 
-        double Agw = redamp;
         for (int i = 0; i < FitRedCoeff / 2; i++) {
 
             double rho = 0;
             if (((MNStruct*)globalcontext)->incRED == 3) {
-                rho = (Agw * Agw / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) *
+                rho = (redamp * redamp / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) *
                       pow(freqs[i] * 365.25, (-redindex)) / (Tspan * 24 * 60 * 60);
             }
 
@@ -238,6 +224,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     if (((MNStruct*)globalcontext)->incDM > 0) {
+        double DMKappa = 2.410 * pow(10.0, -16);
 
         for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
             DMVec[o] = 1.0 / (DMKappa *
@@ -249,17 +236,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
             freqs[startpos + i] =
                 ((MNStruct*)globalcontext)->sampleFreq[startpos / 2 + i] / maxtspan;
             freqs[startpos + i + FitDMCoeff / 2] = freqs[startpos + i];
-
-            if (((MNStruct*)globalcontext)->storeFMatrices == 0) {
-                for (int k = 0; k < ((MNStruct*)globalcontext)->pulse->nobs; k++) {
-                    double time = (double)((MNStruct*)globalcontext)->pulse->obsn[k].bat;
-
-                    TotalMatrix(k, (i + TimetoMargin + startpos)) =
-                        cos(2 * M_PI * freqs[startpos + i] * time) * DMVec[k];
-                    TotalMatrix(k, (i + FitDMCoeff / 2 + TimetoMargin + startpos)) =
-                        sin(2 * M_PI * freqs[startpos + i] * time) * DMVec[k];
-                }
-            }
         }
     }
 
