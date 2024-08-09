@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_set>
+#include "../eigen_config.h"
 #include "../types/model_element.h"
 
 class pl_red_noise_element : public model_element_t {
@@ -9,6 +10,15 @@ public:
     parameter_t amplitude;
     parameter_t spectral_index;
     optional_parameter_t num_coeffs;
+    Eigen::VectorXd frequencies;
+
+    pl_red_noise_element()
+    {
+        frequencies = Eigen::VectorXd::Zero(33);
+        for (int i = 0; i < frequencies.size(); i++) {
+            frequencies[i] = i + 1;
+        }
+    }
 
     void set_parameter(const string_t& name, const parameter_t& param) override
     {

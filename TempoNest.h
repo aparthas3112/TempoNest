@@ -24,6 +24,7 @@
  */
 
 #include <vector>
+#include "eigen_config.h"
 #include "tempo2.h"
 
 typedef struct {
@@ -39,7 +40,6 @@ typedef struct {
     int numFitDMCoeff;
     int totCoeff;
 
-    double* sampleFreq;
     int numdims;
 
     int* sysFlags;
@@ -81,8 +81,3 @@ void setupMNparams(char* ConfigFileName, int& sampler, int& IS, int& modal, int&
                    double& efr, int& sample, int& updInt, int& nClsPar);
 void setupparams(char* ConfigFileName, char* root, int& numTempo2its, double& numRedCoeff,
                  double& numDMCoeff, char* whiteflag, int& useOriginalErrors, int& debug);
-
-void setFrequencies(char* ConfigFileName, double* SampleFreq, int numRedfreqs, int numDMfreqs,
-                    int numRedLogFreqs, int numDMLogFreqs, int numScatLogFreqs, double RedLowFreq,
-                    double DMLowFreq, double ScatLowFreq, double RedMidFreq, double DMMidFreq,
-                    double ScatMidFreq);

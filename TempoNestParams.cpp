@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "configfile.h"
+#include "eigen_config.h"
 
 void setupparams(char* ConfigFileName, char* root, int& numTempo2its, double& numRedCoeff,
                  double& numDMCoeff, char* whiteflag, int& useOriginalErrors, int& debug)
@@ -95,29 +96,4 @@ void setupparams(char* ConfigFileName, char* root, int& numTempo2its, double& nu
         printf("WARNING: parameters file '%s' not found. Using defaults.\n",
                oError.filename.c_str());
     }  // try
-}
-
-void setFrequencies(char* ConfigFileName, double* SampleFreq, int numRedfreqs, int numDMfreqs,
-                    int numRedLogFreqs, int numDMLogFreqs, int numScatLogFreqs, double RedLowFreq,
-                    double DMLowFreq, double ScatLowFreq, double RedMidFreq, double DMMidFreq,
-                    double ScatMidFreq)
-{
-
-    int startpoint = 0;
-    double RedLogDiff = log10(RedMidFreq) - log10(RedLowFreq);
-    for (int i = 0; i < numRedLogFreqs; i++) {
-        SampleFreq[startpoint] = pow(10.0, log10(RedLowFreq) + i * RedLogDiff / numRedLogFreqs);
-        startpoint++;
-        printf("%i %g %g \n", i, log10(RedLowFreq) - i * log10(RedLowFreq) / numRedLogFreqs,
-               SampleFreq[startpoint - 1]);
-    }
-
-    for (int i = 0; i < numRedfreqs - numRedLogFreqs; i++) {
-        SampleFreq[startpoint] = i + RedMidFreq;
-        startpoint++;
-    }
-    for (int i = 0; i < numDMfreqs; i++) {
-        SampleFreq[startpoint] = i + 1;
-        startpoint++;
-    }
 }

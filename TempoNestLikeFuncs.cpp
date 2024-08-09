@@ -177,43 +177,37 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     if (model::pl_red_noise.has_value()) {
 
-        for (int i = 0; i < FitRedCoeff / 2; i++) {
-
-            freqs[startpos + i] = (double)((MNStruct*)globalcontext)->sampleFreq[i] / maxtspan;
-            freqs[startpos + i + FitRedCoeff / 2] = freqs[startpos + i];
-        }
-    }
-
-    if (model::pl_red_noise.has_value()) {
-
         pl_red_noise_element* pl = model::pl_red_noise.value()->as<pl_red_noise_element>();
+
+        const int halfCoeff = FitRedCoeff / 2;
+
+        // Calculate and assign frequencies
+        freqs.segment(startpos, halfCoeff) = pl->frequencies / maxtspan;
+
+        freqs.segment(startpos + halfCoeff, halfCoeff) = freqs.segment(startpos, halfCoeff);
 
         double Tspan = maxtspan;
         double f1yr = 1.0 / 3.16e7;
 
-        double redamp = pl->amplitude.get_exp_value(Cube[pcount]);
-        pcount++;
-        double redindex = pl->spectral_index.get_value(Cube[pcount]);
-        pcount++;
+        double redamp = pl->amplitude.get_exp_value(Cube[pcount++]);
+        double redindex = pl->spectral_index.get_value(Cube[pcount++]);
 
         if (pl->amplitude.prior_type == prior_type_t::uniform) {
             uniformpriorterm += log(redamp);
         }
 
-        for (int i = 0; i < FitRedCoeff / 2; i++) {
+        for (int i = 0; i < halfCoeff; i++) {
 
             double rho = (redamp * redamp / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) *
                          pow(freqs[i] * 365.25, (-redindex)) / (Tspan * 24 * 60 * 60);
 
             powercoeff[i] += rho;
-            powercoeff[i + FitRedCoeff / 2] += rho;
+            powercoeff[i + halfCoeff] += rho;
         }
 
         startpos = FitRedCoeff;
 
-        for (int i = 0; i < FitRedCoeff / 2; i++) {
-            freqdet = freqdet + 2 * log(powercoeff[i]);
-        }
+        freqdet += 2 * powercoeff.segment(0, halfCoeff).array().log().sum();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,6 +218,8 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
         pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
 
+        const int halfCoeff = FitDMCoeff / 2;
+
         double DMKappa = 2.410 * pow(10.0, -16);
 
         for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
@@ -231,17 +227,13 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
                               pow((double)((MNStruct*)globalcontext)->pulse->obsn[o].freqSSB, 2));
         }
 
-        for (int i = 0; i < FitDMCoeff / 2; i++) {
+        // Calculate and assign frequencies
+        freqs.segment(startpos, halfCoeff) = pl->frequencies / maxtspan;
 
-            freqs[startpos + i] =
-                ((MNStruct*)globalcontext)->sampleFreq[startpos / 2 + i] / maxtspan;
-            freqs[startpos + i + FitDMCoeff / 2] = freqs[startpos + i];
-        }
+        freqs.segment(startpos + halfCoeff, halfCoeff) = freqs.segment(startpos, halfCoeff);
 
-        double DMamp = pl->amplitude.get_exp_value(Cube[pcount]);
-        pcount++;
-        double DMindex = pl->spectral_index.get_value(Cube[pcount]);
-        pcount++;
+        double DMamp = pl->amplitude.get_exp_value(Cube[pcount++]);
+        double DMindex = pl->spectral_index.get_value(Cube[pcount++]);
 
         double f1yr = 1.0 / 3.16e7;
 
@@ -249,17 +241,16 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
             uniformpriorterm += log(DMamp);
         }
 
-        for (int i = 0; i < FitDMCoeff / 2; i++) {
+        for (int i = 0; i < halfCoeff; i++) {
 
             double rho = (DMamp * DMamp) * pow(f1yr, (-3)) *
                          pow(freqs[startpos + i] * 365.25, (-DMindex)) / (maxtspan * 24 * 60 * 60);
             powercoeff[startpos + i] += rho;
-            powercoeff[startpos + i + FitDMCoeff / 2] += rho;
+            powercoeff[startpos + i + halfCoeff] += rho;
         }
 
-        for (int i = 0; i < FitDMCoeff / 2; i++) {
-            freqdet = freqdet + 2 * log(powercoeff[startpos + i]);
-        }
+        freqdet += 2 * powercoeff.segment(startpos, halfCoeff).array().log().sum();
+
         startpos += FitDMCoeff;
     }
 
@@ -267,13 +258,8 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     /////////////////////////Get Time domain likelihood//////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    double tdet = 0;
-    double timelike = 0;
-
-    for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
-        timelike += Resvec[o] * Resvec[o] * Noise[o];
-        tdet -= log(Noise[o]);
-    }
+    double timelike = (Resvec.array().square() * Noise.array()).sum();
+    double tdet = -Noise.array().log().sum();
 
     //////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////Do Algebra/////////////////////////////////////////////////////////

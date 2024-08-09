@@ -55,6 +55,7 @@
 #include <gsl/gsl_sf_gamma.h>
 
 #include <mpi.h>
+#include "eigen_config.h"
 #include "types/model.h"
 
 void ephemeris_routines(pulsar* psr, int npsr);
@@ -147,8 +148,8 @@ void fastformSubIntBatsAll(pulsar* psr, int npsr)
 
 MNStruct* init_struct(pulsar* pulseval, int numberpulsarsval, int timing_model_params,
                       int systemcountval, int numFitRedCoeffval, int numFitDMCoeffval,
-                      int* sysFlagsval, int numdimsval, double* SampleFreqsVal, char* whiteflagval,
-                      int useOriginalErrors, int debug, char* rootName, int rank)
+                      int* sysFlagsval, int numdimsval, char* whiteflagval, int useOriginalErrors,
+                      int debug, char* rootName, int rank)
 {
     MNStruct* MNS = (MNStruct*)malloc(sizeof(MNStruct));
 
@@ -163,7 +164,6 @@ MNStruct* init_struct(pulsar* pulseval, int numberpulsarsval, int timing_model_p
     MNS->sysFlags = sysFlagsval;
     MNS->numdims = numdimsval;
 
-    MNS->sampleFreq = SampleFreqsVal;
     MNS->whiteflag = whiteflagval;
 
     MNS->useOriginalErrors = useOriginalErrors;
@@ -333,7 +333,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     model::load_from_json("model_config.json");
 
-    int StoreFMatrices = 1;
     char root[100];
     int numTempo2its;
     int incEFAC;
@@ -343,11 +342,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     int DMdims = 0;
     double numRedCoeff;
     double numDMCoeff;
-
-    double FourierSig;
-    double* SampleFreq;
-    int numEFAC = 0;
-    int numEQUAD = 0;
 
     char wflag[100];
 
@@ -410,9 +404,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     } else {
         numDMCoeff = int(DMdaysincoeffs);  // DMdaysincoeffs;
     }
-
-    SampleFreq = new double[int(numRedCoeff + numDMCoeff)];
-    setFrequencies(ConfigFileName, SampleFreq, numRedCoeff, numDMCoeff, 0, 0, 0, 1, 1, 1, 1, 1, 1);
 
     if (rank == 0)
         printf("Num T2 its %i \n", numTempo2its);
@@ -679,7 +670,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     MNStruct* MNS =
         init_struct(psr, npsr, timing_model_params, systemcount, int(numRedCoeff), int(numDMCoeff),
-                    numFlags, ndims, SampleFreq, wflag, useOriginalErrors, debug, chartroot, rank);
+                    numFlags, ndims, wflag, useOriginalErrors, debug, chartroot, rank);
 
     // return 0;
     context = MNS;

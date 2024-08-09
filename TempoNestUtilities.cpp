@@ -325,9 +325,11 @@ void StoreTMatrix(double* TotalMatrix, void* context)
     int startpos = 0;
 
     if (model::pl_red_noise.has_value()) {
+        pl_red_noise_element* pl = model::pl_red_noise.value()->as<pl_red_noise_element>();
+
         for (int i = 0; i < FitRedCoeff / 2; i++) {
 
-            freqs[startpos + i] = (double)((MNStruct*)context)->sampleFreq[i] / maxtspan;
+            freqs[startpos + i] = pl->frequencies[i] / maxtspan;
             freqs[startpos + i + FitRedCoeff / 2] = freqs[startpos + i];
         }
 
@@ -351,6 +353,8 @@ void StoreTMatrix(double* TotalMatrix, void* context)
 
     if (model::pl_dm_noise.has_value()) {
 
+        pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
+
         for (int o = 0; o < ((MNStruct*)context)->pulse->nobs; o++) {
             DMVec[o] =
                 1.0 / (DMKappa * std::pow((double)((MNStruct*)context)->pulse->obsn[o].freqSSB, 2));
@@ -358,7 +362,7 @@ void StoreTMatrix(double* TotalMatrix, void* context)
 
         for (int i = 0; i < FitDMCoeff / 2; i++) {
 
-            freqs[startpos + i] = ((MNStruct*)context)->sampleFreq[startpos / 2 + i] / maxtspan;
+            freqs[startpos + i] = pl->frequencies[i] / maxtspan;
             freqs[startpos + i + FitDMCoeff / 2] = freqs[startpos + i];
 
             for (int k = 0; k < ((MNStruct*)context)->pulse->nobs; k++) {
