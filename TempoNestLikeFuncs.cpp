@@ -37,6 +37,7 @@
 #include <cstring>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 #include <iterator>
 #include <sstream>
 #include <vector>
@@ -44,13 +45,8 @@
 #include "TempoNest.h"
 #include "eigen_config.h"
 #include "tempo2.h"
-
-#ifdef HAVE_MLAPACK
-    #include <mpblas_mpfr.h>
-    #include <mplapack_mpfr.h>
-#endif
-#include <iostream>
-
+#include "types/model.h"
+#include "types/model_element.h"
 using namespace std;
 
 void* globalcontext;
@@ -110,7 +106,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     /////////////////////////Get White Noise vector///////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    if (((MNStruct*)globalcontext)->numFitEFAC == 1) {
+    if (model::efac.has_value()) {
 
         for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
             EFAC(o) = pow(10.0, Cube[pcount]);
@@ -119,20 +115,10 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
             }
         }
         pcount++;
-
-    } else if (((MNStruct*)globalcontext)->numFitEFAC > 1) {
-
-        for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-            EFAC(o) = pow(10.0, Cube[pcount]);
-            if (((MNStruct*)globalcontext)->EFACPriorType == 1) {
-                uniformpriorterm += log(EFAC(o));
-            }
-            pcount++;
-        }
     }
 
     // printf("Equad %i \n", ((MNStruct *)globalcontext)->numFitEQUAD);
-    if (((MNStruct*)globalcontext)->numFitEQUAD == 1) {
+    if (model::equad.has_value()) {
         for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
             EQUAD(o) = pow(10.0, 2 * Cube[pcount]);
             if (((MNStruct*)globalcontext)->EQUADPriorType == 1) {
@@ -140,15 +126,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
             }
         }
         pcount++;
-    } else if (((MNStruct*)globalcontext)->numFitEQUAD > 1) {
-        for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-
-            EQUAD(o) = pow(10.0, 2 * Cube[pcount]);
-            if (((MNStruct*)globalcontext)->EQUADPriorType == 1) {
-                uniformpriorterm += log(pow(10.0, Cube[pcount]));
-            }
-            pcount++;
-        }
     }
 
     Eigen::VectorXd Noise = Eigen::VectorXd::Zero(((MNStruct*)globalcontext)->pulse->nobs);
@@ -208,7 +185,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     double freqdet = 0;
     int startpos = 0;
 
-    if (((MNStruct*)globalcontext)->incRED > 0) {
+    if (model::pl_red_noise.has_value()) {
 
         for (int i = 0; i < FitRedCoeff / 2; i++) {
 
@@ -217,20 +194,9 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
         }
     }
 
-    if (((MNStruct*)globalcontext)->storeFMatrices == 0) {
+    if (model::pl_red_noise.has_value()) {
 
-        for (int i = 0; i < FitRedCoeff / 2; i++) {
-            for (int k = 0; k < ((MNStruct*)globalcontext)->pulse->nobs; k++) {
-                double time = (double)((MNStruct*)globalcontext)->pulse->obsn[k].bat;
-
-                TotalMatrix(k, i + TimetoMargin + startpos) = cos(2 * M_PI * freqs[i] * time);
-                TotalMatrix(k, i + FitRedCoeff / 2 + TimetoMargin + startpos) =
-                    sin(2 * M_PI * freqs[i] * time);
-            }
-        }
-    }
-
-    if (((MNStruct*)globalcontext)->incRED == 3) {
+        pl_red_noise_element* pl = model::pl_red_noise.value()->as<pl_red_noise_element>();
 
         double Tspan = maxtspan;
         double f1yr = 1.0 / 3.16e7;
@@ -241,13 +207,9 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
         pcount++;
 
         double cornerfreq = 0;
-        if (((MNStruct*)globalcontext)->incRED == 4) {
-            cornerfreq = pow(10.0, Cube[pcount]) / Tspan;
-            pcount++;
-        }
 
         redamp = pow(10.0, redamp);
-        if (((MNStruct*)globalcontext)->RedPriorType == 1) {
+        if (pl->amplitude.prior_type == prior_type_t::uniform) {
             uniformpriorterm += log(redamp);
         }
 
@@ -259,14 +221,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
                 rho = (Agw * Agw / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) *
                       pow(freqs[i] * 365.25, (-redindex)) / (Tspan * 24 * 60 * 60);
             }
-            if (((MNStruct*)globalcontext)->incRED == 4) {
 
-                rho = pow((1 + (pow((1.0 / 365.25) / cornerfreq, redindex / 2))), 2) *
-                      (Agw * Agw / 12.0 / (M_PI * M_PI)) /
-                      pow((1 + (pow(freqs[i] / cornerfreq, redindex / 2))), 2) /
-                      (Tspan * 24 * 60 * 60) * pow(f1yr, -3.0);
-            }
-            // if(rho > pow(10.0,15))rho=pow(10.0,15);
             powercoeff[i] += rho;
             powercoeff[i + FitRedCoeff / 2] += rho;
         }
@@ -390,9 +345,6 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     }
 
     double lnewChol = -0.5 * (tdet + jointdet + freqdet + timelike - freqlike) + uniformpriorterm;
-
-    // std::cout << "lnew " << lnewChol << " " << tdet << " " << jointdet << " " << freqdet << " "
-    //          << timelike << " " << freqlike << " " << uniformpriorterm << std::endl;
 
     logtchk("Exiting TempoNest Likelihood");
 

@@ -3,7 +3,7 @@
 
 namespace model {
 
-optional_element_t red_noise;
+optional_element_t pl_red_noise;
 optional_element_t efac;
 optional_element_t equad;
 

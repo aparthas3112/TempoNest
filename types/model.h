@@ -10,7 +10,7 @@ namespace model {
 // global settings
 
 // model elements
-extern optional_element_t red_noise;
+extern optional_element_t pl_red_noise;
 extern optional_element_t efac;
 extern optional_element_t equad;
 
