@@ -67,5 +67,7 @@ public:
         }
     }
 
+    int get_fitted_dims() override { return 2; }
+
     string_t get_name() const override { return "Power Law Red Noise"; }
 };

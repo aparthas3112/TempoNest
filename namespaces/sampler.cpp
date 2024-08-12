@@ -56,7 +56,7 @@ void load_sampler(const string_t& filename)
 
 void print()
 {
-    std::cout << "Sampler settings:" << std::endl;
+    std::cout << "Sampler globals:" << std::endl;
     std::cout << "Sampler: " << (sampler == sampler_t::MULTINEST ? "MultiNest" : "PolyChord")
               << std::endl;
     std::cout << "Importance sampling: " << importance_sampling << std::endl;

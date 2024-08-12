@@ -1,7 +1,9 @@
 #include "settings.h"
 #include "../json_loader.h"
 
-namespace settings {
+namespace globals {
+
+pulsar_t* pulsar;
 
 bool debug = false;
 
@@ -25,4 +27,4 @@ void print()
     std::cout << "  num_tempo2_its: " << num_tempo2_its << std::endl;
     std::cout << "  useOriginalErrors: " << use_original_errors << std::endl;
 }
-}  // namespace settings
+}  // namespace globals

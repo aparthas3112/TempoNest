@@ -28,10 +28,6 @@
 #include "tempo2.h"
 
 void assigncontext(void* context);
-void fastephemeris_routines(pulsar* psr, int npsr);
-void fastSubIntephemeris_routines(pulsar* psr, int npsr);
-void fastformBatsAll(pulsar* psr, int npsr);
-void fastformSubIntBatsAll(pulsar* psr, int npsr);
 
 void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndims,
                   std::vector<double> paramlist, double Evidence, std::string longname,

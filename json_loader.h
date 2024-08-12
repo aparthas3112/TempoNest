@@ -3,7 +3,6 @@
 #include <memory>
 #include "rapidjson/document.h"
 #include "types/model_element.h"
-#include "types/parameter.h"
 
 /**
  * @brief A utility class for loading and parsing JSON files
@@ -47,21 +46,11 @@ public:
     static void load_sampler(const std::string& filename);
 
     /**
-     * @brief Load settings configuration from a JSON file
+     * @brief Load globals configuration from a JSON file
      *
      * @param filename The name of the file containing the sampler configuration JSON
      */
     static void load_settings(const std::string& filename);
-
-private:
-
-    /**
-     * @brief Parse a JSON file into a rapidjson::Document
-     *
-     * @param filename The name of the file to parse
-     * @return rapidjson::Document The parsed JSON document
-     */
-    static rapidjson::Document parse_json_file(const std::string& filename);
 
     /**
      * @brief Safely get a value from a JSON object if the key is present
@@ -159,6 +148,16 @@ private:
         }
         return false;
     }
+
+private:
+
+    /**
+     * @brief Parse a JSON file into a rapidjson::Document
+     *
+     * @param filename The name of the file to parse
+     * @return rapidjson::Document The parsed JSON document
+     */
+    static rapidjson::Document parse_json_file(const std::string& filename);
 
     /**
      * @brief Helper variable template for the static_assert in get_if_present

@@ -58,123 +58,8 @@
 #include "eigen_config.h"
 #include "namespaces/sampler.h"
 #include "namespaces/settings.h"
+#include "pulsar_utils.h"
 #include "types/model.h"
-
-void ephemeris_routines(pulsar* psr, int num_pulsars);
-void clock_corrections(pulsar* psr, int num_pulsars);
-void extra_delays(pulsar* psr, int num_pulsars);
-
-void fastephemeris_routines(pulsar* psr, int num_pulsars)
-{
-    vectorPulsar(psr, num_pulsars);     /* 1. Form a vector pointing at the pulsar */
-    readEphemeris(psr, num_pulsars, 0); /* 2. Read the ephemeris normally out */
-    get_obsCoord(
-        psr,
-        num_pulsars); /* 3. Get Coordinate of observatory relative to Earth's centre normally out*/
-    tt2tb(psr, num_pulsars);            /* Observatory/time-dependent part of TT-TB normally out*/
-    readEphemeris(psr, num_pulsars, 0); /* Re-evaluate ephemeris with correct TB */
-}
-
-void fastSubIntephemeris_routines(pulsar* psr, int num_pulsars)
-{
-
-    get_obsCoord(psr,
-                 num_pulsars); /* 3. Get Coordinate of observatory relative to Earth's centre */
-}
-
-void fastformBatsAll(pulsar* psr, int num_pulsars)
-{
-
-    int dotime = 0;
-    struct timeval tval_before, tval_after, tval_resultone;
-    if (dotime == 1) {
-        gettimeofday(&tval_before, NULL);
-    }
-
-    fastephemeris_routines(psr, num_pulsars); /* Ephemeris routines ... */
-
-    if (dotime == 1) {
-
-        gettimeofday(&tval_after, NULL);
-        timersub(&tval_after, &tval_before, &tval_resultone);
-        printf("Time elapsed Up to end of ephem: %ld.%06ld\n", (long int)tval_resultone.tv_sec,
-               (long int)tval_resultone.tv_usec);
-        gettimeofday(&tval_before, NULL);
-    }
-
-    extra_delays(psr, num_pulsars); /* Other time delays ... */
-
-    if (dotime == 1) {
-
-        gettimeofday(&tval_after, NULL);
-        timersub(&tval_after, &tval_before, &tval_resultone);
-        printf("Time elapsed Up to end of extra: %ld.%06ld\n", (long int)tval_resultone.tv_sec,
-               (long int)tval_resultone.tv_usec);
-        gettimeofday(&tval_before, NULL);
-    }
-
-    formBats(psr, num_pulsars); /* Form Barycentric arrival times */
-
-    if (dotime == 1) {
-
-        gettimeofday(&tval_after, NULL);
-        timersub(&tval_after, &tval_before, &tval_resultone);
-        printf("Time elapsed Up to end of formbats: %ld.%06ld\n", (long int)tval_resultone.tv_sec,
-               (long int)tval_resultone.tv_usec);
-        gettimeofday(&tval_before, NULL);
-    }
-
-    secularMotion(psr, num_pulsars);
-    // updateBatsAll(psr, num_pulsars);
-    if (dotime == 1) {
-
-        gettimeofday(&tval_after, NULL);
-        timersub(&tval_after, &tval_before, &tval_resultone);
-        printf("Time elapsed Up to end of secular: %ld.%06ld\n", (long int)tval_resultone.tv_sec,
-               (long int)tval_resultone.tv_usec);
-        gettimeofday(&tval_before, NULL);
-    }
-}
-
-void fastformSubIntBatsAll(pulsar* psr, int num_pulsars)
-{
-    // clock_corrections(psr,num_pulsars); /* Clock corrections ... */
-    fastSubIntephemeris_routines(psr, num_pulsars); /* Ephemeris routines ... */
-    extra_delays(psr, num_pulsars);                 /* Other time delays ... */
-    formBats(psr, num_pulsars);                     /* Form Barycentric arrival times */
-    secularMotion(psr, num_pulsars);
-}
-
-void printPriors(std::string longname)
-{
-
-    std::ofstream getdistparamnames;
-    std::string gdpnfname = longname + ".paramnames";
-    getdistparamnames.open(gdpnfname.c_str());
-
-    if (model::efac.has_value()) {
-
-        getdistparamnames << "EFAC\n";
-    }
-
-    if (model::equad.has_value()) {
-
-        getdistparamnames << "EQUAD\n";
-    }
-
-    if (model::pl_red_noise) {
-
-        getdistparamnames << "RedAmp\n";
-        getdistparamnames << "RedSlope\n";
-    }
-
-    if (model::pl_dm_noise.has_value()) {
-        getdistparamnames << "DMAmp\n";
-        getdistparamnames << "DMSlope\n";
-    }
-
-    getdistparamnames.close();
-}
 
 /************************************************* dumper routine
  * ******************************************************/
@@ -272,7 +157,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     num_pulsars = 0; /* Initialise the number of pulsars */
     nGlobal = 0;
     /* Obtain command line arguments */
-    logdbg("Running getInputs %d", model::pulsar->nits);
+    logdbg("Running getInputs %d", globals::pulsar->nits);
     logdbg("Completed getInputs");
     getInputs(psr, argc, commandLine, timFile, parFile, &listparms, &num_pulsars, &nGlobal, &outRes,
               &writeModel, outputSO, &flagPolyco, polyco_args, polyco_file, &newpar, &onlypre,
@@ -281,181 +166,27 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     logdbg("Reading par file");
     readParfile(psr, parFile, timFile,
                 num_pulsars); /* Read .par file to define the pulsar's initial parameters */
-    logdbg("Finished reading par file %d", model::pulsar->nits);
+    logdbg("Finished reading par file %d", globals::pulsar->nits);
     if (flagPolyco == 0) {
         logdbg("Running readTimfile");
         readTimfile(psr, timFile,
                     num_pulsars); /* Read .tim file to define the site-arrival-times */
-        logdbg("Completed readTimfile %d", model::pulsar->param[param_ecc].paramSet[1]);
+        logdbg("Completed readTimfile %d", globals::pulsar->param[param_ecc].paramSet[1]);
     }
 
-    logdbg("Running preProcess %d", model::pulsar->nits);
+    logdbg("Running preProcess %d", globals::pulsar->nits);
     preProcess(psr, num_pulsars, argc, commandLine);
-    logdbg("Completed preProcess %d", model::pulsar->nits);
+    logdbg("Completed preProcess %d", globals::pulsar->nits);
 
-    if (debugFlag == 1) {
-        logdbg("Number of iterations = %d", model::pulsar->nits);
-        logdbg("Maximum number of parameters = %d", MAX_PARAMS);
-        logdbg("Number of pulsars = %d", num_pulsars);
-    }
+    globals::pulsar = &psr[0];
+    initialise_pulsar(onlypre);
 
-    settings::load_settings(ConfigFileName);
+    globals::load_settings(ConfigFileName);
     model::load_model(ConfigFileName);
     sampler::load_sampler(ConfigFileName);
 
-    model::pulsar = &psr[0];
-
-    int incEFAC;
-    int incEQUAD;
-    int Reddims = 0;
-    int DMdims = 0;
-    double numRedCoeff;
-    double numDMCoeff;
-
-    char* Type = new char[100];
-    char* WhiteName = new char[100];
-
-    formBatsAll(model::pulsar, 1); /* Form Barycentric arrival times */
-    logdbg("calling formResiduals");
-    formResiduals(model::pulsar, 1, 1); /* Form residuals */
-
-    /*Work out data time span to get maximum number of coefficients*/
-
-    double start, end;
-    int go = 0;
-    for (int i = 0; i < model::pulsar->nobs; i++) {
-        if (model::pulsar->obsn[i].deleted == 0) {
-            if (go == 0) {
-                go = 1;
-                start = (double)model::pulsar->obsn[i].bat;
-                end = start;
-            } else {
-                if (start > (double)model::pulsar->obsn[i].bat)
-                    start = (double)model::pulsar->obsn[i].bat;
-                if (end < (double)model::pulsar->obsn[i].bat)
-                    end = (double)model::pulsar->obsn[i].bat;
-            }
-        }
-    }
-
-    double maxtspan = 1 * (end - start);
-
-    if (maxtspan < 1) {
-        maxtspan = maxtspan * 24 * 60;
-        if (rank == 0)
-            printf("Assume less than a day, Tspan is now in minutes\n");
-    }
-
-    int mindays = int(floor(1 + 2 * maxtspan / model::pulsar->nobs));
-    int mincoeff = int(floor(1 + maxtspan / mindays));
-
-    int Reddaysincoeffs = int(floor(maxtspan / numRedCoeff));
-    int DMdaysincoeffs = int(floor(maxtspan / numDMCoeff));
-
-    if (numRedCoeff < mindays) {
-        numRedCoeff = mincoeff;
-
-    } else {
-        numRedCoeff = int(Reddaysincoeffs);  // Reddaysincoeffs;
-    }
-
-    if (numDMCoeff < mindays) {
-        numDMCoeff = mincoeff;
-    } else {
-        numDMCoeff = int(DMdaysincoeffs);  // DMdaysincoeffs;
-    }
-
-    if (rank == 0)
-        printf("Num T2 its %i \n", settings::num_tempo2_its);
-
-    for (it = 0; it < settings::num_tempo2_its;
-         it++) /* Why pulsar 0 should select the iterations? */
-    {
-        if (it > 0) /* Copy post-fit values to pre-fit values */
-        {
-            for (i = 0; i < MAX_PARAMS; i++) {
-                for (k = 0; k < model::pulsar->param[i].aSize; k++) {
-                    model::pulsar->param[i].prefit[k] = model::pulsar->param[i].val[k];
-                    model::pulsar->param[i].prefitErr[k] = model::pulsar->param[i].err[k];
-                }
-            }
-        }
-
-        for (iteration = 0; iteration < 2; iteration++) /* Do pre- and post- fit analysis */
-        {
-            logdbg("iteration %d", iteration);
-            logdbg("calling formBatsAll");
-            //	  printf("Calling formBats\n");
-            formBatsAll(model::pulsar, num_pulsars); /* Form Barycentric arrival times */
-            logdbg("calling formResiduals");
-            formResiduals(model::pulsar, num_pulsars, 1); /* Form residuals */
-
-            if (listparms == 1 && iteration == 0)
-                displayParameters(13, timFile, parFile, model::pulsar,
-                                  num_pulsars); /* List out all the parameters */
-            if (iteration == 0)                 /* Only fit to pre-fit residuals */
-            {
-                logdbg("calling doFit");
-
-                t2Fit(model::pulsar, num_pulsars, covarFuncFile);
-
-                logdbg("completed doFit");
-            }
-            if (iteration == 1 || onlypre == 1) {
-                if (strlen(outputSO) == 0) {
-                    if (rank == 0)
-                        textOutput(model::pulsar, num_pulsars, globalParameter, nGlobal, outRes,
-                                   newpar, newparname); /* Output results to the screen */
-                } else                                  /* Use a plug in for the output */
-                {
-                    char* (*entry)(int, char**, pulsar*, int);
-                    void* module;
-                    for (int iplug = 0; iplug < tempo2_plug_path_len; iplug++) {
-                        sprintf(str, "%s/%s_%s_plug.t2", tempo2_plug_path[iplug], outputSO,
-                                tempo2MachineType);
-                        module = dlopen(str, RTLD_NOW);
-                        if (module == NULL) {
-                            printf("dlerror() = %s\n", dlerror());
-                        } else
-                            break;
-                    }
-                    if (!module) {
-                        fprintf(stderr, "[error]: dlopen() failed while resolving symbols.\n");
-                        return -1;
-                    }
-                    /*
-                     * Check that the plugin is compiled against the same version of tempo2.h
-                     */
-                    char** pv = (char**)dlsym(module, "plugVersionCheck");
-                    if (pv != NULL) {
-                        // there is a version check for this plugin
-                        if (strcmp(TEMPO2_h_VER, *pv)) {
-                            fprintf(stderr, "[error]: Plugin version mismatch\n");
-                            fprintf(stderr, " '%s' != '%s'\n", TEMPO2_h_VER, *pv);
-                            fprintf(stderr,
-                                    " Please recompile plugin against same tempo2 version!\n");
-                            dlclose(module);
-                            return -1;
-                        }
-                    }
-
-                    entry = (char* (*)(int, char**, pulsar*, int))dlsym(module, "tempoOutput");
-                    if (entry == NULL) {
-                        dlclose(module);
-                        fprintf(stderr, "[error]: dlerror() failed while  retrieving address.\n");
-                        return -1;
-                    }
-                    entry(argc, argv, model::pulsar, num_pulsars);
-                }
-            }
-            model::pulsar->noWarnings = 2;
-            if (onlypre == 1)
-                iteration = 2;
-        }
-    }
-
-    std::string pulsarname = model::pulsar->name;
-    std::string longname = settings::root + pulsarname + "-";
+    std::string pulsarname = globals::pulsar->name;
+    std::string longname = globals::root + pulsarname + "-";
 
     if (longname.size() >= 100) {
         if (rank == 0)
@@ -486,46 +217,23 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
         printf("file root set to %s \n", root);
     }
 
-    int systemcount = 0;
-    int* numFlags = new int[model::pulsar->nobs];
-    for (int o = 0; o < model::pulsar->nobs; o++) {
-        numFlags[o] = 0;
-    }
-
-    for (int o = 0; o < model::pulsar->nobs; o++) {
-        model::pulsar->obsn[o].snr = 1;
-        model::pulsar->obsn[o].tobs = 1;
-        for (int f = 0; f < model::pulsar->obsn[o].nFlags; f++) {
-            if (strcasecmp(model::pulsar->obsn[o].flagID[f], "-snr") == 0) {
-                model::pulsar->obsn[o].snr = atof(model::pulsar->obsn[o].flagVal[f]);
+    for (int o = 0; o < globals::pulsar->nobs; o++) {
+        globals::pulsar->obsn[o].snr = 1;
+        globals::pulsar->obsn[o].tobs = 1;
+        for (int f = 0; f < globals::pulsar->obsn[o].nFlags; f++) {
+            if (strcasecmp(globals::pulsar->obsn[o].flagID[f], "-snr") == 0) {
+                globals::pulsar->obsn[o].snr = atof(globals::pulsar->obsn[o].flagVal[f]);
             }
-            if (strcasecmp(model::pulsar->obsn[o].flagID[f], "-tobs") == 0) {
-                model::pulsar->obsn[o].tobs = atof(model::pulsar->obsn[o].flagVal[f]);
+            if (strcasecmp(globals::pulsar->obsn[o].flagID[f], "-tobs") == 0) {
+                globals::pulsar->obsn[o].tobs = atof(globals::pulsar->obsn[o].flagVal[f]);
             }
         }
-    }
-
-    int timing_model_params = 0;
-    timing_model_params++;
-    for (int p = 0; p < MAX_PARAMS; p++) {
-        for (int k = 0; k < model::pulsar->param[p].aSize; k++) {
-            if (model::pulsar->param[p].fitFlag[k] == 1) {
-                if (rank == 0)
-                    printf("fitting for: %s \n", model::pulsar->param[p].shortlabel[k]);
-                timing_model_params++;
-            }
-        }
-    }
-
-    for (int i = 0; i <= model::pulsar->nJumps; i++) {
-        if (model::pulsar->fitJump[i] == 1)
-            timing_model_params++;
     }
 
     // set the MultiNest sampling parameters
 
     double tol = 0.5;  // tol, defines the stopping criteria
-    int ndims = 4;
+    int ndims = 5;
 
     double Ztol = -1E90;  // all the modes with logZ < Ztol are ignored
     int maxModes = 100;   // expected max no. of modes (used only for memory allocation)
@@ -549,24 +257,16 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     char* chartroot = new char[longname.length() + 1];
     std::strcpy(chartroot, longname.c_str());
 
-    printPriors(longname);
-
-    if (rank == 0)
-        printf("\n\n");
-
     //////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////get TotalMatrix////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    model::design_size = timing_model_params;
     getArraySizeInfo();
 
-    formBatsAll(model::pulsar, num_pulsars);
-    formResiduals(model::pulsar, num_pulsars, 1);
+    formBatsAll(globals::pulsar, num_pulsars);
+    formResiduals(globals::pulsar, num_pulsars, 1);
 
     StoreTMatrix();
-
-    std::cout << "Stored t matrix " << ndims << std::endl;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -587,7 +287,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     }
 
     if (rank == 0) {
-        readsummary(model::pulsar, longname, ndims, 0, ndims);
+        readsummary(globals::pulsar, longname, ndims, 0, ndims);
 
         time(&rawstoptime);
         rawstoptimeinfo = localtime(&rawstoptime);

@@ -4,9 +4,12 @@
 #include <optional>
 #include "../types/basic_types.h"
 
-namespace settings {
+namespace globals {
 
-// global settings
+// the pulsar we are evaluating
+extern pulsar_t* pulsar;
+
+// global globals
 extern bool debug;
 
 // Root of the results files,relative to the directory in which TempoNest is run. This will be
@@ -23,4 +26,4 @@ extern bool use_original_errors;
 void load_settings(const string_t& filename);
 
 void print();
-}  // namespace settings
+}  // namespace globals

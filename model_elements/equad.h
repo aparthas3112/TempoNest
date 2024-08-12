@@ -34,5 +34,13 @@ public:
         }
     }
 
+    int get_fitted_dims() override
+    {
+        if (global.has_value()) {
+            return 1;
+        }
+        return 0;
+    }
+
     string_t get_name() const override { return "EQUAD"; }
 };

@@ -5,23 +5,11 @@
 #include "namespaces/settings.h"
 #include "rapidjson/istreamwrapper.h"
 #include "types/model.h"
-#include "types/model_element.h"
-#include "types/parameter.h"
 
 parameter_t json_loader::parse_parameter(const rapidjson::Value& json_param)
 {
     parameter_t param;
-    param.name = json_param["name"].GetString();
-    param.description = json_param["description"].GetString();
-
-    param.prior_type = string_t(json_param["prior_type"].GetString()) == "uniform"
-                           ? prior_type_t::uniform
-                           : prior_type_t::log_uniform;
-
-    param.include = json_param["include"].GetBool();
-    param.fit = json_param["fit"].GetBool();
-    param.min_value = json_param["min_value"].GetDouble();
-    param.max_value = json_param["max_value"].GetDouble();
+    param.load_from_json(json_param);
     return param;
 }
 
@@ -38,6 +26,10 @@ element_t json_loader::create_model_element(const string_t& element_name)
         std::cout << "loading equad " << std::endl;
 
         return std::make_unique<equad_element>();
+    } else if (element_name == "Timing Model") {
+        std::cout << "loading timing model " << std::endl;
+
+        return std::make_unique<timing_model_t>();
     }
     // Add other model elements as needed
     throw std::runtime_error("Unknown model element: " + element_name);
@@ -67,9 +59,9 @@ void json_loader::load_model(const string_t& filename)
 {
     rapidjson::Document doc = parse_json_file(filename);
 
-    // Load global settings
+    // Load global globals
     if (doc.HasMember("global_settings")) {
-        // Parse global settings as needed
+        // Parse global globals as needed
     }
 
     // Load model elements
@@ -125,6 +117,9 @@ void json_loader::load_model(const string_t& filename)
             } else if (element_name == "EQUAD") {
                 model::equad = std::move(element);
                 model::equad.value()->print();
+            } else if (element_name == "Timing Model") {
+                model::timing_model = std::move(element);
+                model::timing_model->print();
             }
         }
     }
@@ -143,7 +138,7 @@ void json_loader::load_sampler(const string_t& filename)
         else
             throw std::runtime_error("Unknown sampler: " + sampler_name);
 
-        // Parse sampler settings as needed
+        // Parse sampler globals as needed
         get_if_present(json_sampler, "sample", sampler::sample);
         get_if_present(json_sampler, "live_points", sampler::live_points);
         get_if_present(json_sampler, "constant_efficiency", sampler::constant_efficiency);
@@ -160,13 +155,13 @@ void json_loader::load_settings(const string_t& filename)
     rapidjson::Document doc = parse_json_file(filename);
 
     // Load model elements
-    if (doc.HasMember("settings")) {
-        const auto& json_settings = doc["settings"];
+    if (doc.HasMember("globals")) {
+        const auto& json_settings = doc["globals"];
 
-        // Parse sampler settings as needed
-        get_if_present(json_settings, "debug", settings::debug);
-        get_if_present(json_settings, "num_tempo2_its", settings::num_tempo2_its);
-        get_if_present(json_settings, "root", settings::root);
-        get_if_present(json_settings, "use_original_errors", settings::use_original_errors);
+        // Parse sampler globals as needed
+        get_if_present(json_settings, "debug", globals::debug);
+        get_if_present(json_settings, "num_tempo2_its", globals::num_tempo2_its);
+        get_if_present(json_settings, "root", globals::root);
+        get_if_present(json_settings, "use_original_errors", globals::use_original_errors);
     }
 }

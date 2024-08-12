@@ -203,68 +203,42 @@ void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int
     readtxtoutput(longname, ndim, paramarray);
     readphyslive(longname, ndim, paramarray, 0);
 
-    formBatsAll(model::pulsar, 1);  // Form Barycentric arrival times
+    formBatsAll(globals::pulsar, 1);  // Form Barycentric arrival times
     // printf("formed bats \n");
-    formResiduals(model::pulsar, 1, 1);  // Form residuals
+    formResiduals(globals::pulsar, 1, 1);  // Form residuals
 
     double Evidence = 0;
-    TNtextOutput(model::pulsar, 1, 0, context, ndims, paramlist, Evidence, longname, paramarray);
+    TNtextOutput(globals::pulsar, 1, 0, context, ndims, paramlist, Evidence, longname, paramarray);
 
     printf("finished output \n");
 }
 
-void getEigenDVectorLike(Eigen::MatrixXd& TNDM)
+void getEigenDVectorLike(Eigen::MatrixXd& design_matrix)
 {
+
+    timing_model_t* timing_model = model::timing_model->as<timing_model_t>();
 
     int imargin = 0;
 
-    pulsar* psr = model::pulsar;
-    FitInfo* fitinfo = &(psr->fitinfo);
-
-    // we have to loop over parameters first then jumps
-    // being careful to keep track of where we are.
-    // This is because temponest keeps jumps at the end
-    // but otherwise the parameters are in the same order.
-    //
-    // In tempo2 the jumps come before most parameters so we
-    // skip over the part with the jumps without incrementing
-    // the temponest index. Later we start from the total number
-    // of parameters excluding jumps and only loop over the jumps
+    FitInfo* fitinfo = &(globals::pulsar->fitinfo);
 
     for (int iparam = 0; iparam < fitinfo->nParams; ++iparam) {
-        // this is something we want to marginalise over
-        param_label p = fitinfo->paramIndex[iparam];
-
-        // skip over jumps here. Note that jumps are at the start, so we skip without incrementing
-        // pcount.
-        if (p == param_JUMP)
+        // check if this is something we want to marginalise over
+        if (!timing_model->marginalised[iparam]) {
             continue;
+        }
+
+        param_label p = fitinfo->paramIndex[iparam];
 
         const int k = fitinfo->paramCounters[iparam];
-        for (int iobs = 0; iobs < psr->nobs; ++iobs) {
-            const double x = psr->obsn[iobs].bat - psr->param[param_pepoch].val[0];
+        for (int iobs = 0; iobs < globals::pulsar->nobs; ++iobs) {
+            const double x =
+                globals::pulsar->obsn[iobs].bat - globals::pulsar->param[param_pepoch].val[0];
 
-            TNDM(iobs, imargin) = fitinfo->paramDerivs[iparam](psr, 0, x, iobs, p, k);
+            design_matrix(iobs, imargin) =
+                fitinfo->paramDerivs[iparam](globals::pulsar, 0, x, iobs, p, k);
         }
         ++imargin;
-    }
-
-    // temponest has jumps at the end, so do NOT reset pcount!
-    // pcount should be positioned at the first jump
-
-    for (int iparam = 0; iparam < fitinfo->nParams; ++iparam) {
-        param_label p = fitinfo->paramIndex[iparam];
-
-        if (p == param_JUMP) {
-
-            const int k = fitinfo->paramCounters[iparam];
-            for (int iobs = 0; iobs < psr->nobs; ++iobs) {
-                const double x = psr->obsn[iobs].bat - psr->param[param_pepoch].val[0];
-                TNDM(iobs, imargin) = fitinfo->paramDerivs[iparam](psr, 0, x, iobs, p, k);
-            }
-
-            ++imargin;
-        }
     }
 }
 
@@ -273,7 +247,7 @@ void StoreTMatrix()
 
     int totalsize = model::total_size;
 
-    model::total_matrix = Eigen::MatrixXd::Zero(model::pulsar->nobs, totalsize);
+    model::total_matrix = Eigen::MatrixXd::Zero(globals::pulsar->nobs, totalsize);
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////Form the Design Matrix////////////////////////////////////////////
@@ -282,23 +256,17 @@ void StoreTMatrix()
     std::cout << "Forming Design Matrix " << model::design_size << std::endl;
     int TimetoMargin = model::design_size;
     if (TimetoMargin > 0) {
-        model::design_matrix = Eigen::MatrixXd::Zero(model::pulsar->nobs, TimetoMargin);
+        model::design_matrix = Eigen::MatrixXd::Zero(globals::pulsar->nobs, TimetoMargin);
         getEigenDVectorLike(model::design_matrix);
 
         // Perform SVD
         Eigen::BDCSVD<Eigen::MatrixXd> svd(model::design_matrix,
                                            Eigen::ComputeThinU | Eigen::ComputeThinV);
 
-        std::cout << "SVD: " << svd.singularValues() << std::endl;
-        std::cout << "SVD U: " << svd.matrixU() << std::endl;
-        std::cout << "SVD V: " << svd.matrixV() << std::endl;
-
         Eigen::MatrixXd U = svd.matrixU();
-        for (int i = 0; i < model::pulsar->nobs; i++) {
+        for (int i = 0; i < globals::pulsar->nobs; i++) {
             for (int j = 0; j < TimetoMargin; j++) {
                 model::total_matrix(i, j) = U(i, j);
-                std::cout << "Setting total matrix " << i << " " << j << " " << U(i, j)
-                          << std::endl;
             }
         }
     }
@@ -314,7 +282,7 @@ void StoreTMatrix()
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     double* freqs = new double[totCoeff];
-    double* DMVec = new double[model::pulsar->nobs];
+    double* DMVec = new double[globals::pulsar->nobs];
 
     double DMKappa = 2.410 * std::pow(10.0, -16);
     int startpos = 0;
@@ -329,8 +297,8 @@ void StoreTMatrix()
         }
 
         for (int i = 0; i < pl->num_freqs; i++) {
-            for (int k = 0; k < model::pulsar->nobs; k++) {
-                double time = (double)model::pulsar->obsn[k].bat;
+            for (int k = 0; k < globals::pulsar->nobs; k++) {
+                double time = (double)globals::pulsar->obsn[k].bat;
                 model::total_matrix(k, i + TimetoMargin + startpos) =
                     cos(2 * M_PI * freqs[i] * time);
                 model::total_matrix(k, i + pl->num_freqs + TimetoMargin + startpos) =
@@ -349,8 +317,8 @@ void StoreTMatrix()
 
         pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
 
-        for (int o = 0; o < model::pulsar->nobs; o++) {
-            DMVec[o] = 1.0 / (DMKappa * std::pow((double)model::pulsar->obsn[o].freqSSB, 2));
+        for (int o = 0; o < globals::pulsar->nobs; o++) {
+            DMVec[o] = 1.0 / (DMKappa * std::pow((double)globals::pulsar->obsn[o].freqSSB, 2));
         }
 
         for (int i = 0; i < pl->num_freqs; i++) {
@@ -358,8 +326,8 @@ void StoreTMatrix()
             freqs[startpos + i] = pl->frequencies[i] / maxtspan;
             freqs[startpos + i + pl->num_freqs] = freqs[startpos + i];
 
-            for (int k = 0; k < model::pulsar->nobs; k++) {
-                double time = (double)model::pulsar->obsn[k].bat;
+            for (int k = 0; k < globals::pulsar->nobs; k++) {
+                double time = (double)globals::pulsar->obsn[k].bat;
 
                 model::total_matrix(k, i + TimetoMargin + startpos) =
                     cos(2 * M_PI * freqs[startpos + i] * time) * DMVec[k];
@@ -383,19 +351,22 @@ void getArraySizeInfo()
     /////////////////////////////////Set up Coefficients///////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
+    timing_model_t* timing_model = model::timing_model->as<timing_model_t>();
+    model::design_size = timing_model->design_size;
+
     double start, end;
     int go = 0;
-    for (int i = 0; i < model::pulsar->nobs; i++) {
-        if (model::pulsar->obsn[i].deleted == 0) {
+    for (int i = 0; i < globals::pulsar->nobs; i++) {
+        if (globals::pulsar->obsn[i].deleted == 0) {
             if (go == 0) {
                 go = 1;
-                start = (double)model::pulsar->obsn[i].bat;
+                start = (double)globals::pulsar->obsn[i].bat;
                 end = start;
             } else {
-                if (start > (double)model::pulsar->obsn[i].bat)
-                    start = (double)model::pulsar->obsn[i].bat;
-                if (end < (double)model::pulsar->obsn[i].bat)
-                    end = (double)model::pulsar->obsn[i].bat;
+                if (start > (double)globals::pulsar->obsn[i].bat)
+                    start = (double)globals::pulsar->obsn[i].bat;
+                if (end < (double)globals::pulsar->obsn[i].bat)
+                    end = (double)globals::pulsar->obsn[i].bat;
             }
         }
     }

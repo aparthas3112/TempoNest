@@ -78,20 +78,23 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     int TimetoMargin = model::design_size;
 
-    Eigen::VectorXd Resvec = Eigen::VectorXd::Zero(model::pulsar->nobs);
-    double EQUAD = 0;
-    double EFAC = 1;
+    // update the residuals if we are fitting any timing model parameters
+    timing_model_t* timing_model = model::timing_model->as<timing_model_t>();
+    timing_model->update_residuals(Cube);
+    int pcount = timing_model->get_fitted_dims();
 
-    int pcount = 0;
+    Eigen::VectorXd Resvec = Eigen::VectorXd::Zero(globals::pulsar->nobs);
 
-    for (int o = 0; o < model::pulsar->nobs; o++) {
-
-        Resvec[o] = (double)model::pulsar->obsn[o].residual;
+    for (int o = 0; o < globals::pulsar->nobs; o++) {
+        Resvec[o] = (double)globals::pulsar->obsn[o].residual;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////Get White Noise vector///////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
+
+    double EQUAD = 0;
+    double EFAC = 1;
 
     if (model::efac.has_value()) {
         efac_element* efac = model::efac.value()->as<efac_element>();
@@ -118,16 +121,16 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
         pcount++;
     }
 
-    Eigen::VectorXd Noise = Eigen::VectorXd::Zero(model::pulsar->nobs);
+    Eigen::VectorXd Noise = Eigen::VectorXd::Zero(globals::pulsar->nobs);
 
-    for (int o = 0; o < model::pulsar->nobs; o++) {
+    for (int o = 0; o < globals::pulsar->nobs; o++) {
         double EFACterm = 0;
         double noiseval = 0;
 
-        if (!settings::use_original_errors) {
-            noiseval = model::pulsar->obsn[o].toaErr;
+        if (!globals::use_original_errors) {
+            noiseval = globals::pulsar->obsn[o].toaErr;
         } else {
-            noiseval = model::pulsar->obsn[o].origErr;
+            noiseval = globals::pulsar->obsn[o].origErr;
         }
 
         EFACterm = (noiseval * pow(10.0, -6)) * EFAC;
@@ -157,7 +160,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     Eigen::VectorXd freqs = Eigen::VectorXd::Zero(totCoeff);
-    Eigen::VectorXd DMVec = Eigen::VectorXd::Zero(model::pulsar->nobs);
+    Eigen::VectorXd DMVec = Eigen::VectorXd::Zero(globals::pulsar->nobs);
 
     double freqdet = 0;
     int startpos = 0;
@@ -209,8 +212,8 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
         double DMKappa = 2.410 * pow(10.0, -16);
 
-        for (int o = 0; o < model::pulsar->nobs; o++) {
-            DMVec[o] = 1.0 / (DMKappa * pow((double)model::pulsar->obsn[o].freqSSB, 2));
+        for (int o = 0; o < globals::pulsar->nobs; o++) {
+            DMVec[o] = 1.0 / (DMKappa * pow((double)globals::pulsar->obsn[o].freqSSB, 2));
         }
 
         // Calculate and assign frequencies

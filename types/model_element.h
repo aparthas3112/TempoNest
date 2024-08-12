@@ -18,6 +18,8 @@ public:
 
     virtual void set_parameter(const string_t& name, const parameter_t& param) = 0;
 
+    virtual int get_fitted_dims() = 0;
+
     virtual void print() const = 0;
 
     template <typename T>
@@ -38,3 +40,4 @@ public:
 #include "model_elements/equad.h"
 #include "model_elements/power_law_dm_noise.h"
 #include "model_elements/power_law_red_noise.h"
+#include "model_elements/timing_model.h"
