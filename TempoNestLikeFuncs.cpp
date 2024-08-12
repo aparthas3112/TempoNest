@@ -44,6 +44,7 @@
 #include "T2toolkit.h"
 #include "TempoNest.h"
 #include "eigen_config.h"
+#include "namespaces/settings.h"
 #include "tempo2.h"
 #include "types/model.h"
 #include "types/model_element.h"
@@ -75,17 +76,17 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     double uniformpriorterm = 0;
 
-    int TimetoMargin = ((MNStruct*)globalcontext)->TimetoMargin;
+    int TimetoMargin = model::design_size;
 
-    Eigen::VectorXd Resvec = Eigen::VectorXd::Zero(((MNStruct*)globalcontext)->pulse->nobs);
-    Eigen::VectorXd EQUAD = Eigen::VectorXd::Zero(((MNStruct*)globalcontext)->systemcount);
-    Eigen::VectorXd EFAC = Eigen::VectorXd::Ones(((MNStruct*)globalcontext)->systemcount);
+    Eigen::VectorXd Resvec = Eigen::VectorXd::Zero(model::pulsar->nobs);
+    double EQUAD = 0;
+    double EFAC = 1;
 
     int pcount = 0;
 
-    for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
+    for (int o = 0; o < model::pulsar->nobs; o++) {
 
-        Resvec[o] = (double)((MNStruct*)globalcontext)->pulse->obsn[o].residual;
+        Resvec[o] = (double)model::pulsar->obsn[o].residual;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,14 +95,12 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     if (model::efac.has_value()) {
         efac_element* efac = model::efac.value()->as<efac_element>();
-        double value = efac->global.value().get_exp_value(Cube[pcount]);
+        EFAC = efac->global.value().get_exp_value(Cube[pcount]);
 
-        for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-            EFAC(o) = value;
-            if (efac->global.value().prior_type == prior_type_t::uniform) {
-                uniformpriorterm += log(value);
-            }
+        if (efac->global.value().prior_type == prior_type_t::uniform) {
+            uniformpriorterm += log(EFAC);
         }
+
         pcount++;
     }
 
@@ -111,57 +110,45 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
         double value = equad->global.value().get_exp_value(Cube[pcount]);
         value = value * value;
 
-        for (int o = 0; o < ((MNStruct*)globalcontext)->systemcount; o++) {
-            EQUAD(o) = value;
-            if (equad->global.value().prior_type == prior_type_t::uniform) {
-                uniformpriorterm += 0.5 * log(value);
-            }
+        EQUAD = value;
+        if (equad->global.value().prior_type == prior_type_t::uniform) {
+            uniformpriorterm += 0.5 * log(value);
         }
+
         pcount++;
     }
 
-    Eigen::VectorXd Noise = Eigen::VectorXd::Zero(((MNStruct*)globalcontext)->pulse->nobs);
+    Eigen::VectorXd Noise = Eigen::VectorXd::Zero(model::pulsar->nobs);
 
-    for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
+    for (int o = 0; o < model::pulsar->nobs; o++) {
         double EFACterm = 0;
         double noiseval = 0;
 
-        if (((MNStruct*)globalcontext)->useOriginalErrors == 0) {
-            noiseval = ((MNStruct*)globalcontext)->pulse->obsn[o].toaErr;
-        } else if (((MNStruct*)globalcontext)->useOriginalErrors == 1) {
-            noiseval = ((MNStruct*)globalcontext)->pulse->obsn[o].origErr;
+        if (!settings::use_original_errors) {
+            noiseval = model::pulsar->obsn[o].toaErr;
+        } else {
+            noiseval = model::pulsar->obsn[o].origErr;
         }
 
-        EFACterm = (noiseval * pow(10.0, -6)) * EFAC(((MNStruct*)globalcontext)->sysFlags[o]);
+        EFACterm = (noiseval * pow(10.0, -6)) * EFAC;
 
-        Noise[o] = 1.0 / (pow(EFACterm, 2) + EQUAD(((MNStruct*)globalcontext)->sysFlags[o]));
+        Noise[o] = 1.0 / (pow(EFACterm, 2) + EQUAD);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////Initialise TotalMatrix////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    int totalsize = ((MNStruct*)globalcontext)->totalsize;
+    int totalsize = model::total_size;
 
-    Eigen::MatrixXd TotalMatrix(((MNStruct*)context)->pulse->nobs, ((MNStruct*)context)->totalsize);
-
-    for (int i = 0; i < ((MNStruct*)globalcontext)->pulse->nobs; i++) {
-        for (int j = 0; j < ((MNStruct*)globalcontext)->totalsize; j++) {
-            TotalMatrix(i, j) = ((MNStruct*)globalcontext)
-                                    ->StoredTMatrix[i + j * ((MNStruct*)context)->pulse->nobs];
-        }
-    }
+    Eigen::MatrixXd TotalMatrix = model::total_matrix;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////Set up Coefficients///////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    double maxtspan = ((MNStruct*)globalcontext)->Tspan;
-
-    int FitRedCoeff = 2 * (((MNStruct*)globalcontext)->numFitRedCoeff);
-    int FitDMCoeff = 2 * (((MNStruct*)globalcontext)->numFitDMCoeff);
-
-    int totCoeff = ((MNStruct*)globalcontext)->totCoeff;
+    double maxtspan = model::max_tspan;
+    int totCoeff = model::noise_size;
 
     Eigen::VectorXd powercoeff = Eigen::VectorXd::Zero(totCoeff);
 
@@ -170,7 +157,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     Eigen::VectorXd freqs = Eigen::VectorXd::Zero(totCoeff);
-    Eigen::VectorXd DMVec = Eigen::VectorXd::Zero(((MNStruct*)globalcontext)->pulse->nobs);
+    Eigen::VectorXd DMVec = Eigen::VectorXd::Zero(model::pulsar->nobs);
 
     double freqdet = 0;
     int startpos = 0;
@@ -179,7 +166,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
         pl_red_noise_element* pl = model::pl_red_noise.value()->as<pl_red_noise_element>();
 
-        const int halfCoeff = FitRedCoeff / 2;
+        const int halfCoeff = pl->num_freqs;
 
         // Calculate and assign frequencies
         freqs.segment(startpos, halfCoeff) = pl->frequencies / maxtspan;
@@ -205,7 +192,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
             powercoeff[i + halfCoeff] += rho;
         }
 
-        startpos = FitRedCoeff;
+        startpos = 2 * pl->num_freqs;
 
         freqdet += 2 * powercoeff.segment(0, halfCoeff).array().log().sum();
     }
@@ -218,13 +205,12 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
         pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
 
-        const int halfCoeff = FitDMCoeff / 2;
+        const int halfCoeff = pl->num_freqs;
 
         double DMKappa = 2.410 * pow(10.0, -16);
 
-        for (int o = 0; o < ((MNStruct*)globalcontext)->pulse->nobs; o++) {
-            DMVec[o] = 1.0 / (DMKappa *
-                              pow((double)((MNStruct*)globalcontext)->pulse->obsn[o].freqSSB, 2));
+        for (int o = 0; o < model::pulsar->nobs; o++) {
+            DMVec[o] = 1.0 / (DMKappa * pow((double)model::pulsar->obsn[o].freqSSB, 2));
         }
 
         // Calculate and assign frequencies
@@ -251,7 +237,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
         freqdet += 2 * powercoeff.segment(startpos, halfCoeff).array().log().sum();
 
-        startpos += FitDMCoeff;
+        startpos += 2 * pl->num_freqs;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////

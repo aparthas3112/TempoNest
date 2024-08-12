@@ -27,35 +27,6 @@
 #include "eigen_config.h"
 #include "tempo2.h"
 
-typedef struct {
-    pulsar* pulse;
-    int numberpulsars;
-    double Tspan;
-    int TimetoMargin;
-    int totalsize;
-
-    char* rootName;
-
-    int numFitRedCoeff;
-    int numFitDMCoeff;
-    int totCoeff;
-
-    int numdims;
-
-    int* sysFlags;
-    int systemcount;
-    char* whiteflag;
-
-    int useOriginalErrors;
-
-    double* StoredTMatrix;
-
-    double* DMatrixVec;
-
-    int debug;
-    int rank;
-} MNStruct;
-
 void assigncontext(void* context);
 void fastephemeris_routines(pulsar* psr, int npsr);
 void fastSubIntephemeris_routines(pulsar* psr, int npsr);
@@ -71,8 +42,8 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
 void LRedLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context);
 
-void StoreTMatrix(double* TMatrix, void* context);
-void getArraySizeInfo(void* context);
+void StoreTMatrix();
+void getArraySizeInfo();
 void OutputMLFiles(int nParameters, double* pdParameterEstimates, double MLike, int startDim);
 
 void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int ndims);

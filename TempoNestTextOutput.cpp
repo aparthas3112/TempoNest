@@ -272,42 +272,6 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim,
             }
         }
 
-        /*	if(((MNStruct *)context)->incStep > 0){
-                printf("%i Step Functions used:\n",((MNStruct *)context)->incStep);
-                for(int i =0; i < ((MNStruct *)context)->incStep; i++){
-                    fitcount++;
-                    printf("Step Time %i: %g +/- %g\n", i+1,
-           paramlist[fitcount],paramlist[fitcount+ndim]); fitcount++; printf("Step Amp %i: %g +/-
-           %g\n", i+1, paramlist[fitcount],paramlist[fitcount+ndim]); fitcount++;
-
-                }
-            }*/
-        std::vector<int> systempos;
-        std::vector<int> sysflag;
-        std::vector<std::string> systemnames;
-
-        // if(((MNStruct *)context)->numFitEFAC > 1 || ((MNStruct *)context)->numFitEQUAD > 1){
-        for (int o = 0; o < ((MNStruct*)context)->pulse[0].nobs; o++) {
-            int found = 0;
-            for (int f = 0; f < ((MNStruct*)context)->pulse[0].obsn[o].nFlags; f++) {
-
-                if (strcasecmp(((MNStruct*)context)->pulse[0].obsn[o].flagID[f],
-                               ((MNStruct*)context)->whiteflag) == 0) {
-
-                    if (std::find(systemnames.begin(), systemnames.end(),
-                                  ((MNStruct*)context)->pulse[0].obsn[o].flagVal[f]) !=
-                        systemnames.end()) {
-                    } else {
-
-                        systempos.push_back(o);
-                        sysflag.push_back(f);
-                        systemnames.push_back(((MNStruct*)context)->pulse[0].obsn[o].flagVal[f]);
-                    }
-                    found = 1;
-                }
-            }
-        }
-
         std::vector<int> grouppos;
         std::vector<int> groupflag;
         std::vector<std::string> groupnames;
@@ -1148,13 +1112,16 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim,
                 }
 
                 if (model::pl_red_noise.has_value()) {
-                    //		printf("STart of Red 3 parms %i \n", whitefitcount);
+
+                    pl_red_noise_element* pl =
+                        model::pl_red_noise.value()->as<pl_red_noise_element>();
+
                     fprintf(fout2, "TNRedAmp %g\n", paramarray[whitefitcount][2]);
                     tablefile << "Log$_{10}$[Red Amp] \\dotfill & " << paramarray[whitefitcount][0]
                               << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";
                     whitefitcount++;
                     fprintf(fout2, "TNRedGam %g\n", paramarray[whitefitcount][2]);
-                    fprintf(fout2, "TNRedC %i\n", ((MNStruct*)context)->numFitRedCoeff);
+                    fprintf(fout2, "TNRedC %i\n", 2 * pl->num_freqs);
                     tablefile << "Red Index \\dotfill & " << paramarray[whitefitcount][0]
                               << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";
                     whitefitcount++;
@@ -1163,12 +1130,15 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim,
 
                 //	printf("end of Red parms\n");
                 if (model::pl_dm_noise.has_value()) {
+
+                    pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
+
                     fprintf(fout2, "TNDMAmp %g\n", paramarray[whitefitcount][2]);
                     tablefile << "Log$_{10}$[DM Amp] \\dotfill & " << paramarray[whitefitcount][0]
                               << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";
                     whitefitcount++;
                     fprintf(fout2, "TNDMGam %g\n", paramarray[whitefitcount][2]);
-                    fprintf(fout2, "TNDMC %i\n", ((MNStruct*)context)->numFitDMCoeff);
+                    fprintf(fout2, "TNDMC %i\n", 2 * pl->num_freqs);
 
                     tablefile << "DM Index \\dotfill & " << paramarray[whitefitcount][0]
                               << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";

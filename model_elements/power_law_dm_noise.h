@@ -11,10 +11,11 @@ public:
     parameter_t spectral_index;
     optional_parameter_t num_coeffs;
     Eigen::VectorXd frequencies;
+    int num_freqs = 33;
 
     pl_dm_noise_element()
     {
-        frequencies = Eigen::VectorXd::Zero(33);
+        frequencies = Eigen::VectorXd::Zero(num_freqs);
         for (int i = 0; i < frequencies.size(); i++) {
             frequencies[i] = i + 1;
         }

@@ -203,23 +203,22 @@ void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int
     readtxtoutput(longname, ndim, paramarray);
     readphyslive(longname, ndim, paramarray, 0);
 
-    formBatsAll(((MNStruct*)context)->pulse, 1);  // Form Barycentric arrival times
+    formBatsAll(model::pulsar, 1);  // Form Barycentric arrival times
     // printf("formed bats \n");
-    formResiduals(((MNStruct*)context)->pulse, 1, 1);  // Form residuals
+    formResiduals(model::pulsar, 1, 1);  // Form residuals
 
     double Evidence = 0;
-    TNtextOutput(((MNStruct*)context)->pulse, 1, 0, context, ndims, paramlist, Evidence, longname,
-                 paramarray);
+    TNtextOutput(model::pulsar, 1, 0, context, ndims, paramlist, Evidence, longname, paramarray);
 
     printf("finished output \n");
 }
 
-void getEigenDVectorLike(void* context, Eigen::MatrixXd& TNDM)
+void getEigenDVectorLike(Eigen::MatrixXd& TNDM)
 {
 
     int imargin = 0;
 
-    pulsar* psr = ((MNStruct*)context)->pulse;
+    pulsar* psr = model::pulsar;
     FitInfo* fitinfo = &(psr->fitinfo);
 
     // we have to loop over parameters first then jumps
@@ -269,37 +268,37 @@ void getEigenDVectorLike(void* context, Eigen::MatrixXd& TNDM)
     }
 }
 
-void StoreTMatrix(double* TotalMatrix, void* context)
+void StoreTMatrix()
 {
 
-    int totalsize = ((MNStruct*)context)->totalsize;
+    int totalsize = model::total_size;
 
-    for (int i = 0; i < ((MNStruct*)context)->pulse->nobs * totalsize; i++) {
-        TotalMatrix[i] = 0;
-    }
+    model::total_matrix = Eigen::MatrixXd::Zero(model::pulsar->nobs, totalsize);
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////Form the Design Matrix////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    int TimetoMargin = ((MNStruct*)context)->TimetoMargin;
+    std::cout << "Forming Design Matrix " << model::design_size << std::endl;
+    int TimetoMargin = model::design_size;
     if (TimetoMargin > 0) {
-        Eigen::MatrixXd DMatrix(((MNStruct*)context)->pulse->nobs, TimetoMargin);
-        getEigenDVectorLike(context, DMatrix);
+        model::design_matrix = Eigen::MatrixXd::Zero(model::pulsar->nobs, TimetoMargin);
+        getEigenDVectorLike(model::design_matrix);
 
         // Perform SVD
-        Eigen::BDCSVD<Eigen::MatrixXd> svd(DMatrix, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        Eigen::BDCSVD<Eigen::MatrixXd> svd(model::design_matrix,
+                                           Eigen::ComputeThinU | Eigen::ComputeThinV);
 
         std::cout << "SVD: " << svd.singularValues() << std::endl;
         std::cout << "SVD U: " << svd.matrixU() << std::endl;
         std::cout << "SVD V: " << svd.matrixV() << std::endl;
 
         Eigen::MatrixXd U = svd.matrixU();
-        for (int i = 0; i < ((MNStruct*)context)->pulse->nobs; i++) {
+        for (int i = 0; i < model::pulsar->nobs; i++) {
             for (int j = 0; j < TimetoMargin; j++) {
-                TotalMatrix[i + j * ((MNStruct*)context)->pulse->nobs] = U(i, j);
-                std::cout << "setting TotalMatrix[" << i << " + " << j << " * "
-                          << ((MNStruct*)context)->pulse->nobs << "] = " << U(i, j) << std::endl;
+                model::total_matrix(i, j) = U(i, j);
+                std::cout << "Setting total matrix " << i << " " << j << " " << U(i, j)
+                          << std::endl;
             }
         }
     }
@@ -307,19 +306,15 @@ void StoreTMatrix(double* TotalMatrix, void* context)
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////Set up Coefficients///////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
-    double maxtspan = ((MNStruct*)context)->Tspan;
-
-    int FitRedCoeff = 2 * (((MNStruct*)context)->numFitRedCoeff);
-    int FitDMCoeff = 2 * (((MNStruct*)context)->numFitDMCoeff);
-
-    int totCoeff = ((MNStruct*)context)->totCoeff;
+    double maxtspan = model::max_tspan;
+    int totCoeff = model::noise_size;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////Red Noise///////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     double* freqs = new double[totCoeff];
-    double* DMVec = new double[((MNStruct*)context)->pulse->nobs];
+    double* DMVec = new double[model::pulsar->nobs];
 
     double DMKappa = 2.410 * std::pow(10.0, -16);
     int startpos = 0;
@@ -327,24 +322,23 @@ void StoreTMatrix(double* TotalMatrix, void* context)
     if (model::pl_red_noise.has_value()) {
         pl_red_noise_element* pl = model::pl_red_noise.value()->as<pl_red_noise_element>();
 
-        for (int i = 0; i < FitRedCoeff / 2; i++) {
+        for (int i = 0; i < pl->num_freqs; i++) {
 
             freqs[startpos + i] = pl->frequencies[i] / maxtspan;
-            freqs[startpos + i + FitRedCoeff / 2] = freqs[startpos + i];
+            freqs[startpos + i + pl->num_freqs] = freqs[startpos + i];
         }
 
-        for (int i = 0; i < FitRedCoeff / 2; i++) {
-            for (int k = 0; k < ((MNStruct*)context)->pulse->nobs; k++) {
-                double time = (double)((MNStruct*)context)->pulse->obsn[k].bat;
-                TotalMatrix[k + (i + TimetoMargin + startpos) * ((MNStruct*)context)->pulse->nobs] =
+        for (int i = 0; i < pl->num_freqs; i++) {
+            for (int k = 0; k < model::pulsar->nobs; k++) {
+                double time = (double)model::pulsar->obsn[k].bat;
+                model::total_matrix(k, i + TimetoMargin + startpos) =
                     cos(2 * M_PI * freqs[i] * time);
-                TotalMatrix[k + (i + FitRedCoeff / 2 + TimetoMargin + startpos) *
-                                    ((MNStruct*)context)->pulse->nobs] =
+                model::total_matrix(k, i + pl->num_freqs + TimetoMargin + startpos) =
                     sin(2 * M_PI * freqs[i] * time);
             }
         }
 
-        startpos += FitRedCoeff;
+        startpos += 2 * pl->num_freqs;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -355,35 +349,34 @@ void StoreTMatrix(double* TotalMatrix, void* context)
 
         pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
 
-        for (int o = 0; o < ((MNStruct*)context)->pulse->nobs; o++) {
-            DMVec[o] =
-                1.0 / (DMKappa * std::pow((double)((MNStruct*)context)->pulse->obsn[o].freqSSB, 2));
+        for (int o = 0; o < model::pulsar->nobs; o++) {
+            DMVec[o] = 1.0 / (DMKappa * std::pow((double)model::pulsar->obsn[o].freqSSB, 2));
         }
 
-        for (int i = 0; i < FitDMCoeff / 2; i++) {
+        for (int i = 0; i < pl->num_freqs; i++) {
 
             freqs[startpos + i] = pl->frequencies[i] / maxtspan;
-            freqs[startpos + i + FitDMCoeff / 2] = freqs[startpos + i];
+            freqs[startpos + i + pl->num_freqs] = freqs[startpos + i];
 
-            for (int k = 0; k < ((MNStruct*)context)->pulse->nobs; k++) {
-                double time = (double)((MNStruct*)context)->pulse->obsn[k].bat;
+            for (int k = 0; k < model::pulsar->nobs; k++) {
+                double time = (double)model::pulsar->obsn[k].bat;
 
-                TotalMatrix[k + (i + TimetoMargin + startpos) * ((MNStruct*)context)->pulse->nobs] =
+                model::total_matrix(k, i + TimetoMargin + startpos) =
                     cos(2 * M_PI * freqs[startpos + i] * time) * DMVec[k];
-                TotalMatrix[k + (i + FitDMCoeff / 2 + TimetoMargin + startpos) *
-                                    ((MNStruct*)context)->pulse->nobs] =
+
+                model::total_matrix(k, i + pl->num_freqs + TimetoMargin + startpos) =
                     sin(2 * M_PI * freqs[startpos + i] * time) * DMVec[k];
             }
         }
 
-        startpos += FitDMCoeff;
+        startpos += 2 * pl->num_freqs;
     }
 
     delete[] DMVec;
     delete[] freqs;
 }
 
-void getArraySizeInfo(void* context)
+void getArraySizeInfo()
 {
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -392,35 +385,37 @@ void getArraySizeInfo(void* context)
 
     double start, end;
     int go = 0;
-    for (int i = 0; i < ((MNStruct*)context)->pulse->nobs; i++) {
-        if (((MNStruct*)context)->pulse->obsn[i].deleted == 0) {
+    for (int i = 0; i < model::pulsar->nobs; i++) {
+        if (model::pulsar->obsn[i].deleted == 0) {
             if (go == 0) {
                 go = 1;
-                start = (double)((MNStruct*)context)->pulse->obsn[i].bat;
+                start = (double)model::pulsar->obsn[i].bat;
                 end = start;
             } else {
-                if (start > (double)((MNStruct*)context)->pulse->obsn[i].bat)
-                    start = (double)((MNStruct*)context)->pulse->obsn[i].bat;
-                if (end < (double)((MNStruct*)context)->pulse->obsn[i].bat)
-                    end = (double)((MNStruct*)context)->pulse->obsn[i].bat;
+                if (start > (double)model::pulsar->obsn[i].bat)
+                    start = (double)model::pulsar->obsn[i].bat;
+                if (end < (double)model::pulsar->obsn[i].bat)
+                    end = (double)model::pulsar->obsn[i].bat;
             }
         }
     }
 
     double maxtspan = 1 * (end - start);
 
-    int FitRedCoeff = 2 * (((MNStruct*)context)->numFitRedCoeff);
-    int FitDMCoeff = 2 * (((MNStruct*)context)->numFitDMCoeff);
-
     int totCoeff = 0;
-    if (model::pl_red_noise.has_value())
-        totCoeff += FitRedCoeff;
-    if (model::pl_dm_noise.has_value())
-        totCoeff += FitDMCoeff;
+    if (model::pl_red_noise.has_value()) {
+        pl_red_noise_element* pl = model::pl_red_noise.value()->as<pl_red_noise_element>();
+        totCoeff += 2 * pl->num_freqs;
+    }
 
-    int totalsize = ((MNStruct*)context)->TimetoMargin + totCoeff;
+    if (model::pl_dm_noise.has_value()) {
+        pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
+        totCoeff += 2 * pl->num_freqs;
+    }
 
-    ((MNStruct*)context)->Tspan = maxtspan;
-    ((MNStruct*)context)->totCoeff = totCoeff;
-    ((MNStruct*)context)->totalsize = totalsize;
+    int totalsize = model::design_size + totCoeff;
+
+    model::max_tspan = maxtspan;
+    model::noise_size = totCoeff;
+    model::total_size = totalsize;
 }
