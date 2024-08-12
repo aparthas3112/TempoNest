@@ -76,8 +76,3 @@ void getArraySizeInfo(void* context);
 void OutputMLFiles(int nParameters, double* pdParameterEstimates, double MLike, int startDim);
 
 void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int ndims);
-
-void setupMNparams(char* ConfigFileName, int& sampler, int& IS, int& modal, int& ceff, int& nlive,
-                   double& efr, int& sample, int& updInt, int& nClsPar);
-void setupparams(char* ConfigFileName, char* root, int& numTempo2its, double& numRedCoeff,
-                 double& numDMCoeff, char* whiteflag, int& useOriginalErrors, int& debug);

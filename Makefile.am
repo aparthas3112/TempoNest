@@ -42,13 +42,15 @@ common_sources = tempo2pred_int.h T2accel.h tempo2pred.h tempo2Util.h constraint
                  TKmatrix.h TKfit.h T2toolkit.h tempo2.h config.h configfile.h configfile.cpp \
                  TempoNest.h json_loader.h json_loader.cpp \
                  TempoNestLikeFuncs.cpp   multinest.h \
-                 TempoNestTextOutput.cpp  MultiNestParams.cpp\
+                 TempoNestTextOutput.cpp \
                  TempoNestPlugin.cpp TempoNestParams.cpp TempoNestUtilities.cpp
                  
 common_sources += $(wildcard $(srcdir)/types/*.h) 
 common_sources += $(wildcard $(srcdir)/model_elements/*.h) 
 common_sources += types/model.cpp
-                 
+common_sources += namespaces/sampler.cpp namespaces/settings.cpp
+common_sources += $(wildcard $(srcdir)/namespaces/*.h) 
+
 
 
 temponest_@T2ARCH@_plug_la_SOURCES = $(common_sources)

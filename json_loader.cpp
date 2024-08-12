@@ -1,6 +1,8 @@
 #include "json_loader.h"
 #include <fstream>
 #include <stdexcept>
+#include "namespaces/sampler.h"
+#include "namespaces/settings.h"
 #include "rapidjson/istreamwrapper.h"
 #include "types/model.h"
 #include "types/model_element.h"
@@ -61,7 +63,7 @@ rapidjson::Document json_loader::parse_json_file(const string_t& filename)
     return doc;
 }
 
-void json_loader::load_from_json(const string_t& filename)
+void json_loader::load_model(const string_t& filename)
 {
     rapidjson::Document doc = parse_json_file(filename);
 
@@ -125,5 +127,46 @@ void json_loader::load_from_json(const string_t& filename)
                 model::equad.value()->print();
             }
         }
+    }
+}
+
+void json_loader::load_sampler(const string_t& filename)
+{
+    rapidjson::Document doc = parse_json_file(filename);
+
+    // Load model elements
+    if (doc.HasMember("sampler")) {
+        const auto& json_sampler = doc["sampler"];
+        string_t sampler_name = json_sampler["id"].GetString();
+        if (sampler_name == "multinest")
+            sampler::sampler = sampler_t::MULTINEST;
+        else
+            throw std::runtime_error("Unknown sampler: " + sampler_name);
+
+        // Parse sampler settings as needed
+        get_if_present(json_sampler, "sample", sampler::sample);
+        get_if_present(json_sampler, "live_points", sampler::live_points);
+        get_if_present(json_sampler, "constant_efficiency", sampler::constant_efficiency);
+        get_if_present(json_sampler, "efficiency", sampler::efficiency);
+        get_if_present(json_sampler, "importance_sampling", sampler::importance_sampling);
+        get_if_present(json_sampler, "modal", sampler::modal);
+        get_if_present(json_sampler, "update_interval", sampler::update_interval);
+        get_if_present(json_sampler, "num_cluster_parameters", sampler::num_cluster_parameters);
+    }
+}
+
+void json_loader::load_settings(const string_t& filename)
+{
+    rapidjson::Document doc = parse_json_file(filename);
+
+    // Load model elements
+    if (doc.HasMember("settings")) {
+        const auto& json_settings = doc["settings"];
+
+        // Parse sampler settings as needed
+        get_if_present(json_settings, "debug", settings::debug);
+        get_if_present(json_settings, "num_tempo2_its", settings::num_tempo2_its);
+        get_if_present(json_settings, "root", settings::root);
+        get_if_present(json_settings, "use_original_errors", settings::use_original_errors);
     }
 }

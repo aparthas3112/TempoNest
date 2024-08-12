@@ -7,13 +7,11 @@
 
 namespace model {
 
-// global settings
-
 // model elements
 extern optional_element_t pl_red_noise;
 extern optional_element_t pl_dm_noise;
 extern optional_element_t efac;
 extern optional_element_t equad;
 
-void load_from_json(const string_t& filename);
+void load_model(const string_t& filename);
 }  // namespace model

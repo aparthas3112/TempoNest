@@ -56,6 +56,8 @@
 
 #include <mpi.h>
 #include "eigen_config.h"
+#include "namespaces/sampler.h"
+#include "namespaces/settings.h"
 #include "types/model.h"
 
 void ephemeris_routines(pulsar* psr, int npsr);
@@ -331,7 +333,8 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
         logdbg("Number of pulsars = %d", npsr);
     }
 
-    model::load_from_json("model_config.json");
+    settings::load_settings("model_config.json");
+    model::load_model("model_config.json");
 
     char root[100];
     int numTempo2its;
@@ -351,9 +354,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     char* WhiteName = new char[100];
 
     int debug = 0;
-
-    setupparams(ConfigFileName, Type, numTempo2its, numRedCoeff, numDMCoeff, WhiteName,
-                useOriginalErrors, debug);
 
     formBatsAll(psr, npsr); /* Form Barycentric arrival times */
     logdbg("calling formResiduals");
@@ -629,19 +629,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
 
     // set the MultiNest sampling parameters
 
-    // 	return 0;
-    int sampler = 1;
-    int IS = 1;        // do Nested Importance Sampling?
-    int mmodal = 0;    // do mode separation?
-    int ceff = 0;      // run in constant efficiency mode?
-    int nlive = 500;   // number of live points
-    double efr = 0.1;  // set the required efficiency
-    int sample = 1;
-    int nClsPar = 1;    // no. of parameters to do mode separation on
-    int updInt = 2000;  // after how many iterations feedback is required & the output files should
-                        // be updated
-
-    setupMNparams(ConfigFileName, sampler, IS, mmodal, ceff, nlive, efr, sample, updInt, nClsPar);
+    sampler::load_sampler("model_config.json");
 
     double tol = 0.5;  // tol, defines the stopping criteria
     int ndims = 4;
@@ -671,9 +659,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     MNStruct* MNS =
         init_struct(psr, npsr, timing_model_params, systemcount, int(numRedCoeff), int(numDMCoeff),
                     numFlags, ndims, wflag, useOriginalErrors, debug, chartroot, rank);
-
-    // return 0;
-    context = MNS;
 
     context = MNS;
 
@@ -715,13 +700,15 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnpsr
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    if (sample == 1) {
+    if (sampler::sample) {
 
         std::cout << "run " << std::endl;
 
-        nested::run(IS, mmodal, ceff, nlive, tol, efr, ndims, ndims, nClsPar, maxModes, updInt,
-                    Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter,
-                    LRedLikeMNWrap, dumper, context);
+        nested::run(sampler::importance_sampling, sampler::modal, sampler::constant_efficiency,
+                    sampler::live_points, tol, sampler::efficiency, ndims, ndims,
+                    sampler::num_cluster_parameters, maxModes, sampler::update_interval, Ztol, root,
+                    seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, LRedLikeMNWrap,
+                    dumper, context);
     }
 
     if (rank == 0) {

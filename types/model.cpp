@@ -8,9 +8,9 @@ optional_element_t pl_dm_noise;
 optional_element_t efac;
 optional_element_t equad;
 
-void load_from_json(const string_t& filename)
+void load_model(const string_t& filename)
 {
-    json_loader::load_from_json(filename);
+    json_loader::load_model(filename);
 }
 
 }  // namespace model
