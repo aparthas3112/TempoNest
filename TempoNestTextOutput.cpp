@@ -39,7 +39,6 @@
 #include <vector>
 #include "TKfit.h"
 #include "TempoNest.h"
-#include "constraints.h"
 #include "tempo2.h"
 #include "types/model.h"
 
@@ -249,14 +248,6 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim,
         printf(
             "--------------------------------------------------------------------------------------"
             "-------------\n");
-        if (psr->rescaleErrChisq == 1 && psr->fitMode == 1)
-            if (psr[p].nconstraints > 0) {
-                printf("\nCONSTRAINTS:\n");
-                for (i = 0; i < psr[p].nconstraints; i++) {
-                    printf("%s\n", get_constraint_name(psr[p].constraints[i]).c_str());
-                }
-                printf("\n");
-            }
 
         /* JUMPS */
         for (i = 1; i <= psr[p].nJumps; i++) {
