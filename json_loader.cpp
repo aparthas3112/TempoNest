@@ -66,6 +66,7 @@ void json_loader::load_model(const string_t& filename)
 
     // Load model elements
     if (doc.HasMember("elements")) {
+        bool have_timing_model = false;
         const auto& json_elements = doc["elements"];
         for (rapidjson::SizeType i = 0; i < json_elements.Size(); i++) {
             const auto& json_element = json_elements[i];
@@ -118,9 +119,16 @@ void json_loader::load_model(const string_t& filename)
                 model::equad = std::move(element);
                 model::equad.value()->print();
             } else if (element_name == "Timing Model") {
+                have_timing_model = true;
                 model::timing_model = std::move(element);
                 model::timing_model->print();
             }
+        }
+
+        // if we havn't loaded a timing model, create an empty one
+        if (!have_timing_model) {
+            auto element = create_model_element("Timing Model");
+            model::timing_model = std::move(element);
         }
     }
 }

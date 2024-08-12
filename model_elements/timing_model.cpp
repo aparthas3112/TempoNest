@@ -1,6 +1,17 @@
 #include "timing_model.h"
 #include "pulsar_utils.h"
 
+timing_model_t::timing_model_t()
+{
+
+    if (globals::pulsar == nullptr) {
+        std::cout << "pulsar not intiialised, don't do anything" << std::endl;
+        return;
+    }
+
+    initialise();
+}
+
 void timing_model_t::initialise()
 {
     FitInfo* fitinfo = &(globals::pulsar->fitinfo);
@@ -42,10 +53,6 @@ void timing_model_t::initialise()
 
 void timing_model_t::set_parameter(const string_t& name, const parameter_t& param)
 {
-
-    if (t2_fitted_labels.size() == 0) {
-        initialise();
-    }
 
     timing_parameter_t timing_parameter = timing_parameter_t(param);
 

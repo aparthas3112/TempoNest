@@ -180,6 +180,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
 
     globals::pulsar = &psr[0];
     initialise_pulsar(onlypre);
+    timing_model_t* timing_model = model::timing_model->as<timing_model_t>();
 
     globals::load_settings(ConfigFileName);
     model::load_model(ConfigFileName);
@@ -233,7 +234,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     // set the MultiNest sampling parameters
 
     double tol = 0.5;  // tol, defines the stopping criteria
-    int ndims = 5;
+    int ndims = model::get_model_dims();
 
     double Ztol = -1E90;  // all the modes with logZ < Ztol are ignored
     int maxModes = 100;   // expected max no. of modes (used only for memory allocation)

@@ -3,7 +3,7 @@
 
 namespace globals {
 
-pulsar_t* pulsar;
+pulsar_t* pulsar = nullptr;
 
 bool debug = false;
 

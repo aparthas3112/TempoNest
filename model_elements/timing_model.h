@@ -19,6 +19,8 @@ public:
     int t2_total_fit;
     int design_size;
 
+    timing_model_t();
+
     // initialize all the vectors once the pulsar is loaded
     void initialise();
 
