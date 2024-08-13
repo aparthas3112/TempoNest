@@ -28,16 +28,13 @@ if HAVE_MULTINEST
 
 plugin_LTLIBRARIES = temponest_@T2ARCH@_plug.la
 
-common_sources = tempo2pred_int.h T2accel.h tempo2pred.h tempo2Util.h  \
-                 TKmatrix.h TKfit.h T2toolkit.h tempo2.h config.h \
-                 TempoNest.h pulsar_utils.h json_loader.h json_loader.cpp \
-                 TempoNestLikeFuncs.cpp   multinest.h \
+common_sources = json_loader.cpp \
+                 TempoNestLikeFuncs.cpp \
                  TempoNestTextOutput.cpp pulsar_utils.cpp\
                  TempoNestPlugin.cpp TempoNestUtilities.cpp
                  
 
 common_sources += model_elements/timing_model.cpp model_elements/efac.cpp model_elements/equad.cpp
-
 common_sources += types/model.cpp types/parameter.cpp
 common_sources += namespaces/sampler.cpp namespaces/settings.cpp
 
@@ -67,3 +64,4 @@ endif  # HAVE_MULTINEST
 # Add this to define a custom clean-local target
 clean-local:
 	-find . -type d -name .deps -exec rm -rf {} +
+	-find . -type f -name .dirstamp -delete
