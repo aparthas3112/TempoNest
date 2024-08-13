@@ -95,7 +95,11 @@ void json_loader::load_model(const string_t& filename)
                 const auto& json_param = json_params[j];
                 string_t param_name = json_param["name"].GetString();
                 if (element->is_valid_parameter(param_name)) {
-                    element->set_parameter(param_name, parse_parameter(json_param));
+                    parameter_t param = parse_parameter(json_param);
+                    if (!param.include) {
+                        continue;
+                    }
+                    element->set_parameter(param_name, param);
                 } else {
                     std::cout << "Warning: Ignoring invalid parameter '" << param_name << "' for "
                               << element->get_name() << std::endl;

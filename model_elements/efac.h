@@ -4,9 +4,15 @@
 #include "../types/model_element.h"
 
 class efac_t : public model_element_t {
+private:
+
+    std::vector<int> flag_indices;
+    std::vector<string_t> flag_values;
+
 public:
 
     optional_parameter_t global;
+    optional_parameter_t per_flag;
 
     void set_parameter(const string_t& name, const parameter_t& param) override;
     bool is_fully_specified() const override;

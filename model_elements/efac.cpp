@@ -5,6 +5,36 @@ void efac_t::set_parameter(const string_t& name, const parameter_t& param)
 {
     if (name == "global") {
         global = param;
+    } else if (name == "per_flag") {
+
+        string_t wflag = "-fe";
+        flag_indices.clear();
+        flag_values.clear();
+
+        for (int o = 0; o < globals::pulsar->nobs; o++) {
+            for (int f = 0; f < globals::pulsar->obsn[o].nFlags; f++) {
+                string_t obs_flag(globals::pulsar->obsn[o].flagID[f]);
+                if (obs_flag == wflag) {
+
+                    string_t flag_value(globals::pulsar->obsn[o].flagVal[f]);
+                    auto it = std::find(flag_values.begin(), flag_values.end(), flag_value);
+                    if (it != flag_values.end()) {
+                        auto index = std::distance(flag_values.begin(), it);
+                        flag_indices.push_back(index);
+                    } else {
+
+                        std::cout << "Found new " << wflag << " "
+                                  << globals::pulsar->obsn[o].flagVal[f] << std::endl;
+
+                        flag_values.push_back(globals::pulsar->obsn[o].flagVal[f]);
+                        flag_indices.push_back(flag_values.size() - 1);
+                    }
+                }
+            }
+        }
+
+        per_flag = param;
+
     } else {
         throw std::runtime_error("Invalid parameter name for EFAC: " + name);
     }
@@ -17,7 +47,7 @@ bool efac_t::is_fully_specified() const
 
 bool efac_t::is_valid_parameter(const string_t& param_name) const
 {
-    static const std::unordered_set<string_t> valid_params = {"global"};
+    static const std::unordered_set<string_t> valid_params = {"global", "per_flag"};
     return valid_params.find(param_name) != valid_params.end();
 }
 
@@ -32,10 +62,14 @@ void efac_t::print() const
 
 int efac_t::get_fitted_dims()
 {
+    int fitted_dims = 0;
     if (global.has_value()) {
-        return 1;
+        fitted_dims += 1;
     }
-    return 0;
+    if (per_flag.has_value()) {
+        fitted_dims += flag_values.size();
+    }
+    return fitted_dims;
 }
 
 string_t efac_t::get_name() const
@@ -55,5 +89,20 @@ void efac_t::apply(double* Cube, Eigen::VectorXd& noise, double& prior_term, int
         p_index++;
 
         noise = (noise * multiplier).array().square();
+    }
+
+    if (per_flag.has_value()) {
+        Eigen::VectorXd multipliers = Eigen::VectorXd::Ones(flag_values.size());
+        for (int i = 0; i < flag_values.size(); i++) {
+            multipliers(i) = per_flag.value().get_exp_value(Cube[p_index++]);
+
+            if (per_flag.value().prior_type == prior_type_t::uniform) {
+                prior_term += log(multipliers(i));
+            }
+        }
+        for (int o = 0; o < globals::pulsar->nobs; o++) {
+            noise(o) *= multipliers[flag_indices[o]];
+        }
+        noise = noise.array().square();
     }
 }
