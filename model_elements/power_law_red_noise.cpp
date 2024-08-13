@@ -67,31 +67,26 @@ string_t pl_red_noise_t::get_name() const
 void pl_red_noise_t::apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_count, int& start_pos,
                            double maxtspan, double& uniform_prior, double& freq_det)
 {
+    double red_amp = amplitude.get_exp_value(Cube[p_count++]);
+    double red_index = spectral_index.get_value(Cube[p_count++]);
 
-    Eigen::VectorXd freqs = frequencies * 365.25 / maxtspan;
+    Eigen::VectorXd red_coeffs = (frequencies * 365.25 / maxtspan).array().pow(-red_index);
 
     double Tspan = maxtspan;
     double f1yr = 1.0 / 3.16e7;
 
-    double redamp = amplitude.get_exp_value(Cube[p_count++]);
-    double redindex = spectral_index.get_value(Cube[p_count++]);
-
     if (amplitude.prior_type == prior_type_t::uniform) {
-        uniform_prior += log(redamp);
+        uniform_prior += log(red_amp);
     }
 
     double pl_amp =
-        (redamp * redamp / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) / (Tspan * 24 * 60 * 60);
+        (red_amp * red_amp / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) / (Tspan * 24 * 60 * 60);
 
-    for (int i = 0; i < num_freqs; i++) {
+    red_coeffs *= pl_amp;
 
-        double rho = pl_amp * pow(freqs[i], -redindex);
+    powercoeff.segment(start_pos, num_freqs) += red_coeffs;
+    powercoeff.segment(start_pos + num_freqs, num_freqs) += red_coeffs;
 
-        powercoeff[i] += rho;
-        powercoeff[i + num_freqs] += rho;
-    }
-
+    freq_det += 2 * powercoeff.segment(start_pos, num_freqs).array().log().sum();
     start_pos += 2 * num_freqs;
-
-    freq_det += 2 * powercoeff.segment(0, num_freqs).array().log().sum();
 }

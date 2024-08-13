@@ -68,35 +68,24 @@ void pl_dm_noise_t::apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_coun
                           double maxtspan, double& uniform_prior, double& freq_det)
 {
 
-    Eigen::VectorXd freqs = frequencies * 365.25 / maxtspan;
+    double dm_amp = amplitude.get_exp_value(Cube[p_count++]);
+    double dm_index = spectral_index.get_value(Cube[p_count++]);
 
-    Eigen::VectorXd DMVec = Eigen::VectorXd::Zero(globals::pulsar->nobs);
+    Eigen::VectorXd dm_coeffs = (frequencies * 365.25 / maxtspan).array().pow(-dm_index);
 
-    double DMKappa = 2.410 * pow(10.0, -16);
-
-    for (int o = 0; o < globals::pulsar->nobs; o++) {
-        DMVec[o] = 1.0 / (DMKappa * pow((double)globals::pulsar->obsn[o].freqSSB, 2));
+    if (amplitude.prior_type == prior_type_t::uniform) {
+        uniform_prior += log(dm_amp);
     }
-
-    double DMamp = amplitude.get_exp_value(Cube[p_count++]);
-    double DMindex = spectral_index.get_value(Cube[p_count++]);
 
     double f1yr = 1.0 / 3.16e7;
 
-    if (amplitude.prior_type == prior_type_t::uniform) {
-        uniform_prior += log(DMamp);
-    }
+    double pl_amp = (dm_amp * dm_amp) * pow(f1yr, (-3)) / (maxtspan * 24 * 60 * 60);
 
-    double pl_amp = (DMamp * DMamp) * pow(f1yr, (-3)) / (maxtspan * 24 * 60 * 60);
+    dm_coeffs *= pl_amp;
 
-    for (int i = 0; i < num_freqs; i++) {
-
-        double rho = pl_amp * pow(freqs[i], -DMindex);
-        powercoeff[start_pos + i] += rho;
-        powercoeff[start_pos + i + num_freqs] += rho;
-    }
+    powercoeff.segment(start_pos, num_freqs) += dm_coeffs;
+    powercoeff.segment(start_pos + num_freqs, num_freqs) += dm_coeffs;
 
     freq_det += 2 * powercoeff.segment(start_pos, num_freqs).array().log().sum();
-
     start_pos += 2 * num_freqs;
 }
