@@ -5,7 +5,6 @@ timing_model_t::timing_model_t()
 {
 
     if (globals::pulsar == nullptr) {
-        std::cout << "pulsar not intiialised, don't do anything" << std::endl;
         return;
     }
 

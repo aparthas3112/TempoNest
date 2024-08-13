@@ -11,63 +11,18 @@ public:
     parameter_t spectral_index;
     optional_parameter_t num_coeffs;
     Eigen::VectorXd frequencies;
-    int num_freqs = 33;
+    int num_freqs;
 
-    pl_dm_noise_t()
-    {
-        frequencies = Eigen::VectorXd::Zero(num_freqs);
-        for (int i = 0; i < frequencies.size(); i++) {
-            frequencies[i] = i + 1;
-        }
-    }
+    pl_dm_noise_t();
 
-    void set_parameter(const string_t& name, const parameter_t& param) override
-    {
-        if (name == "amplitude") {
-            amplitude = param;
-        } else if (name == "spectral_index") {
-            spectral_index = param;
-        } else if (name == "num_coeffs") {
-            num_coeffs = param;
-        } else {
-            throw std::runtime_error("Invalid parameter name for Power Law Red Noise: " + name);
-        }
-    }
+    void set_parameter(const string_t& name, const parameter_t& param) override;
+    bool is_valid_parameter(const string_t& param_name) const override;
+    bool is_fully_specified() const override;
+    void print() const override;
+    int get_fitted_dims() override;
+    string_t get_name() const override;
 
-    bool is_valid_parameter(const string_t& param_name) const override
-    {
-        static const std::unordered_set<string_t> valid_params = {"amplitude", "spectral_index",
-                                                                  "num_coeffs"};
-        return valid_params.find(param_name) != valid_params.end();
-    }
-
-    bool is_fully_specified() const override
-    {
-        // If either amplitude or spectral_index is included, both must be
-        if (amplitude.include == spectral_index.include) {
-            return true;
-        }
-        if (num_coeffs.has_value() && num_coeffs.value().include && amplitude.include) {
-            return true;
-        }
-
-        return false;
-    }
-
-    void print() const override
-    {
-        std::cout << "Power Law Red Noise Element:" << std::endl;
-        std::cout << "Amplitude: ";
-        amplitude.print();
-        std::cout << "Spectral Index: ";
-        spectral_index.print();
-        if (num_coeffs.has_value()) {
-            std::cout << "Cutoff: ";
-            num_coeffs->print();
-        }
-    }
-
-    int get_fitted_dims() override { return 2; }
-
-    string_t get_name() const override { return "Power Law Red Noise"; }
+    // use the dm noise params to calculate the dm noise power at each frequency
+    void apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_count, int& start_pos,
+               double maxtspan, double& uniform_prior, double& freq_det);
 };

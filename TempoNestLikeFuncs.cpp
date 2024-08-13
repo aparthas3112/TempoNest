@@ -136,45 +136,14 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     /////////////////////////Red Noise///////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    Eigen::VectorXd freqs = Eigen::VectorXd::Zero(totCoeff);
-    Eigen::VectorXd DMVec = Eigen::VectorXd::Zero(globals::pulsar->nobs);
-
-    double freqdet = 0;
-    int startpos = 0;
+    double freq_det = 0;
+    int start_pos = 0;
 
     if (model::pl_red_noise.has_value()) {
 
         pl_red_noise_t* pl = model::pl_red_noise.value()->as<pl_red_noise_t>();
 
-        const int halfCoeff = pl->num_freqs;
-
-        // Calculate and assign frequencies
-        freqs.segment(startpos, halfCoeff) = pl->frequencies / maxtspan;
-
-        freqs.segment(startpos + halfCoeff, halfCoeff) = freqs.segment(startpos, halfCoeff);
-
-        double Tspan = maxtspan;
-        double f1yr = 1.0 / 3.16e7;
-
-        double redamp = pl->amplitude.get_exp_value(Cube[p_count++]);
-        double redindex = pl->spectral_index.get_value(Cube[p_count++]);
-
-        if (pl->amplitude.prior_type == prior_type_t::uniform) {
-            uniform_prior += log(redamp);
-        }
-
-        for (int i = 0; i < halfCoeff; i++) {
-
-            double rho = (redamp * redamp / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) *
-                         pow(freqs[i] * 365.25, (-redindex)) / (Tspan * 24 * 60 * 60);
-
-            powercoeff[i] += rho;
-            powercoeff[i + halfCoeff] += rho;
-        }
-
-        startpos = 2 * pl->num_freqs;
-
-        freqdet += 2 * powercoeff.segment(0, halfCoeff).array().log().sum();
+        pl->apply(Cube, powercoeff, p_count, start_pos, maxtspan, uniform_prior, freq_det);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,39 +154,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
         pl_dm_noise_t* pl = model::pl_dm_noise.value()->as<pl_dm_noise_t>();
 
-        const int halfCoeff = pl->num_freqs;
-
-        double DMKappa = 2.410 * pow(10.0, -16);
-
-        for (int o = 0; o < globals::pulsar->nobs; o++) {
-            DMVec[o] = 1.0 / (DMKappa * pow((double)globals::pulsar->obsn[o].freqSSB, 2));
-        }
-
-        // Calculate and assign frequencies
-        freqs.segment(startpos, halfCoeff) = pl->frequencies / maxtspan;
-
-        freqs.segment(startpos + halfCoeff, halfCoeff) = freqs.segment(startpos, halfCoeff);
-
-        double DMamp = pl->amplitude.get_exp_value(Cube[p_count++]);
-        double DMindex = pl->spectral_index.get_value(Cube[p_count++]);
-
-        double f1yr = 1.0 / 3.16e7;
-
-        if (pl->amplitude.prior_type == prior_type_t::uniform) {
-            uniform_prior += log(DMamp);
-        }
-
-        for (int i = 0; i < halfCoeff; i++) {
-
-            double rho = (DMamp * DMamp) * pow(f1yr, (-3)) *
-                         pow(freqs[startpos + i] * 365.25, (-DMindex)) / (maxtspan * 24 * 60 * 60);
-            powercoeff[startpos + i] += rho;
-            powercoeff[startpos + i + halfCoeff] += rho;
-        }
-
-        freqdet += 2 * powercoeff.segment(startpos, halfCoeff).array().log().sum();
-
-        startpos += 2 * pl->num_freqs;
+        pl->apply(Cube, powercoeff, p_count, start_pos, maxtspan, uniform_prior, freq_det);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -254,7 +191,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     double freqlike = NTd.dot(chol_solution);
 
-    double lnewChol = -0.5 * (tdet + jointdet + freqdet + timelike - freqlike) + uniform_prior;
+    double lnewChol = -0.5 * (tdet + jointdet + freq_det + timelike - freqlike) + uniform_prior;
 
     logtchk("Exiting TempoNest Likelihood");
 

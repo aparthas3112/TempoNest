@@ -38,6 +38,5 @@ void LRedLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* con
 
 void StoreTMatrix();
 void getArraySizeInfo();
-void OutputMLFiles(int nParameters, double* pdParameterEstimates, double MLike, int startDim);
 
 void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int ndims);
