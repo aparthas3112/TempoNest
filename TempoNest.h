@@ -27,8 +27,6 @@
 #include "eigen_config.h"
 #include "tempo2.h"
 
-void assigncontext(void* context);
-
 void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndims,
                   std::vector<double> paramlist, double Evidence, std::string longname,
                   double** paramarray);

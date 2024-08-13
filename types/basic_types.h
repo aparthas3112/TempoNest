@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <optional>
 #include <string>
 #include "rapidjson/document.h"
@@ -10,7 +11,6 @@ class parameter_t;
 class pulsar;
 
 using pulsar_t = pulsar;
-
 using string_t = std::string;
 using json_value_t = rapidjson::Value;
 

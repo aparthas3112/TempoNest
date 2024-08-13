@@ -1104,8 +1104,7 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim,
 
                 if (model::pl_red_noise.has_value()) {
 
-                    pl_red_noise_element* pl =
-                        model::pl_red_noise.value()->as<pl_red_noise_element>();
+                    pl_red_noise_t* pl = model::pl_red_noise.value()->as<pl_red_noise_t>();
 
                     fprintf(fout2, "TNRedAmp %g\n", paramarray[whitefitcount][2]);
                     tablefile << "Log$_{10}$[Red Amp] \\dotfill & " << paramarray[whitefitcount][0]
@@ -1122,7 +1121,7 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim,
                 //	printf("end of Red parms\n");
                 if (model::pl_dm_noise.has_value()) {
 
-                    pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
+                    pl_dm_noise_t* pl = model::pl_dm_noise.value()->as<pl_dm_noise_t>();
 
                     fprintf(fout2, "TNDMAmp %g\n", paramarray[whitefitcount][2]);
                     tablefile << "Log$_{10}$[DM Amp] \\dotfill & " << paramarray[whitefitcount][0]

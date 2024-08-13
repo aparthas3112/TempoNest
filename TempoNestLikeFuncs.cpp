@@ -74,14 +74,14 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     logtchk("Entering TempoNest likelihood");
 
-    double uniformpriorterm = 0;
+    double uniform_prior = 0;
 
     int TimetoMargin = model::design_size;
 
     // update the residuals if we are fitting any timing model parameters
     timing_model_t* timing_model = model::timing_model->as<timing_model_t>();
     timing_model->update_residuals(Cube);
-    int pcount = timing_model->get_fitted_dims();
+    int p_count = timing_model->get_fitted_dims();
 
     Eigen::VectorXd Resvec = Eigen::VectorXd::Zero(globals::pulsar->nobs);
 
@@ -90,53 +90,30 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////Get White Noise vector///////////////////////////////////////////////
+    /////////////////////////Get White noise vector///////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    double EQUAD = 0;
-    double EFAC = 1;
-
-    if (model::efac.has_value()) {
-        efac_element* efac = model::efac.value()->as<efac_element>();
-        EFAC = efac->global.value().get_exp_value(Cube[pcount]);
-
-        if (efac->global.value().prior_type == prior_type_t::uniform) {
-            uniformpriorterm += log(EFAC);
-        }
-
-        pcount++;
-    }
-
-    // printf("Equad %i \n", ((MNStruct *)globalcontext)->numFitEQUAD);
-    if (model::equad.has_value()) {
-        equad_element* equad = model::equad.value()->as<equad_element>();
-        double value = equad->global.value().get_exp_value(Cube[pcount]);
-        value = value * value;
-
-        EQUAD = value;
-        if (equad->global.value().prior_type == prior_type_t::uniform) {
-            uniformpriorterm += 0.5 * log(value);
-        }
-
-        pcount++;
-    }
-
-    Eigen::VectorXd Noise = Eigen::VectorXd::Zero(globals::pulsar->nobs);
+    Eigen::VectorXd noise = Eigen::VectorXd::Zero(globals::pulsar->nobs);
 
     for (int o = 0; o < globals::pulsar->nobs; o++) {
-        double EFACterm = 0;
-        double noiseval = 0;
-
         if (!globals::use_original_errors) {
-            noiseval = globals::pulsar->obsn[o].toaErr;
+            noise[o] = globals::pulsar->obsn[o].toaErr * pow(10.0, -6);
         } else {
-            noiseval = globals::pulsar->obsn[o].origErr;
+            noise[o] = globals::pulsar->obsn[o].origErr * pow(10.0, -6);
         }
-
-        EFACterm = (noiseval * pow(10.0, -6)) * EFAC;
-
-        Noise[o] = 1.0 / (pow(EFACterm, 2) + EQUAD);
     }
+
+    if (model::efac.has_value()) {
+        efac_t* efac = model::efac.value()->as<efac_t>();
+        efac->apply(Cube, noise, uniform_prior, p_count);
+    }
+
+    if (model::equad.has_value()) {
+        equad_t* equad = model::equad.value()->as<equad_t>();
+        equad->apply(Cube, noise, uniform_prior, p_count);
+    }
+
+    noise = noise.array().inverse();
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////Initialise TotalMatrix////////////////////////////////////////////
@@ -167,7 +144,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     if (model::pl_red_noise.has_value()) {
 
-        pl_red_noise_element* pl = model::pl_red_noise.value()->as<pl_red_noise_element>();
+        pl_red_noise_t* pl = model::pl_red_noise.value()->as<pl_red_noise_t>();
 
         const int halfCoeff = pl->num_freqs;
 
@@ -179,11 +156,11 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
         double Tspan = maxtspan;
         double f1yr = 1.0 / 3.16e7;
 
-        double redamp = pl->amplitude.get_exp_value(Cube[pcount++]);
-        double redindex = pl->spectral_index.get_value(Cube[pcount++]);
+        double redamp = pl->amplitude.get_exp_value(Cube[p_count++]);
+        double redindex = pl->spectral_index.get_value(Cube[p_count++]);
 
         if (pl->amplitude.prior_type == prior_type_t::uniform) {
-            uniformpriorterm += log(redamp);
+            uniform_prior += log(redamp);
         }
 
         for (int i = 0; i < halfCoeff; i++) {
@@ -206,7 +183,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     if (model::pl_dm_noise.has_value()) {
 
-        pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
+        pl_dm_noise_t* pl = model::pl_dm_noise.value()->as<pl_dm_noise_t>();
 
         const int halfCoeff = pl->num_freqs;
 
@@ -221,13 +198,13 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
         freqs.segment(startpos + halfCoeff, halfCoeff) = freqs.segment(startpos, halfCoeff);
 
-        double DMamp = pl->amplitude.get_exp_value(Cube[pcount++]);
-        double DMindex = pl->spectral_index.get_value(Cube[pcount++]);
+        double DMamp = pl->amplitude.get_exp_value(Cube[p_count++]);
+        double DMindex = pl->spectral_index.get_value(Cube[p_count++]);
 
         double f1yr = 1.0 / 3.16e7;
 
         if (pl->amplitude.prior_type == prior_type_t::uniform) {
-            uniformpriorterm += log(DMamp);
+            uniform_prior += log(DMamp);
         }
 
         for (int i = 0; i < halfCoeff; i++) {
@@ -247,15 +224,15 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
     /////////////////////////Get Time domain likelihood//////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    double timelike = (Resvec.array().square() * Noise.array()).sum();
-    double tdet = -Noise.array().log().sum();
+    double timelike = (Resvec.array().square() * noise.array()).sum();
+    double tdet = -noise.array().log().sum();
 
     //////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////Do Algebra/////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
     logtchk("Starting algebra");
 
-    Eigen::MatrixXd NT = TotalMatrix.array().colwise() * Noise.array();
+    Eigen::MatrixXd NT = TotalMatrix.array().colwise() * noise.array();
 
     Eigen::MatrixXd TNT = TotalMatrix.transpose() * NT;
 
@@ -277,7 +254,7 @@ double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived,
 
     double freqlike = NTd.dot(chol_solution);
 
-    double lnewChol = -0.5 * (tdet + jointdet + freqdet + timelike - freqlike) + uniformpriorterm;
+    double lnewChol = -0.5 * (tdet + jointdet + freqdet + timelike - freqlike) + uniform_prior;
 
     logtchk("Exiting TempoNest Likelihood");
 

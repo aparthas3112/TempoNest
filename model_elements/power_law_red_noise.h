@@ -4,7 +4,7 @@
 #include "../eigen_config.h"
 #include "../types/model_element.h"
 
-class pl_red_noise_element : public model_element_t {
+class pl_red_noise_t : public model_element_t {
 public:
 
     parameter_t amplitude;
@@ -13,7 +13,7 @@ public:
     Eigen::VectorXd frequencies;
     int num_freqs = 33;
 
-    pl_red_noise_element()
+    pl_red_noise_t()
     {
         frequencies = Eigen::VectorXd::Zero(num_freqs);
         for (int i = 0; i < frequencies.size(); i++) {

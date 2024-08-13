@@ -17,15 +17,15 @@ element_t json_loader::create_model_element(const string_t& element_name)
 {
     if (element_name == "Power Law Red Noise") {
         std::cout << "loading power law red noise " << std::endl;
-        return std::make_unique<pl_red_noise_element>();
+        return std::make_unique<pl_red_noise_t>();
     } else if (element_name == "EFAC") {
         std::cout << "loading efac " << std::endl;
 
-        return std::make_unique<efac_element>();
+        return std::make_unique<efac_t>();
     } else if (element_name == "EQUAD") {
         std::cout << "loading equad " << std::endl;
 
-        return std::make_unique<equad_element>();
+        return std::make_unique<equad_t>();
     } else if (element_name == "Timing Model") {
         std::cout << "loading timing model " << std::endl;
 

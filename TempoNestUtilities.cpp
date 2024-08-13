@@ -288,7 +288,7 @@ void StoreTMatrix()
     int startpos = 0;
 
     if (model::pl_red_noise.has_value()) {
-        pl_red_noise_element* pl = model::pl_red_noise.value()->as<pl_red_noise_element>();
+        pl_red_noise_t* pl = model::pl_red_noise.value()->as<pl_red_noise_t>();
 
         for (int i = 0; i < pl->num_freqs; i++) {
 
@@ -315,7 +315,7 @@ void StoreTMatrix()
 
     if (model::pl_dm_noise.has_value()) {
 
-        pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
+        pl_dm_noise_t* pl = model::pl_dm_noise.value()->as<pl_dm_noise_t>();
 
         for (int o = 0; o < globals::pulsar->nobs; o++) {
             DMVec[o] = 1.0 / (DMKappa * std::pow((double)globals::pulsar->obsn[o].freqSSB, 2));
@@ -375,12 +375,12 @@ void getArraySizeInfo()
 
     int totCoeff = 0;
     if (model::pl_red_noise.has_value()) {
-        pl_red_noise_element* pl = model::pl_red_noise.value()->as<pl_red_noise_element>();
+        pl_red_noise_t* pl = model::pl_red_noise.value()->as<pl_red_noise_t>();
         totCoeff += 2 * pl->num_freqs;
     }
 
     if (model::pl_dm_noise.has_value()) {
-        pl_dm_noise_element* pl = model::pl_dm_noise.value()->as<pl_dm_noise_element>();
+        pl_dm_noise_t* pl = model::pl_dm_noise.value()->as<pl_dm_noise_t>();
         totCoeff += 2 * pl->num_freqs;
     }
 

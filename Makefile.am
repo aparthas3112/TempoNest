@@ -7,16 +7,6 @@ xtra_dist_sources=triplot.py
 # Specify to include the T2runtime in distributions
 EXTRA_DIST = $(xtra_dist_sources)
 
-# This clears out any CVS files that might get in our distribution
-#dist-hook:
-#	rm -rf `find $(distdir)/T2runtime -name CVS`
-#	rm -rf $(distdir)/T2runtime/plugins/*
-#	rm -rf $(distdir)/unsupported_plugins/built_plugins/*
-#	rm -rf `find $(distdir)/unsupported_plugins/ -name CVS`
-#	rm -rf `find $(distdir)/unsupported_plugins/ -name '*.o'`
-
-
-
 plugindir=@TEMPO2_PLUG_INSTALL@
 
 # Optimization flags
@@ -45,10 +35,8 @@ common_sources = tempo2pred_int.h T2accel.h tempo2pred.h tempo2Util.h  \
                  TempoNestTextOutput.cpp pulsar_utils.cpp\
                  TempoNestPlugin.cpp TempoNestUtilities.cpp
                  
-common_sources += $(wildcard $(srcdir)/types/*.h) 
-common_sources += $(wildcard $(srcdir)/model_elements/*.h) 
-common_sources += $(wildcard $(srcdir)/namespaces/*.h) 
-common_sources += model_elements/timing_model.cpp
+
+common_sources += model_elements/timing_model.cpp model_elements/efac.cpp model_elements/equad.cpp
 
 common_sources += types/model.cpp types/parameter.cpp
 common_sources += namespaces/sampler.cpp namespaces/settings.cpp
@@ -76,17 +64,6 @@ temponest-install: temponest_@T2ARCH@_plug.la
 
 endif  # HAVE_MULTINEST
 
-#.PHONY: plugins-install plugins plugins-clean \
-#   unsupported unsupported-install unsupported-clean \
-#   complete complete-install complete-clean \
-#   core core-install core-clean \
-#   temponest temponest-install temponest-clean
-#
-#install-data-hook:
-#	@echo ""
-#	@echo ""
-#	@echo "*** NOTICE ***"
-#	@echo "Plugins are no longer installed by default"
-#	@echo "Use: 'make plugins-install' to install them"
-#	@echo ""
-#	@echo ""
+# Add this to define a custom clean-local target
+clean-local:
+	-find . -type d -name .deps -exec rm -rf {} +
