@@ -1,12 +1,51 @@
 #include "equad.h"
 #include <iostream>
 
-void equad_t::set_parameter(const string_t& name, const parameter_t& param)
+void equad_t::set_parameter(const string_t& name, const parameter_t& param,
+                            const rapidjson::Value& param_json)
 {
     if (name == "global") {
         global = param;
+    } else if (name == "per_flag") {
+
+        string_t wflag = param_json["flag"].GetString();
+        flag_indices = Eigen::VectorXi::Zero(globals::pulsar->nobs);
+        flag_values.clear();
+
+        for (int o = 0; o < globals::pulsar->nobs; o++) {
+            bool found = false;
+            for (int f = 0; f < globals::pulsar->obsn[o].nFlags; f++) {
+                string_t obs_flag(globals::pulsar->obsn[o].flagID[f]);
+                if (obs_flag == wflag) {
+
+                    string_t flag_value(globals::pulsar->obsn[o].flagVal[f]);
+                    auto it = std::find(flag_values.begin(), flag_values.end(), flag_value);
+                    if (it != flag_values.end()) {
+                        auto index = std::distance(flag_values.begin(), it);
+                        flag_indices(o) = index;
+                    } else {
+
+                        std::cout << "Found new EQUAD " << wflag << " "
+                                  << globals::pulsar->obsn[o].flagVal[f] << std::endl;
+
+                        flag_values.push_back(globals::pulsar->obsn[o].flagVal[f]);
+                        flag_indices(o) = flag_values.size() - 1;
+                    }
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                throw std::runtime_error("No flag found for EQUAD on observation " +
+                                         std::to_string(o));
+            }
+        }
+
+        per_flag = param;
+
     } else {
-        throw std::runtime_error("Invalid parameter name for EQUAD: " + name);
+        throw std::runtime_error("Invalid parameter name for EFAC: " + name);
     }
 }
 
@@ -32,10 +71,14 @@ void equad_t::print() const
 
 int equad_t::get_fitted_dims()
 {
+    int fitted_dims = 0;
     if (global.has_value()) {
-        return 1;
+        fitted_dims += 1;
     }
-    return 0;
+    if (per_flag.has_value()) {
+        fitted_dims += flag_values.size();
+    }
+    return fitted_dims;
 }
 
 string_t equad_t::get_name() const
@@ -46,15 +89,27 @@ string_t equad_t::get_name() const
 void equad_t::apply(double* Cube, Eigen::VectorXd& noise, double& prior_term, int& p_index)
 {
     if (global.has_value()) {
-        double value = global.value().get_exp_value(Cube[p_index]);
+        double value = global.value().get_exp_value(Cube[p_index++]);
         double equad = value * value;
 
         if (global.value().prior_type == prior_type_t::uniform) {
-            prior_term += 0.5 * log(value);
+            prior_term += log(value);
         }
 
-        p_index++;
-
         noise = noise.array() + equad;
+    }
+
+    if (per_flag.has_value()) {
+        Eigen::VectorXd equad_values = Eigen::VectorXd::Zero(flag_values.size());
+        for (int i = 0; i < flag_values.size(); i++) {
+            double value = per_flag.value().get_exp_value(Cube[p_index++]);
+            equad_values(i) = value * value;
+
+            if (per_flag.value().prior_type == prior_type_t::uniform) {
+                prior_term += log(value);
+            }
+        }
+
+        noise += equad_values(flag_indices);
     }
 }

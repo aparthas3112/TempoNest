@@ -4,11 +4,19 @@
 #include "../types/model_element.h"
 
 class equad_t : public model_element_t {
+
+private:
+
+    Eigen::VectorXi flag_indices;
+    std::vector<string_t> flag_values;
+
 public:
 
     optional_parameter_t global;
+    optional_parameter_t per_flag;
 
-    void set_parameter(const string_t& name, const parameter_t& param) override;
+    void set_parameter(const string_t& name, const parameter_t& param,
+                       const rapidjson::Value& param_json) override;
     bool is_fully_specified() const override;
     bool is_valid_parameter(const string_t& param_name) const override;
     void print() const override;

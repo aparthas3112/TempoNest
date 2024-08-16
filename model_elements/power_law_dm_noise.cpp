@@ -10,7 +10,8 @@ pl_dm_noise_t::pl_dm_noise_t() : num_freqs(33)
     }
 }
 
-void pl_dm_noise_t::set_parameter(const string_t& name, const parameter_t& param)
+void pl_dm_noise_t::set_parameter(const string_t& name, const parameter_t& param,
+                                  const rapidjson::Value& param_json)
 {
     if (name == "amplitude") {
         amplitude = param;

@@ -50,7 +50,8 @@ void timing_model_t::initialise()
     t2_total_fit = t2_fitted_labels.size();
 }
 
-void timing_model_t::set_parameter(const string_t& name, const parameter_t& param)
+void timing_model_t::set_parameter(const string_t& name, const parameter_t& param,
+                                   const rapidjson::Value& param_json)
 {
 
     timing_parameter_t timing_parameter = timing_parameter_t(param);

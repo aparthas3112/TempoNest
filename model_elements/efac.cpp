@@ -1,17 +1,19 @@
 #include "efac.h"
 #include <iostream>
 
-void efac_t::set_parameter(const string_t& name, const parameter_t& param)
+void efac_t::set_parameter(const string_t& name, const parameter_t& param,
+                           const rapidjson::Value& param_json)
 {
     if (name == "global") {
         global = param;
     } else if (name == "per_flag") {
 
-        string_t wflag = "-fe";
-        flag_indices.clear();
+        string_t wflag = param_json["flag"].GetString();
+        flag_indices = Eigen::VectorXi::Zero(globals::pulsar->nobs);
         flag_values.clear();
 
         for (int o = 0; o < globals::pulsar->nobs; o++) {
+            bool found = false;
             for (int f = 0; f < globals::pulsar->obsn[o].nFlags; f++) {
                 string_t obs_flag(globals::pulsar->obsn[o].flagID[f]);
                 if (obs_flag == wflag) {
@@ -20,16 +22,23 @@ void efac_t::set_parameter(const string_t& name, const parameter_t& param)
                     auto it = std::find(flag_values.begin(), flag_values.end(), flag_value);
                     if (it != flag_values.end()) {
                         auto index = std::distance(flag_values.begin(), it);
-                        flag_indices.push_back(index);
+                        flag_indices(o) = index;
                     } else {
 
-                        std::cout << "Found new " << wflag << " "
+                        std::cout << "Found new EFAC " << wflag << " "
                                   << globals::pulsar->obsn[o].flagVal[f] << std::endl;
 
                         flag_values.push_back(globals::pulsar->obsn[o].flagVal[f]);
-                        flag_indices.push_back(flag_values.size() - 1);
+                        flag_indices(o) = flag_values.size() - 1;
                     }
+                    found = true;
+                    break;
                 }
+            }
+
+            if (!found) {
+                throw std::runtime_error("No flag found for EFAC on observation " +
+                                         std::to_string(o));
             }
         }
 
@@ -100,9 +109,7 @@ void efac_t::apply(double* Cube, Eigen::VectorXd& noise, double& prior_term, int
                 prior_term += log(multipliers(i));
             }
         }
-        for (int o = 0; o < globals::pulsar->nobs; o++) {
-            noise(o) *= multipliers[flag_indices[o]];
-        }
-        noise = noise.array().square();
+
+        noise = noise.cwiseProduct(multipliers(flag_indices)).array().square();
     }
 }

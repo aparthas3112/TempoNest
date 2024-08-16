@@ -92,14 +92,14 @@ void json_loader::load_model(const string_t& filename)
             auto element = create_model_element(element_name);
 
             for (rapidjson::SizeType j = 0; j < json_params.Size(); j++) {
-                const auto& json_param = json_params[j];
+                const rapidjson::Value& json_param = json_params[j];
                 string_t param_name = json_param["name"].GetString();
                 if (element->is_valid_parameter(param_name)) {
                     parameter_t param = parse_parameter(json_param);
                     if (!param.include) {
                         continue;
                     }
-                    element->set_parameter(param_name, param);
+                    element->set_parameter(param_name, param, json_param);
                 } else {
                     std::cout << "Warning: Ignoring invalid parameter '" << param_name << "' for "
                               << element->get_name() << std::endl;

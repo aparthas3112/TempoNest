@@ -15,7 +15,8 @@ public:
 
     pl_dm_noise_t();
 
-    void set_parameter(const string_t& name, const parameter_t& param) override;
+    void set_parameter(const string_t& name, const parameter_t& param,
+                       const rapidjson::Value& param_json) override;
     bool is_valid_parameter(const string_t& param_name) const override;
     bool is_fully_specified() const override;
     void print() const override;

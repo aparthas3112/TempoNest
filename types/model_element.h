@@ -4,6 +4,7 @@
 #include <vector>
 #include "basic_types.h"
 #include "parameter.h"
+#include "rapidjson/document.h"
 
 class model_element_t {
 public:
@@ -16,7 +17,8 @@ public:
 
     virtual string_t get_name() const = 0;
 
-    virtual void set_parameter(const string_t& name, const parameter_t& param) = 0;
+    virtual void set_parameter(const string_t& name, const parameter_t& param,
+                               const rapidjson::Value& param_json) = 0;
 
     virtual int get_fitted_dims() = 0;
 
