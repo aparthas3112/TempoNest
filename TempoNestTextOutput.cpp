@@ -47,7 +47,6 @@
 double TNm2(longdouble mf, longdouble sini, longdouble m1);
 void TNprintGlitch(pulsar psr);
 double TNdglep(pulsar psr, int gn, double fph);
-double TNcalcRMS(pulsar* psr, int p);
 
 /* ******************************************** */
 /* textOutput                                   */
@@ -143,7 +142,7 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim,
         mean_pre = 0.0;
         mean_post = 0.0;
         count = 0;
-        TNcalcRMS(psr, p);
+        calcRMS(psr, p);
         {
             long double centrePos;
             long double closestV, check;
@@ -274,16 +273,38 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim,
                 "------------------------------------------------------------------------------\n");
             printf("Stochastic Parameters:\n");
             if (model::efac.has_value()) {
-                whitefitcount = fitcount;
-                printf("Global EFAC: %g +/- %g\n", paramarray[fitcount][0],
-                       paramarray[fitcount][1]);
-                fitcount++;
+                efac_t* efac = model::efac.value()->as<efac_t>();
+                if (efac->global.has_value()) {
+                    printf("Global EFAC: %g +/- %g\n", paramarray[fitcount][0],
+                           paramarray[fitcount][1]);
+                    fitcount++;
+                }
+                if (efac->per_flag.has_value()) {
+                    for (size_t f = 0; f < efac->flag_values.size(); f++) {
+                        printf("EFAC %s: %g +/- %g\n", efac->flag.c_str(),
+                               efac->flag_values[f].c_str(), paramarray[fitcount][0],
+                               paramarray[fitcount][1]);
+                        fitcount++;
+                    }
+                }
             }
 
             if (model::equad.has_value()) {
-                printf("Global EQUAD: %g +/- %g\n", paramarray[fitcount][0],
-                       paramarray[fitcount][1]);
-                fitcount++;
+                equad_t* equad = model::equad.value()->as<equad_t>();
+
+                if (equad->global.has_value()) {
+                    printf("Global EQUAD: %g +/- %g\n", paramarray[fitcount][0],
+                           paramarray[fitcount][1]);
+                    fitcount++;
+                }
+                if (equad->per_flag.has_value()) {
+                    for (size_t f = 0; f < equad->flag_values.size(); f++) {
+                        printf("EQUAD %s: %g +/- %g\n", equad->flag.c_str(),
+                               equad->flag_values[f].c_str(), paramarray[fitcount][0],
+                               paramarray[fitcount][1]);
+                        fitcount++;
+                    }
+                }
             }
 
             if (model::pl_red_noise.has_value()) {
@@ -1093,13 +1114,39 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim,
 
                 // Add EFACS/EQUADS
                 if (model::efac.has_value()) {
-                    fprintf(fout2, "TNGlobalEF %g\n", pow(10.0, paramarray[whitefitcount][2]));
-                    whitefitcount++;
+                    efac_t* efac = model::efac.value()->as<efac_t>();
+
+                    if (efac->global.has_value()) {
+                        fprintf(fout2, "TNGLobalEF %g\n", paramarray[whitefitcount][2]);
+
+                        whitefitcount++;
+                    }
+                    if (efac->per_flag.has_value()) {
+                        for (size_t f = 0; f < efac->flag_values.size(); f++) {
+                            fprintf(fout2, "TNEF %s %s %g\n", efac->flag.c_str(),
+                                    efac->flag_values[f].c_str(), paramarray[whitefitcount][2]);
+
+                            whitefitcount++;
+                        }
+                    }
                 }
 
                 if (model::equad.has_value()) {
-                    fprintf(fout2, "TNGLobalEQ %g\n", paramarray[whitefitcount][2]);
-                    whitefitcount++;
+                    equad_t* equad = model::equad.value()->as<equad_t>();
+
+                    if (equad->global.has_value()) {
+                        fprintf(fout2, "TNGLobalEQ %g\n", paramarray[whitefitcount][2]);
+
+                        whitefitcount++;
+                    }
+                    if (equad->per_flag.has_value()) {
+                        for (size_t f = 0; f < equad->flag_values.size(); f++) {
+                            fprintf(fout2, "TNEQ %s %s %g\n", equad->flag.c_str(),
+                                    equad->flag_values[f].c_str(), paramarray[whitefitcount][2]);
+
+                            whitefitcount++;
+                        }
+                    }
                 }
 
                 if (model::pl_red_noise.has_value()) {
@@ -1215,57 +1262,6 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim,
        psr[p].storePrec[i].comment);
        } */
     }
-}
-
-double TNcalcRMS(pulsar* psr, int p)
-{
-    double sumwt = 0.0, rms_pre = 0.0, rms_post = 0.0, wgt = 0.0, sumsq_post = 0.0;
-    double sumsq_pre = 0.0, sum_pre = 0.0, sum_post = 0.0, mean_post = 0.0, mean_pre = 0.0;
-    int i, count = 0;
-
-    for (i = 0; i < psr[p].nobs; i++) {
-        if (psr[p].obsn[i].deleted == 0 &&
-            (psr[p].param[param_start].paramSet[0] != 1 ||
-             psr[p].param[param_start].fitFlag[0] != 1 ||
-             psr[p].param[param_start].val[0] < psr[p].obsn[i].bat) &&
-            (psr[p].param[param_finish].paramSet[0] != 1 ||
-             psr[p].param[param_finish].fitFlag[0] != 1 ||
-             psr[p].param[param_finish].val[0] > psr[p].obsn[i].bat)) {
-            mean_pre += (double)psr[p].obsn[i].prefitResidual;
-            if (psr[p].fitMode == 1)
-                wgt = 1.0 / (1.0e-6 * psr[p].obsn[i].toaErr * psr[p].param[param_f].val[0] *
-                             1.0e-6 * psr[p].obsn[i].toaErr * psr[p].param[param_f].val[0]);
-            else
-                wgt = 1.0 / (1.0e-6 * psr[p].param[param_f].val[0] * 1.0e-6 *
-                             psr[p].param[param_f].val[0]);
-            sumsq_pre +=
-                (double)(wgt * psr[p].obsn[i].prefitResidual * psr[p].param[param_f].val[0] *
-                         psr[p].obsn[i].prefitResidual * psr[p].param[param_f].val[0]);
-            sum_pre += (double)(wgt * psr[p].obsn[i].prefitResidual * psr[p].param[param_f].val[0]);
-
-            sumsq_post += (double)(wgt * psr[p].obsn[i].residual * psr[p].param[param_f].val[0] *
-                                   psr[p].obsn[i].residual * psr[p].param[param_f].val[0]);
-            sum_post += (double)(wgt * psr[p].obsn[i].residual * psr[p].param[param_f].val[0]);
-            sumwt += wgt;
-            mean_post += (double)psr[p].obsn[i].residual;
-            count++;
-        }
-    }
-    logdbg("textOutput %g %g %d", mean_pre, mean_post, count);
-    mean_pre /= count;
-    mean_post /= count;
-
-    rms_pre = sqrt((sumsq_pre - sum_pre * sum_pre / sumwt) / sumwt) * 1e3 /
-              psr[p].param[param_f].val[0] * 1e3;
-    rms_post = sqrt((sumsq_post - sum_post * sum_post / sumwt) / sumwt) * 1e3 /
-               psr[p].param[param_f].val[0] * 1e3;
-    logdbg("textOutput %g %g %g %G %d", rms_pre, rms_post, sumsq_pre, sum_pre, count);
-
-    psr[p].rmsPre = rms_pre;
-    psr[p].rmsPost = rms_post;
-    psr[p].param[param_tres].val[0] = rms_post;
-    psr[p].param[param_tres].paramSet[0] = 1;
-    return sumwt;
 }
 
 /* ************************************************************************

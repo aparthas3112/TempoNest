@@ -1,3 +1,4 @@
+#include <iostream>
 #include "namespaces/settings.h"
 #include "t2fit.h"
 #include "tempo2.h"
@@ -6,7 +7,11 @@ void initialise_pulsar(int only_prefit)
 {
     int num_pulsars = 1;
 
-    formBatsAll(globals::pulsar, num_pulsars);      /* Form Barycentric arrival times */
+    std::cout << "form bats" << std::endl;
+
+    formBatsAll(globals::pulsar, num_pulsars); /* Form Barycentric arrival times */
+    std::cout << "form residuals" << std::endl;
+
     formResiduals(globals::pulsar, num_pulsars, 1); /* Form residuals */
 
     for (int it = 0; it < globals::num_tempo2_its; it++) {

@@ -174,13 +174,18 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
         logdbg("Completed readTimfile %d", globals::pulsar->param[param_ecc].paramSet[1]);
     }
 
+    std::cout << "call pre process" << std::endl;
     logdbg("Running preProcess %d", globals::pulsar->nits);
     preProcess(psr, num_pulsars, argc, commandLine);
     logdbg("Completed preProcess %d", globals::pulsar->nits);
 
+    std::cout << "initialise pulsar" << std::endl;
+
     globals::pulsar = &psr[0];
     initialise_pulsar(onlypre);
     timing_model_t* timing_model = model::timing_model->as<timing_model_t>();
+
+    std::cout << "load settings" << std::endl;
 
     globals::load_settings(ConfigFileName);
     model::load_model(ConfigFileName);

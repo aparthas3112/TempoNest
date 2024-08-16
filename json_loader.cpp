@@ -1,10 +1,23 @@
 #include "json_loader.h"
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 #include <fstream>
 #include <stdexcept>
 #include "namespaces/sampler.h"
 #include "namespaces/settings.h"
 #include "rapidjson/istreamwrapper.h"
 #include "types/model.h"
+
+void json_loader::print_node(const rapidjson::Value& json)
+{
+    rapidjson::StringBuffer buffer;
+
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    json.Accept(writer);
+
+    std::cout << buffer.GetString() << std::endl;
+}
 
 parameter_t json_loader::parse_parameter(const rapidjson::Value& json_param)
 {
@@ -32,6 +45,7 @@ element_t json_loader::create_model_element(const string_t& element_name)
         return std::make_unique<timing_model_t>();
     }
     // Add other model elements as needed
+    std::cout << "Unknown model element: " << element_name << std::endl;
     throw std::runtime_error("Unknown model element: " + element_name);
 }
 
@@ -58,11 +72,6 @@ rapidjson::Document json_loader::parse_json_file(const string_t& filename)
 void json_loader::load_model(const string_t& filename)
 {
     rapidjson::Document doc = parse_json_file(filename);
-
-    // Load global globals
-    if (doc.HasMember("global_settings")) {
-        // Parse global globals as needed
-    }
 
     // Load model elements
     if (doc.HasMember("elements")) {
@@ -164,7 +173,10 @@ void json_loader::load_sampler(const string_t& filename)
 
 void json_loader::load_settings(const string_t& filename)
 {
+    std::cout << "parse json" << std::endl;
     rapidjson::Document doc = parse_json_file(filename);
+
+    std::cout << "load settings" << std::endl;
 
     // Load model elements
     if (doc.HasMember("globals")) {
@@ -176,4 +188,6 @@ void json_loader::load_settings(const string_t& filename)
         get_if_present(json_settings, "root", globals::root);
         get_if_present(json_settings, "use_original_errors", globals::use_original_errors);
     }
+
+    std::cout << "loaded settings" << std::endl;
 }

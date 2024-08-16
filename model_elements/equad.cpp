@@ -1,14 +1,18 @@
 #include "equad.h"
+#include <json_loader.h>
 #include <iostream>
 
 void equad_t::set_parameter(const string_t& name, const parameter_t& param,
                             const rapidjson::Value& param_json)
 {
+    std::cout << "Setting EQUAD parameter: " << name << std::endl;
+
+    // json_loader::print_node(param_json);
     if (name == "global") {
         global = param;
     } else if (name == "per_flag") {
 
-        string_t wflag = param_json["flag"].GetString();
+        flag = param_json["flag"].GetString();
         flag_indices = Eigen::VectorXi::Zero(globals::pulsar->nobs);
         flag_values.clear();
 
@@ -16,7 +20,7 @@ void equad_t::set_parameter(const string_t& name, const parameter_t& param,
             bool found = false;
             for (int f = 0; f < globals::pulsar->obsn[o].nFlags; f++) {
                 string_t obs_flag(globals::pulsar->obsn[o].flagID[f]);
-                if (obs_flag == wflag) {
+                if (obs_flag == flag) {
 
                     string_t flag_value(globals::pulsar->obsn[o].flagVal[f]);
                     auto it = std::find(flag_values.begin(), flag_values.end(), flag_value);
@@ -25,7 +29,7 @@ void equad_t::set_parameter(const string_t& name, const parameter_t& param,
                         flag_indices(o) = index;
                     } else {
 
-                        std::cout << "Found new EQUAD " << wflag << " "
+                        std::cout << "Found new EQUAD " << flag << " "
                                   << globals::pulsar->obsn[o].flagVal[f] << std::endl;
 
                         flag_values.push_back(globals::pulsar->obsn[o].flagVal[f]);
@@ -56,7 +60,7 @@ bool equad_t::is_fully_specified() const
 
 bool equad_t::is_valid_parameter(const string_t& param_name) const
 {
-    static const std::unordered_set<string_t> valid_params = {"global"};
+    static const std::unordered_set<string_t> valid_params = {"global", "per_flag"};
     return valid_params.find(param_name) != valid_params.end();
 }
 
@@ -66,6 +70,10 @@ void equad_t::print() const
     if (global.has_value()) {
         std::cout << "global: ";
         global->print();
+    }
+    if (per_flag.has_value()) {
+        std::cout << "per_flag: ";
+        per_flag->print();
     }
 }
 
@@ -101,7 +109,7 @@ void equad_t::apply(double* Cube, Eigen::VectorXd& noise, double& prior_term, in
 
     if (per_flag.has_value()) {
         Eigen::VectorXd equad_values = Eigen::VectorXd::Zero(flag_values.size());
-        for (int i = 0; i < flag_values.size(); i++) {
+        for (size_t i = 0; i < flag_values.size(); i++) {
             double value = per_flag.value().get_exp_value(Cube[p_index++]);
             equad_values(i) = value * value;
 

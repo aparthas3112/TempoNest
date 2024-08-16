@@ -16,6 +16,14 @@ class json_loader {
 public:
 
     /**
+     * @brief print a node to screen
+     *
+     * @param json_param The JSON object representing a parameter
+     * @return void
+     */
+    static void print_node(const rapidjson::Value& json_param);
+
+    /**
      * @brief Parse a JSON object into a parameter_t structure
      *
      * @param json_param The JSON object representing a parameter

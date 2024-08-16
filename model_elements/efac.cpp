@@ -8,7 +8,7 @@ void efac_t::set_parameter(const string_t& name, const parameter_t& param,
         global = param;
     } else if (name == "per_flag") {
 
-        string_t wflag = param_json["flag"].GetString();
+        flag = param_json["flag"].GetString();
         flag_indices = Eigen::VectorXi::Zero(globals::pulsar->nobs);
         flag_values.clear();
 
@@ -16,7 +16,7 @@ void efac_t::set_parameter(const string_t& name, const parameter_t& param,
             bool found = false;
             for (int f = 0; f < globals::pulsar->obsn[o].nFlags; f++) {
                 string_t obs_flag(globals::pulsar->obsn[o].flagID[f]);
-                if (obs_flag == wflag) {
+                if (obs_flag == flag) {
 
                     string_t flag_value(globals::pulsar->obsn[o].flagVal[f]);
                     auto it = std::find(flag_values.begin(), flag_values.end(), flag_value);
@@ -25,7 +25,7 @@ void efac_t::set_parameter(const string_t& name, const parameter_t& param,
                         flag_indices(o) = index;
                     } else {
 
-                        std::cout << "Found new EFAC " << wflag << " "
+                        std::cout << "Found new EFAC " << flag << " "
                                   << globals::pulsar->obsn[o].flagVal[f] << std::endl;
 
                         flag_values.push_back(globals::pulsar->obsn[o].flagVal[f]);
@@ -67,6 +67,10 @@ void efac_t::print() const
         std::cout << "global: ";
         global->print();
     }
+    if (per_flag.has_value()) {
+        std::cout << "per_flag: ";
+        per_flag->print();
+    }
 }
 
 int efac_t::get_fitted_dims()
@@ -102,7 +106,7 @@ void efac_t::apply(double* Cube, Eigen::VectorXd& noise, double& prior_term, int
 
     if (per_flag.has_value()) {
         Eigen::VectorXd multipliers = Eigen::VectorXd::Ones(flag_values.size());
-        for (int i = 0; i < flag_values.size(); i++) {
+        for (size_t i = 0; i < flag_values.size(); i++) {
             multipliers(i) = per_flag.value().get_exp_value(Cube[p_index++]);
 
             if (per_flag.value().prior_type == prior_type_t::uniform) {
