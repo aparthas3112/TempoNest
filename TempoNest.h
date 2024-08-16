@@ -32,7 +32,7 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndims,
                   double** paramarray);
 
 // non linear timing model likelihood functions
-double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived, void* context);
+double likelihood(double Cube[], int ndim, double phi[], int nDerived, void* context);
 
 void LRedLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context);
 

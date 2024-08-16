@@ -157,8 +157,6 @@ public:
         return false;
     }
 
-private:
-
     /**
      * @brief Parse a JSON file into a rapidjson::Document
      *
@@ -166,6 +164,8 @@ private:
      * @return rapidjson::Document The parsed JSON document
      */
     static rapidjson::Document parse_json_file(const std::string& filename);
+
+private:
 
     /**
      * @brief Helper variable template for the static_assert in get_if_present

@@ -1,4 +1,4 @@
-.PHONY: temponest temponest-install
+.PHONY: temponest temponest-install test
 ACLOCAL_AMFLAGS = -I autoconf
 
 # Source files used by plugins that are not part of temponest
@@ -10,7 +10,7 @@ EXTRA_DIST = $(xtra_dist_sources)
 plugindir=@TEMPO2_PLUG_INSTALL@
 
 # Optimization flags
-AM_CXXFLAGS = -O3 -march=native -mtune=native -ffast-math $(OPENMP_CXXFLAGS)
+AM_CXXFLAGS = -O3 -g -march=native -mtune=native -ffast-math $(OPENMP_CXXFLAGS)
 AM_CFLAGS = $(AM_CXXFLAGS)
 
 AM_CXXFLAGS += @MPI_CXXFLAGS@
@@ -28,7 +28,7 @@ if HAVE_MULTINEST
 
 plugin_LTLIBRARIES = temponest_@T2ARCH@_plug.la
 
-common_sources = json_loader.cpp \
+common_sources = json_loader.cpp logger.cpp \
                  TempoNestLikeFuncs.cpp \
                  TempoNestTextOutput.cpp pulsar_utils.cpp\
                  TempoNestPlugin.cpp TempoNestUtilities.cpp
@@ -39,7 +39,8 @@ common_sources += model_elements/timing_model.cpp model_elements/efac.cpp model_
 common_sources += types/model.cpp types/parameter.cpp
 common_sources += namespaces/sampler.cpp namespaces/settings.cpp
 
-
+# Tests 
+common_sources += tests/tests.cpp tests/test_likelihood.cpp
 
 temponest_@T2ARCH@_plug_la_SOURCES = $(common_sources)
 temponest_@T2ARCH@_plug_la_CXXFLAGS = $(AM_CXXFLAGS)
@@ -66,3 +67,18 @@ endif  # HAVE_MULTINEST
 clean-local:
 	-find . -type d -name .deps -exec rm -rf {} +
 	-find . -type f -name .dirstamp -delete
+
+
+run-tests: temponest
+	@echo "Running TempoNest tests..."
+	@if [ -z "$$TEMPO2" ]; then \
+		echo "ERROR: TEMPO2 environment variable is not set"; \
+		exit 1; \
+	fi
+	@if [ ! -x "$$TEMPO2/bin/tempo2" ]; then \
+		echo "ERROR: $$TEMPO2/bin/tempo2 does not exist or is not executable"; \
+		exit 1; \
+	fi
+	@$$TEMPO2/bin/tempo2 -gr temponest -f tests/test_data/test.par tests/test_data/test.tim -cfile tests/test_data/test.json || (echo "Tests failed"; exit 1)
+
+test: temponest temponest-install run-tests

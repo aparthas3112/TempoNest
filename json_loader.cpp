@@ -170,24 +170,3 @@ void json_loader::load_sampler(const string_t& filename)
         get_if_present(json_sampler, "num_cluster_parameters", sampler::num_cluster_parameters);
     }
 }
-
-void json_loader::load_settings(const string_t& filename)
-{
-    std::cout << "parse json" << std::endl;
-    rapidjson::Document doc = parse_json_file(filename);
-
-    std::cout << "load settings" << std::endl;
-
-    // Load model elements
-    if (doc.HasMember("globals")) {
-        const auto& json_settings = doc["globals"];
-
-        // Parse sampler globals as needed
-        get_if_present(json_settings, "debug", globals::debug);
-        get_if_present(json_settings, "num_tempo2_its", globals::num_tempo2_its);
-        get_if_present(json_settings, "root", globals::root);
-        get_if_present(json_settings, "use_original_errors", globals::use_original_errors);
-    }
-
-    std::cout << "loaded settings" << std::endl;
-}

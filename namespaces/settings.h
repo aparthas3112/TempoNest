@@ -23,6 +23,9 @@ extern int num_tempo2_its;
 // useOriginalErrors - Use tempo2 errors before modification by TNEF/TNEQ
 extern bool use_original_errors;
 
+// test mode - to run unit tests
+extern bool test_mode;
+
 void load_settings(const string_t& filename);
 
 void print();

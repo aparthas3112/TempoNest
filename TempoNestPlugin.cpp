@@ -59,6 +59,7 @@
 #include "namespaces/sampler.h"
 #include "namespaces/settings.h"
 #include "pulsar_utils.h"
+#include "tests/tests.h"
 #include "types/model.h"
 
 /************************************************* dumper routine
@@ -273,6 +274,12 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     formResiduals(globals::pulsar, num_pulsars, 1);
 
     StoreTMatrix();
+
+    // if we are running unit tests do that now rather than sampling
+    if (globals::test_mode) {
+        run_tests();
+        return 0;
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -50,26 +50,19 @@
 #include "types/model_element.h"
 using namespace std;
 
-void* globalcontext;
-
-void assigncontext(void* context)
-{
-    globalcontext = context;
-}
-
 void LRedLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context)
 {
 
     double* DerivedParams = new double[npars];
 
-    double result = NewLRedMarginLogLike(Cube, ndim, DerivedParams, npars, context);
+    double result = likelihood(Cube, ndim, DerivedParams, npars, context);
 
     delete[] DerivedParams;
 
     lnew = result;
 }
 
-double NewLRedMarginLogLike(double Cube[], int ndim, double phi[], int nDerived, void* context)
+double likelihood(double Cube[], int ndim, double phi[], int nDerived, void* context)
 {
 
     logtchk("Entering TempoNest likelihood");
