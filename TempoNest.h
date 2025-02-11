@@ -27,16 +27,11 @@
 #include "eigen_config.h"
 #include "tempo2.h"
 
-void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndims,
-                  std::vector<double> paramlist, double Evidence, std::string longname,
-                  double** paramarray);
+void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndims, std::vector<double> paramlist, double Evidence, std::string longname, double** paramarray);
 
 // non linear timing model likelihood functions
 double likelihood(double Cube[], int ndim, double phi[], int nDerived, void* context);
 
 void LRedLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context);
-
-void StoreTMatrix();
-void getArraySizeInfo();
 
 void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int ndims);

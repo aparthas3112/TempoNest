@@ -3,33 +3,27 @@
 #include <memory>
 #include <optional>
 #include "../json/json_loader.h"
+#include "../model/model_space.h"
 #include "basic_types.h"
 #include "model_element.h"
 
 namespace model {
 
-extern double max_tspan;
-
-extern int total_size;
-extern int design_size;
-extern int noise_size;
-extern Eigen::MatrixXd design_matrix;
-extern Eigen::MatrixXd total_matrix;
-
-// model elements
-
-// there is always some kind of timing model even if we are just marginalising over it
-extern element_t timing_model;
-
-// all other properties are optional
-extern optional_element_t pl_red_noise;
-extern optional_element_t pl_dm_noise;
-extern optional_element_t efac;
-extern optional_element_t equad;
+extern model_space_t model_space;
 
 void load_model(const string_t& filename);
-element_t create_model_element(const string_t& element_name);
-parameter_t parse_parameter(const json_node_t& json_param);
 
-int get_model_dims();
+// Wrapper functions that delegate to model_space (optional, for backwards compatibility)
+template <typename T>
+T& get_element(const string_t& name)
+{
+    return model_space.get_element<T>(name);
+}
+
+template <typename T>
+std::optional<std::reference_wrapper<T>> get_optional_element(const string_t& name)
+{
+    return model_space.get_optional_element<T>(name);
+}
+
 }  // namespace model

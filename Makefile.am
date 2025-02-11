@@ -39,6 +39,7 @@ common_sources += model_elements/timing_model.cpp model_elements/efac.cpp model_
 common_sources += types/model.cpp types/parameter.cpp
 common_sources += namespaces/sampler.cpp namespaces/settings.cpp
 common_sources += json/json_loader.cpp json/json_node.cpp
+common_sources += model/model_space.cpp
 
 # Tests 
 common_sources += tests/tests.cpp tests/test_likelihood.cpp

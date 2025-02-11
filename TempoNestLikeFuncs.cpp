@@ -69,17 +69,19 @@ double likelihood(double Cube[], int ndim, double phi[], int nDerived, void* con
 
     double uniform_prior = 0;
 
-    int TimetoMargin = model::design_size;
+    int TimetoMargin = model::model_space.get_design_size();
 
     // update the residuals if we are fitting any timing model parameters
-    timing_model_t* timing_model = model::timing_model->as<timing_model_t>();
-    timing_model->update_residuals(Cube);
-    int p_count = timing_model->get_fitted_dims();
+    // there is always some kind of timing model so use get_element
+    auto& timing_model = model::get_element<timing_model_t>("Timing Model");
+
+    timing_model.update_residuals(Cube);
+    int p_count = timing_model.get_fitted_dims();
 
     Eigen::VectorXd Resvec = Eigen::VectorXd::Zero(globals::pulsar->nobs);
 
     for (int o = 0; o < globals::pulsar->nobs; o++) {
-        Resvec[o] = (double)globals::pulsar->obsn[o].residual;
+        Resvec[o] = static_cast<double>(globals::pulsar->obsn[o].residual);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,14 +98,14 @@ double likelihood(double Cube[], int ndim, double phi[], int nDerived, void* con
         }
     }
 
-    if (model::efac.has_value()) {
-        efac_t* efac = model::efac.value()->as<efac_t>();
-        efac->apply(Cube, noise, uniform_prior, p_count);
+    // Apply EFAC if present
+    if (auto efac = model::get_optional_element<efac_t>("EFAC")) {
+        efac->get().apply(Cube, noise, uniform_prior, p_count);
     }
 
-    if (model::equad.has_value()) {
-        equad_t* equad = model::equad.value()->as<equad_t>();
-        equad->apply(Cube, noise, uniform_prior, p_count);
+    // Apply EQUAD if present
+    if (auto equad = model::get_optional_element<equad_t>("EQUAD")) {
+        equad->get().apply(Cube, noise, uniform_prior, p_count);
     }
 
     noise = noise.array().inverse();
@@ -112,16 +114,16 @@ double likelihood(double Cube[], int ndim, double phi[], int nDerived, void* con
     ///////////////////////////Initialise TotalMatrix////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    int totalsize = model::total_size;
+    int totalsize = model::model_space.get_total_size();
 
-    Eigen::MatrixXd TotalMatrix = model::total_matrix;
+    const Eigen::MatrixXd& TotalMatrix = model::model_space.get_total_matrix();
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////Set up Coefficients///////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    double maxtspan = model::max_tspan;
-    int totCoeff = model::noise_size;
+    double maxtspan = model::model_space.get_max_tspan();
+    int totCoeff = model::model_space.get_noise_size();
 
     Eigen::VectorXd powercoeff = Eigen::VectorXd::Zero(totCoeff);
 
@@ -132,22 +134,18 @@ double likelihood(double Cube[], int ndim, double phi[], int nDerived, void* con
     double freq_det = 0;
     int start_pos = 0;
 
-    if (model::pl_red_noise.has_value()) {
-
-        pl_red_noise_t* pl = model::pl_red_noise.value()->as<pl_red_noise_t>();
-
-        pl->apply(Cube, powercoeff, p_count, start_pos, maxtspan, uniform_prior, freq_det);
+    // Apply red noise if present
+    if (auto pl_red = model::get_optional_element<pl_red_noise_t>("Power Law Red Noise")) {
+        pl_red->get().apply(Cube, powercoeff, p_count, start_pos, maxtspan, uniform_prior, freq_det);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////DM Variations////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    if (model::pl_dm_noise.has_value()) {
-
-        pl_dm_noise_t* pl = model::pl_dm_noise.value()->as<pl_dm_noise_t>();
-
-        pl->apply(Cube, powercoeff, p_count, start_pos, maxtspan, uniform_prior, freq_det);
+    // Apply DM noise if present
+    if (auto pl_dm = model::get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
+        pl_dm->get().apply(Cube, powercoeff, p_count, start_pos, maxtspan, uniform_prior, freq_det);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////

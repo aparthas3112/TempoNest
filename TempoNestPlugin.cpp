@@ -88,10 +88,7 @@
 // logZerr						= error on log evidence value
 // context						void pointer, any additional information
 
-void dumper(int& nSamples, int& nlive, int& nPar, double** physLive, double** posterior,
-            double** paramConstr, double& maxLogLike, double& logZ, double& logZerr, void* context)
-{
-}
+void dumper(int& nSamples, int& nlive, int& nPar, double** physLive, double** posterior, double** paramConstr, double& maxLogLike, double& logZ, double& logZerr, void* context) {}
 
 /* The main function of a plugin called from Tempo2 is 'graphicalInterface'
  */
@@ -160,18 +157,15 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     /* Obtain command line arguments */
     logdbg("Running getInputs %d", globals::pulsar->nits);
     logdbg("Completed getInputs");
-    getInputs(psr, argc, commandLine, timFile, parFile, &listparms, &num_pulsars, &nGlobal, &outRes,
-              &writeModel, outputSO, &flagPolyco, polyco_args, polyco_file, &newpar, &onlypre,
-              dcmFile, covarFuncFile, newparname);
+    getInputs(psr, argc, commandLine, timFile, parFile, &listparms, &num_pulsars, &nGlobal, &outRes, &writeModel, outputSO, &flagPolyco, polyco_args, polyco_file, &newpar, &onlypre, dcmFile,
+              covarFuncFile, newparname);
 
     logdbg("Reading par file");
-    readParfile(psr, parFile, timFile,
-                num_pulsars); /* Read .par file to define the pulsar's initial parameters */
+    readParfile(psr, parFile, timFile, num_pulsars); /* Read .par file to define the pulsar's initial parameters */
     logdbg("Finished reading par file %d", globals::pulsar->nits);
     if (flagPolyco == 0) {
         logdbg("Running readTimfile");
-        readTimfile(psr, timFile,
-                    num_pulsars); /* Read .tim file to define the site-arrival-times */
+        readTimfile(psr, timFile, num_pulsars); /* Read .tim file to define the site-arrival-times */
         logdbg("Completed readTimfile %d", globals::pulsar->param[param_ecc].paramSet[1]);
     }
 
@@ -184,7 +178,6 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
 
     globals::pulsar = &psr[0];
     initialise_pulsar(onlypre);
-    timing_model_t* timing_model = model::timing_model->as<timing_model_t>();
 
     std::cout << "load settings" << std::endl;
 
@@ -197,8 +190,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
 
     if (longname.size() >= 100) {
         if (rank == 0)
-            printf("Root Name is too long, needs to be less than 100 characters, currently %i .\n",
-                   (int)longname.size());
+            printf("Root Name is too long, needs to be less than 100 characters, currently %i .\n", (int)longname.size());
         return 0;
     }
 
@@ -240,7 +232,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     // set the MultiNest sampling parameters
 
     double tol = 0.5;  // tol, defines the stopping criteria
-    int ndims = model::get_model_dims();
+    int ndims = model::model_space.get_model_dims();
 
     double Ztol = -1E90;  // all the modes with logZ < Ztol are ignored
     int maxModes = 100;   // expected max no. of modes (used only for memory allocation)
@@ -248,17 +240,17 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     for (int i = 0; i < ndims; i++)
         pWrap[i] = 0;
 
-    int seed = -1;    // random no. generator seed, if < 0 then take the seed from system clock
-    int fb = 1;       // need feedback on standard output?
-    int resume = 1;   // resume from a previous job?
-    int outfile = 1;  // write output files?
-    int initMPI = 0;  // initialize MPI routines?, relevant only if compiling with MPI set it to F
-                      // if you want your main program to handle MPI initialization
+    int seed = -1;              // random no. generator seed, if < 0 then take the seed from system clock
+    int fb = 1;                 // need feedback on standard output?
+    int resume = 1;             // resume from a previous job?
+    int outfile = 1;            // write output files?
+    int initMPI = 0;            // initialize MPI routines?, relevant only if compiling with MPI set it to F
+                                // if you want your main program to handle MPI initialization
     double logZero = -DBL_MAX;  // points with loglike < logZero will be ignored by MultiNest
-    int maxiter = 0;  // max no. of iterations, a non-positive value means infinity. MultiNest will
-                      // terminate if either it has done max no. of iterations or convergence
-                      // criterion (defined through tol) has been satisfied
-    void* context = 0;  // not required by MultiNest, any additional information user wants to pass
+    int maxiter = 0;            // max no. of iterations, a non-positive value means infinity. MultiNest will
+                                // terminate if either it has done max no. of iterations or convergence
+                                // criterion (defined through tol) has been satisfied
+    void* context = 0;          // not required by MultiNest, any additional information user wants to pass
     // printf("Here \n");
 
     char* chartroot = new char[longname.length() + 1];
@@ -268,12 +260,12 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     ///////////////////////get TotalMatrix////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    getArraySizeInfo();
+    model::model_space.update_array_size_info();
 
     formBatsAll(globals::pulsar, num_pulsars);
     formResiduals(globals::pulsar, num_pulsars, 1);
 
-    StoreTMatrix();
+    model::model_space.store_total_matrix();
 
     // if we are running unit tests do that now rather than sampling
     if (globals::test_mode) {
@@ -292,11 +284,8 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
 
         std::cout << "run " << std::endl;
 
-        nested::run(sampler::importance_sampling, sampler::modal, sampler::constant_efficiency,
-                    sampler::live_points, tol, sampler::efficiency, ndims, ndims,
-                    sampler::num_cluster_parameters, maxModes, sampler::update_interval, Ztol, root,
-                    seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, LRedLikeMNWrap,
-                    dumper, 0);
+        nested::run(sampler::importance_sampling, sampler::modal, sampler::constant_efficiency, sampler::live_points, tol, sampler::efficiency, ndims, ndims, sampler::num_cluster_parameters, maxModes,
+                    sampler::update_interval, Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, LRedLikeMNWrap, dumper, 0);
     }
 
     if (rank == 0) {
