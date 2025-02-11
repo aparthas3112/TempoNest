@@ -1,7 +1,6 @@
 #include "parameter.h"
 #include <cmath>
 #include <iostream>
-#include "../json_loader.h"
 
 parameter_t::parameter_t() : min_value(0), max_value(1) {}
 

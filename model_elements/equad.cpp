@@ -1,5 +1,4 @@
 #include "equad.h"
-#include <json_loader.h>
 #include <iostream>
 
 void equad_t::set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json)

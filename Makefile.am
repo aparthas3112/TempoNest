@@ -28,11 +28,10 @@ if HAVE_MULTINEST
 
 plugin_LTLIBRARIES = temponest_@T2ARCH@_plug.la
 
-common_sources = json_loader.cpp logger.cpp \
-                 TempoNestLikeFuncs.cpp \
+common_sources = TempoNestLikeFuncs.cpp \
                  TempoNestTextOutput.cpp pulsar_utils.cpp\
                  TempoNestPlugin.cpp TempoNestUtilities.cpp \
-				 utils.cpp
+				 utils.cpp logger.cpp
                  
 
 common_sources += model_elements/timing_model.cpp model_elements/efac.cpp model_elements/equad.cpp model_elements/power_law_red_noise.cpp \

@@ -1,5 +1,4 @@
 #include "model.h"
-#include "../json_loader.h"
 
 namespace model {
 
@@ -51,77 +50,73 @@ element_t create_model_element(const string_t& element_name)
 
 void load_model(const string_t& filename)
 {
-    std::optional<json_node_t> model = globals::config.get_optional_value<json_node_t>("model");
+    json_node_array_t json_elements = globals::config.get_array<json_node_t>("elements");
 
-    if (model.has_value()) {
-        bool have_timing_model = false;
-        const auto& json_model = model.value();
+    bool have_timing_model = false;
 
-        const auto& json_elements = json_model.get_array<json_node_t>("elements");
-        for (size_t i = 0; i < json_elements.size(); i++) {
-            const auto& json_element = json_elements[i];
-            string_t element_name = json_element.get_value<string_t>("name");
+    for (size_t i = 0; i < json_elements.size(); i++) {
+        const auto& json_element = json_elements[i];
+        string_t element_name = json_element.get_value<string_t>("name");
 
-            // Check if any parameters are included
-            bool any_param_included = false;
-            const auto& json_params = json_element.get_array<json_node_t>("parameters");
-            for (size_t j = 0; j < json_params.size(); j++) {
-                if (json_params[j].get_value<bool>("include")) {
-                    any_param_included = true;
-                    break;
-                }
-            }
-
-            if (!any_param_included) {
-                std::cout << "Note: " << element_name << " element not included as all parameters are excluded." << std::endl;
-
-                continue;
-            }
-
-            auto element = create_model_element(element_name);
-
-            for (size_t j = 0; j < json_params.size(); j++) {
-                const auto& json_param = json_params[j];
-                string_t param_name = json_param.get_value<string_t>("name");
-                if (element->is_valid_parameter(param_name)) {
-                    parameter_t param = parse_parameter(json_param);
-                    if (!param.include) {
-                        continue;
-                    }
-                    element->set_parameter(param_name, param, json_param);
-                } else {
-                    std::cout << "Warning: Ignoring invalid parameter '" << param_name << "' for " << element->get_name() << std::endl;
-                }
-            }
-
-            if (!element->is_fully_specified()) {
-                throw std::runtime_error("Element " + element_name + " is not fully specified.");
-            }
-
-            if (element_name == "Power Law Red Noise") {
-                model::pl_red_noise = std::move(element);
-                model::pl_red_noise.value()->print();
-            } else if (element_name == "Power Law DM Noise") {
-                model::pl_dm_noise = std::move(element);
-                model::pl_dm_noise.value()->print();
-            } else if (element_name == "EFAC") {
-                model::efac = std::move(element);
-                model::efac.value()->print();
-            } else if (element_name == "EQUAD") {
-                model::equad = std::move(element);
-                model::equad.value()->print();
-            } else if (element_name == "Timing Model") {
-                have_timing_model = true;
-                model::timing_model = std::move(element);
-                model::timing_model->print();
+        // Check if any parameters are included
+        bool any_param_included = false;
+        const auto& json_params = json_element.get_array<json_node_t>("parameters");
+        for (size_t j = 0; j < json_params.size(); j++) {
+            if (json_params[j].get_value<bool>("include")) {
+                any_param_included = true;
+                break;
             }
         }
 
-        // if we havn't loaded a timing model, create an empty one
-        if (!have_timing_model) {
-            auto element = create_model_element("Timing Model");
+        if (!any_param_included) {
+            std::cout << "Note: " << element_name << " element not included as all parameters are excluded." << std::endl;
+
+            continue;
+        }
+
+        auto element = create_model_element(element_name);
+
+        for (size_t j = 0; j < json_params.size(); j++) {
+            const auto& json_param = json_params[j];
+            string_t param_name = json_param.get_value<string_t>("name");
+            if (element->is_valid_parameter(param_name)) {
+                parameter_t param = parse_parameter(json_param);
+                if (!param.include) {
+                    continue;
+                }
+                element->set_parameter(param_name, param, json_param);
+            } else {
+                std::cout << "Warning: Ignoring invalid parameter '" << param_name << "' for " << element->get_name() << std::endl;
+            }
+        }
+
+        if (!element->is_fully_specified()) {
+            throw std::runtime_error("Element " + element_name + " is not fully specified.");
+        }
+
+        if (element_name == "Power Law Red Noise") {
+            model::pl_red_noise = std::move(element);
+            model::pl_red_noise.value()->print();
+        } else if (element_name == "Power Law DM Noise") {
+            model::pl_dm_noise = std::move(element);
+            model::pl_dm_noise.value()->print();
+        } else if (element_name == "EFAC") {
+            model::efac = std::move(element);
+            model::efac.value()->print();
+        } else if (element_name == "EQUAD") {
+            model::equad = std::move(element);
+            model::equad.value()->print();
+        } else if (element_name == "Timing Model") {
+            have_timing_model = true;
             model::timing_model = std::move(element);
+            model::timing_model->print();
         }
+    }
+
+    // if we havn't loaded a timing model, create an empty one
+    if (!have_timing_model) {
+        auto element = create_model_element("Timing Model");
+        model::timing_model = std::move(element);
     }
 }
 

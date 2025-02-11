@@ -1,5 +1,4 @@
 #include "settings.h"
-#include "../json_loader.h"
 
 namespace globals {
 
@@ -22,8 +21,6 @@ void load_settings(const string_t& filename)
 
     config.load_json(filename);
 
-    rapidjson::Document doc = json_loader::parse_json_file(filename);
-
     std::cout << "load settings" << std::endl;
 
     // Load model elements
@@ -35,8 +32,7 @@ void load_settings(const string_t& filename)
         debug = json_globals.get_optional_value<bool>("debug").value_or(false);
         num_tempo2_its = json_globals.get_optional_value<int>("num_tempo2_its").value_or(1);
         root = json_globals.get_optional_value<string_t>("root").value_or("results/Example1-");
-        use_original_errors =
-            json_globals.get_optional_value<bool>("use_original_errors").value_or(true);
+        use_original_errors = json_globals.get_optional_value<bool>("use_original_errors").value_or(true);
         test_mode = json_globals.get_optional_value<bool>("test_mode").value_or(false);
     }
 

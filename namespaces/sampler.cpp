@@ -1,5 +1,5 @@
 #include "sampler.h"
-#include "../json_loader.h"
+#include "settings.h"
 
 namespace sampler {
 
