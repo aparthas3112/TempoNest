@@ -16,8 +16,7 @@ public:
     std::vector<string_t> flag_values;
     string_t flag;
 
-    void set_parameter(const string_t& name, const parameter_t& param,
-                       const rapidjson::Value& param_json) override;
+    void set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json) override;
     bool is_fully_specified() const override;
     bool is_valid_parameter(const string_t& param_name) const override;
     void print() const override;

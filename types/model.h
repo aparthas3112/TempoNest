@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <optional>
+#include "../json/json_loader.h"
 #include "basic_types.h"
 #include "model_element.h"
 
@@ -27,6 +28,8 @@ extern optional_element_t efac;
 extern optional_element_t equad;
 
 void load_model(const string_t& filename);
+element_t create_model_element(const string_t& element_name);
+parameter_t parse_parameter(const json_node_t& json_param);
 
 int get_model_dims();
 }  // namespace model

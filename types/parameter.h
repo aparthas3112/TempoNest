@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "rapidjson/document.h"
+#include "../json/json_loader.h"
 
 enum class prior_type_t { uniform, log_uniform, categorical };
 
@@ -18,7 +18,7 @@ public:
     parameter_t();
     virtual ~parameter_t() = default;
 
-    virtual void load_from_json(const rapidjson::Value& json_param);
+    virtual void load_from_json(const json_node_t& json_param);
     virtual void print() const;
     virtual double get_value(double& cube_value) const;
     virtual double get_exp_value(double& cube_value) const;

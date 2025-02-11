@@ -3,6 +3,7 @@
 #include <memory>
 #include <optional>
 #include "../types/basic_types.h"
+#include "json/json_loader.h"
 
 namespace globals {
 
@@ -25,6 +26,9 @@ extern bool use_original_errors;
 
 // test mode - to run unit tests
 extern bool test_mode;
+
+// json config document
+extern json_loader_t config;
 
 void load_settings(const string_t& filename);
 

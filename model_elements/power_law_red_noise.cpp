@@ -10,8 +10,7 @@ pl_red_noise_t::pl_red_noise_t() : num_freqs(33)
     }
 }
 
-void pl_red_noise_t::set_parameter(const string_t& name, const parameter_t& param,
-                                   const rapidjson::Value& param_json)
+void pl_red_noise_t::set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json)
 {
     if (name == "amplitude") {
         amplitude = param;
@@ -26,8 +25,7 @@ void pl_red_noise_t::set_parameter(const string_t& name, const parameter_t& para
 
 bool pl_red_noise_t::is_valid_parameter(const string_t& param_name) const
 {
-    static const std::unordered_set<string_t> valid_params = {"amplitude", "spectral_index",
-                                                              "num_coeffs"};
+    static const std::unordered_set<string_t> valid_params = {"amplitude", "spectral_index", "num_coeffs"};
     return valid_params.find(param_name) != valid_params.end();
 }
 
@@ -65,8 +63,7 @@ string_t pl_red_noise_t::get_name() const
     return "Power Law Red Noise";
 }
 
-void pl_red_noise_t::apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_count, int& start_pos,
-                           double maxtspan, double& uniform_prior, double& freq_det)
+void pl_red_noise_t::apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_count, int& start_pos, double maxtspan, double& uniform_prior, double& freq_det)
 {
     double red_amp = amplitude.get_exp_value(Cube[p_count++]);
     double red_index = spectral_index.get_value(Cube[p_count++]);
@@ -80,8 +77,7 @@ void pl_red_noise_t::apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_cou
         uniform_prior += log(red_amp);
     }
 
-    double pl_amp =
-        (red_amp * red_amp / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) / (Tspan * 24 * 60 * 60);
+    double pl_amp = (red_amp * red_amp / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) / (Tspan * 24 * 60 * 60);
 
     red_coeffs *= pl_amp;
 

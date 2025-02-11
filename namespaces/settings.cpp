@@ -15,24 +15,29 @@ bool use_original_errors = true;
 
 bool test_mode = false;
 
+json_loader_t config;
+
 void load_settings(const string_t& filename)
 {
+
+    config.load_json(filename);
 
     rapidjson::Document doc = json_loader::parse_json_file(filename);
 
     std::cout << "load settings" << std::endl;
 
     // Load model elements
-    if (doc.HasMember("globals")) {
-        const auto& json_settings = doc["globals"];
-
+    std::optional<json_node_t> globals = config.get_optional_value<json_node_t>("globals");
+    if (globals.has_value()) {
+        const auto& json_globals = globals.value();
         // Parse sampler globals as needed
-        json_loader::get_if_present(json_settings, "debug", globals::debug);
-        json_loader::get_if_present(json_settings, "num_tempo2_its", globals::num_tempo2_its);
-        json_loader::get_if_present(json_settings, "root", globals::root);
-        json_loader::get_if_present(json_settings, "use_original_errors",
-                                    globals::use_original_errors);
-        json_loader::get_if_present(json_settings, "test_mode", globals::test_mode);
+
+        debug = json_globals.get_optional_value<bool>("debug").value_or(false);
+        num_tempo2_its = json_globals.get_optional_value<int>("num_tempo2_its").value_or(1);
+        root = json_globals.get_optional_value<string_t>("root").value_or("results/Example1-");
+        use_original_errors =
+            json_globals.get_optional_value<bool>("use_original_errors").value_or(true);
+        test_mode = json_globals.get_optional_value<bool>("test_mode").value_or(false);
     }
 
     print();

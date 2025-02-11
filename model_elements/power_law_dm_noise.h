@@ -15,8 +15,7 @@ public:
 
     pl_dm_noise_t();
 
-    void set_parameter(const string_t& name, const parameter_t& param,
-                       const rapidjson::Value& param_json) override;
+    void set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json) override;
     bool is_valid_parameter(const string_t& param_name) const override;
     bool is_fully_specified() const override;
     void print() const override;
@@ -24,6 +23,5 @@ public:
     string_t get_name() const override;
 
     // use the dm noise params to calculate the dm noise power at each frequency
-    void apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_count, int& start_pos,
-               double maxtspan, double& uniform_prior, double& freq_det);
+    void apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_count, int& start_pos, double maxtspan, double& uniform_prior, double& freq_det);
 };

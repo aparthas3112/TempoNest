@@ -17,8 +17,7 @@ public:
 
     virtual string_t get_name() const = 0;
 
-    virtual void set_parameter(const string_t& name, const parameter_t& param,
-                               const rapidjson::Value& param_json) = 0;
+    virtual void set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json) = 0;
 
     virtual int get_fitted_dims() = 0;
 

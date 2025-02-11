@@ -50,8 +50,7 @@ void timing_model_t::initialise()
     t2_total_fit = t2_fitted_labels.size();
 }
 
-void timing_model_t::set_parameter(const string_t& name, const parameter_t& param,
-                                   const rapidjson::Value& param_json)
+void timing_model_t::set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json)
 {
 
     timing_parameter_t timing_parameter = timing_parameter_t(param);
@@ -91,8 +90,7 @@ void timing_model_t::update_residuals(double* Cube)
 
     for (size_t p = 0; p < parameters.size(); p++) {
         long double scalar = Cube[p];
-        long double new_value =
-            parameters[p].ld_pmin + (parameters[p].ld_pmax - parameters[p].ld_pmin) * scalar;
+        long double new_value = parameters[p].ld_pmin + (parameters[p].ld_pmax - parameters[p].ld_pmin) * scalar;
 
         globals::pulsar->param[parameters[p].t2_p_index].val[parameters[p].t2_k_index] = new_value;
     }

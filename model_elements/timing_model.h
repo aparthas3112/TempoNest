@@ -27,8 +27,7 @@ public:
     // function to handle updating the residuals given the current set of parameters
     void update_residuals(double* Cube);
 
-    void set_parameter(const string_t& name, const parameter_t& param,
-                       const rapidjson::Value& param_json) override;
+    void set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json) override;
 
     bool is_fully_specified() const override { return true; }
 

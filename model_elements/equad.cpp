@@ -2,8 +2,7 @@
 #include <json_loader.h>
 #include <iostream>
 
-void equad_t::set_parameter(const string_t& name, const parameter_t& param,
-                            const rapidjson::Value& param_json)
+void equad_t::set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json)
 {
     std::cout << "Setting EQUAD parameter: " << name << std::endl;
 
@@ -12,7 +11,7 @@ void equad_t::set_parameter(const string_t& name, const parameter_t& param,
         global = param;
     } else if (name == "per_flag") {
 
-        flag = param_json["flag"].GetString();
+        flag = param_json.get_value<string_t>("flag");
         flag_indices = Eigen::VectorXi::Zero(globals::pulsar->nobs);
         flag_values.clear();
 
@@ -29,8 +28,7 @@ void equad_t::set_parameter(const string_t& name, const parameter_t& param,
                         flag_indices(o) = index;
                     } else {
 
-                        std::cout << "Found new EQUAD " << flag << " "
-                                  << globals::pulsar->obsn[o].flagVal[f] << std::endl;
+                        std::cout << "Found new EQUAD " << flag << " " << globals::pulsar->obsn[o].flagVal[f] << std::endl;
 
                         flag_values.push_back(globals::pulsar->obsn[o].flagVal[f]);
                         flag_indices(o) = flag_values.size() - 1;
@@ -41,8 +39,7 @@ void equad_t::set_parameter(const string_t& name, const parameter_t& param,
             }
 
             if (!found) {
-                throw std::runtime_error("No flag found for EQUAD on observation " +
-                                         std::to_string(o));
+                throw std::runtime_error("No flag found for EQUAD on observation " + std::to_string(o));
             }
         }
 

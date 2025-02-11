@@ -50,15 +50,36 @@ int num_cluster_parameters = 1;
 
 void load_sampler(const string_t& filename)
 {
-    json_loader::load_sampler(filename);
+    std::optional<json_node_t> sampler = globals::config.get_optional_value<json_node_t>("sampler");
+
+    if (sampler.has_value()) {
+        const auto& json_sampler = sampler.value();
+        // Parse sampler config as needed
+
+        string_t sampler_string = json_sampler.get_optional_value<string_t>("sampler").value_or("multinest");
+
+        if (sampler_string == "multinest")
+            sampler::sampler = sampler_t::MULTINEST;
+        else
+            throw std::runtime_error("Unknown sampler: " + sampler_string);
+
+        importance_sampling = json_sampler.get_optional_value<int>("importance_sampling").value_or(0);
+        modal = json_sampler.get_optional_value<int>("modal").value_or(0);
+        constant_efficiency = json_sampler.get_optional_value<int>("constant_efficiency").value_or(0);
+        live_points = json_sampler.get_optional_value<int>("live_points").value_or(500);
+        efficiency = json_sampler.get_optional_value<double>("efficiency").value_or(0.1);
+        sample = json_sampler.get_optional_value<bool>("sample").value_or(true);
+        update_interval = json_sampler.get_optional_value<int>("update_interval").value_or(2000);
+        num_cluster_parameters = json_sampler.get_optional_value<int>("num_cluster_parameters").value_or(1);
+    }
+
     print();
 }
 
 void print()
 {
     std::cout << "Sampler globals:" << std::endl;
-    std::cout << "Sampler: " << (sampler == sampler_t::MULTINEST ? "MultiNest" : "PolyChord")
-              << std::endl;
+    std::cout << "Sampler: " << (sampler == sampler_t::MULTINEST ? "MultiNest" : "PolyChord") << std::endl;
     std::cout << "Importance sampling: " << importance_sampling << std::endl;
     std::cout << "Modal: " << modal << std::endl;
     std::cout << "Constant efficiency: " << constant_efficiency << std::endl;

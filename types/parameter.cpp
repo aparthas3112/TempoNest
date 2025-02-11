@@ -5,21 +5,18 @@
 
 parameter_t::parameter_t() : min_value(0), max_value(1) {}
 
-void parameter_t::load_from_json(const rapidjson::Value& json_param)
+void parameter_t::load_from_json(const json_node_t& json_param)
 {
-    name = json_param["name"].GetString();
-    json_loader::get_if_present(json_param, "description", description);
+    name = json_param.get_value<string_t>("name");
+    description = json_param.get_optional_value<string_t>("description").value_or("");
 
-    prior_type = string_t(json_param["prior_type"].GetString()) == "uniform"
-                     ? prior_type_t::uniform
-                     : prior_type_t::log_uniform;
+    prior_type = string_t(json_param.get_value<string_t>("prior_type")) == "uniform" ? prior_type_t::uniform : prior_type_t::log_uniform;
 
-    include = json_param["include"].GetBool();
-    fit = json_param["fit"].GetBool();
+    include = json_param.get_value<bool>("include");
+    fit = json_param.get_value<bool>("fit");
 
-    // default priors are just [0,1]
-    json_loader::get_if_present(json_param, "min_value", min_value);
-    json_loader::get_if_present(json_param, "max_value", max_value);
+    min_value = json_param.get_optional_value<double>("min_value").value_or(0);
+    max_value = json_param.get_optional_value<double>("max_value").value_or(1);
 }
 
 void parameter_t::print() const

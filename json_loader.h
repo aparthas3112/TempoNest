@@ -16,51 +16,6 @@ class json_loader {
 public:
 
     /**
-     * @brief print a node to screen
-     *
-     * @param json_param The JSON object representing a parameter
-     * @return void
-     */
-    static void print_node(const rapidjson::Value& json_param);
-
-    /**
-     * @brief Parse a JSON object into a parameter_t structure
-     *
-     * @param json_param The JSON object representing a parameter
-     * @return parameter_t The parsed parameter structure
-     */
-    static parameter_t parse_parameter(const rapidjson::Value& json_param);
-
-    /**
-     * @brief Create a model element based on its name
-     *
-     * @param element_name The name of the element to create
-     * @return element_t The created model element
-     */
-    static element_t create_model_element(const std::string& element_name);
-
-    /**
-     * @brief Load a model from a JSON file
-     *
-     * @param filename The name of the file containing the model JSON
-     */
-    static void load_model(const std::string& filename);
-
-    /**
-     * @brief Load sampler configuration from a JSON file
-     *
-     * @param filename The name of the file containing the sampler configuration JSON
-     */
-    static void load_sampler(const std::string& filename);
-
-    /**
-     * @brief Load globals configuration from a JSON file
-     *
-     * @param filename The name of the file containing the sampler configuration JSON
-     */
-    static void load_settings(const std::string& filename);
-
-    /**
      * @brief Safely get a value from a JSON object if the key is present
      *
      * This function checks if a key exists in the JSON object and retrieves its value

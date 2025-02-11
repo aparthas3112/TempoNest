@@ -10,8 +10,7 @@ pl_dm_noise_t::pl_dm_noise_t() : num_freqs(33)
     }
 }
 
-void pl_dm_noise_t::set_parameter(const string_t& name, const parameter_t& param,
-                                  const rapidjson::Value& param_json)
+void pl_dm_noise_t::set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json)
 {
     if (name == "amplitude") {
         amplitude = param;
@@ -26,8 +25,7 @@ void pl_dm_noise_t::set_parameter(const string_t& name, const parameter_t& param
 
 bool pl_dm_noise_t::is_valid_parameter(const string_t& param_name) const
 {
-    static const std::unordered_set<string_t> valid_params = {"amplitude", "spectral_index",
-                                                              "num_coeffs"};
+    static const std::unordered_set<string_t> valid_params = {"amplitude", "spectral_index", "num_coeffs"};
     return valid_params.find(param_name) != valid_params.end();
 }
 
@@ -65,8 +63,7 @@ string_t pl_dm_noise_t::get_name() const
     return "Power Law DM Noise";
 }
 
-void pl_dm_noise_t::apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_count, int& start_pos,
-                          double maxtspan, double& uniform_prior, double& freq_det)
+void pl_dm_noise_t::apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_count, int& start_pos, double maxtspan, double& uniform_prior, double& freq_det)
 {
 
     double dm_amp = amplitude.get_exp_value(Cube[p_count++]);
