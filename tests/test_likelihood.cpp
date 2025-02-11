@@ -8,7 +8,7 @@ bool run_likelihood_tests()
     int ndims = model::model_space.get_model_dims();
     int npars = ndims;
 
-    double* Cube = new double[4];
+    double* Cube = new double[5];
     Cube[0] = 0.91;
     Cube[1] = 0.85;
     Cube[2] = 0.85;
