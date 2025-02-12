@@ -1,80 +1,17 @@
-#ifdef HAVE_CONFIG_H
-    #include <config.h>
-#endif
+#include "temponest_v1.h"
+#include "../logger.h"
 
-//  Copyright (C) 2013 Lindley Lentati
-
-/*
- *    This file is part of TempoNest
- *
- *    TempoNest is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *    TempoNest  is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *    You should have received a copy of the GNU General Public License
- *    along with TempoNest.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/*
- *    If you use TempoNest and as a byproduct both Tempo2 and MultiNest
- *    then please acknowledge it by citing Lentati L., Alexander P., Hobson M. P. (2013) for
- * TempoNest, Hobbs, Edwards & Manchester (2006) MNRAS, Vol 369, Issue 2, pp. 655-672 (bibtex:
- * 2006MNRAS.369..655H) or Edwards, Hobbs & Manchester (2006) MNRAS, VOl 372, Issue 4, pp. 1549-1574
- * (bibtex: 2006MNRAS.372.1549E) when discussing the timing model and MultiNest Papers here.
- */
-
-#include <gsl/gsl_multifit.h>
-#include <gsl/gsl_multimin.h>
-#include <gsl/gsl_sf_bessel.h>
-#include <stdio.h>
-#include <sys/time.h>
-#include <time.h>
-#include <unistd.h>
-#include <cstring>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <iterator>
-#include <sstream>
-#include <vector>
-#include "T2toolkit.h"
-#include "TempoNest.h"
-#include "eigen_config.h"
-#include "namespaces/settings.h"
-#include "tempo2.h"
-#include "types/model.h"
-#include "types/model_element.h"
-using namespace std;
-
-void LRedLikeMNWrap(double* Cube, int& ndim, int& npars, double& lnew, void* context)
+double temponest_v1_t::operator()(const model_space_t& model_space, const std::vector<double>& parameter_values) const
 {
-
-    double* DerivedParams = new double[npars];
-
-    double result = likelihood(Cube, ndim, DerivedParams, npars, context);
-
-    delete[] DerivedParams;
-
-    lnew = result;
-}
-
-double likelihood(double Cube[], int, double[], int, void*)
-{
-
-    logtchk("Entering TempoNest likelihood");
+    logger::log_debug("Entering TempoNest likelihood");
 
     double uniform_prior = 0;
 
     // update the residuals if we are fitting any timing model parameters
     // there is always some kind of timing model so use get_element
-    auto& timing_model = model::get_element<timing_model_t>("Timing Model");
+    auto& timing_model = model_space.get_element<timing_model_t>("Timing Model");
 
-    timing_model.update_residuals(Cube);
-    int p_count = timing_model.get_fitted_dims();
+    timing_model.update_residuals(parameter_values);
 
     Eigen::VectorXd Resvec = Eigen::VectorXd::Zero(globals::pulsar->nobs);
 
@@ -97,13 +34,13 @@ double likelihood(double Cube[], int, double[], int, void*)
     }
 
     // Apply EFAC if present
-    if (auto efac = model::get_optional_element<efac_t>("EFAC")) {
-        efac->get().apply(Cube, noise, uniform_prior, p_count);
+    if (auto efac = model_space.get_optional_element<efac_t>("EFAC")) {
+        efac->get().apply(parameter_values, noise, uniform_prior);
     }
 
     // Apply EQUAD if present
-    if (auto equad = model::get_optional_element<equad_t>("EQUAD")) {
-        equad->get().apply(Cube, noise, uniform_prior, p_count);
+    if (auto equad = model_space.get_optional_element<equad_t>("EQUAD")) {
+        equad->get().apply(parameter_values, noise, uniform_prior);
     }
 
     noise = noise.array().inverse();
@@ -112,14 +49,14 @@ double likelihood(double Cube[], int, double[], int, void*)
     ///////////////////////////Get TotalMatrix///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    const Eigen::MatrixXd& TotalMatrix = model::model_space.get_total_matrix();
+    const Eigen::MatrixXd& TotalMatrix = model_space.get_total_matrix();
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////Set up Coefficients///////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    double maxtspan = model::model_space.get_max_tspan();
-    int totCoeff = model::model_space.get_noise_size();
+    double maxtspan = model_space.get_max_tspan();
+    int totCoeff = model_space.get_noise_size();
 
     Eigen::VectorXd powercoeff = Eigen::VectorXd::Zero(totCoeff);
 
@@ -131,8 +68,8 @@ double likelihood(double Cube[], int, double[], int, void*)
     int start_pos = 0;
 
     // Apply red noise if present
-    if (auto pl_red = model::get_optional_element<pl_red_noise_t>("Power Law Red Noise")) {
-        pl_red->get().apply(Cube, powercoeff, p_count, start_pos, maxtspan, uniform_prior, freq_det);
+    if (auto pl_red = model_space.get_optional_element<pl_red_noise_t>("Power Law Red Noise")) {
+        pl_red->get().apply(parameter_values, powercoeff, start_pos, maxtspan, uniform_prior, freq_det);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,8 +77,8 @@ double likelihood(double Cube[], int, double[], int, void*)
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     // Apply DM noise if present
-    if (auto pl_dm = model::get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
-        pl_dm->get().apply(Cube, powercoeff, p_count, start_pos, maxtspan, uniform_prior, freq_det);
+    if (auto pl_dm = model_space.get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
+        pl_dm->get().apply(parameter_values, powercoeff, start_pos, maxtspan, uniform_prior, freq_det);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////

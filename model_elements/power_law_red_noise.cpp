@@ -63,10 +63,10 @@ string_t pl_red_noise_t::get_name() const
     return "Power Law Red Noise";
 }
 
-void pl_red_noise_t::apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_count, int& start_pos, double maxtspan, double& uniform_prior, double& freq_det)
+void pl_red_noise_t::apply(const std::vector<double>& parameter_values, Eigen::VectorXd& powercoeff, int& start_pos, double maxtspan, double& uniform_prior, double& freq_det) const
 {
-    double red_amp = amplitude.get_exp_value(Cube[p_count++]);
-    double red_index = spectral_index.get_value(Cube[p_count++]);
+    double red_amp = amplitude.get_exp_value(parameter_values);
+    double red_index = spectral_index.get_value(parameter_values);
 
     Eigen::VectorXd red_coeffs = (frequencies * 365.25 / maxtspan).array().pow(-red_index);
 

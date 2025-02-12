@@ -25,6 +25,19 @@ public:
         die("Required element '" + name + "' not found in model");
     }
 
+    /**
+     * @brief Const version of get_element
+     */
+    template <typename T>
+    const T& get_element(const string_t& name) const
+    {
+        auto element = get_optional_element<T>(name);
+        if (element) {
+            return element->get();
+        }
+        die("Required element '" + name + "' not found in model");
+    }
+
     template <typename T>
     std::optional<std::reference_wrapper<T>> get_optional_element(const string_t& name)
     {
@@ -39,8 +52,25 @@ public:
         die("Element '" + name + "' found with wrong type in model");
     }
 
+    /**
+     * @brief Const version of get_optional_element
+     */
+    template <typename T>
+    std::optional<std::reference_wrapper<const T>> get_optional_element(const string_t& name) const
+    {
+        auto it = elements_.find(name);
+        if (it == elements_.end())
+            return std::nullopt;
+
+        auto* typed = it->second->as<T>();
+        if (typed) {
+            return std::ref(*typed);
+        }
+        die("Element '" + name + "' found with wrong type in model");
+    }
+
     // Get total number of fitted dimensions
-    int get_model_dims() const;
+    int get_fitted_dims() const;
 
     // Check if model is fully specified
     bool is_fully_specified() const;
@@ -66,10 +96,16 @@ public:
     // Elements getter
     const std::unordered_map<string_t, element_t>& get_elements() const { return elements_; }
 
+    /**
+     * @brief Get parameters being sampled
+     * @return Vector of pointers to non-fixed parameters that are included
+     */
+    std::vector<const parameter_t*> get_sampling_parameters() const;
+
 private:
 
     // Helper methods
-    void load_model(const string_t& filename);
+    void load_model();
     parameter_t parse_parameter(const json_node_t& json_param);
     element_t create_element(const string_t& type);
 

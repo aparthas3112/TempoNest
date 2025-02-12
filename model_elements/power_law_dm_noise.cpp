@@ -63,11 +63,11 @@ string_t pl_dm_noise_t::get_name() const
     return "Power Law DM Noise";
 }
 
-void pl_dm_noise_t::apply(double* Cube, Eigen::VectorXd& powercoeff, int& p_count, int& start_pos, double maxtspan, double& uniform_prior, double& freq_det)
+void pl_dm_noise_t::apply(const std::vector<double>& parameter_values, Eigen::VectorXd& powercoeff, int& start_pos, double maxtspan, double& uniform_prior, double& freq_det) const
 {
 
-    double dm_amp = amplitude.get_exp_value(Cube[p_count++]);
-    double dm_index = spectral_index.get_value(Cube[p_count++]);
+    double dm_amp = amplitude.get_exp_value(parameter_values);
+    double dm_index = spectral_index.get_value(parameter_values);
 
     Eigen::VectorXd dm_coeffs = (frequencies * 365.25 / maxtspan).array().pow(-dm_index);
 

@@ -40,7 +40,7 @@
 #include <algorithm>
 #include <vector>
 #include "TempoNest.h"
-#include "multinest.h"
+#include "samplers/multinest_interface.h"
 #include "tempo2.h"
 #include "tempo2pred.h"
 #include "tempo2pred_int.h"
@@ -232,7 +232,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     // set the MultiNest sampling parameters
 
     double tol = 0.5;  // tol, defines the stopping criteria
-    int ndims = model::model_space.get_model_dims();
+    int ndims = model::model_space.get_fitted_dims();
 
     double Ztol = -1E90;  // all the modes with logZ < Ztol are ignored
     int maxModes = 100;   // expected max no. of modes (used only for memory allocation)

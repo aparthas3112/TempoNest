@@ -25,18 +25,18 @@ public:
     void initialise();
 
     // function to handle updating the residuals given the current set of parameters
-    void update_residuals(double* Cube);
+    void update_residuals(const std::vector<double>& parameter_values) const;
 
     void set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json) override;
 
     bool is_fully_specified() const override { return true; }
 
-    bool is_valid_parameter(const string_t& param_name) const override { return true; }
+    bool is_valid_parameter(const string_t&) const override { return true; }
 
     void print() const override
     {
         std::cout << "Timing Model Element:" << std::endl;
-        for (int i = 0; i < parameters.size(); i++) {
+        for (size_t i = 0; i < parameters.size(); i++) {
             parameters[i].print();
         }
     }

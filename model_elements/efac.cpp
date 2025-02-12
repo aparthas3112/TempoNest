@@ -87,16 +87,14 @@ string_t efac_t::get_name() const
     return "EFAC";
 }
 
-void efac_t::apply(double* Cube, Eigen::VectorXd& noise, double& prior_term, int& p_index)
+void efac_t::apply(const std::vector<double>& parameter_values, Eigen::VectorXd& noise, double& prior_term) const
 {
     if (global.has_value()) {
-        double multiplier = global.value().get_exp_value(Cube[p_index]);
+        double multiplier = global.value().get_exp_value(parameter_values);
 
         if (global.value().prior_type == prior_type_t::uniform) {
             prior_term += log(multiplier);
         }
-
-        p_index++;
 
         noise = (noise * multiplier).array().square();
     }
@@ -104,7 +102,7 @@ void efac_t::apply(double* Cube, Eigen::VectorXd& noise, double& prior_term, int
     if (per_flag.has_value()) {
         Eigen::VectorXd multipliers = Eigen::VectorXd::Ones(flag_values.size());
         for (size_t i = 0; i < flag_values.size(); i++) {
-            multipliers(i) = per_flag.value().get_exp_value(Cube[p_index++]);
+            multipliers(i) = per_flag.value().get_exp_value(parameter_values);
 
             if (per_flag.value().prior_type == prior_type_t::uniform) {
                 prior_term += log(multipliers(i));

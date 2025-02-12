@@ -20,6 +20,28 @@ public:
 
     virtual void load_from_json(const json_node_t& json_param);
     virtual void print() const;
-    virtual double get_value(double& cube_value) const;
-    virtual double get_exp_value(double& cube_value) const;
+    virtual double get_value(const std::vector<double>& parameter_values) const;
+    virtual double get_exp_value(const std::vector<double>& parameter_values) const;
+
+    /**
+     * @brief Get parameter index in sampler's parameter vector
+     *
+     * @return int Index (-1 if parameter is not being sampled)
+     */
+    int get_index() const { return index_; }
+
+    /**
+     * @brief Set parameter index in sampler's parameter vector
+     *
+     * @param index New index value
+     */
+    void set_index(int index) { index_ = index; }
+
+private:
+
+    /**
+     * Index in sampler's parameter vector.
+     * -1 indicates parameter is not being sampled.
+     */
+    int index_ = -1;
 };

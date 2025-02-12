@@ -5,7 +5,7 @@
 
 bool run_likelihood_tests()
 {
-    int ndims = model::model_space.get_model_dims();
+    int ndims = model::model_space.get_fitted_dims();
     int npars = ndims;
 
     double* Cube = new double[5];

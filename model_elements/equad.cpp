@@ -90,10 +90,10 @@ string_t equad_t::get_name() const
     return "EQUAD";
 }
 
-void equad_t::apply(double* Cube, Eigen::VectorXd& noise, double& prior_term, int& p_index)
+void equad_t::apply(const std::vector<double>& parameter_values, Eigen::VectorXd& noise, double& prior_term, int& p_index) const
 {
     if (global.has_value()) {
-        double value = global.value().get_exp_value(Cube[p_index++]);
+        double value = global.value().get_exp_value(parameter_values[p_index++]);
         double equad = value * value;
 
         if (global.value().prior_type == prior_type_t::uniform) {
@@ -106,7 +106,7 @@ void equad_t::apply(double* Cube, Eigen::VectorXd& noise, double& prior_term, in
     if (per_flag.has_value()) {
         Eigen::VectorXd equad_values = Eigen::VectorXd::Zero(flag_values.size());
         for (size_t i = 0; i < flag_values.size(); i++) {
-            double value = per_flag.value().get_exp_value(Cube[p_index++]);
+            double value = per_flag.value().get_exp_value(parameter_values[p_index++]);
             equad_values(i) = value * value;
 
             if (per_flag.value().prior_type == prior_type_t::uniform) {

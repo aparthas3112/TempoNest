@@ -25,5 +25,5 @@ public:
     string_t get_name() const override;
 
     // function that applies the efac parameters to the noise vector
-    void apply(double* Cube, Eigen::VectorXd& noise, double& prior_term, int& p_index);
+    void apply(const std::vector<double>& parameter_values, Eigen::VectorXd& noise, double& prior_term) const;
 };

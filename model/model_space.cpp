@@ -2,7 +2,7 @@
 
 model_space_t::model_space_t(const string_t& filename)
 {
-    load_model(filename);
+    load_model();
 
     // check that the model is fully specified
     if (!is_fully_specified()) {
@@ -10,7 +10,7 @@ model_space_t::model_space_t(const string_t& filename)
     }
 }
 
-void model_space_t::load_model(const string_t& filename)
+void model_space_t::load_model()
 {
     json_node_array_t json_elements = globals::config.get_array<json_node_t>("elements");
 
@@ -96,7 +96,7 @@ element_t model_space_t::create_element(const string_t& type)
     die("Unknown element type: " + type);
 }
 
-int model_space_t::get_model_dims() const
+int model_space_t::get_fitted_dims() const
 {
     int total_dims = 0;
     for (const auto& [key, element] : elements_) {
