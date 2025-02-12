@@ -22,7 +22,6 @@ void multinest_settings_t::load_from_json(const json_node_t& json)
     constant_efficiency = json.get_optional_value<int>("constant_efficiency").value_or(0);
     num_live = json.get_optional_value<int>("live_points").value_or(500);
     efficiency = json.get_optional_value<double>("efficiency").value_or(0.1);
-    sample = json.get_optional_value<bool>("sample").value_or(true);
     update_interval = json.get_optional_value<int>("update_interval").value_or(2000);
     num_cluster_parameters = json.get_optional_value<int>("num_cluster_parameters").value_or(1);
 }
@@ -82,19 +81,16 @@ void multinest_sampler_t::run(std::shared_ptr<model_t> model)
                                 // criterion (defined through tol) has been satisfied
     void* context = 0;          // not required by MultiNest, any additional information user wants to pass
 
-    std::string pulsarname = globals::pulsar->name;
-    std::string longname = mn_settings.output_dir + "/" + pulsarname + "-";
-
-    if (longname.size() >= 100)
-        die("Root Name is too long, needs to be less than 100 characters, currently: " + std::to_string(longname.size()));
+    if (mn_settings.output_dir.size() >= 100)
+        die("Root Name is too long, needs to be less than 100 characters, currently: " + std::to_string(mn_settings.output_dir.size()));
 
     char root[100];
-    for (int r = 0; r <= longname.size(); r++) {
-        root[r] = longname[r];
+    for (int r = 0; r <= mn_settings.output_dir.size(); r++) {
+        root[r] = mn_settings.output_dir[r];
     }
 
-    char* chartroot = new char[longname.length() + 1];
-    std::strcpy(chartroot, longname.c_str());
+    char* chartroot = new char[mn_settings.output_dir.length() + 1];
+    std::strcpy(chartroot, mn_settings.output_dir.c_str());
 
     nested::run(mn_settings.importance_sampling, mn_settings.modal, mn_settings.constant_efficiency, mn_settings.num_live, tol, mn_settings.efficiency, ndims, ndims,
                 mn_settings.num_cluster_parameters, maxModes, mn_settings.update_interval, Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, loglike_wrapper, dumper, this);

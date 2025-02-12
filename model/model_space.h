@@ -9,10 +9,7 @@
 class model_space_t {
 public:
 
-    // Default constructor
-    model_space_t() = default;
-
-    explicit model_space_t(const string_t& filename);
+    explicit model_space_t();
 
     // Get element of specified type by name
     template <typename T>

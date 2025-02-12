@@ -36,10 +36,12 @@ common_sources = TempoNestLikeFuncs.cpp \
 
 common_sources += model_elements/timing_model.cpp model_elements/efac.cpp model_elements/equad.cpp model_elements/power_law_red_noise.cpp \
 					model_elements/power_law_dm_noise.cpp
-common_sources += types/model.cpp types/parameter.cpp
-common_sources += namespaces/sampler.cpp namespaces/settings.cpp
+common_sources += types/parameter.cpp
+common_sources += namespaces/settings.cpp
 common_sources += json/json_loader.cpp json/json_node.cpp
 common_sources += model/model_space.cpp
+common_sources += likelihoods/temponest_v1.cpp
+common_sources += samplers/sampler.cpp samplers/multinest.cpp
 
 # Tests 
 common_sources += tests/tests.cpp tests/test_likelihood.cpp

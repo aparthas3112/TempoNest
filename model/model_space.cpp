@@ -1,6 +1,6 @@
 #include "model_space.h"
 
-model_space_t::model_space_t(const string_t& filename)
+model_space_t::model_space_t()
 {
     load_model();
 
@@ -8,6 +8,13 @@ model_space_t::model_space_t(const string_t& filename)
     if (!is_fully_specified()) {
         die("Model is not fully specified");
     }
+
+    update_array_size_info();
+
+    formBatsAll(globals::pulsar, globals::num_pulsars);
+    formResiduals(globals::pulsar, globals::num_pulsars, 1);
+
+    store_total_matrix();
 }
 
 void model_space_t::load_model()

@@ -4,6 +4,8 @@ namespace globals {
 
 pulsar_t* pulsar = nullptr;
 
+int num_pulsars = 1;
+
 bool debug = false;
 
 string_t root = "results/Example1-";

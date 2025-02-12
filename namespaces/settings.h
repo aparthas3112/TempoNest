@@ -10,6 +10,8 @@ namespace globals {
 // the pulsar we are evaluating
 extern pulsar_t* pulsar;
 
+extern int num_pulsars;
+
 // global globals
 extern bool debug;
 

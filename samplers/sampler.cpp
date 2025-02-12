@@ -27,6 +27,11 @@ void sampler_settings_t::load_from_json(const json_node_t& json)
     if (auto dir = json.get_optional_value<string_t>("output_dir")) {
         output_dir = *dir;
     }
+
+    std::string pulsarname = globals::pulsar->name;
+    output_dir += "/" + pulsarname + "-";
+
+    sample = json.get_optional_value<bool>("sample").value_or(true);
 }
 
 std::unique_ptr<sampler_t> sampler_factory_t::create(const json_node_t& config)

@@ -45,6 +45,9 @@ public:
     /** @brief Directory for output chain files */
     string_t output_dir = "./chains/";
 
+    /** @brief Are we actually sampling */
+    bool sample = true;
+
 protected:
 
     /**
@@ -84,8 +87,6 @@ private:
 
 protected:
 
-    const sampler_settings_t& get_settings() const { return *settings_; }
-
     sampler_settings_t& get_mutable_settings() { return *settings_; }
 
 public:
@@ -117,4 +118,6 @@ public:
      * @param model Shared pointer to the model to be sampled
      */
     virtual void run(std::shared_ptr<model_t> model) = 0;
+
+    const sampler_settings_t& get_settings() const { return *settings_; }
 };
