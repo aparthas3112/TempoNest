@@ -23,6 +23,8 @@ public:
     int get_fitted_dims() override;
     string_t get_name() const override;
 
+    void write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const override;
+
     // function that applies the efac parameters to the noise vector
     void apply(const std::vector<double>& parameter_values, Eigen::VectorXd& noise, double& prior_term) const;
 };

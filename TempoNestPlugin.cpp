@@ -173,7 +173,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     std::shared_ptr<likelihood_t> likelihood = std::make_shared<temponest_v1_t>();
     std::shared_ptr<model_space_t> model_space = std::make_shared<model_space_t>();
 
-    std::shared_ptr<model_t> model = std::make_shared<model_t>(likelihood, model_space);
+    std::shared_ptr<model_t> model = std::make_shared<model_t>(model_space, likelihood);
 
     if (rank == 0) {
         printf("Graphical Interface: TempoNest\n");
@@ -192,7 +192,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
         printf("file root set to %s \n", sampler->get_settings().output_dir.c_str());
     }
 
-      // if we are running unit tests do that now rather than sampling
+    // if we are running unit tests do that now rather than sampling
     if (globals::test_mode) {
         run_tests();
         return 0;
@@ -213,7 +213,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     }
 
     if (rank == 0) {
-        readsummary(globals::pulsar, sampler->get_settings().output_dir, model->get_fitted_dims(), 0, model->get_fitted_dims());
+        sampler->output_results();
 
         time(&rawstoptime);
         rawstoptimeinfo = localtime(&rawstoptime);

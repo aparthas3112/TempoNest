@@ -38,6 +38,18 @@ public:
      */
     std::vector<const parameter_t*> get_sampling_parameters() const { return model_space_->get_sampling_parameters(); }
 
+    /**
+     * @brief Get read-only access to the model space
+     * @return Const reference to model space
+     */
+    const model_space_t& get_model_space() const { return *model_space_; }
+
+    /**
+     * @brief Get read-only access to the likelihood
+     * @return Const reference to likelihood
+     */
+    const likelihood_t& get_likelihood() const { return *likelihood_; }
+
 private:
 
     std::shared_ptr<model_space_t> model_space_;

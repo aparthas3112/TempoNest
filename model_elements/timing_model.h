@@ -41,6 +41,8 @@ public:
         }
     }
 
+    void write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const override {}
+
     int get_fitted_dims() override { return t2_total_fit - design_size; }
 
     string_t get_name() const override { return "Timing Model"; }

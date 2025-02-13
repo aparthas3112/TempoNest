@@ -22,6 +22,8 @@ public:
     int get_fitted_dims() override;
     string_t get_name() const override;
 
+    void write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const override;
+
     // use the red noise params to calculate the red noise power at each frequency
     void apply(const std::vector<double>& parameter_values, Eigen::VectorXd& powercoeff, int& start_pos, double maxtspan, double& uniform_prior, double& freq_det) const;
 };

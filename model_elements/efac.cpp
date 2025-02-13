@@ -5,6 +5,7 @@ void efac_t::set_parameter(const string_t& name, const parameter_t& param, const
 {
     if (name == "global") {
         global = param;
+        parameters_.push_back(&global.value());
     } else if (name == "per_flag") {
 
         flag = param_json.get_value<string_t>("flag");
@@ -40,6 +41,7 @@ void efac_t::set_parameter(const string_t& name, const parameter_t& param, const
         }
 
         per_flag = param;
+        parameters_.push_back(&per_flag.value());
 
     } else {
         throw std::runtime_error("Invalid parameter name for EFAC: " + name);
@@ -67,6 +69,18 @@ void efac_t::print() const
     if (per_flag.has_value()) {
         std::cout << "per_flag: ";
         per_flag->print();
+    }
+}
+
+void efac_t::write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const
+{
+    if (global.has_value()) {
+        fprintf(par_file, "TNGLobalEF %g\n", parameters[global.value().get_index()]);
+    }
+    if (per_flag.has_value()) {
+        for (size_t f = 0; f < flag_values.size(); f++) {
+            fprintf(par_file, "TNEF %s %s %g\n", flag.c_str(), flag_values[f].c_str(), parameters[global.value().get_index()]);
+        }
     }
 }
 

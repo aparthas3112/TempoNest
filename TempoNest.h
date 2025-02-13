@@ -25,8 +25,7 @@
 
 #include <vector>
 #include "eigen_config.h"
+#include "samplers/sampler.h"
 #include "tempo2.h"
 
-void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndims, std::vector<double> paramlist, double Evidence, std::string longname, double** paramarray);
-
-void readsummary(pulsar* psr, std::string longname, int ndim, void* context, int ndims);
+void TNtextOutput(pulsar* psr, int npsr, int ndims, std::string longname, const std::shared_ptr<model_t> model, std::vector<parameter_stats_t>& stats);

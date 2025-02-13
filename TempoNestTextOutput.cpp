@@ -39,8 +39,8 @@
 #include <vector>
 #include "TKfit.h"
 #include "TempoNest.h"
+#include "model/model.h"
 #include "tempo2.h"
-#include "types/model.h"
 
 // #define TSUN (4.925490947e-6L) (Should be tempo2.h now).
 
@@ -123,8 +123,11 @@ int longturn_dms(long double turn, char* dms)
     return 0;
 }
 
-void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim, std::vector<double> paramlist, double Evidence, std::string longname, double** paramarray)
+void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const std::shared_ptr<model_t> model, const std::vector<parameter_stats_t>& stats)
 {
+
+    const model_space_t& model_space = model->get_model_space();
+
     double rms_pre = 0.0, rms_post = 0.0;
     double mean_pre = 0.0, mean_post = 0.0, chisqr;
     int i, p, count, k, whitefitcount;
@@ -177,7 +180,6 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim, st
         printf("\n\n");
 
         if (psr[p].fitMode == 1) {
-            printf("Evidence = %.10g\t", Evidence);
             /*      printf("wmean = %g\n",sumwt/(double)psr[p].nobs); */
             /* chisqr =
              * psr[p].fitChisq*pow(psr[p].param[param_f0].val,2)*sumwt/(double)psr[p].nobs/(double)psr[p].fitNfree;
@@ -263,7 +265,7 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim, st
 
         // First check if we have any stochastic elements
         bool has_stochastic = false;
-        for (const auto& [name, element] : model::model_space.get_elements()) {
+        for (const auto& [name, element] : model_space.get_elements()) {
             if (name != "Timing Model") {
                 has_stochastic = true;
                 break;
@@ -276,50 +278,50 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim, st
             printf("Stochastic Parameters:\n");
 
             // Handle EFAC if present
-            if (auto efac_opt = model::get_optional_element<efac_t>("EFAC")) {
+            if (auto efac_opt = model_space.get_optional_element<efac_t>("EFAC")) {
                 auto& efac = efac_opt->get();
                 if (efac.global.has_value()) {
-                    printf("Global EFAC: %g +/- %g\n", paramarray[fitcount][0], paramarray[fitcount][1]);
+                    printf("Global EFAC: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
                     fitcount++;
                 }
                 if (efac.per_flag.has_value()) {
                     for (size_t f = 0; f < efac.flag_values.size(); f++) {
-                        printf("EFAC %s: %g +/- %g\n", efac.flag.c_str(), efac.flag_values[f].c_str(), paramarray[fitcount][0], paramarray[fitcount][1]);
+                        printf("EFAC %s: %g +/- %g\n", efac.flag.c_str(), efac.flag_values[f].c_str(), stats[fitcount].mean, stats[fitcount].stdev);
                         fitcount++;
                     }
                 }
             }
 
             // Handle EQUAD if present
-            if (auto equad_opt = model::get_optional_element<equad_t>("EQUAD")) {
+            if (auto equad_opt = model_space.get_optional_element<equad_t>("EQUAD")) {
                 auto& equad = equad_opt->get();
                 if (equad.global.has_value()) {
-                    printf("Global EQUAD: %g +/- %g\n", paramarray[fitcount][0], paramarray[fitcount][1]);
+                    printf("Global EQUAD: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
                     fitcount++;
                 }
                 if (equad.per_flag.has_value()) {
                     for (size_t f = 0; f < equad.flag_values.size(); f++) {
-                        printf("EQUAD %s: %g +/- %g\n", equad.flag.c_str(), equad.flag_values[f].c_str(), paramarray[fitcount][0], paramarray[fitcount][1]);
+                        printf("EQUAD %s: %g +/- %g\n", equad.flag.c_str(), equad.flag_values[f].c_str(), stats[fitcount].mean, stats[fitcount].stdev);
                         fitcount++;
                     }
                 }
             }
 
             // Handle Power Law Red Noise if present
-            if (auto pl_red = model::get_optional_element<pl_red_noise_t>("Power Law Red Noise")) {
+            if (auto pl_red = model_space.get_optional_element<pl_red_noise_t>("Power Law Red Noise")) {
                 printf("Power Law Red Noise Model:\n");
-                printf("Log Amplitude: %g +/- %g\n", paramarray[fitcount][0], paramarray[fitcount][1]);
+                printf("Log Amplitude: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
                 fitcount++;
-                printf("Spectral Index: %g +/- %g\n", paramarray[fitcount][0], paramarray[fitcount][1]);
+                printf("Spectral Index: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
                 fitcount++;
             }
 
             // Handle Power Law DM Noise if present
-            if (auto pl_dm = model::get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
+            if (auto pl_dm = model_space.get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
                 printf("Power Law DM Model:\n");
-                printf("Log Amplitude: %g +/- %g\n", paramarray[fitcount][0], paramarray[fitcount][1]);
+                printf("Log Amplitude: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
                 fitcount++;
-                printf("Spectral Index: %g +/- %g\n", paramarray[fitcount][0], paramarray[fitcount][1]);
+                printf("Spectral Index: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
                 fitcount++;
             }
         }
@@ -800,7 +802,6 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim, st
 
             // printf("name size: %i \n",parname.size());
             fname = (char*)parname.c_str();
-            // fname="newpar.par";
             printf("writing par file %s. \n", fname);
             FILE* fout2;
 
@@ -963,62 +964,62 @@ void TNtextOutput(pulsar* psr, int npsr, int newpar, void* context, int ndim, st
                 //	printf("end of T2 parms %i \n", whitefitcount);
 
                 // Handle EFAC if present
-                if (auto efac_opt = model::get_optional_element<efac_t>("EFAC")) {
+                if (auto efac_opt = model_space.get_optional_element<efac_t>("EFAC")) {
                     auto& efac = efac_opt->get();
 
                     if (efac.global.has_value()) {
-                        fprintf(fout2, "TNGLobalEF %g\n", paramarray[whitefitcount][2]);
+                        fprintf(fout2, "TNGLobalEF %g\n", stats[whitefitcount].maximum_likelihood);
                         whitefitcount++;
                     }
                     if (efac.per_flag.has_value()) {
                         for (size_t f = 0; f < efac.flag_values.size(); f++) {
-                            fprintf(fout2, "TNEF %s %s %g\n", efac.flag.c_str(), efac.flag_values[f].c_str(), paramarray[whitefitcount][2]);
+                            fprintf(fout2, "TNEF %s %s %g\n", efac.flag.c_str(), efac.flag_values[f].c_str(), stats[whitefitcount].maximum_likelihood);
                             whitefitcount++;
                         }
                     }
                 }
 
                 // Handle EQUAD if present
-                if (auto equad_opt = model::get_optional_element<equad_t>("EQUAD")) {
+                if (auto equad_opt = model_space.get_optional_element<equad_t>("EQUAD")) {
                     auto& equad = equad_opt->get();
 
                     if (equad.global.has_value()) {
-                        fprintf(fout2, "TNGLobalEQ %g\n", paramarray[whitefitcount][2]);
+                        fprintf(fout2, "TNGLobalEQ %g\n", stats[whitefitcount].maximum_likelihood);
                         whitefitcount++;
                     }
                     if (equad.per_flag.has_value()) {
                         for (size_t f = 0; f < equad.flag_values.size(); f++) {
-                            fprintf(fout2, "TNEQ %s %s %g\n", equad.flag.c_str(), equad.flag_values[f].c_str(), paramarray[whitefitcount][2]);
+                            fprintf(fout2, "TNEQ %s %s %g\n", equad.flag.c_str(), equad.flag_values[f].c_str(), stats[whitefitcount].maximum_likelihood);
                             whitefitcount++;
                         }
                     }
                 }
 
                 // Handle Power Law Red Noise if present
-                if (auto pl_red_opt = model::get_optional_element<pl_red_noise_t>("Power Law Red Noise")) {
+                if (auto pl_red_opt = model_space.get_optional_element<pl_red_noise_t>("Power Law Red Noise")) {
                     auto& pl = pl_red_opt->get();
 
-                    fprintf(fout2, "TNRedAmp %g\n", paramarray[whitefitcount][2]);
-                    tablefile << "Log$_{10}$[Red Amp] \\dotfill & " << paramarray[whitefitcount][0] << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";
+                    fprintf(fout2, "TNRedAmp %g\n", stats[whitefitcount].maximum_likelihood);
+                    tablefile << "Log$_{10}$[Red Amp] \\dotfill & " << stats[whitefitcount].mean << " $\\pm$ " << stats[whitefitcount].stdev << "  \\\\ \n";
                     whitefitcount++;
 
-                    fprintf(fout2, "TNRedGam %g\n", paramarray[whitefitcount][2]);
+                    fprintf(fout2, "TNRedGam %g\n", stats[whitefitcount].maximum_likelihood);
                     fprintf(fout2, "TNRedC %i\n", 2 * pl.num_freqs);
-                    tablefile << "Red Index \\dotfill & " << paramarray[whitefitcount][0] << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";
+                    tablefile << "Red Index \\dotfill & " << stats[whitefitcount].mean << " $\\pm$ " << stats[whitefitcount].stdev << "  \\\\ \n";
                     whitefitcount++;
                 }
 
                 // Handle Power Law DM Noise if present
-                if (auto pl_dm_opt = model::get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
+                if (auto pl_dm_opt = model_space.get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
                     auto& pl = pl_dm_opt->get();
 
-                    fprintf(fout2, "TNDMAmp %g\n", paramarray[whitefitcount][2]);
-                    tablefile << "Log$_{10}$[DM Amp] \\dotfill & " << paramarray[whitefitcount][0] << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";
+                    fprintf(fout2, "TNDMAmp %g\n", stats[whitefitcount].maximum_likelihood);
+                    tablefile << "Log$_{10}$[DM Amp] \\dotfill & " << stats[whitefitcount].mean << " $\\pm$ " << stats[whitefitcount].stdev << "  \\\\ \n";
                     whitefitcount++;
 
-                    fprintf(fout2, "TNDMGam %g\n", paramarray[whitefitcount][2]);
+                    fprintf(fout2, "TNDMGam %g\n", stats[whitefitcount].maximum_likelihood);
                     fprintf(fout2, "TNDMC %i\n", 2 * pl.num_freqs);
-                    tablefile << "DM Index \\dotfill & " << paramarray[whitefitcount][0] << " $\\pm$ " << paramarray[whitefitcount][1] << "  \\\\ \n";
+                    tablefile << "DM Index \\dotfill & " << stats[whitefitcount].mean << " $\\pm$ " << stats[whitefitcount].stdev << "  \\\\ \n";
                     whitefitcount++;
                 }
 

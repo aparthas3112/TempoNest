@@ -77,6 +77,7 @@ void timing_model_t::set_parameter(const string_t& name, const parameter_t& para
     }
 
     parameters.push_back(timing_parameter);
+    parameters_.push_back(&parameters.back());
 
     // every added parameters reduces the size of the design matrix by one
     design_size--;

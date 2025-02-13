@@ -99,6 +99,12 @@ public:
      */
     std::vector<const parameter_t*> get_sampling_parameters() const;
 
+    /**
+     * @brief Get read-only access to the parameters vector
+     * @return Const reference to parameters
+     */
+    const std::vector<const parameter_t*>& get_parameters() const { return parameters_; }
+
 private:
 
     // Helper methods
@@ -110,6 +116,7 @@ private:
 
     // Member variables
     std::unordered_map<string_t, element_t> elements_;
+    std::vector<const parameter_t*> parameters_;  // Store all parameters in load order
 
     // Matrices and dimensions
     Eigen::MatrixXd design_matrix_;

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <rapidjson/document.h>
+#include "../types/basic_types.h"
 #include "../utils.h"
-#include "types/basic_types.h"
 
 // forward declare
 class json_loader_t;

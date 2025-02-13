@@ -8,6 +8,8 @@ void equad_t::set_parameter(const string_t& name, const parameter_t& param, cons
     // json_loader::print_node(param_json);
     if (name == "global") {
         global = param;
+        parameters_.push_back(&global.value());
+
     } else if (name == "per_flag") {
 
         flag = param_json.get_value<string_t>("flag");
@@ -43,6 +45,7 @@ void equad_t::set_parameter(const string_t& name, const parameter_t& param, cons
         }
 
         per_flag = param;
+        parameters_.push_back(&per_flag.value());
 
     } else {
         throw std::runtime_error("Invalid parameter name for EFAC: " + name);
@@ -90,10 +93,10 @@ string_t equad_t::get_name() const
     return "EQUAD";
 }
 
-void equad_t::apply(const std::vector<double>& parameter_values, Eigen::VectorXd& noise, double& prior_term, int& p_index) const
+void equad_t::apply(const std::vector<double>& parameter_values, Eigen::VectorXd& noise, double& prior_term) const
 {
     if (global.has_value()) {
-        double value = global.value().get_exp_value(parameter_values[p_index++]);
+        double value = global.value().get_exp_value(parameter_values);
         double equad = value * value;
 
         if (global.value().prior_type == prior_type_t::uniform) {
@@ -106,7 +109,7 @@ void equad_t::apply(const std::vector<double>& parameter_values, Eigen::VectorXd
     if (per_flag.has_value()) {
         Eigen::VectorXd equad_values = Eigen::VectorXd::Zero(flag_values.size());
         for (size_t i = 0; i < flag_values.size(); i++) {
-            double value = per_flag.value().get_exp_value(parameter_values[p_index++]);
+            double value = per_flag.value().get_exp_value(parameter_values);
             equad_values(i) = value * value;
 
             if (per_flag.value().prior_type == prior_type_t::uniform) {

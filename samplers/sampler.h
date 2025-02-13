@@ -7,6 +7,13 @@
 #include "../json/json_node.h"
 #include "../model/model.h"
 
+struct parameter_stats_t {
+    double mean;
+    double stdev;
+    double maximum_likelihood;
+    double MAP;  // Maximum A Posteriori
+};
+
 // Forward declarations
 class sampler_t;
 
@@ -118,6 +125,12 @@ public:
      * @param model Shared pointer to the model to be sampled
      */
     virtual void run(std::shared_ptr<model_t> model) = 0;
+
+    /**
+     * @brief Output the results of sampling
+     *
+     */
+    virtual void output_results() = 0;
 
     const sampler_settings_t& get_settings() const { return *settings_; }
 };

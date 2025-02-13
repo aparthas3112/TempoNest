@@ -1,11 +1,13 @@
 #include <TempoNest.h>
 #include "../logger.h"
-#include "../types/model.h"
 #include "tests.h"
 
-bool run_likelihood_tests()
+bool run_likelihood_tests(const std::shared_ptr<model_t> model)
 {
-    int ndims = model::model_space.get_fitted_dims();
+    const model_space_t& model_space = model->get_model_space();
+    const likelihood_t& likelihood = model->get_likelihood();
+
+    int ndims = model_space.get_fitted_dims();
     int npars = ndims;
 
     double* Cube = new double[5];
@@ -15,11 +17,16 @@ bool run_likelihood_tests()
     Cube[3] = 0.9;
     Cube[4] = 0.8;
 
-    double* DerivedParams = new double[ndims];
+    std::vector<const parameter_t*> parameters = model->get_sampling_parameters();
 
-    double result = likelihood(Cube, ndims, DerivedParams, npars, 0);
+    std::vector<double> params(ndims);
 
-    delete[] DerivedParams;
+    for (int i = 0; i < ndims; ++i) {
+        double physical_value = parameters[i]->min_value + Cube[i] * (parameters[i]->max_value - parameters[i]->min_value);
+        params[i] = physical_value;
+    }
+
+    double result = likelihood(model_space, params);
 
     if (fabs(result - 956.0983174) > 1e-6) {
         logger::log_error("Likelihood test failed");

@@ -14,10 +14,13 @@ void pl_dm_noise_t::set_parameter(const string_t& name, const parameter_t& param
 {
     if (name == "amplitude") {
         amplitude = param;
+        parameters_.push_back(&amplitude);
     } else if (name == "spectral_index") {
         spectral_index = param;
+        parameters_.push_back(&spectral_index);
     } else if (name == "num_coeffs") {
         num_coeffs = param;
+        parameters_.push_back(&num_coeffs.value());
     } else {
         throw std::runtime_error("Invalid parameter name for Power Law DM Noise: " + name);
     }

@@ -1,7 +1,10 @@
 #include "multinest.h"
-#include <json_loader.h>
+#include <TempoNest.h>
+#include <logger.h>
 #include <cfloat>
 #include <filesystem>
+#include <fstream>
+#include "../json/json_loader.h"
 
 bool multinest_settings_t::validate() const
 {
@@ -96,4 +99,133 @@ void multinest_sampler_t::run(std::shared_ptr<model_t> model)
                 mn_settings.num_cluster_parameters, maxModes, mn_settings.update_interval, Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, loglike_wrapper, dumper, this);
 
     model_.reset();
+}
+
+void multinest_sampler_t::readtxtoutput(int ndim, std::vector<parameter_stats_t>& stats)
+{
+    stats.clear();
+    stats = std::vector<parameter_stats_t>(ndim);
+    double weightsum = 0;
+
+    // Get filename
+    std::string txt_filename = get_settings().output_dir + ".txt";
+
+    // First pass - get means, MAP and max likelihood
+    std::ifstream txt_file(txt_filename);
+    if (!txt_file.is_open()) {
+        throw std::runtime_error("Could not open file: " + txt_filename);
+    }
+
+    double maxlike = -1e10;
+    double max_posterior = 0;
+
+    std::string line;
+    while (getline(txt_file, line)) {
+        std::istringstream stream(line);
+        std::vector<double> values{std::istream_iterator<double>(stream), std::istream_iterator<double>()};
+
+        if (values.size() < ndim + 2) {
+            throw std::runtime_error("Invalid line format in file");
+        }
+
+        double weight = values[0];
+        double likelihood = values[1];
+        weightsum += weight;
+
+        // Update maximum likelihood point
+        if (likelihood > maxlike) {
+            maxlike = likelihood;
+            for (int i = 0; i < ndim; i++) {
+                stats[i].maximum_likelihood = values[i + 2];
+            }
+        }
+
+        // Update MAP point
+        if (weight > max_posterior) {
+            max_posterior = weight;
+            for (int i = 0; i < ndim; i++) {
+                stats[i].MAP = values[i + 2];
+            }
+        }
+
+        // Accumulate weighted means
+        for (int i = 0; i < ndim; i++) {
+            stats[i].mean += values[i + 2] * weight;
+        }
+    }
+
+    // Normalize means
+    for (auto& result : stats) {
+        result.mean /= weightsum;
+    }
+
+    // Second pass - calculate standard deviations
+    txt_file.clear();
+    txt_file.seekg(0);
+
+    while (getline(txt_file, line)) {
+        std::istringstream stream(line);
+        std::vector<double> values{std::istream_iterator<double>(stream), std::istream_iterator<double>()};
+
+        double weight = values[0];
+        for (int i = 0; i < ndim; i++) {
+            double diff = values[i + 2] - stats[i].mean;
+            stats[i].stdev += weight * diff * diff;
+        }
+    }
+
+    // Finalize standard deviations
+    for (auto& result : stats) {
+        result.stdev = std::sqrt(result.stdev / weightsum);
+    }
+}
+
+// Updates maximum likelihood if better one found in live points
+void multinest_sampler_t::readphyslive(int ndim, std::vector<parameter_stats_t>& stats)
+{
+    std::string phys_live_filename = get_settings().output_dir + "phys_live.points";
+
+    std::ifstream phys_live_file(phys_live_filename);
+    if (!phys_live_file.is_open()) {
+        throw std::runtime_error("Could not open file: " + phys_live_filename);
+    }
+
+    double maxlike = -1e10;
+    std::string line;
+
+    while (getline(phys_live_file, line)) {
+        std::istringstream stream(line);
+        std::vector<double> values{std::istream_iterator<double>(stream), std::istream_iterator<double>()};
+
+        if (values.size() < ndim + 1) {  // +1 for likelihood value
+            throw std::runtime_error("Invalid line format in physlive file");
+        }
+
+        double like = values[ndim];
+
+        if (like > maxlike) {
+            maxlike = like;
+            for (int i = 0; i < ndim; i++) {
+                stats[i].maximum_likelihood = values[i];
+            }
+        }
+    }
+}
+
+void multinest_sampler_t::output_results()
+{
+
+    std::vector<parameter_stats_t> stats;
+
+    int n_dims = model_->get_fitted_dims();
+
+    readtxtoutput(n_dims, stats);
+    readphyslive(n_dims, stats);
+
+    formBatsAll(globals::pulsar, 1);       // Form Barycentric arrival times
+    formResiduals(globals::pulsar, 1, 1);  // Form residuals
+
+    TNtextOutput(globals::pulsar, 1, n_dims, get_settings().output_dir, model_, stats);
+
+    logger::log_info("finished output");
 }

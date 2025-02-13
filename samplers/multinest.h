@@ -109,7 +109,23 @@ private:
      * @param phi Derived parameters (unused)
      * @param npars Number of derived parameters (unused)
      */
-    static void loglike_wrapper(double* Cube, int& ndim, int& npars, double& lnew, void* context);
+    static void loglike_wrapper(double* Cube, int& ndim, int& npars, double& lnew, void* context)
+    {
+
+        // Cast the context back to the object instance and call the instance method
+        multinest_sampler_t* self = static_cast<multinest_sampler_t*>(context);
+        std::vector<const parameter_t*> parameters = self->model_->get_sampling_parameters();
+
+        std::vector<double> params(ndim);
+
+        for (int i = 0; i < ndim; ++i) {
+            double physical_value = parameters[i]->min_value + Cube[i] * (parameters[i]->max_value - parameters[i]->min_value);
+            Cube[i] = physical_value;
+            params[i] = physical_value;
+        }
+
+        lnew = self->model_->calc_loglike(params);
+    }
 
     /************************************************* dumper routine
      * ******************************************************/
@@ -139,8 +155,13 @@ private:
 
     static void dumper(int& nSamples, int& nlive, int& nPar, double** physLive, double** posterior, double** paramConstr, double& maxLogLike, double& logZ, double& logZerr, void* context) {}
 
+    // functions for reading output
+    void readphyslive(int ndim, std::vector<parameter_stats_t>& stats);
+    void readtxtoutput(int ndim, std::vector<parameter_stats_t>& stats);
+
 public:
 
     explicit multinest_sampler_t(std::unique_ptr<sampler_settings_t> settings);
     void run(std::shared_ptr<model_t> model) override;
+    void output_results() override;
 };

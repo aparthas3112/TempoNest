@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdio>
 #include <iostream>
 #include <vector>
 #include "basic_types.h"
@@ -7,7 +8,18 @@
 #include "rapidjson/document.h"
 
 class model_element_t {
+protected:
+
+    /// Vector of pointers to parameters used by this element
+    std::vector<const parameter_t*> parameters_;
+
 public:
+
+    /**
+     * @brief Get read-only access to the parameters vector
+     * @return Const reference to parameters
+     */
+    const std::vector<const parameter_t*>& get_parameters() const { return parameters_; }
 
     virtual ~model_element_t() = default;
 
@@ -22,6 +34,8 @@ public:
     virtual int get_fitted_dims() = 0;
 
     virtual void print() const = 0;
+
+    virtual void write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const = 0;
 
     template <typename T>
     T* as()

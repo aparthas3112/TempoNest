@@ -23,6 +23,8 @@ void model_space_t::load_model()
 
     bool have_timing_model = false;
 
+    int param_index = 0;
+
     for (size_t i = 0; i < json_elements.size(); i++) {
         const auto& json_element = json_elements[i];
         string_t element_name = json_element.get_value<string_t>("name");
@@ -52,6 +54,7 @@ void model_space_t::load_model()
                 if (!param.include) {
                     continue;
                 }
+                param.set_index(param_index++);
                 element->set_parameter(param_name, param, json_param);
             } else {
                 std::cout << "Warning: Ignoring invalid parameter '" << param_name << "' for " << element->get_name() << std::endl;
@@ -121,6 +124,16 @@ bool model_space_t::is_fully_specified() const
         }
     }
     return true;
+}
+
+std::vector<const parameter_t*> model_space_t::get_sampling_parameters() const
+{
+    std::vector<const parameter_t*> parameters;
+    for (const auto& [name, element] : elements_) {
+        auto element_params = element->get_parameters();
+        parameters.insert(parameters.end(), element_params.begin(), element_params.end());
+    }
+    return parameters;
 }
 
 void model_space_t::update_array_size_info()

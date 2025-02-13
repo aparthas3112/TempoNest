@@ -28,9 +28,8 @@ if HAVE_MULTINEST
 
 plugin_LTLIBRARIES = temponest_@T2ARCH@_plug.la
 
-common_sources = TempoNestLikeFuncs.cpp \
-                 TempoNestTextOutput.cpp pulsar_utils.cpp\
-                 TempoNestPlugin.cpp TempoNestUtilities.cpp \
+common_sources = TempoNestTextOutput.cpp pulsar_utils.cpp\
+                 TempoNestPlugin.cpp \
 				 utils.cpp logger.cpp
                  
 
