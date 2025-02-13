@@ -27,11 +27,11 @@ void print_color(const char* message, const char* color)
     printf("%s%s%s", color, message, "\033[0m");
 }
 
-void run_tests()
+void run_tests(const std::shared_ptr<model_t> model)
 {
     bool success = true;
 
-    success &= run_likelihood_tests();
+    success &= run_likelihood_tests(model);
 
     if (success) {
         print_color(SUCCESS_ART, "\033[0;32m");  // Green color

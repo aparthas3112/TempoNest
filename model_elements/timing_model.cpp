@@ -99,3 +99,5 @@ void timing_model_t::update_residuals(const std::vector<double>& parameter_value
     fastformBatsAll(globals::pulsar, 1);  /* Form Barycentric arrival times */
     formResiduals(globals::pulsar, 1, 1); /* Form residuals */
 }
+
+void timing_model_t::write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const {}

@@ -194,7 +194,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
 
     // if we are running unit tests do that now rather than sampling
     if (globals::test_mode) {
-        run_tests();
+        run_tests(model);
         return 0;
     }
 

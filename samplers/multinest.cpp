@@ -6,6 +6,8 @@
 #include <fstream>
 #include "../json/json_loader.h"
 
+multinest_sampler_t::multinest_sampler_t(std::unique_ptr<sampler_settings_t> settings) : sampler_t(std::move(settings)) {}
+
 bool multinest_settings_t::validate() const
 {
     if (!sampler_settings_t::validate()) {

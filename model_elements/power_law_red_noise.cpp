@@ -56,6 +56,8 @@ void pl_red_noise_t::print() const
     }
 }
 
+void pl_red_noise_t::write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const {}
+
 int pl_red_noise_t::get_fitted_dims()
 {
     return 2;

@@ -28,4 +28,4 @@
 #include "samplers/sampler.h"
 #include "tempo2.h"
 
-void TNtextOutput(pulsar* psr, int npsr, int ndims, std::string longname, const std::shared_ptr<model_t> model, std::vector<parameter_stats_t>& stats);
+void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const std::shared_ptr<model_t> model, const std::vector<parameter_stats_t>& stats);

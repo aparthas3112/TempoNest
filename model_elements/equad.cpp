@@ -76,6 +76,8 @@ void equad_t::print() const
     }
 }
 
+void equad_t::write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const {}
+
 int equad_t::get_fitted_dims()
 {
     int fitted_dims = 0;

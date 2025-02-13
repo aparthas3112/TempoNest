@@ -3,7 +3,6 @@
 
 double temponest_v1_t::operator()(const model_space_t& model_space, const std::vector<double>& parameter_values) const
 {
-    logger::log_debug("Entering TempoNest likelihood");
 
     double uniform_prior = 0;
 
