@@ -96,6 +96,13 @@ protected:
 
     sampler_settings_t& get_mutable_settings() { return *settings_; }
 
+    /**
+     * @brief Validate the output directory and create if necessary
+     *
+     * return bool True if directory is valid
+     */
+    bool create_output_directories();
+
 public:
 
     explicit sampler_t(std::unique_ptr<sampler_settings_t> settings) : settings_(std::move(settings)) {}

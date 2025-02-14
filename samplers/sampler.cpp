@@ -8,21 +8,22 @@
 #include "../logger.h"
 #include "multinest.h"
 
-bool sampler_settings_t::validate() const
+bool sampler_t::create_output_directories()
 {
     try {
         // Get just the directory part by finding the last separator
-        size_t last_sep = output_root.find_last_of("/\\");
+        size_t last_sep = get_settings().output_root.find_last_of("/\\");
         if (last_sep == std::string::npos) {
             // No directory structure to create
             return true;
         }
 
         // Extract just the directory path without the final prefix
-        std::string dir_path = output_root.substr(0, last_sep);
+        std::string dir_path = get_settings().output_root.substr(0, last_sep);
         std::filesystem::path dir(dir_path);
         dir = dir.lexically_normal();
 
+        std::cout << "dir path: " << dir_path << std::endl;
         // Create the directory structure if it doesn't exist
         if (!std::filesystem::exists(dir)) {
             if (!std::filesystem::create_directories(dir)) {
@@ -33,9 +34,14 @@ bool sampler_settings_t::validate() const
 
         return std::filesystem::is_directory(dir);
     } catch (const std::filesystem::filesystem_error&) {
-        logger::log_error("Unable to create optimiser output directory: " + output_root);
+        logger::log_error("Unable to create optimiser output directory: " + get_settings().output_root);
         return false;
     }
+}
+
+bool sampler_settings_t::validate() const
+{
+    return true;
 }
 
 void sampler_settings_t::load_from_json(const json_node_t& json)

@@ -47,13 +47,8 @@ void multinest_sampler_t::run(std::shared_ptr<model_t> model)
 {
     const multinest_settings_t& mn_settings = static_cast<const multinest_settings_t&>(get_settings());
 
-    // Create output directories
-    std::filesystem::path base_dir(mn_settings.output_root);
-
-    try {
-        std::filesystem::create_directories(base_dir);
-    } catch (const std::filesystem::filesystem_error& e) {
-        die("Failed to create output directories: " + std::string(e.what()));
+    if (!create_output_directories()) {
+        die("Failed to create output directories");
     }
 
     if (!model) {
