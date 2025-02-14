@@ -33,17 +33,7 @@ public:
 
     bool is_valid_parameter(const string_t&) const override { return true; }
 
-    void print() const override
-    {
-        std::cout << "Timing Model Element:" << std::endl;
-        for (size_t i = 0; i < parameters.size(); i++) {
-            parameters[i].print();
-        }
-    }
-
     void write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const override;
-
-    int get_fitted_dims() override { return t2_total_fit - design_size; }
 
     string_t get_name() const override { return "Timing Model"; }
 };

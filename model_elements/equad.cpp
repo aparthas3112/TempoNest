@@ -7,8 +7,7 @@ void equad_t::set_parameter(const string_t& name, const parameter_t& param, cons
 
     // json_loader::print_node(param_json);
     if (name == "global") {
-        global = param;
-        parameters_.push_back(&global.value());
+        parameter_map_[name] = param;
 
     } else if (name == "per_flag") {
 
@@ -44,8 +43,7 @@ void equad_t::set_parameter(const string_t& name, const parameter_t& param, cons
             }
         }
 
-        per_flag = param;
-        parameters_.push_back(&per_flag.value());
+        parameter_map_[name] = param;
 
     } else {
         throw std::runtime_error("Invalid parameter name for EFAC: " + name);
@@ -63,32 +61,7 @@ bool equad_t::is_valid_parameter(const string_t& param_name) const
     return valid_params.find(param_name) != valid_params.end();
 }
 
-void equad_t::print() const
-{
-    std::cout << "EQUAD Element:" << std::endl;
-    if (global.has_value()) {
-        std::cout << "global: ";
-        global->print();
-    }
-    if (per_flag.has_value()) {
-        std::cout << "per_flag: ";
-        per_flag->print();
-    }
-}
-
 void equad_t::write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const {}
-
-int equad_t::get_fitted_dims()
-{
-    int fitted_dims = 0;
-    if (global.has_value()) {
-        fitted_dims += 1;
-    }
-    if (per_flag.has_value()) {
-        fitted_dims += flag_values.size();
-    }
-    return fitted_dims;
-}
 
 string_t equad_t::get_name() const
 {
@@ -97,24 +70,24 @@ string_t equad_t::get_name() const
 
 void equad_t::apply(const std::vector<double>& parameter_values, Eigen::VectorXd& noise, double& prior_term) const
 {
-    if (global.has_value()) {
-        double value = global.value().get_exp_value(parameter_values);
+    if (auto param = get_optional_parameter("global")) {
+        double value = param.value()->get_exp_value(parameter_values);
         double equad = value * value;
 
-        if (global.value().prior_type == prior_type_t::uniform) {
+        if (param.value()->prior_type == prior_type_t::uniform) {
             prior_term += log(value);
         }
 
         noise = noise.array() + equad;
     }
 
-    if (per_flag.has_value()) {
+    if (auto param = get_optional_parameter("per_flag")) {
         Eigen::VectorXd equad_values = Eigen::VectorXd::Zero(flag_values.size());
         for (size_t i = 0; i < flag_values.size(); i++) {
-            double value = per_flag.value().get_exp_value(parameter_values);
+            double value = param.value()->get_exp_value(parameter_values);
             equad_values(i) = value * value;
 
-            if (per_flag.value().prior_type == prior_type_t::uniform) {
+            if (param.value()->prior_type == prior_type_t::uniform) {
                 prior_term += log(value);
             }
         }

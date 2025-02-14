@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 #include "basic_types.h"
 #include "parameter.h"
@@ -10,8 +11,7 @@
 class model_element_t {
 protected:
 
-    /// Vector of pointers to parameters used by this element
-    std::vector<const parameter_t*> parameters_;
+    std::unordered_map<string_t, parameter_t> parameter_map_;
 
 public:
 
@@ -19,7 +19,15 @@ public:
      * @brief Get read-only access to the parameters vector
      * @return Const reference to parameters
      */
-    const std::vector<const parameter_t*>& get_parameters() const { return parameters_; }
+    std::vector<const parameter_t*> get_parameters() const
+    {
+        std::vector<const parameter_t*> params;
+        params.reserve(parameter_map_.size());
+        for (const auto& [key, param] : parameter_map_) {
+            params.push_back(&param);
+        }
+        return params;
+    }
 
     virtual ~model_element_t() = default;
 
@@ -31,9 +39,16 @@ public:
 
     virtual void set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json) = 0;
 
-    virtual int get_fitted_dims() = 0;
+    int get_fitted_dims() const { return parameter_map_.size(); }
 
-    virtual void print() const = 0;
+    void print() const
+    {
+        std::cout << get_name() << " Element:" << std::endl;
+        for (const auto& [name, param] : parameter_map_) {
+            std::cout << name << ": ";
+            param.print();
+        }
+    }
 
     virtual void write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const = 0;
 
@@ -47,6 +62,24 @@ public:
     const T* as() const
     {
         return dynamic_cast<const T*>(this);
+    }
+
+    std::optional<const parameter_t*> get_optional_parameter(const string_t& name) const
+    {
+        auto it = parameter_map_.find(name);
+        if (it == parameter_map_.end()) {
+            return std::nullopt;
+        }
+        return &it->second;
+    }
+
+    const parameter_t* get_parameter(const string_t& name) const
+    {
+        auto param = get_optional_parameter(name);
+        if (!param) {
+            die("Parameter not found: " + name);
+        }
+        return *param;
     }
 };
 

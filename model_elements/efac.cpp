@@ -4,8 +4,7 @@
 void efac_t::set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json)
 {
     if (name == "global") {
-        global = param;
-        parameters_.push_back(&global.value());
+        parameter_map_[name] = param;
     } else if (name == "per_flag") {
 
         flag = param_json.get_value<string_t>("flag");
@@ -40,8 +39,7 @@ void efac_t::set_parameter(const string_t& name, const parameter_t& param, const
             }
         }
 
-        per_flag = param;
-        parameters_.push_back(&per_flag.value());
+        parameter_map_[name] = param;
 
     } else {
         throw std::runtime_error("Invalid parameter name for EFAC: " + name);
@@ -59,41 +57,16 @@ bool efac_t::is_valid_parameter(const string_t& param_name) const
     return valid_params.find(param_name) != valid_params.end();
 }
 
-void efac_t::print() const
-{
-    std::cout << "EFAC Element:" << std::endl;
-    if (global.has_value()) {
-        std::cout << "global: ";
-        global->print();
-    }
-    if (per_flag.has_value()) {
-        std::cout << "per_flag: ";
-        per_flag->print();
-    }
-}
-
 void efac_t::write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const
 {
-    if (global.has_value()) {
-        fprintf(par_file, "TNGLobalEF %g\n", parameters[global.value().get_index()]);
+    if (auto param = get_optional_parameter("global")) {
+        fprintf(par_file, "TNGLobalEF %g\n", parameters[param.value()->get_index()]);
     }
-    if (per_flag.has_value()) {
+    if (auto param = get_optional_parameter("per_flag")) {
         for (size_t f = 0; f < flag_values.size(); f++) {
-            fprintf(par_file, "TNEF %s %s %g\n", flag.c_str(), flag_values[f].c_str(), parameters[global.value().get_index()]);
+            fprintf(par_file, "TNEF %s %s %g\n", flag.c_str(), flag_values[f].c_str(), parameters[param.value()->get_index()]);
         }
     }
-}
-
-int efac_t::get_fitted_dims()
-{
-    int fitted_dims = 0;
-    if (global.has_value()) {
-        fitted_dims += 1;
-    }
-    if (per_flag.has_value()) {
-        fitted_dims += flag_values.size();
-    }
-    return fitted_dims;
 }
 
 string_t efac_t::get_name() const
@@ -103,22 +76,22 @@ string_t efac_t::get_name() const
 
 void efac_t::apply(const std::vector<double>& parameter_values, Eigen::VectorXd& noise, double& prior_term) const
 {
-    if (global.has_value()) {
-        double multiplier = global.value().get_exp_value(parameter_values);
+    if (auto param = get_optional_parameter("global")) {
+        double multiplier = param.value()->get_exp_value(parameter_values);
 
-        if (global.value().prior_type == prior_type_t::uniform) {
+        if (param.value()->prior_type == prior_type_t::uniform) {
             prior_term += log(multiplier);
         }
 
         noise = (noise * multiplier).array().square();
     }
 
-    if (per_flag.has_value()) {
+    if (auto param = get_optional_parameter("per_flag")) {
         Eigen::VectorXd multipliers = Eigen::VectorXd::Ones(flag_values.size());
         for (size_t i = 0; i < flag_values.size(); i++) {
-            multipliers(i) = per_flag.value().get_exp_value(parameter_values);
+            multipliers(i) = param.value()->get_exp_value(parameter_values);
 
-            if (per_flag.value().prior_type == prior_type_t::uniform) {
+            if (param.value()->prior_type == prior_type_t::uniform) {
                 prior_term += log(multipliers(i));
             }
         }

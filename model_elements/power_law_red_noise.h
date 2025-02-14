@@ -7,9 +7,6 @@
 class pl_red_noise_t : public model_element_t {
 public:
 
-    parameter_t amplitude;
-    parameter_t spectral_index;
-    optional_parameter_t num_coeffs;
     Eigen::VectorXd frequencies;
     int num_freqs;
 
@@ -18,8 +15,6 @@ public:
     void set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json) override;
     bool is_valid_parameter(const string_t& param_name) const override;
     bool is_fully_specified() const override;
-    void print() const override;
-    int get_fitted_dims() override;
     string_t get_name() const override;
 
     void write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const override;

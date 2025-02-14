@@ -175,6 +175,8 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
 
     std::shared_ptr<model_t> model = std::make_shared<model_t>(model_space, likelihood);
 
+    globals::config.validate();
+
     if (rank == 0) {
         printf("Graphical Interface: TempoNest\n");
         printf("Author:              L. Lentati\n");

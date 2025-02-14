@@ -280,13 +280,13 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
             // Handle EFAC if present
             if (auto efac_opt = model_space.get_optional_element<efac_t>("EFAC")) {
                 auto& efac = efac_opt->get();
-                if (efac.global.has_value()) {
-                    printf("Global EFAC: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
+                if (auto param = efac.get_optional_parameter("global")) {
+                    printf("Global EFAC: %g +/- %g\n", stats[param.value()->get_index()].mean, stats[param.value()->get_index()].stdev);
                     fitcount++;
                 }
-                if (efac.per_flag.has_value()) {
+                if (auto param = efac.get_optional_parameter("per_flag")) {
                     for (size_t f = 0; f < efac.flag_values.size(); f++) {
-                        printf("EFAC %s: %g +/- %g\n", efac.flag.c_str(), efac.flag_values[f].c_str(), stats[fitcount].mean, stats[fitcount].stdev);
+                        printf("EFAC %s: %g +/- %g\n", efac.flag.c_str(), efac.flag_values[f].c_str(), stats[param.value()->get_index()].mean, stats[param.value()->get_index()].stdev);
                         fitcount++;
                     }
                 }
@@ -295,13 +295,13 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
             // Handle EQUAD if present
             if (auto equad_opt = model_space.get_optional_element<equad_t>("EQUAD")) {
                 auto& equad = equad_opt->get();
-                if (equad.global.has_value()) {
-                    printf("Global EQUAD: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
+                if (auto param = equad.get_optional_parameter("global")) {
+                    printf("Global EQUAD: %g +/- %g\n", stats[param.value()->get_index()].mean, stats[param.value()->get_index()].stdev);
                     fitcount++;
                 }
-                if (equad.per_flag.has_value()) {
+                if (auto param = equad.get_optional_parameter("per_flag")) {
                     for (size_t f = 0; f < equad.flag_values.size(); f++) {
-                        printf("EQUAD %s: %g +/- %g\n", equad.flag.c_str(), equad.flag_values[f].c_str(), stats[fitcount].mean, stats[fitcount].stdev);
+                        printf("EQUAD %s: %g +/- %g\n", equad.flag.c_str(), equad.flag_values[f].c_str(), stats[param.value()->get_index()].mean, stats[param.value()->get_index()].stdev);
                         fitcount++;
                     }
                 }
@@ -309,19 +309,22 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
 
             // Handle Power Law Red Noise if present
             if (auto pl_red = model_space.get_optional_element<pl_red_noise_t>("Power Law Red Noise")) {
+                auto& pl = pl_red->get();
                 printf("Power Law Red Noise Model:\n");
-                printf("Log Amplitude: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
+                printf("Log Amplitude: %g +/- %g\n", stats[pl.get_parameter("amplitude")->get_index()].mean, stats[pl.get_parameter("amplitude")->get_index()].stdev);
                 fitcount++;
-                printf("Spectral Index: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
+                printf("Spectral Index: %g +/- %g\n", stats[pl.get_parameter("spectral_index")->get_index()].mean, stats[pl.get_parameter("spectral_index")->get_index()].stdev);
                 fitcount++;
             }
 
             // Handle Power Law DM Noise if present
             if (auto pl_dm = model_space.get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
+                auto& pl = pl_dm->get();
+
                 printf("Power Law DM Model:\n");
-                printf("Log Amplitude: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
+                printf("Log Amplitude: %g +/- %g\n", stats[pl.get_parameter("amplitude")->get_index()].mean, stats[pl.get_parameter("amplitude")->get_index()].stdev);
                 fitcount++;
-                printf("Spectral Index: %g +/- %g\n", stats[fitcount].mean, stats[fitcount].stdev);
+                printf("Spectral Index: %g +/- %g\n", stats[pl.get_parameter("spectral_index")->get_index()].mean, stats[pl.get_parameter("spectral_index")->get_index()].stdev);
                 fitcount++;
             }
         }
@@ -967,13 +970,13 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
                 if (auto efac_opt = model_space.get_optional_element<efac_t>("EFAC")) {
                     auto& efac = efac_opt->get();
 
-                    if (efac.global.has_value()) {
-                        fprintf(fout2, "TNGLobalEF %g\n", stats[whitefitcount].maximum_likelihood);
+                    if (auto param = efac.get_optional_parameter("global")) {
+                        fprintf(fout2, "TNGLobalEF %g\n", stats[param.value()->get_index()].maximum_likelihood);
                         whitefitcount++;
                     }
-                    if (efac.per_flag.has_value()) {
+                    if (auto param = efac.get_optional_parameter("per_flag")) {
                         for (size_t f = 0; f < efac.flag_values.size(); f++) {
-                            fprintf(fout2, "TNEF %s %s %g\n", efac.flag.c_str(), efac.flag_values[f].c_str(), stats[whitefitcount].maximum_likelihood);
+                            fprintf(fout2, "TNEF %s %s %g\n", efac.flag.c_str(), efac.flag_values[f].c_str(), stats[param.value()->get_index()].maximum_likelihood);
                             whitefitcount++;
                         }
                     }
@@ -983,13 +986,13 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
                 if (auto equad_opt = model_space.get_optional_element<equad_t>("EQUAD")) {
                     auto& equad = equad_opt->get();
 
-                    if (equad.global.has_value()) {
-                        fprintf(fout2, "TNGLobalEQ %g\n", stats[whitefitcount].maximum_likelihood);
+                    if (auto param = equad.get_optional_parameter("global")) {
+                        fprintf(fout2, "TNGLobalEQ %g\n", stats[param.value()->get_index()].maximum_likelihood);
                         whitefitcount++;
                     }
-                    if (equad.per_flag.has_value()) {
+                    if (auto param = equad.get_optional_parameter("per_flag")) {
                         for (size_t f = 0; f < equad.flag_values.size(); f++) {
-                            fprintf(fout2, "TNEQ %s %s %g\n", equad.flag.c_str(), equad.flag_values[f].c_str(), stats[whitefitcount].maximum_likelihood);
+                            fprintf(fout2, "TNEQ %s %s %g\n", equad.flag.c_str(), equad.flag_values[f].c_str(), stats[param.value()->get_index()].maximum_likelihood);
                             whitefitcount++;
                         }
                     }
@@ -999,13 +1002,15 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
                 if (auto pl_red_opt = model_space.get_optional_element<pl_red_noise_t>("Power Law Red Noise")) {
                     auto& pl = pl_red_opt->get();
 
-                    fprintf(fout2, "TNRedAmp %g\n", stats[whitefitcount].maximum_likelihood);
-                    tablefile << "Log$_{10}$[Red Amp] \\dotfill & " << stats[whitefitcount].mean << " $\\pm$ " << stats[whitefitcount].stdev << "  \\\\ \n";
+                    fprintf(fout2, "TNRedAmp %g\n", stats[pl.get_parameter("amplitude")->get_index()].maximum_likelihood);
+                    tablefile << "Log$_{10}$[Red Amp] \\dotfill & " << stats[pl.get_parameter("amplitude")->get_index()].mean << " $\\pm$ " << stats[pl.get_parameter("amplitude")->get_index()].stdev
+                              << "  \\\\ \n";
                     whitefitcount++;
 
-                    fprintf(fout2, "TNRedGam %g\n", stats[whitefitcount].maximum_likelihood);
+                    fprintf(fout2, "TNRedGam %g\n", stats[pl.get_parameter("spectral_index")->get_index()].maximum_likelihood);
                     fprintf(fout2, "TNRedC %i\n", 2 * pl.num_freqs);
-                    tablefile << "Red Index \\dotfill & " << stats[whitefitcount].mean << " $\\pm$ " << stats[whitefitcount].stdev << "  \\\\ \n";
+                    tablefile << "Red Index \\dotfill & " << stats[pl.get_parameter("spectral_index")->get_index()].mean << " $\\pm$ " << stats[pl.get_parameter("spectral_index")->get_index()].stdev
+                              << "  \\\\ \n";
                     whitefitcount++;
                 }
 
@@ -1013,13 +1018,15 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
                 if (auto pl_dm_opt = model_space.get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
                     auto& pl = pl_dm_opt->get();
 
-                    fprintf(fout2, "TNDMAmp %g\n", stats[whitefitcount].maximum_likelihood);
-                    tablefile << "Log$_{10}$[DM Amp] \\dotfill & " << stats[whitefitcount].mean << " $\\pm$ " << stats[whitefitcount].stdev << "  \\\\ \n";
+                    fprintf(fout2, "TNDMAmp %g\n", stats[pl.get_parameter("amplitude")->get_index()].maximum_likelihood);
+                    tablefile << "Log$_{10}$[DM Amp] \\dotfill & " << stats[pl.get_parameter("amplitude")->get_index()].mean << " $\\pm$ " << stats[pl.get_parameter("amplitude")->get_index()].stdev
+                              << "  \\\\ \n";
                     whitefitcount++;
 
-                    fprintf(fout2, "TNDMGam %g\n", stats[whitefitcount].maximum_likelihood);
+                    fprintf(fout2, "TNDMGam %g\n", stats[pl.get_parameter("spectral_index")->get_index()].maximum_likelihood);
                     fprintf(fout2, "TNDMC %i\n", 2 * pl.num_freqs);
-                    tablefile << "DM Index \\dotfill & " << stats[whitefitcount].mean << " $\\pm$ " << stats[whitefitcount].stdev << "  \\\\ \n";
+                    tablefile << "DM Index \\dotfill & " << stats[pl.get_parameter("spectral_index")->get_index()].mean << " $\\pm$ " << stats[pl.get_parameter("spectral_index")->get_index()].stdev
+                              << "  \\\\ \n";
                     whitefitcount++;
                 }
 

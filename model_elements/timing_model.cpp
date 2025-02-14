@@ -23,7 +23,6 @@ void timing_model_t::initialise()
         const int k = fitinfo->paramCounters[iparam];
 
         t2_fitted_labels.push_back(globals::pulsar->param[p].shortlabel[k]);
-        std::cout << "Adding " << globals::pulsar->param[p].shortlabel[k] << std::endl;
 
         // be default we do marginalise over the parameters
         marginalised.push_back(true);
@@ -77,7 +76,7 @@ void timing_model_t::set_parameter(const string_t& name, const parameter_t& para
     }
 
     parameters.push_back(timing_parameter);
-    parameters_.push_back(&parameters.back());
+    parameter_map_[name] = param;  // Add to base class map for standard parameter access
 
     // every added parameters reduces the size of the design matrix by one
     design_size--;
