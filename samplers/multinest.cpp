@@ -48,7 +48,7 @@ void multinest_sampler_t::run(std::shared_ptr<model_t> model)
     const multinest_settings_t& mn_settings = static_cast<const multinest_settings_t&>(get_settings());
 
     // Create output directories
-    std::filesystem::path base_dir(mn_settings.output_dir);
+    std::filesystem::path base_dir(mn_settings.output_root);
 
     try {
         std::filesystem::create_directories(base_dir);
@@ -86,21 +86,19 @@ void multinest_sampler_t::run(std::shared_ptr<model_t> model)
                                 // criterion (defined through tol) has been satisfied
     void* context = 0;          // not required by MultiNest, any additional information user wants to pass
 
-    if (mn_settings.output_dir.size() >= 100)
-        die("Root Name is too long, needs to be less than 100 characters, currently: " + std::to_string(mn_settings.output_dir.size()));
+    if (mn_settings.output_root.size() >= 100)
+        die("Root Name is too long, needs to be less than 100 characters, currently: " + std::to_string(mn_settings.output_root.size()));
 
     char root[100];
-    for (int r = 0; r <= mn_settings.output_dir.size(); r++) {
-        root[r] = mn_settings.output_dir[r];
+    for (int r = 0; r <= mn_settings.output_root.size(); r++) {
+        root[r] = mn_settings.output_root[r];
     }
 
-    char* chartroot = new char[mn_settings.output_dir.length() + 1];
-    std::strcpy(chartroot, mn_settings.output_dir.c_str());
+    char* chartroot = new char[mn_settings.output_root.length() + 1];
+    std::strcpy(chartroot, mn_settings.output_root.c_str());
 
     nested::run(mn_settings.importance_sampling, mn_settings.modal, mn_settings.constant_efficiency, mn_settings.num_live, tol, mn_settings.efficiency, ndims, ndims,
                 mn_settings.num_cluster_parameters, maxModes, mn_settings.update_interval, Ztol, root, seed, pWrap, fb, resume, outfile, initMPI, logZero, maxiter, loglike_wrapper, dumper, this);
-
-    model_.reset();
 }
 
 void multinest_sampler_t::readtxtoutput(int ndim, std::vector<parameter_stats_t>& stats)
@@ -110,7 +108,7 @@ void multinest_sampler_t::readtxtoutput(int ndim, std::vector<parameter_stats_t>
     double weightsum = 0;
 
     // Get filename
-    std::string txt_filename = get_settings().output_dir + ".txt";
+    std::string txt_filename = get_settings().output_root + ".txt";
 
     // First pass - get means, MAP and max likelihood
     std::ifstream txt_file(txt_filename);
@@ -185,7 +183,7 @@ void multinest_sampler_t::readtxtoutput(int ndim, std::vector<parameter_stats_t>
 // Updates maximum likelihood if better one found in live points
 void multinest_sampler_t::readphyslive(int ndim, std::vector<parameter_stats_t>& stats)
 {
-    std::string phys_live_filename = get_settings().output_dir + "phys_live.points";
+    std::string phys_live_filename = get_settings().output_root + "phys_live.points";
 
     std::ifstream phys_live_file(phys_live_filename);
     if (!phys_live_file.is_open()) {
@@ -227,7 +225,7 @@ void multinest_sampler_t::output_results()
     formBatsAll(globals::pulsar, 1);       // Form Barycentric arrival times
     formResiduals(globals::pulsar, 1, 1);  // Form residuals
 
-    TNtextOutput(globals::pulsar, 1, n_dims, get_settings().output_dir, model_, stats);
+    TNtextOutput(globals::pulsar, 1, n_dims, get_settings().output_root, model_, stats);
 
     logger::log_info("finished output");
 }

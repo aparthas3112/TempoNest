@@ -189,7 +189,7 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
         printf("Starting TempoNest\n");
         printf("*****************************************************\n\n\n\n");
         printf("Details of the fit:\n");
-        printf("file root set to %s \n", sampler->get_settings().output_dir.c_str());
+        printf("file root set to %s \n", sampler->get_settings().output_root.c_str());
     }
 
     // if we are running unit tests do that now rather than sampling

@@ -133,6 +133,9 @@ std::vector<const parameter_t*> model_space_t::get_sampling_parameters() const
         auto element_params = element->get_parameters();
         parameters.insert(parameters.end(), element_params.begin(), element_params.end());
     }
+
+    std::sort(parameters.begin(), parameters.end(), [](const parameter_t* a, const parameter_t* b) { return a->get_index() < b->get_index(); });
+
     return parameters;
 }
 

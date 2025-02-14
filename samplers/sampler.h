@@ -50,7 +50,7 @@ public:
     // Common settings
 
     /** @brief Directory for output chain files */
-    string_t output_dir = "./chains/";
+    string_t output_root = "./chains/";
 
     /** @brief Are we actually sampling */
     bool sample = true;
