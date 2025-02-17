@@ -24,6 +24,7 @@ public:
         std::vector<const parameter_t*> params;
         params.reserve(parameter_map_.size());
         for (const auto& [key, param] : parameter_map_) {
+            const_cast<parameter_t&>(param).set_id(key);  // Need const_cast since we're in a const function
             params.push_back(&param);
         }
         return params;
@@ -81,6 +82,8 @@ public:
         }
         return *param;
     }
+
+    const std::unordered_map<string_t, parameter_t>& get_parameter_map() const { return parameter_map_; }
 };
 
 // we need to include all the model elements here to avoid circular dependencies

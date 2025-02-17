@@ -130,11 +130,10 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
 
     double rms_pre = 0.0, rms_post = 0.0;
     double mean_pre = 0.0, mean_post = 0.0, chisqr;
-    int i, p, count, k, whitefitcount;
+    int i, p, count, k;
     FILE* fout;
     char* fname;
 
-    whitefitcount = 0;
     logdbg("In textOutput");
 
     for (p = 0; p < npsr; p++) {
@@ -186,8 +185,6 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
              */
             chisqr = psr[p].fitChisq;
         }
-        int pcount = 1;
-        int fitcount = 0;
 
         printf("\n\n");
         printf(
@@ -237,8 +234,6 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
                         if (strcmp(psr[p].tzrsite, "NULL") != 0)
                             printf("%-15.15s %-25.25s\n", "TZRSITE", psr[p].tzrsite);
                     }
-
-                    pcount++;
                 }
             }
         }
@@ -252,8 +247,6 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
                 printf("Jump %d (%s): %.14g %.14g ", i, psr[p].jumpStr[i], psr[p].jumpVal[i], psr[p].jumpValErr[i]);
                 if (psr[p].fitJump[i] == 1) {
 
-                    pcount++;
-
                 } else
                     printf("N\n");
             }
@@ -263,71 +256,48 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
         std::vector<int> groupflag;
         std::vector<std::string> groupnames;
 
-        // First check if we have any stochastic elements
-        bool has_stochastic = false;
-        for (const auto& [name, element] : model_space.get_elements()) {
-            if (name != "Timing Model") {
-                has_stochastic = true;
-                break;
-            }
+        std::ofstream tablefile;
+        std::string tablefilename = longname + "_table.tex";
+        tablefile.open(tablefilename.c_str());
+
+        tablefile << "\n";
+        tablefile << "\\documentclass{article}\n";
+        tablefile << "\\begin{document}\n";
+        tablefile << "\\begin{table*}\n";
+        tablefile << "\\caption{Stochastic parameter estimates for PSR " << psr[p].name << "}\n";
+        tablefile << "\\begin{tabular}{ll}\n";
+        tablefile << "\\hline\\hline\n";
+        tablefile << "\\multicolumn{2}{c}{Fit and data-set} \\\\ \n";
+        tablefile << "\\hline\n";
+        tablefile << "Pulsar name\\dotfill & " << psr[p].name << " \\\\ \n";
+        tablefile << "MJD range\\dotfill & " << psr[p].param[param_start].val[0] << "---" << psr[p].param[param_finish].val[0] << " \\\\ \n";
+        tablefile << "Number of TOAs\\dotfill & " << psr[p].nFit << " \\\\\n";
+        tablefile << "\\hline\n";
+        tablefile << "\\multicolumn{2}{c}{Stochastic Parameters} \\\\ \n";
+        tablefile << "\\hline\n";
+
+        printf("------------------------------------------------------------------------------\n");
+        printf("Stochastic Parameters:\n");
+
+        const auto& parameters = model_space.get_sampling_parameters();
+        for (const auto& param : parameters) {
+            model_element_t* parent = param->get_parent();
+            if (parent->get_name() == "Timing Model")
+                continue;
+
+            double mean = stats[param->get_index()].mean;
+            double stdev = stats[param->get_index()].stdev;
+            printf("%s: %s : %g +/- %g\n", parent->get_name().c_str(), param->id.c_str(), mean, stdev);
+            tablefile << parent->get_name() << " : " << param->id.c_str() << " \\dotfill & " << mean << " $\\pm$ " << stdev << "  \\\\ \n";
         }
 
-        if (has_stochastic) {
-            whitefitcount = fitcount;
-            printf("------------------------------------------------------------------------------\n");
-            printf("Stochastic Parameters:\n");
-
-            // Handle EFAC if present
-            if (auto efac_opt = model_space.get_optional_element<efac_t>("EFAC")) {
-                auto& efac = efac_opt->get();
-                if (auto param = efac.get_optional_parameter("global")) {
-                    printf("Global EFAC: %g +/- %g\n", stats[param.value()->get_index()].mean, stats[param.value()->get_index()].stdev);
-                    fitcount++;
-                }
-                if (auto param = efac.get_optional_parameter("per_flag")) {
-                    for (size_t f = 0; f < efac.flag_values.size(); f++) {
-                        printf("EFAC %s: %g +/- %g\n", efac.flag.c_str(), efac.flag_values[f].c_str(), stats[param.value()->get_index()].mean, stats[param.value()->get_index()].stdev);
-                        fitcount++;
-                    }
-                }
-            }
-
-            // Handle EQUAD if present
-            if (auto equad_opt = model_space.get_optional_element<equad_t>("EQUAD")) {
-                auto& equad = equad_opt->get();
-                if (auto param = equad.get_optional_parameter("global")) {
-                    printf("Global EQUAD: %g +/- %g\n", stats[param.value()->get_index()].mean, stats[param.value()->get_index()].stdev);
-                    fitcount++;
-                }
-                if (auto param = equad.get_optional_parameter("per_flag")) {
-                    for (size_t f = 0; f < equad.flag_values.size(); f++) {
-                        printf("EQUAD %s: %g +/- %g\n", equad.flag.c_str(), equad.flag_values[f].c_str(), stats[param.value()->get_index()].mean, stats[param.value()->get_index()].stdev);
-                        fitcount++;
-                    }
-                }
-            }
-
-            // Handle Power Law Red Noise if present
-            if (auto pl_red = model_space.get_optional_element<pl_red_noise_t>("Power Law Red Noise")) {
-                auto& pl = pl_red->get();
-                printf("Power Law Red Noise Model:\n");
-                printf("Log Amplitude: %g +/- %g\n", stats[pl.get_parameter("amplitude")->get_index()].mean, stats[pl.get_parameter("amplitude")->get_index()].stdev);
-                fitcount++;
-                printf("Spectral Index: %g +/- %g\n", stats[pl.get_parameter("spectral_index")->get_index()].mean, stats[pl.get_parameter("spectral_index")->get_index()].stdev);
-                fitcount++;
-            }
-
-            // Handle Power Law DM Noise if present
-            if (auto pl_dm = model_space.get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
-                auto& pl = pl_dm->get();
-
-                printf("Power Law DM Model:\n");
-                printf("Log Amplitude: %g +/- %g\n", stats[pl.get_parameter("amplitude")->get_index()].mean, stats[pl.get_parameter("amplitude")->get_index()].stdev);
-                fitcount++;
-                printf("Spectral Index: %g +/- %g\n", stats[pl.get_parameter("spectral_index")->get_index()].mean, stats[pl.get_parameter("spectral_index")->get_index()].stdev);
-                fitcount++;
-            }
-        }
+        tablefile << "\\hline\n";
+        tablefile << "\\end{tabular}\n";
+        tablefile << "\\label{Table:" << psr[p].name << "}\n";
+        tablefile << "\\end{table*} \n";
+        tablefile << "\\end{document}\n";
+        tablefile << "\n";
+        tablefile.close();
 
         /* Whitening */
         if (psr[p].param[param_wave_om].paramSet[0] == 1) {
@@ -778,26 +748,6 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
             printf("Total time span = %.3f days = %.3f years\n", end - start, (end - start) / 365.25);
         }
 
-        std::ofstream tablefile;
-        std::string tablefilename = longname + "_table.tex";
-        tablefile.open(tablefilename.c_str());
-
-        tablefile << "\n";
-        tablefile << "\\documentclass{article}\n";
-        tablefile << "\\begin{document}\n";
-        tablefile << "\\begin{table*}\n";
-        tablefile << "\\caption{Stochastic parameter estimates for PSR " << psr[p].name << "}\n";
-        tablefile << "\\begin{tabular}{ll}\n";
-        tablefile << "\\hline\\hline\n";
-        tablefile << "\\multicolumn{2}{c}{Fit and data-set} \\\\ \n";
-        tablefile << "\\hline\n";
-        tablefile << "Pulsar name\\dotfill & " << psr[p].name << " \\\\ \n";
-        tablefile << "MJD range\\dotfill & " << psr[p].param[param_start].val[0] << "---" << psr[p].param[param_finish].val[0] << " \\\\ \n";
-        tablefile << "Number of TOAs\\dotfill & " << psr[p].nFit << " \\\\\n";
-        tablefile << "\\hline\n";
-        tablefile << "\\multicolumn{2}{c}{Stochastic Parameters} \\\\ \n";
-        tablefile << "\\hline\n";
-        //	printf("start of T@ parms %i\n", whitefitcount);
         if (1 == 1) /* Write a new .par file */
         {
 
@@ -964,7 +914,6 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
                     else if (strcasecmp(str1, "NAME") == 0 || strcasecmp(str1, "TEL") == 0 || str1[0] == '-')
                         fprintf(fout2, "JUMP %s %s %.14g %d\n", str1, str2, psr[p].jumpVal[i], psr[p].fitJump[i]);
                 }
-                //	printf("end of T2 parms %i \n", whitefitcount);
 
                 // Handle EFAC if present
                 if (auto efac_opt = model_space.get_optional_element<efac_t>("EFAC")) {
@@ -972,12 +921,10 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
 
                     if (auto param = efac.get_optional_parameter("global")) {
                         fprintf(fout2, "TNGLobalEF %g\n", stats[param.value()->get_index()].maximum_likelihood);
-                        whitefitcount++;
                     }
                     if (auto param = efac.get_optional_parameter("per_flag")) {
                         for (size_t f = 0; f < efac.flag_values.size(); f++) {
                             fprintf(fout2, "TNEF %s %s %g\n", efac.flag.c_str(), efac.flag_values[f].c_str(), stats[param.value()->get_index()].maximum_likelihood);
-                            whitefitcount++;
                         }
                     }
                 }
@@ -988,12 +935,10 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
 
                     if (auto param = equad.get_optional_parameter("global")) {
                         fprintf(fout2, "TNGLobalEQ %g\n", stats[param.value()->get_index()].maximum_likelihood);
-                        whitefitcount++;
                     }
                     if (auto param = equad.get_optional_parameter("per_flag")) {
                         for (size_t f = 0; f < equad.flag_values.size(); f++) {
                             fprintf(fout2, "TNEQ %s %s %g\n", equad.flag.c_str(), equad.flag_values[f].c_str(), stats[param.value()->get_index()].maximum_likelihood);
-                            whitefitcount++;
                         }
                     }
                 }
@@ -1003,15 +948,8 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
                     auto& pl = pl_red_opt->get();
 
                     fprintf(fout2, "TNRedAmp %g\n", stats[pl.get_parameter("amplitude")->get_index()].maximum_likelihood);
-                    tablefile << "Log$_{10}$[Red Amp] \\dotfill & " << stats[pl.get_parameter("amplitude")->get_index()].mean << " $\\pm$ " << stats[pl.get_parameter("amplitude")->get_index()].stdev
-                              << "  \\\\ \n";
-                    whitefitcount++;
-
                     fprintf(fout2, "TNRedGam %g\n", stats[pl.get_parameter("spectral_index")->get_index()].maximum_likelihood);
                     fprintf(fout2, "TNRedC %i\n", 2 * pl.num_freqs);
-                    tablefile << "Red Index \\dotfill & " << stats[pl.get_parameter("spectral_index")->get_index()].mean << " $\\pm$ " << stats[pl.get_parameter("spectral_index")->get_index()].stdev
-                              << "  \\\\ \n";
-                    whitefitcount++;
                 }
 
                 // Handle Power Law DM Noise if present
@@ -1019,15 +957,8 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
                     auto& pl = pl_dm_opt->get();
 
                     fprintf(fout2, "TNDMAmp %g\n", stats[pl.get_parameter("amplitude")->get_index()].maximum_likelihood);
-                    tablefile << "Log$_{10}$[DM Amp] \\dotfill & " << stats[pl.get_parameter("amplitude")->get_index()].mean << " $\\pm$ " << stats[pl.get_parameter("amplitude")->get_index()].stdev
-                              << "  \\\\ \n";
-                    whitefitcount++;
-
                     fprintf(fout2, "TNDMGam %g\n", stats[pl.get_parameter("spectral_index")->get_index()].maximum_likelihood);
                     fprintf(fout2, "TNDMC %i\n", 2 * pl.num_freqs);
-                    tablefile << "DM Index \\dotfill & " << stats[pl.get_parameter("spectral_index")->get_index()].mean << " $\\pm$ " << stats[pl.get_parameter("spectral_index")->get_index()].stdev
-                              << "  \\\\ \n";
-                    whitefitcount++;
                 }
 
                 /* Add whitening flags */
@@ -1084,14 +1015,6 @@ void TNtextOutput(pulsar* psr, int npsr, int ndim, std::string longname, const s
                     }
                 }
                 fclose(fout2);
-
-                tablefile << "\\hline\n";
-                tablefile << "\\end{tabular}\n";
-                tablefile << "\\label{Table:" << psr[p].name << "}\n";
-                tablefile << "\\end{table*} \n";
-                tablefile << "\\end{document}\n";
-                tablefile << "\n";
-                tablefile.close();
             }
         }
         /* printf("Precision: routine, precision, comment\n");

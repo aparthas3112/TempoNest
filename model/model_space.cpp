@@ -45,6 +45,7 @@ void model_space_t::load_model()
         }
 
         auto element = create_element(element_name);
+        auto* element_ptr = element.get();  // Get raw pointer before moving
 
         for (size_t j = 0; j < json_params.size(); j++) {
             const auto& json_param = json_params[j];
@@ -54,8 +55,21 @@ void model_space_t::load_model()
                 if (!param.include) {
                     continue;
                 }
-                param.set_index(param_index++);
+                // Store the current number of fitted dimensions before adding new parameter(s)
+                int previous_dims = element->get_fitted_dims();
+
+                // Set the initial index for this parameter
+                param.set_index(param_index);
+                param.set_parent(element_ptr);  // Set the parent before adding parameter
+
+                // set_parameter might create multiple parameters internally
                 element->set_parameter(param_name, param, json_param);
+                // Calculate how many new parameters were added
+                int new_dims = element->get_fitted_dims() - previous_dims;
+
+                // Increment param_index by the number of new parameters
+                param_index += new_dims;
+
             } else {
                 std::cout << "Warning: Ignoring invalid parameter '" << param_name << "' for " << element->get_name() << std::endl;
             }
@@ -108,11 +122,7 @@ element_t model_space_t::create_element(const string_t& type)
 
 int model_space_t::get_fitted_dims() const
 {
-    int total_dims = 0;
-    for (const auto& [key, element] : elements_) {
-        total_dims += element->get_fitted_dims();
-    }
-    return total_dims;
+    return get_sampling_parameters().size();
 }
 
 bool model_space_t::is_fully_specified() const

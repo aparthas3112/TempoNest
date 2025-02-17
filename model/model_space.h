@@ -66,6 +66,25 @@ public:
         die("Element '" + name + "' found with wrong type in model");
     }
 
+    std::optional<std::reference_wrapper<model_element_t>> get_optional_base_element(const string_t& name) const
+    {
+        auto it = elements_.find(name);
+        if (it == elements_.end())
+            return std::nullopt;
+
+        return std::ref(*it->second);
+    }
+
+    // non const version
+    std::optional<std::reference_wrapper<model_element_t>> get_optional_base_element(const string_t& name)
+    {
+        auto it = elements_.find(name);
+        if (it == elements_.end())
+            return std::nullopt;
+
+        return std::ref(*it->second);
+    }
+
     // Get total number of fitted dimensions
     int get_fitted_dims() const;
 
@@ -99,12 +118,6 @@ public:
      */
     std::vector<const parameter_t*> get_sampling_parameters() const;
 
-    /**
-     * @brief Get read-only access to the parameters vector
-     * @return Const reference to parameters
-     */
-    const std::vector<const parameter_t*>& get_parameters() const { return parameters_; }
-
 private:
 
     // Helper methods
@@ -116,7 +129,6 @@ private:
 
     // Member variables
     std::unordered_map<string_t, element_t> elements_;
-    std::vector<const parameter_t*> parameters_;  // Store all parameters in load order
 
     // Matrices and dimensions
     Eigen::MatrixXd design_matrix_;

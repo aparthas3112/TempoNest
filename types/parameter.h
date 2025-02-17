@@ -8,6 +8,7 @@ class parameter_t {
 public:
 
     std::string name;
+    std::string id = "";
     std::string description;
     prior_type_t prior_type;
     bool include;
@@ -37,8 +38,15 @@ public:
      */
     void set_index(int index) { index_ = index; }
 
+    void set_parent(model_element_t* parent) { parent_ = parent; }
+
+    model_element_t* get_parent() const { return parent_; }
+
+    void set_id(std::string id) { this->id = id; }
+
 private:
 
+    model_element_t* parent_{nullptr};
     /**
      * Index in sampler's parameter vector.
      * -1 indicates parameter is not being sampled.

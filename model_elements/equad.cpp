@@ -43,7 +43,13 @@ void equad_t::set_parameter(const string_t& name, const parameter_t& param, cons
             }
         }
 
-        parameter_map_[name] = param;
+        // Now create a parameter for each unique flag value
+        for (size_t i = 0; i < flag_values.size(); i++) {
+            string_t param_name = "per_flag::" + flag + "::" + std::to_string(i);
+            parameter_t new_param = param;
+            new_param.set_index(param.get_index() + i);
+            parameter_map_[param_name] = new_param;
+        }
 
     } else {
         throw std::runtime_error("Invalid parameter name for EFAC: " + name);
@@ -52,7 +58,10 @@ void equad_t::set_parameter(const string_t& name, const parameter_t& param, cons
 
 bool equad_t::is_fully_specified() const
 {
-    return true;
+    if (get_optional_parameter("global").has_value() == flag_values.empty()) {
+        return true;
+    }
+    return false;
 }
 
 bool equad_t::is_valid_parameter(const string_t& param_name) const
@@ -81,13 +90,15 @@ void equad_t::apply(const std::vector<double>& parameter_values, Eigen::VectorXd
         noise = noise.array() + equad;
     }
 
-    if (auto param = get_optional_parameter("per_flag")) {
+    if (!flag_values.empty()) {
         Eigen::VectorXd equad_values = Eigen::VectorXd::Zero(flag_values.size());
         for (size_t i = 0; i < flag_values.size(); i++) {
-            double value = param.value()->get_exp_value(parameter_values);
+            string_t param_name = "per_flag::" + flag + "::" + std::to_string(i);
+            auto param = get_parameter(param_name);
+            double value = param->get_exp_value(parameter_values);
             equad_values(i) = value * value;
 
-            if (param.value()->prior_type == prior_type_t::uniform) {
+            if (param->prior_type == prior_type_t::uniform) {
                 prior_term += log(value);
             }
         }
