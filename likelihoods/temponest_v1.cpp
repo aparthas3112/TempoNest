@@ -1,5 +1,7 @@
 #include "temponest_v1.h"
 #include "../logger.h"
+#include "../namespaces/settings.h"
+#include "gpu_functions.h"
 
 double temponest_v1_t::operator()(const model_space_t& model_space, const std::vector<double>& parameter_values) const
 {
@@ -92,31 +94,35 @@ double temponest_v1_t::operator()(const model_space_t& model_space, const std::v
     //////////////////////////////////////////////////////////////////////////////////////////
     logtchk("Starting algebra");
 
-    Eigen::MatrixXd NT = TotalMatrix.array().colwise() * noise.array();
+    double likelihood = 0.0;
+    if (globals::use_gpu) {
+        likelihood = performAlgebraWithArrayFireGPU(TotalMatrix, noise, Resvec, powercoeff, totCoeff, tdet, freq_det, timelike, uniform_prior);
+    } else {
+        Eigen::MatrixXd NT = TotalMatrix.array().colwise() * noise.array();
 
-    Eigen::MatrixXd TNT = TotalMatrix.transpose() * NT;
+        Eigen::MatrixXd TNT = TotalMatrix.transpose() * NT;
 
-    Eigen::VectorXd NTd = NT.transpose() * Resvec;
+        Eigen::VectorXd NTd = NT.transpose() * Resvec;
 
-    logtchk("Finishing main algebra");
+        logtchk("Finishing main algebra");
 
-    if (totCoeff > 0)
-        TNT.diagonal().tail(totCoeff) += powercoeff.cwiseInverse();
+        if (totCoeff > 0)
+            TNT.diagonal().tail(totCoeff) += powercoeff.cwiseInverse();
 
-    // Perform Cholesky decomposition
-    Eigen::LLT<Eigen::MatrixXd> llt(TNT);
+        // Perform Cholesky decomposition
+        Eigen::LLT<Eigen::MatrixXd> llt(TNT);
 
-    // Solve the linear system
-    Eigen::VectorXd chol_solution = llt.solve(NTd);
+        // Solve the linear system
+        Eigen::VectorXd chol_solution = llt.solve(NTd);
 
-    // Calculate log determinant
-    double jointdet = 2 * llt.matrixLLT().diagonal().array().log().sum();
+        // Calculate log determinant
+        double jointdet = 2 * llt.matrixLLT().diagonal().array().log().sum();
 
-    double freqlike = NTd.dot(chol_solution);
+        double freqlike = NTd.dot(chol_solution);
 
-    double lnewChol = -0.5 * (tdet + jointdet + freq_det + timelike - freqlike) + uniform_prior;
-
+        likelihood = -0.5 * (tdet + jointdet + freq_det + timelike - freqlike) + uniform_prior;
+    }
     logtchk("Exiting TempoNest Likelihood");
 
-    return lnewChol;
+    return likelihood;
 }

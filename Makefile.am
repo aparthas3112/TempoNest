@@ -40,6 +40,7 @@ common_sources += namespaces/settings.cpp
 common_sources += json/json_loader.cpp json/json_node.cpp
 common_sources += model/model_space.cpp
 common_sources += likelihoods/temponest_v1.cpp
+common_sources += likelihoods/gpu_functions.cpp
 common_sources += samplers/sampler.cpp samplers/multinest.cpp
 
 # Tests 
@@ -57,6 +58,13 @@ temponest_@T2ARCH@_plug_la_LIBADD = -lgfortran -ltempo2 -lsofa @MULTINEST_LIBS@ 
 temponest_@T2ARCH@_plug_la_CPPFLAGS = @MULTINEST_CFLAGS@ @GSL_CFLAGS@ @TEMPO2_CFLAGS@ @EIGEN_CPPFLAGS@ $(MPI_CXXFLAGS)
 
 temponest_@T2ARCH@_plug_la_LDFLAGS = -fopenmp  -shared -module -avoid-version -shrext .t2 $(MPI_CXXLDFLAGS) 
+
+# ArrayFire support
+if HAVE_ARRAYFIRE
+temponest_@T2ARCH@_plug_la_CPPFLAGS += @ARRAYFIRE_CPPFLAGS@ -DHAVE_ARRAYFIRE
+temponest_@T2ARCH@_plug_la_LIBADD += @ARRAYFIRE_LIBS@
+temponest_@T2ARCH@_plug_la_LDFLAGS += @ARRAYFIRE_LDFLAGS@
+endif
 
 temponest: temponest_@T2ARCH@_plug.la
 

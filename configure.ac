@@ -161,6 +161,73 @@ AC_MSG_CHECKING([for BLAS])
 AC_MSG_RESULT($have_blas)
 AM_CONDITIONAL(HAVE_BLAS, [test x$have_blas = xyes])
 
+
+# Check for ArrayFire
+AC_ARG_WITH([arrayfire],
+    [AS_HELP_STRING([--with-arrayfire=DIR],
+        [prefix for ArrayFire installation])],
+    [ARRAYFIRE_DIR="$withval"],
+    [ARRAYFIRE_DIR=""])
+
+if test "x$with_arrayfire" != "xno"; then
+    if test -n "$ARRAYFIRE_DIR"; then
+        ARRAYFIRE_CPPFLAGS="-I$ARRAYFIRE_DIR/include"
+        ARRAYFIRE_LDFLAGS="-L$ARRAYFIRE_DIR/lib64 -L$ARRAYFIRE_DIR/lib"
+        AC_MSG_NOTICE([ArrayFire directory specified: $ARRAYFIRE_DIR])
+        AC_MSG_NOTICE([ArrayFire CPPFLAGS: $ARRAYFIRE_CPPFLAGS])
+        AC_MSG_NOTICE([ArrayFire LDFLAGS: $ARRAYFIRE_LDFLAGS])
+    else
+        AC_MSG_NOTICE([ArrayFire directory not specified, will search in standard locations])
+    fi
+    
+    save_CPPFLAGS="$CPPFLAGS"
+    save_LDFLAGS="$LDFLAGS"
+    save_LIBS="$LIBS"
+    CPPFLAGS="$CPPFLAGS $ARRAYFIRE_CPPFLAGS"
+    LDFLAGS="$LDFLAGS $ARRAYFIRE_LDFLAGS"
+    
+    AC_LANG_PUSH([C++])
+    AC_CHECK_HEADER([arrayfire.h],
+        [have_arrayfire_h=yes
+         AC_MSG_NOTICE([Found arrayfire.h])],
+        [have_arrayfire_h=no
+         AC_MSG_WARN([arrayfire.h not found])])
+    
+    if test "x$have_arrayfire_h" = xyes; then
+        AC_CHECK_LIB([af], [af_create_array],
+            [ARRAYFIRE_LIBS="-laf"
+             have_arrayfire=yes
+             AC_MSG_NOTICE([Found ArrayFire library])],
+            [have_arrayfire=no
+             AC_MSG_WARN([ArrayFire library not found])])
+    else
+        have_arrayfire=no
+    fi
+    AC_LANG_POP([C++])
+    
+    CPPFLAGS="$save_CPPFLAGS"
+    LDFLAGS="$save_LDFLAGS"
+    LIBS="$save_LIBS"
+    
+    if test "x$have_arrayfire" = xyes; then
+        AC_DEFINE([HAVE_ARRAYFIRE], [1], [Define if ArrayFire is available])
+        AC_SUBST(ARRAYFIRE_CPPFLAGS)
+        AC_SUBST(ARRAYFIRE_LDFLAGS)
+        AC_SUBST(ARRAYFIRE_LIBS)
+    else
+        AC_MSG_WARN([
+-------------------------------------
+ArrayFire was requested but not found.
+Have ArrayFire header: $have_arrayfire_h
+Please check that $ARRAYFIRE_DIR contains the ArrayFire installation.
+The directory should have 'include' and 'lib' (or 'lib64') subdirectories.
+-------------------------------------])
+    fi
+fi
+
+AM_CONDITIONAL([HAVE_ARRAYFIRE], [test "x$have_arrayfire" = xyes])
+
+
 # Check for Eigen
 AC_ARG_WITH([eigen],
     [AS_HELP_STRING([--with-eigen=DIR],
@@ -315,6 +382,16 @@ fi
 #else
 #        AC_MSG_NOTICE(QD library not found, will not compile high precision part of TempoNest)
 #fi
+
+if test "x$have_arrayfire" = xyes; then
+    AC_MSG_NOTICE([ArrayFire support: enabled])
+    AC_MSG_NOTICE([ArrayFire CPPFLAGS: $ARRAYFIRE_CPPFLAGS])
+    AC_MSG_NOTICE([ArrayFire LDFLAGS: $ARRAYFIRE_LDFLAGS])
+    AC_MSG_NOTICE([ArrayFire LIBS: $ARRAYFIRE_LIBS])
+else
+    AC_MSG_NOTICE([ArrayFire support: disabled])
+fi
+
 
 
 AC_MSG_NOTICE(Tempo2 includes: $TEMPO2_CFLAGS)

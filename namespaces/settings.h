@@ -28,6 +28,9 @@ extern bool test_mode;
 // json config document
 extern json_loader_t config;
 
+// are we using gpus
+extern bool use_gpu;
+
 void load_settings(const string_t& filename);
 
 void print();
