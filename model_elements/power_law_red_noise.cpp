@@ -12,14 +12,11 @@ pl_red_noise_t::pl_red_noise_t() : num_freqs(33)
 
 void pl_red_noise_t::set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json)
 {
-    std::cout << " in set parameter for red noise" << std::endl;
     if (!is_valid_parameter(name)) {
         die("Invalid parameter name for Power Law Red Noise: " + name);
     }
 
-    std::cout << "Setting Power Law Red Noise parameter: " << name << std::endl;
     parameter_map_[name] = param;
-    std::cout << "done setting Power Law Red Noise parameter: " << name << std::endl;
 }
 
 bool pl_red_noise_t::is_valid_parameter(const string_t& param_name) const

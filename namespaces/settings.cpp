@@ -1,4 +1,5 @@
 #include "settings.h"
+#include <logger.h>
 #include "../likelihoods/gpu_functions.h"
 
 namespace globals {
@@ -27,8 +28,6 @@ void load_settings(const string_t& filename)
 {
 
     config.load_json(filename);
-
-    std::cout << "load settings" << std::endl;
 
     // Load model elements
     std::optional<json_node_t> globals = config.get_optional_value<json_node_t>("globals");
@@ -60,7 +59,10 @@ void print()
     std::cout << "  useOriginalErrors: " << use_original_errors << std::endl;
 
     if (use_gpu) {
+        logger::log_info("Using GPU for calculations");
         initializeArrayFire();
+    } else {
+        logger::log_info("Using CPU for calculations");
     }
 }
 }  // namespace globals

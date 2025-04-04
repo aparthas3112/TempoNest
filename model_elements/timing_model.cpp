@@ -93,8 +93,8 @@ void timing_model_t::set_parameter(const string_t& name, const parameter_t& para
         timing_parameter.t2_k_index = t2_fit_indices[index].second;
 
         // set the long double priors for this parameter
-        timing_parameter.ld_pmin = t2_fit_values[index] - 50 * t2_fit_errors[index];
-        timing_parameter.ld_pmax = t2_fit_values[index] + 50 * t2_fit_errors[index];
+        timing_parameter.ld_pmin = t2_fit_values[index] + static_cast<long double>(param.min_value) * t2_fit_errors[index];
+        timing_parameter.ld_pmax = t2_fit_values[index] + static_cast<long double>(param.max_value) * t2_fit_errors[index];
 
     } else {
         // Element not found
@@ -115,7 +115,8 @@ void timing_model_t::update_residuals(const std::vector<double>& parameter_value
         return;
 
     for (size_t p = 0; p < parameters.size(); p++) {
-        long double scalar = parameter_values[p];
+        int index = parameters[p].get_index();
+        long double scalar = parameter_values[index];
         long double new_value = parameters[p].ld_pmin + (parameters[p].ld_pmax - parameters[p].ld_pmin) * scalar;
 
         globals::pulsar->param[parameters[p].t2_p_index].val[parameters[p].t2_k_index] = new_value;
