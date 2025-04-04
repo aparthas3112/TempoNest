@@ -1,3 +1,4 @@
+#include "gpu_functions.h"
 #include <utils.h>
 #include <Eigen/Dense>
 #include <iomanip>
@@ -5,6 +6,38 @@
 
 #ifdef HAVE_ARRAYFIRE
     #include <arrayfire.h>
+
+// Define storage for namespace variables
+namespace gpu_data {
+af::array total_matrix_;
+bool initialized = false;
+
+void initialize(const Eigen::MatrixXd& eigenTotalMatrix)
+{
+    // Convert Eigen matrices/vectors to ArrayFire arrays
+    total_matrix_ = eigenToAf(eigenTotalMatrix);
+
+    // Explicitly copy data to GPU
+    total_matrix_.eval();
+
+    // Ensure all operations are complete
+    af::sync();
+
+    initialized = true;
+}
+
+bool isInitialized()
+{
+    return initialized;
+}
+
+void cleanup()
+{
+    // Release arrays if needed
+    total_matrix_ = af::array();
+    initialized = false;
+}
+}  // namespace gpu_data
 
 void initializeArrayFire()
 {
@@ -92,37 +125,35 @@ af::array eigenToAf(const Eigen::VectorXd& eigenVec)
     return af::array(af::dim4(eigenVec.size(), 1), host_data.data());
 }
 
-double performAlgebraWithArrayFireGPU(const Eigen::MatrixXd& TotalMatrix, const Eigen::VectorXd& noise, const Eigen::VectorXd& Resvec, const Eigen::VectorXd& powercoeff, int totCoeff, double tdet,
-                                      double freq_det, double timelike, double uniform_prior)
+// New optimized version that uses static data
+double performAlgebraWithArrayFireGPU(const Eigen::VectorXd& noise, const Eigen::VectorXd& Resvec, const Eigen::VectorXd& powercoeff, int totCoeff, double tdet, double freq_det, double timelike,
+                                      double uniform_prior)
 {
+    if (!gpu_data::isInitialized()) {
+        std::cerr << "Static GPU data not initialized. Call gpu_data::initialize() first." << std::endl;
+        die("Static GPU data not initialized");
+        return 0.0;
+    }
 
     try {
         // Convert Eigen matrices/vectors to ArrayFire arrays
-        af::array afTotalMatrix = eigenToAf(TotalMatrix);
         af::array afNoise = eigenToAf(noise);
         af::array afResvec = eigenToAf(Resvec);
 
         // Explicitly copy data to GPU
-        afTotalMatrix.eval();
         afNoise.eval();
         afResvec.eval();
-
-        // Verify array precision (for debugging)
-        // std::cout << "TotalMatrix dtype: " << afTotalMatrix.type() << std::endl;
-        // std::cout << "noise dtype: " << afNoise.type() << std::endl;
-        // std::cout << "Resvec dtype: " << afResvec.type() << std::endl;
-        // af::dtype::f64 should be displayed as 2
 
         // Perform algebra - matching the CPU implementation
         // NT = TotalMatrix.array().colwise() * noise.array()
         // We need to multiply each column of TotalMatrix by the corresponding element in noise
-        af::array NT = af::constant(0, afTotalMatrix.dims(), f64);
-        for (int i = 0; i < TotalMatrix.cols(); i++) {
-            NT(af::span, i) = afTotalMatrix(af::span, i) * afNoise;
+        af::array NT = af::constant(0, gpu_data::total_matrix_.dims(), f64);
+        for (int i = 0; i < gpu_data::total_matrix_.dims(1); i++) {
+            NT(af::span, i) = gpu_data::total_matrix_(af::span, i) * afNoise;
         }
 
-        // TNT = TotalMatrix.transpose() * NT
-        af::array TNT = af::matmul(afTotalMatrix, NT, AF_MAT_TRANS, AF_MAT_NONE);
+        // TNT = gpu_data::total_matrix_.transpose() * NT
+        af::array TNT = af::matmul(gpu_data::total_matrix_, NT, AF_MAT_TRANS, AF_MAT_NONE);
 
         // NTd = NT.transpose() * Resvec
         af::array NTd = af::matmul(NT, afResvec, AF_MAT_TRANS, AF_MAT_NONE);
@@ -166,17 +197,6 @@ double performAlgebraWithArrayFireGPU(const Eigen::MatrixXd& TotalMatrix, const 
         // Calculate final result
         double lnewChol = -0.5 * (tdet + jointdet + freq_det + timelike - freqlike) + uniform_prior;
 
-        // Debug output
-        /*
-        printf("GPU calculation:\n");
-        printf("  tdet: %.15f\n", tdet);
-        printf("  jointdet: %.15f\n", jointdet);
-        printf("  freq_det: %.15f\n", freq_det);
-        printf("  timelike: %.15f\n", timelike);
-        printf("  freqlike: %.15f\n", freqlike);
-        printf("  uniform_prior: %.15f\n", uniform_prior);
-        printf("  lnewChol: %.15f\n", lnewChol);
-        */
         // Ensure all GPU operations are complete before returning
         af::sync();
 
@@ -185,6 +205,19 @@ double performAlgebraWithArrayFireGPU(const Eigen::MatrixXd& TotalMatrix, const 
         std::cout << "ArrayFire error: " << e.what() << std::endl;
         return 0.0;  // Or handle the error as appropriate for your application
     }
+}
+
+// Original function - now acts as a wrapper that initializes static data if needed
+double performAlgebraWithArrayFireGPU(const Eigen::MatrixXd& TotalMatrix, const Eigen::VectorXd& noise, const Eigen::VectorXd& Resvec, const Eigen::VectorXd& powercoeff, int totCoeff, double tdet,
+                                      double freq_det, double timelike, double uniform_prior)
+{
+    // If static data isn't initialized or is different, initialize it
+    if (!gpu_data::isInitialized()) {
+        gpu_data::initialize(TotalMatrix);
+    }
+
+    // Call the optimized version that uses static data
+    return performAlgebraWithArrayFireGPU(noise, Resvec, powercoeff, totCoeff, tdet, freq_det, timelike, uniform_prior);
 }
 
 // Function to add CPU and GPU implementations side by side for verification
@@ -226,8 +259,13 @@ void compareEigenAndArrayFire(const Eigen::MatrixXd& TotalMatrix, const Eigen::V
         printf("  lnewChol: %.15f\n", cpu_result);
     }
 
-    // Run GPU implementation
-    double gpu_result = performAlgebraWithArrayFireGPU(TotalMatrix, noise, Resvec, powercoeff, totCoeff, tdet, freq_det, timelike, uniform_prior);
+    // Initialize static data if needed
+    if (!gpu_data::isInitialized()) {
+        gpu_data::initialize(TotalMatrix);
+    }
+
+    // Run GPU implementation with static data
+    double gpu_result = performAlgebraWithArrayFireGPU(noise, Resvec, powercoeff, totCoeff, tdet, freq_det, timelike, uniform_prior);
 
     // Compare results
     double diff = std::abs(cpu_result - gpu_result);
@@ -240,11 +278,40 @@ void compareEigenAndArrayFire(const Eigen::MatrixXd& TotalMatrix, const Eigen::V
 
 #else
 
-double performAlgebraWithArrayFireGPU(const Eigen::MatrixXd& TotalMatrix, const Eigen::VectorXd& noise, const Eigen::VectorXd& Resvec, const Eigen::VectorXd& powercoeff, int totCoeff, double tdet,
-                                      double freq_det, double timelike, double uniform_prior)
+namespace gpu_data {
+bool initialized = false;
+
+void initialize(const Eigen::MatrixXd&)
+{
+    die("calling gpu_data::initialize without ArrayFire support");
+}
+
+bool isInitialized()
+{
+    return false;
+}
+
+void cleanup()
+{
+    // Do nothing
+}
+}  // namespace gpu_data
+
+double performAlgebraWithArrayFireGPU(const Eigen::VectorXd&, const Eigen::VectorXd&, const Eigen::VectorXd&, int, double, double, double, double)
 {
     die("calling performAlgebraWithArrayFireGPU without ArrayFire support");
     return 0.0;
+}
+
+double performAlgebraWithArrayFireGPU(const Eigen::MatrixXd&, const Eigen::VectorXd&, const Eigen::VectorXd&, const Eigen::VectorXd&, int, double, double, double, double)
+{
+    die("calling performAlgebraWithArrayFireGPU without ArrayFire support");
+    return 0.0;
+}
+
+void compareEigenAndArrayFire(const Eigen::MatrixXd&, const Eigen::VectorXd&, const Eigen::VectorXd&, const Eigen::VectorXd&, int, double, double, double, double)
+{
+    die("calling compareEigenAndArrayFire without ArrayFire support");
 }
 
 void initializeArrayFire()

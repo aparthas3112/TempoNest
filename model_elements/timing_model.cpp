@@ -22,7 +22,23 @@ void timing_model_t::initialise()
         param_label p = fitinfo->paramIndex[iparam];
         const int k = fitinfo->paramCounters[iparam];
 
-        t2_fitted_labels.push_back(globals::pulsar->param[p].shortlabel[k]);
+        if (p == param_ZERO) {
+            t2_fitted_labels.push_back("PHASE");
+        } else if (p == param_JUMP) {
+            t2_fitted_labels.push_back("JUMP_" + std::to_string(k));
+        } else {
+
+            int size = 0;
+            while (globals::pulsar->param[p].shortlabel[size] != NULL) {
+                size++;
+            }
+
+            if (k >= size) {
+                die("Timing model parameter index out of range");
+            }
+
+            t2_fitted_labels.push_back(globals::pulsar->param[p].shortlabel[k]);
+        }
 
         // be default we do marginalise over the parameters
         marginalised.push_back(true);
@@ -32,6 +48,11 @@ void timing_model_t::initialise()
         if (p == param_ZERO) {
             t2_fit_values.push_back(globals::pulsar->offset);
             t2_fit_errors.push_back(globals::pulsar->offset_e / error_scaling);
+        } else if (p == param_JUMP) {
+            double jump_mean = globals::pulsar->jumpVal[k];
+            double jump_err = globals::pulsar->jumpValErr[k] / error_scaling;
+            t2_fit_values.push_back(jump_mean);
+            t2_fit_errors.push_back(jump_err);
         } else {
 
             long double mean = globals::pulsar->param[p].prefit[k];
@@ -51,6 +72,11 @@ void timing_model_t::initialise()
 
 void timing_model_t::set_parameter(const string_t& name, const parameter_t& param, const json_node_t&)
 {
+
+    // for now just dont allow fitting for jumps directly.. why would you?
+    if (name.find("JUMP") != std::string::npos) {
+        throw std::runtime_error("Cannot fit for jumps directly");
+    }
 
     timing_parameter_t timing_parameter = timing_parameter_t(param);
 

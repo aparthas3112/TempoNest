@@ -1,4 +1,5 @@
 #include "model_space.h"
+#include "../likelihoods/gpu_functions.h"
 
 model_space_t::model_space_t()
 {
@@ -15,6 +16,8 @@ model_space_t::model_space_t()
     formResiduals(globals::pulsar, globals::num_pulsars, 1);
 
     store_total_matrix();
+
+    gpu_data::initialize(total_matrix_);
 }
 
 void model_space_t::load_model()
@@ -104,6 +107,9 @@ element_t model_space_t::create_element(const string_t& type)
 {
     if (type == "Power Law Red Noise") {
         return std::make_unique<pl_red_noise_t>();
+    }
+    if (type == "Power Law DM Noise") {
+        return std::make_unique<pl_dm_noise_t>();
     }
     if (type == "EFAC") {
         return std::make_unique<efac_t>();
