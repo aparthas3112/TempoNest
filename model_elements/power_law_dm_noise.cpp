@@ -2,8 +2,15 @@
 #include <iostream>
 #include <stdexcept>
 
-pl_dm_noise_t::pl_dm_noise_t() : num_freqs(33)
+pl_dm_noise_t::pl_dm_noise_t(const std::optional<json_node_t>& optional_config)
 {
+    num_freqs = 33;
+
+    if (optional_config.has_value()) {
+        json_node_t config = optional_config.value();
+        num_freqs = config.get_optional_value<int>("num_freqs").value_or(33);
+    }
+
     frequencies = Eigen::VectorXd::Zero(num_freqs);
     for (int i = 0; i < frequencies.size(); i++) {
         frequencies[i] = i + 1;
@@ -15,6 +22,20 @@ void pl_dm_noise_t::set_parameter(const string_t& name, const parameter_t& param
     if (!is_valid_parameter(name)) {
         die("Invalid parameter name for Power Law DM Noise: " + name);
     }
+
+    if (param_json.has_member("num_freqs")) {
+        num_freqs = param_json.get_value<int>("num_freqs");
+        if (num_freqs <= 0) {
+            throw std::invalid_argument("num_freqs must be a positive integer");
+        }
+        if (num_freqs != frequencies.size()) {
+            frequencies = Eigen::VectorXd::Zero(num_freqs);
+            for (int i = 0; i < frequencies.size(); i++) {
+                frequencies[i] = i + 1;
+            }
+        }
+    }
+
     parameter_map_[name] = param;
 }
 

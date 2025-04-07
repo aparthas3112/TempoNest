@@ -2,8 +2,15 @@
 #include <iostream>
 #include <stdexcept>
 
-pl_red_noise_t::pl_red_noise_t() : num_freqs(33)
+pl_red_noise_t::pl_red_noise_t(const std::optional<json_node_t>& optional_config)
 {
+    if (optional_config.has_value()) {
+        json_node_t config = optional_config.value();
+        num_freqs = config.get_optional_value<int>("num_freqs").value_or(33);
+    } else {
+        num_freqs = 33;
+    }
+
     frequencies = Eigen::VectorXd::Zero(num_freqs);
     for (int i = 0; i < frequencies.size(); i++) {
         frequencies[i] = i + 1;

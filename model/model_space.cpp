@@ -47,7 +47,7 @@ void model_space_t::load_model()
             continue;
         }
 
-        auto element = create_element(element_name);
+        auto element = create_element(element_name, json_element);
         auto* element_ptr = element.get();  // Get raw pointer before moving
 
         for (size_t j = 0; j < json_params.size(); j++) {
@@ -103,13 +103,13 @@ parameter_t model_space_t::parse_parameter(const json_node_t& json_param)
     return param;
 }
 
-element_t model_space_t::create_element(const string_t& type)
+element_t model_space_t::create_element(const string_t& type, const std::optional<json_node_t>& element_json)
 {
     if (type == "Power Law Red Noise") {
-        return std::make_unique<pl_red_noise_t>();
+        return std::make_unique<pl_red_noise_t>(element_json);
     }
     if (type == "Power Law DM Noise") {
-        return std::make_unique<pl_dm_noise_t>();
+        return std::make_unique<pl_dm_noise_t>(element_json);
     }
     if (type == "EFAC") {
         return std::make_unique<efac_t>();

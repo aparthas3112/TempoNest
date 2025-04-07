@@ -123,7 +123,7 @@ private:
     // Helper methods
     void load_model();
     parameter_t parse_parameter(const json_node_t& json_param);
-    element_t create_element(const string_t& type);
+    element_t create_element(const string_t& type, const std::optional<json_node_t>& element_json = std::nullopt);
 
     void getEigenDVectorLike(Eigen::MatrixXd& design_matrix);
 

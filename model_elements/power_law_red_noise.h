@@ -10,7 +10,7 @@ public:
     Eigen::VectorXd frequencies;
     int num_freqs;
 
-    pl_red_noise_t();
+    pl_red_noise_t(const std::optional<json_node_t>& element_json);
 
     void set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json) override;
     bool is_valid_parameter(const string_t& param_name) const override;
@@ -21,4 +21,14 @@ public:
 
     // use the red noise params to calculate the red noise power at each frequency
     void apply(const std::vector<double>& parameter_values, Eigen::VectorXd& powercoeff, int& start_pos, double maxtspan, double& uniform_prior, double& freq_det) const;
+
+    void print() const override
+    {
+        std::cout << get_name() << " Element:" << std::endl;
+        std::cout << "Number of Frequencies: " << num_freqs << std::endl;
+        for (const auto& [name, param] : parameter_map_) {
+            std::cout << name << ": ";
+            param.print();
+        }
+    }
 };

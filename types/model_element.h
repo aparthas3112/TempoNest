@@ -42,7 +42,7 @@ public:
 
     int get_fitted_dims() const { return parameter_map_.size(); }
 
-    void print() const
+    virtual void print() const
     {
         std::cout << get_name() << " Element:" << std::endl;
         for (const auto& [name, param] : parameter_map_) {
