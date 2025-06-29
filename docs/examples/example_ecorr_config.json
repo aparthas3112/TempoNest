@@ -1,0 +1,68 @@
+{
+  "globals": {
+    "use_original_errors": true,
+    "num_tempo2_its": 1,
+    "test_mode": true
+  },
+  "sampler": {
+    "type": "multinest",
+    "sample": true,
+    "live_points": 500,
+    "efficiency": 0.1
+  },
+  "elements": [
+    {
+      "name": "Timing Model",
+      "marginalise": "all",
+      "parameters": []
+    },
+    {
+      "name": "Power Law Red Noise",
+      "days_per_coeff": 30.0,
+      "parameters": [
+        {
+          "name": "amplitude",
+          "prior_type": "log_uniform",
+          "include": true,
+          "min_value": -18,
+          "max_value": -10
+        },
+        {
+          "name": "spectral_index",
+          "prior_type": "uniform",
+          "include": true,
+          "min_value": 0,
+          "max_value": 7
+        }
+      ]
+    },
+    {
+      "name": "ECORR",
+      "parameters": [
+        {
+          "name": "per_backend",
+          "prior_type": "log_uniform",
+          "include": true,
+          "min_value": -10,
+          "max_value": -5,
+          "flag": "-sys",
+          "epoch_window": 1.157e-5,
+          "min_toas_per_epoch": 2
+        }
+      ]
+    },
+    {
+      "name": "EFAC",
+      "parameters": [
+        {
+          "name": "per_flag",
+          "prior_type": "uniform",
+          "include": true,
+          "min_value": -1,
+          "max_value": 0.7,
+          "flag": "-group"
+        }
+      ]
+    }
+  ]
+}

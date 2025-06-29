@@ -1,0 +1,73 @@
+*o
+*.la
+*.lo
+*.Plo
+*~
+config.h.in
+configure
+autom4te.cache
+config
+CVS
+plugin/build_settings
+Makefile.common
+Makefile.config
+Makefile.in
+Makefile
+libtool
+*.Po
+.libs
+plugin/.deps
+config.h
+config.log
+config.status
+stamp-h1
+tempo2
+T2runtime/plugins
+*..t2
+.*.swp
+getPeriod
+TKlongdouble.h
+testEndToEnd
+aclocal.m4
+config.h.in~
+[config.h].in
+*.*~
+*.so
+*.a
+Ellipsis/build/*
+*.mod
+lbfgs/INSTALL
+lbfgs/config.guess
+lbfgs/config.sub
+lbfgs/depcomp
+lbfgs/install-sh
+lbfgs/ltmain.sh
+lbfgs/missing
+lbfgs/sample/sample
+autoconf/libtool.m4
+autoconf/ltoptions.m4
+autoconf/ltsugar.m4
+autoconf/ltversion.m4
+autoconf/lt~obsolete.m4
+build.log
+lbfgs/compile
+.idea/*
+*.dirstamp
+.vscode/*
+external/ArrayFire/
+scripts/ArrayFire-v3.9.0*
+build/
+  *.so
+  *.a
+  *.o
+  *.mod
+chains/
+  *resume.dat
+  *live.points
+  *post_equal_weights.dat
+  *ev.dat
+  *stats.dat
+  *summary.txt
+*.tmp
+  *~
+  .DS_Store

@@ -1,0 +1,250 @@
+#ifdef HAVE_CONFIG_H
+    #include <config.h>
+#endif
+//  Copyright (C) 2013 Lindley Lentati
+
+/*
+ * This file is part of TempoNest
+ *
+ * TempoNest is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * TempoNest is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with TempoNest. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * If you use TempoNest and as a byproduct both Tempo2 and MultiNest
+ * then please acknowledge it by citing Lentati L., Alexander P., Hobson M. P. (2013) for TempoNest,
+ * Hobbs, Edwards & Manchester (2006) MNRAS, Vol 369, Issue 2,
+ * pp. 655-672 (bibtex: 2006MNRAS.369..655H)
+ * or Edwards, Hobbs & Manchester (2006) MNRAS, VOl 372, Issue 4,
+ * pp. 1549-1574 (bibtex: 2006MNRAS.372.1549E) when discussing the
+ * timing model and MultiNest Papers here.
+ */
+
+#include <dlfcn.h>
+#include <float.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+#include <t2fit.h>
+#include <time.h>
+#include <algorithm>
+#include <vector>
+#include "TempoNest.h"
+#include "../core/samplers/multinest_interface.h"
+#include "tempo2.h"
+#include "tempo2pred.h"
+#include "tempo2pred_int.h"
+
+#include <string.h>
+#include <cstring>
+#include <fstream>
+#include "../core/utils/run_summary.h"
+#include <iostream>
+#include <iterator>
+#include <sstream>
+
+#include <gsl/gsl_sf_gamma.h>
+
+#include <mpi.h>
+#include "eigen_config.h"
+#include "../core/likelihood/temponest_v1.h"
+#include "../core/models/model.h"
+#include "../core/utils/settings.h"
+#include "../core/utils/pulsar_utils.h"
+#include "../core/samplers/sampler.h"
+#include "../../tests/cpp/tests.h"
+
+/* The main function of a plugin called from Tempo2 is 'graphicalInterface'
+ */
+extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_pulsars)
+{
+    int iteration;
+    int listparms;
+    int outRes = 0;
+    int writeModel = 0;
+    char timFile[MAX_PSR][MAX_FILELEN], parFile[MAX_PSR][MAX_FILELEN];
+    char outputSO[MAX_FILELEN];
+    char str[MAX_FILELEN];
+    char newparname[MAX_FILELEN];
+    int num_pulsars = *pnum_pulsars; /* The number of pulsars */
+    double globalParameter = 0.0;
+    int nGlobal, i, flagPolyco = 0, it, k;
+    char polyco_args[128];
+    char polyco_file[128];
+    int newpar = 0;
+    int onlypre = 0;
+    char** commandLine;
+    time_t rawstarttime, rawstoptime;
+    struct tm* rawstarttimeinfo;
+    struct tm* rawstoptimeinfo;
+    char* ConfigFileName;
+
+    int rank, size;
+    MPI_Comm world_comm;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_dup(MPI_COMM_WORLD, &world_comm);
+
+    if (rank == 0) {
+        printf("This program comes with ABSOLUTELY NO WARRANTY.\n");
+        printf("This is free software, and you are welcome to redistribute it\n");
+        printf("under conditions of GPL license.\n\n");
+    }
+
+    time(&rawstarttime);
+    rawstarttimeinfo = localtime(&rawstarttime);
+    time_t starttime = mktime(rawstarttimeinfo);
+    if (rank == 0)
+        printf("The start date/time is: %s", asctime(rawstarttimeinfo));
+    commandLine = (char**)malloc(1000 * sizeof(char*));
+
+    for (i = 0; i < 1000; i++)
+        commandLine[i] = (char*)malloc(sizeof(char) * 1000);
+
+    ConfigFileName = "defaultparameters.json";
+    /* Parse input line for machine type */
+    for (i = 0; i < argc; i++) {
+        if (strcasecmp(argv[i], "-Cfile") == 0) {
+            ConfigFileName = argv[i + 1];
+        }
+        strcpy(commandLine[i], argv[i]);
+    }
+
+    if (rank == 0) {
+        printf("Using config filename: %s \n", ConfigFileName);
+    }
+
+    strcpy(outputSO, "");
+    num_pulsars = 0; /* Initialise the number of pulsars */
+    nGlobal = 0;
+    /* Obtain command line arguments */
+    logdbg("Running getInputs %d", globals::pulsar->nits);
+    logdbg("Completed getInputs");
+    getInputs(psr, argc, commandLine, timFile, parFile, &listparms, &num_pulsars, &nGlobal, &outRes, &writeModel, outputSO, &flagPolyco, polyco_args, polyco_file, &newpar, &onlypre, dcmFile,
+              covarFuncFile, newparname);
+
+    logdbg("Reading par file");
+    readParfile(psr, parFile, timFile, num_pulsars); /* Read .par file to define the pulsar's initial parameters */
+    logdbg("Finished reading par file %d", globals::pulsar->nits);
+    if (flagPolyco == 0) {
+        logdbg("Running readTimfile");
+        readTimfile(psr, timFile, num_pulsars); /* Read .tim file to define the site-arrival-times */
+        logdbg("Completed readTimfile %d", globals::pulsar->param[param_ecc].paramSet[1]);
+    }
+
+    std::cout << "call pre process" << std::endl;
+    logdbg("Running preProcess %d", globals::pulsar->nits);
+    preProcess(psr, num_pulsars, argc, commandLine);
+    logdbg("Completed preProcess %d", globals::pulsar->nits);
+
+    std::cout << "initialise pulsar" << std::endl;
+
+    globals::pulsar = &psr[0];
+    initialise_pulsar(onlypre);
+
+    for (int o = 0; o < globals::pulsar->nobs; o++) {
+        globals::pulsar->obsn[o].snr = 1;
+        globals::pulsar->obsn[o].tobs = 1;
+        for (int f = 0; f < globals::pulsar->obsn[o].nFlags; f++) {
+            if (strcasecmp(globals::pulsar->obsn[o].flagID[f], "-snr") == 0) {
+                globals::pulsar->obsn[o].snr = atof(globals::pulsar->obsn[o].flagVal[f]);
+            }
+            if (strcasecmp(globals::pulsar->obsn[o].flagID[f], "-tobs") == 0) {
+                globals::pulsar->obsn[o].tobs = atof(globals::pulsar->obsn[o].flagVal[f]);
+            }
+        }
+    }
+
+    std::cout << std::endl << "Loading TempoNest configuration..." << std::endl;
+
+    globals::load_settings(ConfigFileName);
+
+    std::unique_ptr<sampler_t> sampler = sampler_factory_t::create(globals::config.get_value<json_node_t>("sampler"));
+    std::shared_ptr<likelihood_t> likelihood = std::make_shared<temponest_v1_t>();
+    std::shared_ptr<model_space_t> model_space = std::make_shared<model_space_t>();
+
+    std::shared_ptr<model_t> model = std::make_shared<model_t>(model_space, likelihood);
+
+    // Initialize run summary tracker
+    run_summary_t run_summary(sampler->get_settings().output_root);
+
+    globals::config.validate();
+
+    if (rank == 0) {
+        printf("Graphical Interface: TempoNest\n");
+        printf("Author:              L. Lentati\n");
+        printf("Version:             1.0\n");
+        printf("----------------------------------------------------------------\n");
+        printf("This program comes with ABSOLUTELY NO WARRANTY.\n");
+        printf("This is free software, and you are welcome to redistribute it\n");
+        printf("under conditions of GPL license.\n\n");
+        printf("----------------------------------------------------------------\n");
+
+        printf("\n\n\n\n*****************************************************\n");
+        printf("Starting TempoNest\n");
+        printf("*****************************************************\n\n\n\n");
+        printf("Details of the fit:\n");
+        printf("file root set to %s \n", sampler->get_settings().output_root.c_str());
+    }
+
+    // if we are running unit tests do that now rather than sampling
+    if (globals::test_mode) {
+        run_tests(model);
+        return 0;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////Call
+    /// Samplers////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    if (sampler->get_settings().sample) {
+
+        std::cout << "run " << std::endl;
+        
+        // Start timing the main analysis
+        run_summary.start_timing();
+
+        sampler->run(model);
+    }
+
+    if (rank == 0) {
+        sampler->output_results();
+
+        // Generate run summary
+        run_summary.finish_and_write_summary(model, sampler->get_settings());
+
+        time(&rawstoptime);
+        rawstoptimeinfo = localtime(&rawstoptime);
+        time_t stoptime = mktime(rawstoptimeinfo);
+        double seconds = difftime(stoptime, starttime);
+        printf("The stop date/time was: %s", asctime(rawstoptimeinfo));
+
+        printf("Total Wall clock run time: %g \n", seconds);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+// redwards function to force linkage with library functions used by
+// plugins
+void thwart_annoying_dynamic_library_stuff(int never_call_me, float or_sink)
+{
+    ChebyModel* cm;
+    T2Predictor* t2p;
+    ChebyModel_Init(cm, 0, 0);
+    T2Predictor_GetPhase(t2p, 0, 0);
+}

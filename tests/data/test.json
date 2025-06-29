@@ -1,0 +1,100 @@
+{
+   "globals" : {
+   	"use_original_errors": true,
+   	"num_tempo2_its": 1,
+   	"test_mode": true
+   },
+   "sampler": {
+   	"type": "multinest",
+   	"sample": true,
+   	"importance_sampling": 0,
+   	"constant_efficiency": 0,
+   	"efficiency": 0.1,
+   	"live_points": 4000
+   },
+  "elements": [
+      {
+      "name": "Timing Model",
+      "parameters": [
+        {
+          "name": "RAJ",
+          "prior_type": "uniform",
+          "include": false,
+          "fit": true
+        }
+      ]
+    },
+
+    {
+      "name": "Power Law Red Noise",
+      "parameters": [
+        {
+          "name": "amplitude",
+          "description": "log amplitude of the power law noise process",
+          "prior_type": "log_uniform",
+          "include": true,
+          "fit": true,
+          "min_value": -18,
+          "max_value": -10
+        },
+        {
+          "name": "spectral_index",
+          "description": "spectral index of power law, +ve means red",
+          "prior_type": "uniform",
+          "include": true,
+          "fit": true,
+          "min_value": 0,
+          "max_value": 7
+        }
+      ]
+    },
+    {
+      "name": "EFAC",
+      "parameters": [
+        {
+          "name": "global",
+	        "description": "global scaling for all error bars",
+          "prior_type": "uniform",
+          "include": true,
+          "fit": true,
+          "min_value": -1,
+          "max_value": 0.7
+        },
+        {
+          "name": "per_flag",
+	        "description": "efac per given flag",
+          "prior_type": "uniform",
+          "include": false,
+          "fit": true,
+          "min_value": -1,
+          "max_value": 0.7,
+          "flag":"-fe"
+        }
+      ]
+    },
+    {
+      "name": "EQUAD",
+      "parameters": [
+        {
+          "name": "global",
+	        "description": "global quadrature term for all error bars",
+          "prior_type": "log_uniform",
+          "include": true,
+          "fit": true,
+          "min_value": -9,
+          "max_value": -3
+        },
+        {
+          "name": "per_flag",
+	        "description": "equad per given flag",
+          "prior_type": "log_uniform",
+          "include": false,
+          "fit": true,
+          "min_value": -9,
+          "max_value": -3,
+          "flag":"-fe"
+        }
+      ]
+    }
+  ]
+}

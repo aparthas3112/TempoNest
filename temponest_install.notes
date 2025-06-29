@@ -1,0 +1,56 @@
+# TempoNest Manual Installation Instructions
+# Updated for reorganized repository structure (2025)
+
+# Prerequisites:
+# - Tempo2 installed and accessible
+# - OpenBLAS or other BLAS library
+# - ArrayFire (optional, for GPU acceleration)
+# - Standard build tools (gcc, make, autotools)
+
+# Step 1: Build MultiNest library
+cd TempoNest/external/MultiNest
+make clean
+make libnest3.so
+
+# Step 2: Set up library paths
+# Replace /path/to/TempoNest with your actual TempoNest directory
+export MULTINEST_DIR="/path/to/TempoNest/external/MultiNest"
+export LDFLAGS="-L${MULTINEST_DIR} ${LDFLAGS}"
+export LD_LIBRARY_PATH="${MULTINEST_DIR}:${LD_LIBRARY_PATH}"
+
+# If using ArrayFire (for GPU acceleration):
+export ARRAYFIRE_DIR="/path/to/ArrayFire-3.9.0-Linux"
+export LDFLAGS="-L${ARRAYFIRE_DIR}/lib64 -L${ARRAYFIRE_DIR}/lib ${LDFLAGS}"
+export LD_LIBRARY_PATH="${ARRAYFIRE_DIR}/lib64:${ARRAYFIRE_DIR}/lib:${LD_LIBRARY_PATH}"
+
+# Step 3: Configure and build TempoNest
+cd ../../  # Back to TempoNest root directory
+
+# Generate configure script (if not present)
+./autogen.sh
+
+# Configure with required options
+# Basic configuration (CPU only):
+./configure --with-blas=openblas
+
+# With ArrayFire GPU support:
+./configure --with-blas=openblas --with-arrayfire=${ARRAYFIRE_DIR}
+
+# With Tempo2 at custom location:
+./configure --with-blas=openblas --with-tempo2=/custom/tempo2/path
+
+# Step 4: Build the plugin
+make temponest
+
+# Step 5: Install (optional)
+make temponest-install
+
+# Alternative: Use the automated build script
+# For convenience, you can use the provided build script instead:
+./scripts/build_temponest.sh
+
+# Notes:
+# - Polychord support has been removed (no longer needed)
+# - ArrayFire is optional but recommended for GPU acceleration
+# - The plugin will be created as temponest_<system>_plug.t2
+# - Make sure Tempo2 can find the plugin by setting TEMPO2_PLUG_DIR if needed
