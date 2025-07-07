@@ -41,7 +41,7 @@ common_sources += src/json/json_loader.cpp src/json/json_node.cpp
 common_sources += src/core/models/model_space.cpp
 common_sources += src/core/likelihood/temponest_v1.cpp
 common_sources += src/core/likelihood/gpu_functions.cpp
-common_sources += src/core/samplers/sampler.cpp src/core/samplers/multinest.cpp
+common_sources += src/core/samplers/sampler.cpp src/core/samplers/multinest.cpp src/core/samplers/polychord.cpp
 
 # Tests 
 common_sources += tests/cpp/tests.cpp tests/cpp/test_likelihood.cpp
@@ -53,9 +53,9 @@ temponest_@T2ARCH@_plug_la_CFLAGS = $(AM_CFLAGS)
 AM_CXXFLAGS += $(MPI_CXXFLAGS)
 AM_CFLAGS += $(MPI_CXXFLAGS)
 
-temponest_@T2ARCH@_plug_la_LIBADD = -lgfortran -ltempo2 -lsofa @MULTINEST_LIBS@ @GSL_LIBS@ @BLAS_LIBS@ @LIBS_LAPACK@ @TEMPO2_LIBS@ $(MPI_CXXLIBS)
+temponest_@T2ARCH@_plug_la_LIBADD = -lgfortran -ltempo2 -lsofa @MULTINEST_LIBS@ @GSL_LIBS@ @BLAS_LIBS@ @LIBS_LAPACK@ @TEMPO2_LIBS@ $(MPI_CXXLIBS) -L$(srcdir)/external/PolyChordLite/lib -lchord
 
-temponest_@T2ARCH@_plug_la_CPPFLAGS = @MULTINEST_CFLAGS@ @GSL_CFLAGS@ @TEMPO2_CFLAGS@ @EIGEN_CPPFLAGS@ $(MPI_CXXFLAGS)
+temponest_@T2ARCH@_plug_la_CPPFLAGS = @MULTINEST_CFLAGS@ @GSL_CFLAGS@ @TEMPO2_CFLAGS@ @EIGEN_CPPFLAGS@ $(MPI_CXXFLAGS) -I$(srcdir)/external/PolyChordLite/src
 
 temponest_@T2ARCH@_plug_la_LDFLAGS = -fopenmp  -shared -module -avoid-version -shrext .t2 $(MPI_CXXLDFLAGS) 
 

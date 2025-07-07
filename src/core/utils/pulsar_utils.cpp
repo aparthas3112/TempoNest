@@ -27,23 +27,6 @@ void initialise_pulsar(int only_prefit)
             }
         }
 
-        // Set tempo2 verbosity based on user preference
-        FILE* original_stdout = nullptr;
-        FILE* original_stderr = nullptr;
-        FILE* devnull = nullptr;
-        
-        if (globals::tempo2_quiet) {
-            globals::pulsar->noWarnings = 1;  // Suppress warnings and messages
-            
-            // Redirect stdout and stderr to suppress tempo2 output
-            devnull = fopen("/dev/null", "w");
-            if (devnull) {
-                original_stdout = stdout;
-                original_stderr = stderr;
-                stdout = devnull;
-                stderr = devnull;
-            }
-        }
         
         for (int iteration = 0; iteration < 2; iteration++) /* Do pre- and post- fit analysis */
         {
@@ -57,25 +40,11 @@ void initialise_pulsar(int only_prefit)
             }
 
             if (iteration == 1 || only_prefit == 1) {
-                /* Output results to the screen only if not in quiet mode */
-                if (!globals::tempo2_quiet) {
-                    textOutput(globals::pulsar, num_pulsars, 0, 0, 0, 0, 0);
-                }
+                textOutput(globals::pulsar, num_pulsars, 0, 0, 0, 0, 0);
             }
-            if (!globals::tempo2_quiet) {
-                globals::pulsar->noWarnings = 2;  // Normal warning level
-            }
+            globals::pulsar->noWarnings = 2;  // Normal warning level
             if (only_prefit == 1)
                 iteration = 2;
-        }
-        
-        // Restore stdout and stderr if they were redirected
-        if (globals::tempo2_quiet && devnull) {
-            fflush(stdout);
-            fflush(stderr);
-            stdout = original_stdout;
-            stderr = original_stderr;
-            fclose(devnull);
         }
     }
 }

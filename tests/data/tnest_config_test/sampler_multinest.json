@@ -1,0 +1,13 @@
+{
+    "sampler": {
+        "type": "multinest",
+        "output_root": "results_mn_test/TNest-",
+        "sample": true,
+        "importance_sampling": 0,
+        "constant_efficiency": 1,
+        "efficiency": 0.1,
+        "live_points": 500,
+        "verbose": true
+
+    }
+}

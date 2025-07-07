@@ -1,0 +1,8 @@
+{
+    "INCLUDE": [
+        "settings.json",
+        "sampler_polychord_fixed.json",
+        "noise.json",
+        "timing.json"
+    ]
+}

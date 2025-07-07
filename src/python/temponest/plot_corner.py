@@ -2,11 +2,12 @@
 """
 Enhanced TempoNest Corner Plot Tool
 
-A simple, flexible tool for creating corner plots from MultiNest chains output.
+A beautiful, flexible tool for creating professional corner plots from MultiNest chains output.
 Automatically detects parameter names from paramnames.txt (if available) or uses
 common TempoNest parameter patterns as fallback.
 
 NEW: Comparison Mode - Overlay posteriors from two different analysis results!
+NEW: Enhanced aesthetics with better label handling, color schemes, and readability!
 
 Parameter Detection:
     1. Reads paramnames.txt from same directory as chains file (preferred)
@@ -86,9 +87,25 @@ import os
 
 # Only import plotting libraries when actually needed
 def import_plotting_libraries():
-    global plt, corner
+    global plt, corner, matplotlib
     try:
+        import matplotlib
         import matplotlib.pyplot as plt
+        # Set better default font and style
+        matplotlib.rcParams.update({
+            'font.size': 12,
+            'font.family': 'serif',
+            'mathtext.fontset': 'dejavuserif',
+            'axes.labelsize': 12,
+            'axes.titlesize': 14,
+            'xtick.labelsize': 10,
+            'ytick.labelsize': 10,
+            'legend.fontsize': 11,
+            'figure.titlesize': 16,
+            'axes.linewidth': 1.2,
+            'axes.grid': True,
+            'grid.alpha': 0.3
+        })
     except ImportError:
         print("Error: 'matplotlib' package not found. Install with: pip install matplotlib")
         sys.exit(1)
@@ -342,6 +359,78 @@ def parse_parameter_selection(param_str, total_params, param_names):
             ordered_indices.append(idx)
     return ordered_indices
 
+def detect_file_format(filename, data):
+    """
+    Detect if this is PolyChord or MultiNest format based on file content and paramnames.
+    
+    PolyChord format: weight, -2*loglike, param1, param2, ..., paramN
+    MultiNest format: param1, param2, ..., paramN, [likelihood]
+    """
+    chains_dir = os.path.dirname(os.path.abspath(filename))
+    paramnames_file = os.path.join(chains_dir, 'paramnames.txt')
+    
+    # Check if paramnames.txt exists
+    if os.path.exists(paramnames_file):
+        try:
+            with open(paramnames_file, 'r') as f:
+                param_names = [line.strip() for line in f if line.strip()]
+            
+            num_params = len(param_names)
+            num_cols = data.shape[1]
+            
+            # PolyChord: num_cols = 2 + num_params (weight + -2*loglike + params)
+            # MultiNest: num_cols = num_params + 1 (params + likelihood) or just num_params
+            
+            if num_cols == num_params + 2:
+                print(f"Detected PolyChord format: {num_cols} columns = weight + (-2*loglike) + {num_params} parameters")
+                return "polychord", param_names
+            elif num_cols == num_params + 1 or num_cols == num_params:
+                print(f"Detected MultiNest format: {num_cols} columns = {num_params} parameters + [likelihood]")
+                return "multinest", param_names
+            else:
+                print(f"Warning: Column count mismatch. {num_cols} columns vs {num_params} parameters")
+                print("Assuming MultiNest format as fallback")
+                return "multinest", param_names
+                
+        except Exception as e:
+            print(f"Warning: Could not read paramnames.txt: {e}")
+    
+    # Fallback: assume MultiNest format
+    print("No paramnames.txt found. Assuming MultiNest format")
+    return "multinest", None
+
+def parse_chains_data(data, file_format, param_names):
+    """
+    Parse chains data based on detected format.
+    
+    Returns: (parameter_data, likelihood_column_index_or_none)
+    """
+    if file_format == "polychord":
+        # PolyChord: weight, -2*loglike, param1, param2, ..., paramN
+        weight_col = data[:, 0]
+        loglike_col = data[:, 1]  # This is -2*loglike, convert to loglike
+        param_data = data[:, 2:]  # Parameters start from column 2
+        
+        print(f"PolyChord data: {len(weight_col)} samples, {param_data.shape[1]} parameters")
+        print(f"Weight range: [{weight_col.min():.2e}, {weight_col.max():.2e}]")
+        print(f"-2*LogLike range: [{loglike_col.min():.2e}, {loglike_col.max():.2e}]")
+        
+        return param_data, None  # No likelihood in parameter columns
+        
+    else:  # multinest
+        # MultiNest: param1, param2, ..., paramN, [likelihood]
+        if param_names and len(param_names) == data.shape[1] - 1:
+            # Has likelihood column
+            param_data = data[:, :-1]
+            likelihood_idx = data.shape[1] - 1
+            print(f"MultiNest data: {data.shape[0]} samples, {param_data.shape[1]} parameters + likelihood")
+            return param_data, likelihood_idx
+        else:
+            # No likelihood column or uncertain
+            param_data = data
+            print(f"MultiNest data: {data.shape[0]} samples, {param_data.shape[1]} parameters")
+            return param_data, None
+
 def apply_transformations(data, param_names):
     """
     Apply common transformations (e.g., EFAC from log to linear).
@@ -360,6 +449,52 @@ def apply_transformations(data, param_names):
     
     return transformed_data, transformed_names
 
+def get_optimal_figure_size(num_params):
+    """
+    Calculate optimal figure size based on number of parameters to prevent label overlap.
+    """
+    # Base size per parameter with minimum and maximum constraints
+    base_size = max(1.5, min(3.0, 15.0 / num_params))  # Adaptive sizing
+    fig_size = num_params * base_size
+    
+    # Ensure reasonable bounds
+    fig_size = max(8, min(20, fig_size))
+    
+    return fig_size
+
+def get_aesthetic_colors(num_datasets):
+    """
+    Generate aesthetically pleasing color palette for multiple datasets.
+    Uses colorbrewer-inspired colors that are distinguishable and print-friendly.
+    """
+    # Professional color palette optimized for scientific plots
+    if num_datasets <= 2:
+        return ['#1f77b4', '#ff7f0e']  # Blue, Orange
+    elif num_datasets <= 3:
+        return ['#1f77b4', '#ff7f0e', '#2ca02c']  # Blue, Orange, Green
+    elif num_datasets <= 4:
+        return ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']  # + Red
+    elif num_datasets <= 6:
+        return ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']  # + Purple, Brown
+    elif num_datasets <= 8:
+        return ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f']  # + Pink, Gray
+    else:
+        # For >8 datasets, use colormap
+        import matplotlib.cm as cm
+        colors = cm.Set3(np.linspace(0, 1, num_datasets))
+        return [matplotlib.colors.to_hex(color) for color in colors]
+
+def get_label_rotation_angle(num_params):
+    """
+    Calculate optimal label rotation angle based on number of parameters.
+    """
+    if num_params <= 4:
+        return 0  # Horizontal
+    elif num_params <= 8:
+        return 45  # Slight angle
+    else:
+        return 90  # Vertical for many parameters
+
 def load_comparison_data(compare_dir, compare_file, input_filename):
     """
     Load comparison data from a second directory.
@@ -375,17 +510,24 @@ def load_comparison_data(compare_dir, compare_file, input_filename):
         raise FileNotFoundError(f"Comparison file not found: {compare_path}")
     
     try:
-        data = np.loadtxt(compare_path)
-        print(f"Loaded comparison data: {data.shape[0]} samples with {data.shape[1]} parameters from {compare_path}")
+        raw_data = np.loadtxt(compare_path)
+        print(f"Loaded comparison data: {raw_data.shape[0]} samples with {raw_data.shape[1]} columns from {compare_path}")
         
         # Ensure 2D
-        if data.ndim == 1:
-            data = data.reshape(1, -1)
+        if raw_data.ndim == 1:
+            raw_data = raw_data.reshape(1, -1)
         
-        # Detect parameter names for comparison data
-        param_names = detect_parameter_names(compare_path, data.shape[1])
-        if len(param_names) != data.shape[1]:
-            param_names = [f'param_{i}' for i in range(data.shape[1])]
+        # Detect file format and parse accordingly
+        file_format, param_names_from_file = detect_file_format(compare_path, raw_data)
+        data, likelihood_col_idx = parse_chains_data(raw_data, file_format, param_names_from_file)
+        
+        # Use parameter names from file if available, otherwise detect/generate
+        if param_names_from_file and len(param_names_from_file) == data.shape[1]:
+            param_names = param_names_from_file
+        else:
+            param_names = detect_parameter_names(compare_path, data.shape[1])
+            if len(param_names) != data.shape[1]:
+                param_names = [f'param_{i}' for i in range(data.shape[1])]
         
         return data, param_names
         
@@ -541,24 +683,31 @@ def main():
         return 1
     
     try:
-        data = np.loadtxt(args.input)
-        print(f"Loaded {data.shape[0]} samples with {data.shape[1]} parameters")
+        raw_data = np.loadtxt(args.input)
+        print(f"Loaded {raw_data.shape[0]} samples with {raw_data.shape[1]} columns")
     except Exception as e:
         print(f"Error loading file '{args.input}': {e}")
         return 1
     
     # Ensure 2D
-    if data.ndim == 1:
-        data = data.reshape(1, -1)
+    if raw_data.ndim == 1:
+        raw_data = raw_data.reshape(1, -1)
+    
+    # Detect file format and parse accordingly
+    file_format, param_names_from_file = detect_file_format(args.input, raw_data)
+    data, likelihood_col_idx = parse_chains_data(raw_data, file_format, param_names_from_file)
     
     total_params = data.shape[1]
     
-    # Detect parameter names
-    param_names = detect_parameter_names(args.input, total_params)
-    if len(param_names) != total_params:
-        param_names = [f'param_{i}' for i in range(total_params)]
-    
-    print(f"Detected parameters: {param_names}")
+    # Use parameter names from file if available, otherwise detect/generate
+    if param_names_from_file and len(param_names_from_file) == total_params:
+        param_names = param_names_from_file
+        print(f"Using parameter names from paramnames.txt: {param_names}")
+    else:
+        param_names = detect_parameter_names(args.input, total_params)
+        if len(param_names) != total_params:
+            param_names = [f'param_{i}' for i in range(total_params)]
+        print(f"Generated parameter names: {param_names}")
     
     # Handle comparison mode - support multiple datasets
     comparison_datasets = []
@@ -697,28 +846,39 @@ def main():
     
     # Create corner plot
     if comparison_mode:
-        # Define colors for multiple datasets
-        colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
         num_datasets = len(comparison_datasets) + 1  # +1 for main dataset
+        colors = get_aesthetic_colors(num_datasets)
         
-        if num_datasets > len(colors):
-            print(f"Warning: Too many datasets ({num_datasets}). Only first {len(colors)} will have distinct colors.")
+        # Calculate optimal figure size
+        fig_size = get_optimal_figure_size(len(plot_indices))
+        
+        # Enhanced corner plot settings for better aesthetics
+        corner_kwargs = {
+            'labels': display_labels,
+            'truths': truths,
+            'show_titles': True,
+            'title_fmt': ".3f",
+            'quantiles': [0.16, 0.5, 0.84],
+            'smooth': True,
+            'smooth1d': True,
+            'bins': 30,
+            'hist_bin_factor': 1.5,
+            'max_n_ticks': 4,
+            'label_kwargs': {'fontsize': 12},
+            'title_kwargs': {'fontsize': 11},
+            'fig': plt.figure(figsize=(fig_size, fig_size))
+        }
         
         # Create figure with first dataset
         figure = corner.corner(
-            plot_data, 
-            labels=display_labels,
-            truths=truths,
-            show_titles=True,
-            title_fmt=".3f",
-            quantiles=[0.16, 0.5, 0.84],
-            smooth=True,
-            hist_kwargs={'density': True, 'alpha': 0.7},
-            contour_kwargs={'colors': [colors[0]], 'alpha': 0.7},
-            color=colors[0]
+            plot_data,
+            hist_kwargs={'alpha': 0.8, 'linewidth': 1.5},
+            contour_kwargs={'colors': [colors[0]], 'alpha': 0.8, 'linewidths': 1.5},
+            color=colors[0],
+            **corner_kwargs
         )
         
-        # Overplot all comparison datasets
+        # Overplot all comparison datasets with enhanced styling
         for i, comp_dataset in enumerate(comparison_datasets):
             color_idx = (i + 1) % len(colors)
             corner.corner(
@@ -726,18 +886,20 @@ def main():
                 fig=figure,
                 labels=display_labels,
                 smooth=True,
-                hist_kwargs={'density': True, 'alpha': 0.7},
-                contour_kwargs={'colors': [colors[color_idx]], 'alpha': 0.7},
+                smooth1d=True,
+                bins=30,
+                hist_kwargs={'alpha': 0.8, 'linewidth': 1.5},
+                contour_kwargs={'colors': [colors[color_idx]], 'alpha': 0.8, 'linewidths': 1.5},
                 color=colors[color_idx]
             )
         
-        # Create legend with custom labels
+        # Create enhanced legend with custom labels
         from matplotlib.lines import Line2D
         legend_elements = []
         
         # Main dataset label
         main_label = args.label_1 if args.label_1 != "Dataset 1" else args.label_1
-        legend_elements.append(Line2D([0], [0], color=colors[0], alpha=0.7, label=main_label))
+        legend_elements.append(Line2D([0], [0], color=colors[0], alpha=0.8, linewidth=3, label=main_label))
         
         # Comparison dataset labels
         for i, comp_dataset in enumerate(comparison_datasets):
@@ -746,12 +908,23 @@ def main():
                 label = args.label_2[i]
             else:
                 label = f"Dataset {i+2}"
-            legend_elements.append(Line2D([0], [0], color=colors[color_idx], alpha=0.7, label=label))
+            legend_elements.append(Line2D([0], [0], color=colors[color_idx], alpha=0.8, linewidth=3, label=label))
         
-        figure.legend(handles=legend_elements, loc='upper right')
+        # Position legend optimally
+        legend_position = 'upper right' if len(plot_indices) <= 6 else 'center left'
+        if len(plot_indices) > 6:
+            bbox_to_anchor = (1.05, 0.5)
+        else:
+            bbox_to_anchor = None
+            
+        figure.legend(handles=legend_elements, loc=legend_position, 
+                     bbox_to_anchor=bbox_to_anchor, frameon=True, 
+                     fancybox=True, shadow=True, fontsize=11)
         
     else:
-        # Single dataset plot
+        # Single dataset plot with enhanced aesthetics
+        fig_size = get_optimal_figure_size(len(plot_indices))
+        
         figure = corner.corner(
             plot_data, 
             labels=display_labels,
@@ -760,16 +933,41 @@ def main():
             title_fmt=".3f",
             quantiles=[0.16, 0.5, 0.84],
             smooth=True,
-            hist_kwargs={'density': True}
+            smooth1d=True,
+            bins=30,
+            hist_bin_factor=1.5,
+            max_n_ticks=4,
+            label_kwargs={'fontsize': 12},
+            title_kwargs={'fontsize': 11},
+            hist_kwargs={'alpha': 0.8, 'linewidth': 1.5},
+            contour_kwargs={'colors': ['#1f77b4'], 'alpha': 0.8, 'linewidths': 1.5},
+            color='#1f77b4',
+            fig=plt.figure(figsize=(fig_size, fig_size))
         )
     
-    # Add title if provided
+    # Add title if provided with enhanced styling
     if args.title:
-        figure.suptitle(args.title, fontsize=16)
+        figure.suptitle(args.title, fontsize=18, fontweight='bold', y=0.98)
     
-    # Save or display
+    # Adjust layout to prevent label overlap
+    plt.tight_layout()
+    
+    # For many parameters, adjust label rotation to prevent overlap
+    if len(plot_indices) > 6:
+        rotation_angle = get_label_rotation_angle(len(plot_indices))
+        for ax in figure.get_axes():
+            # Rotate x-axis labels
+            ax.tick_params(axis='x', labelrotation=rotation_angle, labelsize=9)
+            # Rotate y-axis labels
+            ax.tick_params(axis='y', labelrotation=0, labelsize=9)
+            # Improve tick spacing
+            ax.locator_params(nbins=4)
+    
+    # Save or display with enhanced settings
     if args.output:
-        plt.savefig(args.output, dpi=args.dpi, bbox_inches='tight')
+        plt.savefig(args.output, dpi=args.dpi, bbox_inches='tight', 
+                   facecolor='white', edgecolor='none', 
+                   pad_inches=0.2, format='png' if args.output.endswith('.png') else 'pdf')
         print(f"Plot saved to {args.output}")
     else:
         plt.show()

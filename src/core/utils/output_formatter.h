@@ -75,4 +75,10 @@ namespace output_formatter {
         std::cout << std::endl;
     }
 
+    inline void print_section_separator() {
+        std::cout << "  ";
+        for (int i = 0; i < 66; i++) std::cout << BOX_HORIZONTAL;
+        std::cout << std::endl << std::endl;
+    }
+
 } // namespace output_formatter

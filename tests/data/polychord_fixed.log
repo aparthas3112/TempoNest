@@ -1,0 +1,2375 @@
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under conditions of GPL license.
+
+Looking for /home/aparthas/software/apps/tempo2/plugins//temponest_linux-gnu_plug.t2
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under conditions of GPL license.
+
+The start date/time is: Thu Jul  3 11:47:36 2025
+Using config filename: tnest_config_test/main_polychord_fixed.json 
+Current filename = test.tim
+Rel path = /home/aparthas/software/sources/GPU_Timing/TempoNest/tests/data/test_tims/J1853+1303_PINT_20220302.nb.tim
+call pre process
+initialise pulsar
+form bats
+[observatory.C:272] Warning: Assuming site 'arecibo' means 'ao'
+[tempo2Util.C:397] [TROP2] Assume standard atmospheric pressure (no data) for site ao at MJD 55789.1
+[tempo2Util.C:397] [TROP1] Assume zero zenith wet delay (no data) for site ao  at MJD 55789.1
+[tempo2Util.C:401] Warning: [DUP1] duplicated warnings have been suppressed.
+form residuals
+[t2fit.C:789] ss/fs 0 0
+[t2fit.C:818] START=55731.1937186050345 FINISH = 59051.1334073910111
+[t2fit.C:1305] Generated 189 TNepochs from 4 TNECORRs
+[TKfit.C:273] QR nparams=209 nconst=189 ndata=4570
+[t2fit_nestlike.C:222] 0 param_jitter 55789.05 -5.909e-09 1.16332e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55818.02 -2.49899e-08 1.16272e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55758.15 -9.77597e-08 1.15386e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55731.20 -3.97565e-08 1.16073e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55912.70 9.08392e-09 1.16444e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57264.00 5.55198e-08 1.16011e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57240.06 5.45193e-08 1.15545e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57116.41 1.45309e-08 1.16378e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57390.66 8.48285e-09 1.16304e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57958.13 -1.48356e-07 1.14909e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56577.89 -7.88965e-08 1.1302e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58810.82 3.13849e-08 1.16253e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57668.94 -2.18073e-08 1.1564e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57032.65 1.19173e-07 1.13628e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56380.43 1.6117e-08 1.15839e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57305.89 2.71923e-08 1.16191e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58622.29 2.58669e-08 1.15938e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58747.94 8.7353e-08 1.15131e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58790.83 5.98471e-08 1.15996e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57326.82 8.4346e-09 1.16408e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56235.83 1.15164e-08 1.165e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58901.57 1.34248e-08 1.16012e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59030.23 -2.23407e-08 1.1605e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57915.25 -2.70925e-08 1.16023e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58986.37 -3.68761e-09 1.16042e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58578.41 6.87136e-08 1.14664e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57096.46 6.40896e-08 1.15689e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58964.38 -2.94029e-08 1.15601e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56662.66 2.44479e-08 1.16074e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59051.14 -1.73174e-08 1.15973e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57375.68 6.2468e-08 1.16021e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57347.76 2.83756e-08 1.16229e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57418.58 6.83781e-09 1.16484e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56417.34 -3.90762e-09 1.15728e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56399.38 5.46055e-09 1.1611e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58730.00 6.54139e-08 1.15706e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57978.08 -3.51828e-08 1.16097e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57746.68 -5.598e-08 1.15427e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56438.30 4.66906e-09 1.16473e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57850.41 -1.09173e-07 1.15003e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56955.87 2.12999e-08 1.1606e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57053.56 5.83865e-08 1.15495e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56934.93 1.13826e-08 1.15996e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56998.75 1.81849e-08 1.16026e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58538.52 3.26851e-08 1.15111e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56738.46 1.32567e-08 1.16044e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55989.50 2.245e-08 1.15861e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58831.71 5.49875e-09 1.16329e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57810.51 -3.98271e-08 1.15611e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56299.65 4.86692e-09 1.16276e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56479.17 8.30537e-09 1.16184e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57069.53 2.35783e-08 1.15916e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57503.35 6.48972e-09 1.16202e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57522.30 1.06765e-08 1.15731e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57200.18 6.1154e-08 1.15765e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57667.90 -2.22342e-08 1.15633e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57768.62 -8.7799e-08 1.15409e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56874.07 -3.15306e-08 1.15551e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57187.23 3.77888e-08 1.15988e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58765.89 7.37515e-08 1.15567e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56977.80 1.64259e-08 1.15778e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58642.24 4.36971e-08 1.1571e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57894.28 -9.64325e-08 1.15348e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57649.95 -1.24803e-08 1.16264e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58880.57 6.87972e-09 1.16423e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57937.18 -5.06242e-07 1.11433e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58683.13 2.24509e-08 1.15695e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57018.69 1.13624e-07 1.14949e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57223.11 1.02006e-07 1.15209e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57705.82 -8.135e-08 1.14746e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59007.29 -3.18644e-08 1.15764e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58475.68 3.84426e-08 1.16079e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58943.44 -1.71726e-08 1.16132e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57186.21 1.0316e-08 1.16077e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56458.22 8.28353e-10 1.16543e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56023.41 -5.24088e-08 1.14718e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57028.66 1.00875e-07 1.1426e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56277.71 2.94593e-08 1.16243e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58544.55 1.91593e-08 1.16166e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57627.05 3.87371e-08 1.15794e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56853.16 -2.96406e-08 1.14692e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56498.10 -3.11957e-10 1.16589e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57608.07 -2.06915e-08 1.15329e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58454.74 3.79503e-08 1.15713e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57538.26 3.30945e-08 1.15495e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57565.19 2.75825e-08 1.15853e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56538.00 -2.62801e-08 1.16094e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56341.54 2.65677e-09 1.16364e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57137.34 1.84728e-08 1.16291e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57588.14 2.02457e-08 1.15757e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57834.45 -1.87758e-07 1.1432e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55731.21 -2.90057e-10 1.16563e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55817.96 -3.14637e-08 1.15888e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55912.68 5.59667e-09 1.15942e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55789.03 -4.42157e-09 1.16581e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55758.12 -3.06021e-09 1.16284e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58729.98 -2.10486e-08 1.11318e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59007.26 8.14133e-08 1.06012e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57069.55 -2.60461e-08 1.13542e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57834.43 -1.02352e-07 1.03264e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56235.81 2.08032e-08 1.1179e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58642.22 2.5286e-08 1.12716e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57187.24 2.19561e-07 8.99973e-08
+[t2fit_nestlike.C:222] 0 param_jitter 58747.93 -2.64466e-08 1.00663e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56057.30 -8.79275e-08 1.07852e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56577.87 3.78484e-09 1.08851e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56738.44 -1.82868e-08 1.1526e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57375.70 7.8493e-08 9.08741e-08
+[t2fit_nestlike.C:222] 0 param_jitter 57305.91 2.89623e-08 1.1089e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56498.11 -3.65129e-08 1.07183e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57116.43 1.2563e-07 1.10442e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57565.17 -1.14207e-07 1.06621e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58964.36 7.7222e-08 1.06336e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57522.29 9.57543e-09 9.55831e-08
+[t2fit_nestlike.C:222] 0 param_jitter 56319.57 -1.77776e-08 1.05507e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57053.58 3.51263e-09 1.15701e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58790.81 2.72565e-08 1.12118e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57768.60 -2.03908e-07 1.05162e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56977.78 1.03295e-08 1.14911e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57588.12 -5.34568e-08 8.20136e-08
+[t2fit_nestlike.C:222] 0 param_jitter 58901.55 -4.56207e-08 1.14395e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57326.83 -5.90349e-08 1.02837e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59051.12 6.87271e-10 1.15242e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57503.34 -6.27051e-08 1.09103e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57608.06 -1.25853e-08 1.15161e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57186.22 1.04749e-07 1.05287e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58765.88 2.23281e-08 1.12968e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56662.63 3.39498e-08 9.61584e-08
+[t2fit_nestlike.C:222] 0 param_jitter 57200.20 1.98458e-07 1.04132e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57705.80 -3.58643e-08 1.13084e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57958.11 -3.21049e-08 1.14214e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56023.39 -1.22277e-07 1.05501e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56874.08 2.43058e-08 1.08937e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58683.11 -8.45625e-09 1.12776e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57418.56 -5.99617e-08 9.59124e-08
+[t2fit_nestlike.C:222] 0 param_jitter 57223.13 9.53552e-09 1.04804e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56998.73 -2.05685e-08 1.14787e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56438.28 4.97969e-08 1.09248e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58538.50 -1.77384e-08 1.15114e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56537.98 -8.39752e-08 1.06495e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57240.08 2.7151e-07 8.4219e-08
+[t2fit_nestlike.C:222] 0 param_jitter 57937.16 -5.4583e-08 1.01008e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57894.27 -5.84021e-08 1.10637e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56201.91 1.09841e-09 1.1331e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56399.36 8.08144e-08 1.07349e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57538.25 -9.41606e-09 1.15343e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58831.69 -1.44635e-08 1.15757e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57627.03 3.08708e-08 1.00609e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57978.06 -1.16905e-07 1.02657e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57137.36 1.01433e-07 1.11459e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57667.89 -4.77465e-08 1.14114e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55989.48 -4.1522e-09 1.15908e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57810.50 -6.93156e-09 1.16446e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58880.57 -7.59844e-11 1.16567e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57032.64 -7.75057e-08 9.48525e-08
+[t2fit_nestlike.C:222] 0 param_jitter 58810.80 -4.70602e-08 1.13039e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56955.85 1.15e-07 1.06579e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58475.67 -5.75164e-09 1.16402e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57096.47 9.75677e-08 9.73598e-08
+[t2fit_nestlike.C:222] 0 param_jitter 56166.02 1.0819e-08 1.1247e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57915.23 -7.70768e-08 1.07215e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57264.02 7.75638e-08 1.06793e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58922.48 2.17601e-09 1.16549e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57746.66 -2.05807e-08 1.15592e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58943.42 2.20361e-08 1.14926e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56140.09 -8.82037e-11 1.1224e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57390.64 2.23354e-08 1.15883e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56458.21 2.36778e-08 1.09267e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56380.42 -5.63225e-08 1.02301e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57850.40 -3.07633e-08 1.03415e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58986.35 7.86222e-08 1.08686e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58558.45 -4.58828e-09 1.10799e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57028.65 2.24098e-09 9.46459e-08
+[t2fit_nestlike.C:222] 0 param_jitter 56853.14 9.50933e-08 1.11223e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57347.77 3.88083e-08 1.0695e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57649.94 -2.43972e-07 1.02403e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58544.54 1.06249e-09 1.13031e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58454.73 -1.59893e-08 1.14459e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56417.32 -1.21895e-08 9.63341e-08
+[t2fit_nestlike.C:222] 0 param_jitter 58578.39 6.0441e-08 1.10933e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58622.28 4.33891e-08 1.13499e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56277.69 -7.71385e-08 1.09891e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56341.52 4.31299e-09 1.12568e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56479.15 6.60458e-08 1.09104e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57668.93 -4.90905e-08 1.13794e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56934.91 3.61923e-08 1.13691e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59030.21 1.65576e-08 1.14969e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56299.62 -3.3673e-08 1.09982e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57018.68 -8.83428e-08 1.09259e-07
+
+
+Results for PSR J1853+1303
+
+
+RMS pre-fit residual = 1.506 (us), RMS post-fit residual = 1.472 (us)
+Fit Chisq = 6186	Chisqr/nfree = 6185.53/4550 = 1.35946	pre/post = 1.02272
+Number of fit parameters: 209
+Number of points in fit = 4570
+Offset: 5.59393e-07 1.24481e-06 offset_e*sqrt(n) = 8.41512e-05 n = 4570
+
+
+PARAMETER       Pre-fit                   Post-fit                  Uncertainty   Difference   Fit
+---------------------------------------------------------------------------------------------------
+ELONG           286.257303904631          286.257303905553          6.2068e-09    9.2236e-10    Y
+ELAT            35.7433491692             35.7433491312639          8.7331e-09    -3.7936e-08   Y
+F0 (s^-1)       244.391373923512          244.391373923512          1.3948e-13    -1.1369e-13   Y
+F1 (s^-2)       -5.20687474439809e-16     -5.20691687245269e-16     3.2971e-21    -4.2128e-21   Y
+PEPOCH (MJD)    57391                     57391                     0             0             N
+POSEPOCH (MJD)  57391                     57391                     0             0             N
+DMEPOCH (MJD)   57391                     57391                     0             0             N
+DM (cm^-3 pc)   30.5701401411977          30.5701641063565          4.9935e-05    2.3965e-05    Y
+DM1 (cm^-3 pc y 8.26117721705731e-05      8.12798384528089e-05      2.2245e-06    -1.3319e-06   Y
+DM2 (cm^-3 pc y 1.54501607461932e-05      1.27652146625802e-05      1.6515e-06    -2.6849e-06   Y
+PMELONG         -1.92603551329247         -1.92807265718405         0.0073906     -0.0020371    Y
+PMELAT          -2.72287618561326         -2.72136271101307         0.016634      0.0015135     Y
+PX (mas)        0.498733219705827         0.331516462585442         0.10986       -0.16722      Y
+SINI            0.94511211661403          0.960616935536924         0.1058        0.015505      Y
+PB (d)          115.653788230616          115.653788231187          2.6107e-09    5.7069e-10    Y
+T0 (MJD)        57400.7512962562          57400.7510077196          0.0059449     -0.00028854   Y
+A1 (lt-s)       40.7695243193548          40.769524454034           6.7601e-07    1.3468e-07    Y
+OM (deg)        346.644898047842          346.643999923588          0.018505      -0.00089812   Y
+ECC             2.36952020103122e-05      2.36940281371559e-05      2.5714e-09    -1.1739e-09   Y
+XDOT            1.54280026648889e-14      1.53358329307734e-14      6.9389e-16    -9.217e-17    Y
+M2              0.0548075338775524        0.0418648232654017        0.066602      -0.012943     Y
+START (MJD)     55731.193718605           55731.193718605           0             0             N
+FINISH (MJD)    59051.133407391           59051.133407391           0             0             N
+TZRMJD          57390.6587742196          57390.6587742196          0             -1.4552e-11   N
+TZRFRQ (MHz)    426.875                   426.875                   0             0             N
+TZRSITE         arecibo                  
+TRES            1.453                     1.47240991341531          0             0.01941       N
+EPHVER          TEMPO2                    TEMPO2                    
+NE_SW (cm^-3)   1                         1                         0             0             N
+DM_SERIES       TAYLOR                   
+---------------------------------------------------------------------------------------------------
+[textOutput.C:305] Notice: Parameter uncertainties multiplied by sqrt(red. chisq)
+
+Jump 1 ( -fe L-wide 6.904825308869e-05 1): 7.0066169809673e-05 1.0039663938209e-06 Y
+
+Derived parameters:
+
+P0 (s)      = 0.004091797447454         2.3354e-18   
+P1          = 8.71784008811834e-21      5.5202e-26   
+tau_c (Myr) = 7441.6
+bs (G)      = 1.9112e+08
+
+Binary model: DD
+Mass function                  = 0.005439637244  +- 0.000000000271 solar masses 
+Minimum, median and maximum companion mass: 0.2395 < 0.2814 < 0.6379 solar masses
+Pulsar Mass (Shapiro Delay): 0.067484 (+/- 0.195178) Msun.
+
+Parallax distance is 3016.44 (+/- 999.63) pc.
+MTOT derived from sin i and m2 = 0.10935224038583
+Inclination angle (deg)        = 73.866518020267 (+ nan - 15.12677)
+Total proper motion = 3.3352 +/- 0.014229 mas/yr
+Total time span = 3319.940 days = 9.089 years
+
+Tempo2 usage
+Units:                 TCB (tempo2)
+Time ephemeris:        IF99 (tempo2)
+Troposphere corr.?     Yes (tempo2)
+Dilate freq?           Yes (tempo2)
+Electron density (1AU) 1
+Solar system ephem     DE440
+Time scale             TT(TAI)
+Binary model           DD
+
+[textOutput.C:1738] Warning: There are output parameters with very high covariance
+                  DM        param_JUMP(1) -0.99110
+                  OM                   T0 +1.00000
+                  M2                   A1 -0.99453
+Notice: There were 3 warnings. Summaries are shown below, check logs for full details.
+Warning #1: Assuming site 'arecibo' means 'ao'
+Warning #2: [DUP1] duplicated warnings have been suppressed.
+Warning #3: There are output parameters with very high covariance
+
+Loading TempoNest configuration...
+┌────────────────────────────────────────────────────────────────────┐
+│                      [1mTEMPONEST CONFIGURATION[0m                       │
+└────────────────────────────────────────────────────────────────────┘
+
+[1mGlobal Settings:[0m
+  • Debug Mode: [31mOFF[0m
+  • Tempo2 Iterations: [32m1[0m
+  • Original Errors: [32mON[0m
+  • Test Mode: [31mOFF[0m
+[0;34m2025-07-03 11:47:38 INFO Using GPU for calculations[0m
+Available devices: 1
+CUDA backend available and selected
+Using device: NVIDIA_GeForce_RTX_4090
+  Platform: CUDA
+  Toolkit: v12.2
+  Compute: 8.9
+Active backend: CUDA
+ArrayFire v3.9.0 (CUDA, 64-bit Linux, build b59a1ae53)
+Platform: CUDA Runtime 12.2, Driver: 535.230.02
+[0] NVIDIA GeForce RTX 4090, 24210 MB, CUDA Compute 8.9
+  • GPU Acceleration: [32mON[0m
+  • GPU Optimized: [32mON[0m
+
+┌────────────────────────────────────────────────────────────────────┐
+│                           [1mMODEL ELEMENTS[0m                           │
+└────────────────────────────────────────────────────────────────────┘
+
+
+[1] [1mPower Law Red Noise[0m [33m(30 frequencies (110.000000 days/coeff))[0m
+    ├─ [1mspectral_index[0m: uniform [0, 7][32m ✓ included[0m
+    └─ [1mamplitude[0m: log-uniform [-18, -10][32m ✓ included[0m
+
+[2] [1mPower Law DM Noise[0m [33m(100 frequencies (33.000000 days/coeff))[0m
+    ├─ [1mspectral_index[0m: uniform [0, 7][32m ✓ included[0m
+    └─ [1mamplitude[0m: log-uniform [-18, -10][32m ✓ included[0m
+
+[3] [1mEFAC[0m [33m(Per-flag (-group, 4 values))[0m
+    ├─ [1mper_flag::-group::L-wide_PUPPI[0m: uniform [-1, 0.7][32m ✓ included[0m
+    ├─ [1mper_flag::-group::L-wide_ASP[0m: uniform [-1, 0.7][32m ✓ included[0m
+    ├─ [1mper_flag::-group::430_PUPPI[0m: uniform [-1, 0.7][32m ✓ included[0m
+    └─ [1mper_flag::-group::430_ASP[0m: uniform [-1, 0.7][32m ✓ included[0m
+
+[4] [1mEQUAD[0m [33m(Per-flag (-group, 4 values))[0m
+    ├─ [1mper_flag::-group::L-wide_PUPPI[0m: log-uniform [-9, -3][32m ✓ included[0m
+    ├─ [1mper_flag::-group::L-wide_ASP[0m: log-uniform [-9, -3][32m ✓ included[0m
+    ├─ [1mper_flag::-group::430_PUPPI[0m: log-uniform [-9, -3][32m ✓ included[0m
+    └─ [1mper_flag::-group::430_ASP[0m: log-uniform [-9, -3][32m ✓ included[0m
+
+[5] [1mECORR[0m [33m(4 backends, 189 epochs)[0m
+
+[5] [1mECORR[0m
+    ├─ [1mecorr::-f::L-wide_PUPPI[0m: log-uniform [-9, -3][32m ✓ included[0m
+    ├─ [1mecorr::-f::L-wide_ASP[0m: log-uniform [-9, -3][32m ✓ included[0m
+    ├─ [1mecorr::-f::430_PUPPI[0m: log-uniform [-9, -3][32m ✓ included[0m
+    └─ [1mecorr::-f::430_ASP[0m: log-uniform [-9, -3][32m ✓ included[0m
+
+[6] [1mDeterministic Solar Wind[0m
+    └─ [1melectron_density[0m: uniform [0, 16][32m ✓ included[0m
+
+[7] [1mTiming Model[0m [33m(Fully marginalised (19 parameters))[0m
+    └─ [33mAll fitted parameters from .par file will be marginalised[0m
+
+┌────────────────────────────────────────────────────────────────────┐
+│                       [1mFREQUENCY COEFFICIENTS[0m                       │
+└────────────────────────────────────────────────────────────────────┘
+
+  📊 [1mObservation Span:[0m 3319.94 days
+
+  🔴 [1mRed Noise:[0m
+     ├─ Frequencies: [32m30[0m
+     ├─ Days per coefficient: [33m110.00[0m
+     └─ Total coefficients: [34m60[0m
+
+  🟣 [1mDM Noise:[0m
+     ├─ Frequencies: [32m100[0m
+     ├─ Days per coefficient: [33m33.00[0m
+     └─ Total coefficients: [34m200[0m
+
+  ⚡ [1mECORR:[0m
+     └─ Total epochs: [34m189[0m
+
+  ──────────────────────────────────────────────────────────────────
+
+Forming Design Matrix 19
+Graphical Interface: TempoNest
+Author:              L. Lentati
+Version:             1.0
+----------------------------------------------------------------
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under conditions of GPL license.
+
+----------------------------------------------------------------
+
+
+
+
+*****************************************************
+Starting TempoNest
+*****************************************************
+
+┌────────────────────────────────────────────────────────────────────┐
+│                       [1mANALYSIS CONFIGURATION[0m                       │
+└────────────────────────────────────────────────────────────────────┘
+
+  🎯 [1mOutput Configuration:[0m
+     └─ File root: [32mresults_pc_fixed/TNest-J1853+1303-[0m
+
+  ──────────────────────────────────────────────────────────────────
+
+run 
+dir path: results_pc_fixed
+[0;34m2025-07-03 11:47:38 INFO Created PolyChord subdirectories[0m
+[0;34m2025-07-03 11:47:38 INFO Starting PolyChord nested sampling[0m
+[0;34m2025-07-03 11:47:38 INFO Number of parameters: 17[0m
+[0;34m2025-07-03 11:47:38 INFO Number of live points: 200[0m
+[0;34m2025-07-03 11:47:38 INFO Number of repeats (user-specified): 25[0m
+[0;34m2025-07-03 11:47:38 INFO Precision criterion: 0.001000[0m
+[0;34m2025-07-03 11:47:38 INFO Boost posterior (legacy value): 5.000000[0m
+[0;34m2025-07-03 11:47:38 INFO Clustering disabled: true[0m
+[0;34m2025-07-03 11:47:38 INFO Compression factor (legacy): 0.367879[0m
+[0;34m2025-07-03 11:47:38 INFO Output directory: results_pc_fixed/[0m
+[0;34m2025-07-03 11:47:38 INFO File root: TNest-J1853+1303-[0m
+[0;34m2025-07-03 11:47:38 INFO Starting PolyChord nested sampling...[0m
+[0;34m2025-07-03 11:47:38 INFO Expected output directory: results_pc_fixed/[0m
+[0;34m2025-07-03 11:47:38 INFO Expected file prefix: TNest-J1853+1303-[0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord prior_wrapper: nDims=17, parameters.size()=17[0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 0: amplitude [-18.000000, -10.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 1: spectral_index [0.000000, 7.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 2: amplitude [-18.000000, -10.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 3: spectral_index [0.000000, 7.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 4: per_flag [-1.000000, 0.700000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 5: per_flag [-1.000000, 0.700000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 6: per_flag [-1.000000, 0.700000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 7: per_flag [-1.000000, 0.700000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 8: per_flag [-9.000000, -3.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 9: per_flag [-9.000000, -3.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 10: per_flag [-9.000000, -3.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 11: per_flag [-9.000000, -3.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 12: per_backend [-9.000000, -3.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 13: per_backend [-9.000000, -3.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 14: per_backend [-9.000000, -3.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 15: per_backend [-9.000000, -3.000000][0m
+[0;34m2025-07-03 11:47:38 INFO Parameter 16: electron_density [0.000000, 16.000000][0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord prior transform #0: cube→physical: 0.721776→-12.225793 0.762068→5.334473 0.816627→-11.466982 0.474837→3.323860 0.357611→-0.392062 [0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord likelihood eval #0: params[0:4]=-12.225793 5.334473 -11.466982 3.323860 -0.392062 [0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord likelihood result #0: loglike=52276.293768[0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord prior transform #1: cube→physical: 0.499752→-14.001987 0.338897→2.372277 0.626844→-12.985251 0.734231→5.139618 0.237957→-0.595474 [0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord likelihood eval #1: params[0:4]=-14.001987 2.372277 -12.985251 5.139618 -0.595474 [0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord likelihood result #1: loglike=50538.875182[0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord prior transform #2: cube→physical: 0.032849→-17.737210 0.435398→3.047784 0.378413→-14.972693 0.393619→2.755332 0.995897→0.693024 [0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord likelihood eval #2: params[0:4]=-17.737210 3.047784 -14.972693 2.755332 0.693024 [0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord likelihood result #2: loglike=54102.073656[0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord likelihood eval #3: params[0:4]=-16.094353 5.782763 -12.571320 5.901259 -0.120199 [0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord likelihood result #3: loglike=-71910.245759[0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord likelihood eval #4: params[0:4]=-17.014501 0.680785 -15.988816 4.815780 -0.917986 [0m
+[0;34m2025-07-03 11:47:38 INFO PolyChord likelihood result #4: loglike=-14597.007417[0m
+[0;34m2025-07-03 11:47:46 INFO PolyChord likelihood eval #1000: params[0:4]=-16.407667 5.659151 -14.017314 4.601436 -0.298661 [0m
+[0;34m2025-07-03 11:47:46 INFO PolyChord likelihood result #1000: loglike=53312.707809[0m
+[0;34m2025-07-03 11:47:53 INFO PolyChord likelihood eval #2000: params[0:4]=-17.458296 4.121064 -16.554294 1.461217 0.338116 [0m
+[0;34m2025-07-03 11:47:53 INFO PolyChord likelihood result #2000: loglike=53614.426879[0m
+[0;34m2025-07-03 11:48:00 INFO PolyChord likelihood eval #3000: params[0:4]=-12.719865 2.281844 -15.043309 5.750971 0.684046 [0m
+[0;34m2025-07-03 11:48:00 INFO PolyChord likelihood result #3000: loglike=44248.816626[0m
+[0;34m2025-07-03 11:48:07 INFO PolyChord likelihood eval #4000: params[0:4]=-10.317862 5.068149 -15.263906 4.645891 0.595913 [0m
+[0;34m2025-07-03 11:48:07 INFO PolyChord likelihood result #4000: loglike=49076.545010[0m
+[0;34m2025-07-03 11:48:15 INFO PolyChord likelihood eval #5000: params[0:4]=-11.368317 0.213737 -13.805589 4.117585 -0.279721 [0m
+[0;34m2025-07-03 11:48:15 INFO PolyChord likelihood result #5000: loglike=52173.345449[0m
+[0;34m2025-07-03 11:48:22 INFO PolyChord likelihood eval #6000: params[0:4]=-13.853828 2.537158 -12.465274 1.829609 0.163630 [0m
+[0;34m2025-07-03 11:48:22 INFO PolyChord likelihood result #6000: loglike=50893.107326[0m
+[0;34m2025-07-03 11:48:29 INFO PolyChord likelihood eval #7000: params[0:4]=-12.581440 5.105717 -11.341032 0.635179 0.538076 [0m
+[0;34m2025-07-03 11:48:29 INFO PolyChord likelihood result #7000: loglike=51404.168998[0m
+[0;34m2025-07-03 11:48:36 INFO PolyChord likelihood eval #8000: params[0:4]=-10.921308 4.686308 -16.454123 6.523528 -0.422621 [0m
+[0;34m2025-07-03 11:48:36 INFO PolyChord likelihood result #8000: loglike=51332.980181[0m
+[0;34m2025-07-03 11:48:44 INFO PolyChord likelihood eval #9000: params[0:4]=-14.695410 0.145975 -12.161892 6.325908 0.659478 [0m
+[0;34m2025-07-03 11:48:44 INFO PolyChord likelihood result #9000: loglike=53537.506819[0m
+[0;34m2025-07-03 11:48:51 INFO PolyChord likelihood eval #10000: params[0:4]=-14.889999 1.594297 -10.238325 2.703981 0.581926 [0m
+[0;34m2025-07-03 11:48:51 INFO PolyChord likelihood result #10000: loglike=51712.687529[0m
+[0;34m2025-07-03 11:48:58 INFO PolyChord likelihood eval #11000: params[0:4]=-15.858742 5.300962 -15.922056 0.098633 -0.952498 [0m
+[0;34m2025-07-03 11:48:58 INFO PolyChord likelihood result #11000: loglike=53268.907501[0m
+[0;34m2025-07-03 11:49:05 INFO PolyChord likelihood eval #12000: params[0:4]=-11.159766 4.995297 -10.997101 2.296835 -0.072476 [0m
+[0;34m2025-07-03 11:49:05 INFO PolyChord likelihood result #12000: loglike=54399.153121[0m
+[0;34m2025-07-03 11:49:13 INFO PolyChord likelihood eval #13000: params[0:4]=-15.455701 0.301612 -11.202894 5.612822 0.125576 [0m
+[0;34m2025-07-03 11:49:13 INFO PolyChord likelihood result #13000: loglike=51970.288910[0m
+[0;34m2025-07-03 11:49:20 INFO PolyChord likelihood eval #14000: params[0:4]=-12.261271 2.559055 -13.264907 1.380789 -0.461752 [0m
+[0;34m2025-07-03 11:49:20 INFO PolyChord likelihood result #14000: loglike=54923.694120[0m
+[0;34m2025-07-03 11:49:27 INFO PolyChord likelihood eval #15000: params[0:4]=-11.290742 2.427003 -14.942753 2.830218 -0.815128 [0m
+[0;34m2025-07-03 11:49:27 INFO PolyChord likelihood result #15000: loglike=53482.181437[0m
+[0;34m2025-07-03 11:49:34 INFO PolyChord likelihood eval #16000: params[0:4]=-17.953792 0.445769 -15.551759 4.093244 -0.812092 [0m
+[0;34m2025-07-03 11:49:34 INFO PolyChord likelihood result #16000: loglike=55100.500262[0m
+[0;34m2025-07-03 11:49:42 INFO PolyChord likelihood eval #17000: params[0:4]=-15.402825 0.088291 -10.459642 6.874081 -0.759897 [0m
+[0;34m2025-07-03 11:49:42 INFO PolyChord likelihood result #17000: loglike=53527.856476[0m
+[0;34m2025-07-03 11:49:49 INFO PolyChord likelihood eval #18000: params[0:4]=-17.240532 2.439988 -16.578507 1.976072 0.372247 [0m
+[0;34m2025-07-03 11:49:49 INFO PolyChord likelihood result #18000: loglike=55093.303852[0m
+[0;34m2025-07-03 11:49:56 INFO PolyChord likelihood eval #19000: params[0:4]=-16.859900 1.572985 -12.987652 6.906349 0.627239 [0m
+[0;34m2025-07-03 11:49:56 INFO PolyChord likelihood result #19000: loglike=55100.017933[0m
+[0;34m2025-07-03 11:50:04 INFO PolyChord likelihood eval #20000: params[0:4]=-10.837207 2.643357 -12.807211 6.603947 -0.950659 [0m
+[0;34m2025-07-03 11:50:04 INFO PolyChord likelihood result #20000: loglike=54396.970244[0m
+[0;34m2025-07-03 11:50:11 INFO PolyChord likelihood eval #21000: params[0:4]=-14.535292 0.773197 -14.225212 0.457049 -0.379947 [0m
+[0;34m2025-07-03 11:50:11 INFO PolyChord likelihood result #21000: loglike=54336.176303[0m
+[0;34m2025-07-03 11:50:18 INFO PolyChord likelihood eval #22000: params[0:4]=-15.903635 1.015530 -16.356501 1.519653 0.394051 [0m
+[0;34m2025-07-03 11:50:18 INFO PolyChord likelihood result #22000: loglike=55328.216254[0m
+[0;34m2025-07-03 11:50:25 INFO PolyChord likelihood eval #23000: params[0:4]=-14.026610 0.238962 -11.802067 5.334005 0.276154 [0m
+[0;34m2025-07-03 11:50:25 INFO PolyChord likelihood result #23000: loglike=55647.264498[0m
+[0;34m2025-07-03 11:50:33 INFO PolyChord likelihood eval #24000: params[0:4]=-15.044598 0.704532 -17.593323 4.586227 -0.526386 [0m
+[0;34m2025-07-03 11:50:33 INFO PolyChord likelihood result #24000: loglike=54362.393042[0m
+[0;34m2025-07-03 11:50:40 INFO PolyChord likelihood eval #25000: params[0:4]=-11.655106 1.939496 -11.301653 6.870133 -0.911028 [0m
+[0;34m2025-07-03 11:50:40 INFO PolyChord likelihood result #25000: loglike=54595.242019[0m
+[0;34m2025-07-03 11:50:47 INFO PolyChord likelihood eval #26000: params[0:4]=-14.032323 5.756431 -17.497264 5.568817 0.047290 [0m
+[0;34m2025-07-03 11:50:47 INFO PolyChord likelihood result #26000: loglike=54701.468356[0m
+[0;34m2025-07-03 11:50:55 INFO PolyChord likelihood eval #27000: params[0:4]=-14.443707 4.725589 -13.626183 1.381360 -0.966895 [0m
+[0;34m2025-07-03 11:50:55 INFO PolyChord likelihood result #27000: loglike=54559.955725[0m
+[0;34m2025-07-03 11:51:02 INFO PolyChord likelihood eval #28000: params[0:4]=-11.128039 2.161004 -16.666060 4.259089 0.335304 [0m
+[0;34m2025-07-03 11:51:02 INFO PolyChord likelihood result #28000: loglike=54221.852514[0m
+[0;34m2025-07-03 11:51:09 INFO PolyChord likelihood eval #29000: params[0:4]=-11.117143 5.055780 -12.333608 1.575341 -0.249903 [0m
+[0;34m2025-07-03 11:51:09 INFO PolyChord likelihood result #29000: loglike=54700.341127[0m
+[0;34m2025-07-03 11:51:17 INFO PolyChord likelihood eval #30000: params[0:4]=-14.148481 2.824681 -11.064262 2.672178 -0.376833 [0m
+[0;34m2025-07-03 11:51:17 INFO PolyChord likelihood result #30000: loglike=55303.707272[0m
+[0;34m2025-07-03 11:51:24 INFO PolyChord likelihood eval #31000: params[0:4]=-17.636001 0.218564 -11.301915 2.424317 -0.919835 [0m
+[0;34m2025-07-03 11:51:24 INFO PolyChord likelihood result #31000: loglike=54476.613360[0m
+[0;34m2025-07-03 11:51:31 INFO PolyChord likelihood eval #32000: params[0:4]=-13.105473 1.170615 -11.514147 0.781219 0.415622 [0m
+[0;34m2025-07-03 11:51:31 INFO PolyChord likelihood result #32000: loglike=54714.964169[0m
+[0;34m2025-07-03 11:51:38 INFO PolyChord likelihood eval #33000: params[0:4]=-14.293225 0.740243 -16.495921 4.947321 -0.360427 [0m
+[0;34m2025-07-03 11:51:38 INFO PolyChord likelihood result #33000: loglike=55201.511033[0m
+[0;34m2025-07-03 11:51:46 INFO PolyChord likelihood eval #34000: params[0:4]=-15.240036 0.244974 -11.050362 3.301461 0.492194 [0m
+[0;34m2025-07-03 11:51:46 INFO PolyChord likelihood result #34000: loglike=55304.879469[0m
+[0;34m2025-07-03 11:51:53 INFO PolyChord likelihood eval #35000: params[0:4]=-17.003751 3.156695 -15.690469 4.164765 0.660761 [0m
+[0;34m2025-07-03 11:51:53 INFO PolyChord likelihood result #35000: loglike=55019.719172[0m
+[0;34m2025-07-03 11:52:00 INFO PolyChord likelihood eval #36000: params[0:4]=-14.177491 5.227530 -13.352390 2.451898 -0.433863 [0m
+[0;34m2025-07-03 11:52:00 INFO PolyChord likelihood result #36000: loglike=55265.235415[0m
+[0;34m2025-07-03 11:52:07 INFO PolyChord likelihood eval #37000: params[0:4]=-16.822215 3.316961 -10.654183 2.339227 0.018133 [0m
+[0;34m2025-07-03 11:52:07 INFO PolyChord likelihood result #37000: loglike=55717.776707[0m
+[0;34m2025-07-03 11:52:15 INFO PolyChord likelihood eval #38000: params[0:4]=-15.795038 2.672217 -16.929739 3.050780 -0.844804 [0m
+[0;34m2025-07-03 11:52:15 INFO PolyChord likelihood result #38000: loglike=55590.669566[0m
+[0;34m2025-07-03 11:52:22 INFO PolyChord likelihood eval #39000: params[0:4]=-13.816260 2.860958 -16.997783 0.842340 -0.152204 [0m
+[0;34m2025-07-03 11:52:22 INFO PolyChord likelihood result #39000: loglike=55686.915632[0m
+[0;34m2025-07-03 11:52:29 INFO PolyChord likelihood eval #40000: params[0:4]=-16.101372 0.323782 -11.605431 3.113103 0.121541 [0m
+[0;34m2025-07-03 11:52:29 INFO PolyChord likelihood result #40000: loglike=55101.255763[0m
+[0;34m2025-07-03 11:52:37 INFO PolyChord likelihood eval #41000: params[0:4]=-12.004149 4.380139 -11.703904 1.974323 0.364415 [0m
+[0;34m2025-07-03 11:52:37 INFO PolyChord likelihood result #41000: loglike=55172.179465[0m
+[0;34m2025-07-03 11:52:44 INFO PolyChord likelihood eval #42000: params[0:4]=-17.130212 1.224217 -12.301584 0.144717 0.010307 [0m
+[0;34m2025-07-03 11:52:44 INFO PolyChord likelihood result #42000: loglike=55031.508438[0m
+[0;34m2025-07-03 11:52:51 INFO PolyChord likelihood eval #43000: params[0:4]=-15.593907 2.171331 -12.666245 1.917173 0.588655 [0m
+[0;34m2025-07-03 11:52:51 INFO PolyChord likelihood result #43000: loglike=55622.012964[0m
+[0;34m2025-07-03 11:52:58 INFO PolyChord likelihood eval #44000: params[0:4]=-13.331434 4.263387 -17.442754 3.637958 -0.391593 [0m
+[0;34m2025-07-03 11:52:58 INFO PolyChord likelihood result #44000: loglike=54456.076064[0m
+[0;34m2025-07-03 11:53:06 INFO PolyChord likelihood eval #45000: params[0:4]=-12.323093 3.340346 -11.862378 1.742152 0.527087 [0m
+[0;34m2025-07-03 11:53:06 INFO PolyChord likelihood result #45000: loglike=55162.699274[0m
+[0;34m2025-07-03 11:53:13 INFO PolyChord likelihood eval #46000: params[0:4]=-17.919098 6.753360 -12.658158 5.518992 -0.364526 [0m
+[0;34m2025-07-03 11:53:13 INFO PolyChord likelihood result #46000: loglike=55347.231350[0m
+[0;34m2025-07-03 11:53:20 INFO PolyChord likelihood eval #47000: params[0:4]=-15.093658 5.414668 -11.875752 6.963832 0.323412 [0m
+[0;34m2025-07-03 11:53:20 INFO PolyChord likelihood result #47000: loglike=55357.462207[0m
+[0;34m2025-07-03 11:53:28 INFO PolyChord likelihood eval #48000: params[0:4]=-17.312573 3.146394 -14.400457 2.090616 0.406979 [0m
+[0;34m2025-07-03 11:53:28 INFO PolyChord likelihood result #48000: loglike=55557.607984[0m
+[0;34m2025-07-03 11:53:35 INFO PolyChord likelihood eval #49000: params[0:4]=-11.537634 3.564956 -11.591857 1.466393 -0.863391 [0m
+[0;34m2025-07-03 11:53:35 INFO PolyChord likelihood result #49000: loglike=55543.811903[0m
+[0;34m2025-07-03 11:53:42 INFO PolyChord likelihood eval #50000: params[0:4]=-15.187341 1.496806 -14.422007 0.619297 0.419395 [0m
+[0;34m2025-07-03 11:53:42 INFO PolyChord likelihood result #50000: loglike=55287.398760[0m
+[0;34m2025-07-03 11:53:50 INFO PolyChord likelihood eval #51000: params[0:4]=-12.671943 1.019086 -14.533933 0.442325 0.513629 [0m
+[0;34m2025-07-03 11:53:50 INFO PolyChord likelihood result #51000: loglike=55658.096411[0m
+[0;34m2025-07-03 11:53:57 INFO PolyChord likelihood eval #52000: params[0:4]=-15.110635 3.003716 -12.202196 5.217182 -0.524712 [0m
+[0;34m2025-07-03 11:53:57 INFO PolyChord likelihood result #52000: loglike=53598.021739[0m
+[0;34m2025-07-03 11:54:04 INFO PolyChord likelihood eval #53000: params[0:4]=-16.394122 3.667363 -10.695435 6.925903 0.554349 [0m
+[0;34m2025-07-03 11:54:04 INFO PolyChord likelihood result #53000: loglike=55443.756336[0m
+[0;34m2025-07-03 11:54:11 INFO PolyChord likelihood eval #54000: params[0:4]=-10.561311 5.698950 -11.946632 4.421330 -0.210398 [0m
+[0;34m2025-07-03 11:54:11 INFO PolyChord likelihood result #54000: loglike=55603.534067[0m
+[0;34m2025-07-03 11:54:19 INFO PolyChord likelihood eval #55000: params[0:4]=-12.009533 2.863463 -12.837617 5.093258 -0.036338 [0m
+[0;34m2025-07-03 11:54:19 INFO PolyChord likelihood result #55000: loglike=55716.155476[0m
+[0;34m2025-07-03 11:54:26 INFO PolyChord likelihood eval #56000: params[0:4]=-11.495186 0.791473 -10.657108 6.618956 0.221253 [0m
+[0;34m2025-07-03 11:54:26 INFO PolyChord likelihood result #56000: loglike=55598.010196[0m
+[0;34m2025-07-03 11:54:33 INFO PolyChord likelihood eval #57000: params[0:4]=-12.418741 2.072628 -14.346595 4.664603 -0.283251 [0m
+[0;34m2025-07-03 11:54:33 INFO PolyChord likelihood result #57000: loglike=55699.271697[0m
+[0;34m2025-07-03 11:54:40 INFO PolyChord likelihood eval #58000: params[0:4]=-17.228501 4.598048 -11.314788 5.071230 -0.777768 [0m
+[0;34m2025-07-03 11:54:40 INFO PolyChord likelihood result #58000: loglike=55768.963748[0m
+[0;34m2025-07-03 11:54:48 INFO PolyChord likelihood eval #59000: params[0:4]=-12.115532 4.503469 -16.897122 3.502780 0.594347 [0m
+[0;34m2025-07-03 11:54:48 INFO PolyChord likelihood result #59000: loglike=55544.935488[0m
+[0;34m2025-07-03 11:54:55 INFO PolyChord likelihood eval #60000: params[0:4]=-10.535933 5.387187 -10.992442 4.469639 -0.258438 [0m
+[0;34m2025-07-03 11:54:55 INFO PolyChord likelihood result #60000: loglike=55677.083075[0m
+[0;34m2025-07-03 11:55:02 INFO PolyChord likelihood eval #61000: params[0:4]=-12.302120 1.765290 -12.110377 3.698224 -0.278716 [0m
+[0;34m2025-07-03 11:55:02 INFO PolyChord likelihood result #61000: loglike=55560.338116[0m
+[0;34m2025-07-03 11:55:10 INFO PolyChord likelihood eval #62000: params[0:4]=-13.302549 0.498118 -11.845646 6.786291 -0.630937 [0m
+[0;34m2025-07-03 11:55:10 INFO PolyChord likelihood result #62000: loglike=55725.578817[0m
+[0;34m2025-07-03 11:55:17 INFO PolyChord likelihood eval #63000: params[0:4]=-10.039588 5.982442 -10.963045 6.568096 -0.283894 [0m
+[0;34m2025-07-03 11:55:17 INFO PolyChord likelihood result #63000: loglike=55562.212659[0m
+[0;34m2025-07-03 11:55:24 INFO PolyChord likelihood eval #64000: params[0:4]=-16.569751 3.912688 -14.192758 0.397375 -0.426470 [0m
+[0;34m2025-07-03 11:55:24 INFO PolyChord likelihood result #64000: loglike=55541.294644[0m
+[0;34m2025-07-03 11:55:32 INFO PolyChord likelihood eval #65000: params[0:4]=-13.337175 1.834286 -12.975545 2.093813 0.609960 [0m
+[0;34m2025-07-03 11:55:32 INFO PolyChord likelihood result #65000: loglike=55719.240393[0m
+[0;34m2025-07-03 11:55:39 INFO PolyChord likelihood eval #66000: params[0:4]=-14.030351 6.911617 -13.076557 1.569595 0.496620 [0m
+[0;34m2025-07-03 11:55:39 INFO PolyChord likelihood result #66000: loglike=55780.562215[0m
+[0;34m2025-07-03 11:55:46 INFO PolyChord likelihood eval #67000: params[0:4]=-17.541147 6.882909 -16.001430 1.620179 0.119557 [0m
+[0;34m2025-07-03 11:55:46 INFO PolyChord likelihood result #67000: loglike=55720.279944[0m
+[0;34m2025-07-03 11:55:53 INFO PolyChord likelihood eval #68000: params[0:4]=-11.747461 3.979424 -13.488618 6.873586 -0.492010 [0m
+[0;34m2025-07-03 11:55:53 INFO PolyChord likelihood result #68000: loglike=55668.354601[0m
+[0;34m2025-07-03 11:56:01 INFO PolyChord likelihood eval #69000: params[0:4]=-16.428056 5.220223 -13.971528 3.316761 -0.095775 [0m
+[0;34m2025-07-03 11:56:01 INFO PolyChord likelihood result #69000: loglike=55412.885561[0m
+[0;34m2025-07-03 11:56:08 INFO PolyChord likelihood eval #70000: params[0:4]=-15.446138 0.938366 -15.476464 1.304173 -0.118444 [0m
+[0;34m2025-07-03 11:56:08 INFO PolyChord likelihood result #70000: loglike=55706.453350[0m
+[0;34m2025-07-03 11:56:15 INFO PolyChord likelihood eval #71000: params[0:4]=-16.234223 1.791053 -11.659151 0.285404 0.447496 [0m
+[0;34m2025-07-03 11:56:15 INFO PolyChord likelihood result #71000: loglike=55715.739049[0m
+[0;34m2025-07-03 11:56:23 INFO PolyChord likelihood eval #72000: params[0:4]=-16.602157 6.059552 -12.244363 3.012562 -0.895595 [0m
+[0;34m2025-07-03 11:56:23 INFO PolyChord likelihood result #72000: loglike=55250.984136[0m
+[0;34m2025-07-03 11:56:30 INFO PolyChord likelihood eval #73000: params[0:4]=-12.400840 5.918209 -11.261579 6.160091 -0.670405 [0m
+[0;34m2025-07-03 11:56:30 INFO PolyChord likelihood result #73000: loglike=55752.986335[0m
+[0;34m2025-07-03 11:56:37 INFO PolyChord likelihood eval #74000: params[0:4]=-13.576088 4.731963 -14.145736 4.136161 0.149230 [0m
+[0;34m2025-07-03 11:56:37 INFO PolyChord likelihood result #74000: loglike=55614.012206[0m
+[0;34m2025-07-03 11:56:44 INFO PolyChord likelihood eval #75000: params[0:4]=-13.232452 5.873313 -12.827089 6.101311 -0.606468 [0m
+[0;34m2025-07-03 11:56:44 INFO PolyChord likelihood result #75000: loglike=55677.906807[0m
+[0;34m2025-07-03 11:56:52 INFO PolyChord likelihood eval #76000: params[0:4]=-13.384575 2.163521 -12.271906 6.220593 0.069749 [0m
+[0;34m2025-07-03 11:56:52 INFO PolyChord likelihood result #76000: loglike=55768.409351[0m
+[0;34m2025-07-03 11:56:59 INFO PolyChord likelihood eval #77000: params[0:4]=-13.075997 5.187237 -11.765891 0.799515 -0.353645 [0m
+[0;34m2025-07-03 11:56:59 INFO PolyChord likelihood result #77000: loglike=55833.555920[0m
+[0;34m2025-07-03 11:57:06 INFO PolyChord likelihood eval #78000: params[0:4]=-16.750696 3.861812 -15.276018 6.073570 -0.190710 [0m
+[0;34m2025-07-03 11:57:06 INFO PolyChord likelihood result #78000: loglike=55703.424662[0m
+[0;34m2025-07-03 11:57:14 INFO PolyChord likelihood eval #79000: params[0:4]=-13.333094 1.431551 -11.424142 2.335426 0.066313 [0m
+[0;34m2025-07-03 11:57:14 INFO PolyChord likelihood result #79000: loglike=55625.353773[0m
+[0;34m2025-07-03 11:57:21 INFO PolyChord likelihood eval #80000: params[0:4]=-15.545458 6.524674 -17.579406 4.475670 0.308810 [0m
+[0;34m2025-07-03 11:57:21 INFO PolyChord likelihood result #80000: loglike=55819.227968[0m
+[0;34m2025-07-03 11:57:28 INFO PolyChord likelihood eval #81000: params[0:4]=-13.057851 4.064771 -11.233915 6.334162 -0.018184 [0m
+[0;34m2025-07-03 11:57:28 INFO PolyChord likelihood result #81000: loglike=55770.806301[0m
+[0;34m2025-07-03 11:57:35 INFO PolyChord likelihood eval #82000: params[0:4]=-16.790341 6.381752 -10.746719 2.271753 -0.297535 [0m
+[0;34m2025-07-03 11:57:35 INFO PolyChord likelihood result #82000: loglike=55617.945200[0m
+[0;34m2025-07-03 11:57:43 INFO PolyChord likelihood eval #83000: params[0:4]=-17.079898 5.083602 -13.247121 6.576556 0.412581 [0m
+[0;34m2025-07-03 11:57:43 INFO PolyChord likelihood result #83000: loglike=55810.245672[0m
+[0;34m2025-07-03 11:57:50 INFO PolyChord likelihood eval #84000: params[0:4]=-17.326328 4.824229 -12.842459 5.131315 -0.025746 [0m
+[0;34m2025-07-03 11:57:50 INFO PolyChord likelihood result #84000: loglike=55844.519829[0m
+PolyChord: MPI is already initilised, not initialising, and will not finalize
+
+PolyChord: Next Generation Nested Sampling
+copyright: Will Handley, Mike Hobson & Anthony Lasenby
+  version: 1.22.1
+  release: 10th Jan 2024
+    email: wh260@mrao.cam.ac.uk
+
+Run Settings
+nlive    :     200
+nDims    :      17
+nDerived :       0
+Synchronous parallelisation
+Generating equally weighted posteriors
+Generating weighted posteriors
+Writing a resume file to results_pc_fixed//TNest-J1853+1303-.resume
+
+generating live points
+
+
+all live points generated
+
+Speed  1 =  0.746E-02 seconds
+number of repeats:           25
+started sampling
+
+_________________
+lives      | 200 |
+phantoms   |3123 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                 201
+nposterior =                 540
+nequals    =                   1
+nlike      =                6623
+<nlike>    =          32.12   (           1.28 per slice )
+log(Z)     =        50047.09 +/-  0.83
+log(Z_1)   =        50047.09 +/-  0.83 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4209 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                 402
+nposterior =                1500
+nequals    =                   2
+nlike      =               16207
+<nlike>    =          47.92   (           1.92 per slice )
+log(Z)     =        53294.92 +/-  0.63
+log(Z_1)   =        53294.92 +/-  0.63 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4557 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                 603
+nposterior =                2619
+nequals    =                   1
+nlike      =               26350
+<nlike>    =          50.72   (           2.03 per slice )
+log(Z)     =        54518.95 +/-  0.83
+log(Z_1)   =        54518.95 +/-  0.83 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4685 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                 804
+nposterior =                3761
+nequals    =                   4
+nlike      =               37155
+<nlike>    =          54.02   (           2.16 per slice )
+log(Z)     =        55071.38 +/-  0.64
+log(Z_1)   =        55071.38 +/-  0.64 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4547 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                1005
+nposterior =                4974
+nequals    =                   7
+nlike      =               48368
+<nlike>    =          56.06   (           2.24 per slice )
+log(Z)     =        55380.35 +/-  0.58
+log(Z_1)   =        55380.35 +/-  0.58 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4874 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                1206
+nposterior =                6069
+nequals    =                   7
+nlike      =               60111
+<nlike>    =          58.72   (           2.35 per slice )
+log(Z)     =        55550.04 +/-  0.57
+log(Z_1)   =        55550.04 +/-  0.57 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |5312 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                1407
+nposterior =                7177
+nequals    =                  12
+nlike      =               71984
+<nlike>    =          59.37   (           2.37 per slice )
+log(Z)     =        55656.49 +/-  0.39
+log(Z_1)   =        55656.49 +/-  0.39 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |5239 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                1608
+[0;34m2025-07-03 11:57:57 INFO PolyChord likelihood eval #85000: params[0:4]=-12.562232 2.580628 -12.693466 6.442634 -0.213464 [0m
+[0;34m2025-07-03 11:57:57 INFO PolyChord likelihood result #85000: loglike=55774.599906[0m
+[0;34m2025-07-03 11:58:05 INFO PolyChord likelihood eval #86000: params[0:4]=-14.312629 5.625639 -12.840366 2.762075 -0.258010 [0m
+[0;34m2025-07-03 11:58:05 INFO PolyChord likelihood result #86000: loglike=55683.257221[0m
+[0;34m2025-07-03 11:58:12 INFO PolyChord likelihood eval #87000: params[0:4]=-13.922541 2.177570 -12.370555 4.383167 -0.560908 [0m
+[0;34m2025-07-03 11:58:12 INFO PolyChord likelihood result #87000: loglike=55761.069842[0m
+[0;34m2025-07-03 11:58:19 INFO PolyChord likelihood eval #88000: params[0:4]=-17.685326 3.227152 -12.159016 6.795745 -0.044174 [0m
+[0;34m2025-07-03 11:58:19 INFO PolyChord likelihood result #88000: loglike=55857.482074[0m
+[0;34m2025-07-03 11:58:27 INFO PolyChord likelihood eval #89000: params[0:4]=-14.288976 0.200589 -12.371589 3.891768 -0.311831 [0m
+[0;34m2025-07-03 11:58:27 INFO PolyChord likelihood result #89000: loglike=55907.337108[0m
+[0;34m2025-07-03 11:58:34 INFO PolyChord likelihood eval #90000: params[0:4]=-13.459410 1.126406 -15.676786 5.862561 0.221019 [0m
+[0;34m2025-07-03 11:58:34 INFO PolyChord likelihood result #90000: loglike=55759.778027[0m
+[0;34m2025-07-03 11:58:41 INFO PolyChord likelihood eval #91000: params[0:4]=-16.635479 4.554351 -11.860975 3.640908 -0.343009 [0m
+[0;34m2025-07-03 11:58:41 INFO PolyChord likelihood result #91000: loglike=55884.823257[0m
+[0;34m2025-07-03 11:58:48 INFO PolyChord likelihood eval #92000: params[0:4]=-13.467615 0.974494 -10.978554 4.874181 0.119696 [0m
+[0;34m2025-07-03 11:58:48 INFO PolyChord likelihood result #92000: loglike=55778.748684[0m
+[0;34m2025-07-03 11:58:56 INFO PolyChord likelihood eval #93000: params[0:4]=-14.150361 4.105510 -11.517213 1.967398 -0.388486 [0m
+[0;34m2025-07-03 11:58:56 INFO PolyChord likelihood result #93000: loglike=55911.322538[0m
+[0;34m2025-07-03 11:59:03 INFO PolyChord likelihood eval #94000: params[0:4]=-15.287423 5.274838 -13.013809 4.596260 -0.172775 [0m
+[0;34m2025-07-03 11:59:03 INFO PolyChord likelihood result #94000: loglike=55868.553835[0m
+[0;34m2025-07-03 11:59:10 INFO PolyChord likelihood eval #95000: params[0:4]=-12.105323 3.593490 -12.792394 5.123692 0.319812 [0m
+[0;34m2025-07-03 11:59:10 INFO PolyChord likelihood result #95000: loglike=55822.805341[0m
+[0;34m2025-07-03 11:59:17 INFO PolyChord likelihood eval #96000: params[0:4]=-14.265732 3.940045 -14.655876 3.588016 0.110274 [0m
+[0;34m2025-07-03 11:59:17 INFO PolyChord likelihood result #96000: loglike=55832.767157[0m
+[0;34m2025-07-03 11:59:25 INFO PolyChord likelihood eval #97000: params[0:4]=-15.318797 2.519349 -13.716442 6.412846 -0.912801 [0m
+[0;34m2025-07-03 11:59:25 INFO PolyChord likelihood result #97000: loglike=55827.941915[0m
+[0;34m2025-07-03 11:59:32 INFO PolyChord likelihood eval #98000: params[0:4]=-14.231078 0.831941 -12.026944 5.768341 0.296706 [0m
+[0;34m2025-07-03 11:59:32 INFO PolyChord likelihood result #98000: loglike=55903.245923[0m
+[0;34m2025-07-03 11:59:39 INFO PolyChord likelihood eval #99000: params[0:4]=-12.907895 6.253246 -11.709806 4.581077 0.157349 [0m
+[0;34m2025-07-03 11:59:39 INFO PolyChord likelihood result #99000: loglike=55875.269386[0m
+[0;34m2025-07-03 11:59:47 INFO PolyChord likelihood eval #100000: params[0:4]=-14.730738 4.643201 -11.599708 4.534919 0.006683 [0m
+[0;34m2025-07-03 11:59:47 INFO PolyChord likelihood result #100000: loglike=55837.283021[0m
+[0;34m2025-07-03 11:59:54 INFO PolyChord likelihood eval #101000: params[0:4]=-17.284088 5.221021 -12.744659 3.028471 0.674987 [0m
+[0;34m2025-07-03 11:59:54 INFO PolyChord likelihood result #101000: loglike=55835.602485[0m
+[0;34m2025-07-03 12:00:01 INFO PolyChord likelihood eval #102000: params[0:4]=-14.267186 6.004016 -12.755827 4.154060 0.619114 [0m
+[0;34m2025-07-03 12:00:01 INFO PolyChord likelihood result #102000: loglike=55876.453352[0m
+[0;34m2025-07-03 12:00:09 INFO PolyChord likelihood eval #103000: params[0:4]=-13.752323 2.355367 -11.850108 5.161810 -0.007604 [0m
+[0;34m2025-07-03 12:00:09 INFO PolyChord likelihood result #103000: loglike=55485.021846[0m
+[0;34m2025-07-03 12:00:16 INFO PolyChord likelihood eval #104000: params[0:4]=-17.087430 1.495490 -12.231731 0.309799 -0.220255 [0m
+[0;34m2025-07-03 12:00:16 INFO PolyChord likelihood result #104000: loglike=55622.020671[0m
+[0;34m2025-07-03 12:00:23 INFO PolyChord likelihood eval #105000: params[0:4]=-13.641965 3.594687 -15.792604 1.474424 0.067268 [0m
+[0;34m2025-07-03 12:00:23 INFO PolyChord likelihood result #105000: loglike=55876.292386[0m
+[0;34m2025-07-03 12:00:30 INFO PolyChord likelihood eval #106000: params[0:4]=-14.446349 3.642616 -14.521332 0.999945 -0.202930 [0m
+[0;34m2025-07-03 12:00:30 INFO PolyChord likelihood result #106000: loglike=55876.463151[0m
+[0;34m2025-07-03 12:00:38 INFO PolyChord likelihood eval #107000: params[0:4]=-13.761565 5.848712 -11.511001 4.759677 -0.609054 [0m
+[0;34m2025-07-03 12:00:38 INFO PolyChord likelihood result #107000: loglike=55918.780033[0m
+[0;34m2025-07-03 12:00:45 INFO PolyChord likelihood eval #108000: params[0:4]=-16.193069 1.298445 -11.441988 3.999077 -0.872601 [0m
+[0;34m2025-07-03 12:00:45 INFO PolyChord likelihood result #108000: loglike=55944.479234[0m
+[0;34m2025-07-03 12:00:52 INFO PolyChord likelihood eval #109000: params[0:4]=-12.791433 1.586467 -11.012578 1.000180 0.471320 [0m
+[0;34m2025-07-03 12:00:52 INFO PolyChord likelihood result #109000: loglike=55766.576018[0m
+[0;34m2025-07-03 12:01:00 INFO PolyChord likelihood eval #110000: params[0:4]=-14.843344 0.593223 -11.409872 3.763881 0.446868 [0m
+[0;34m2025-07-03 12:01:00 INFO PolyChord likelihood result #110000: loglike=55908.457764[0m
+[0;34m2025-07-03 12:01:02 INFO PolyChord progress: 2010 dead points, logZ = 55850.718173 ± 0.399629[0m
+[0;34m2025-07-03 12:01:07 INFO PolyChord likelihood eval #111000: params[0:4]=-14.960093 1.462365 -12.132388 2.453940 -0.034034 [0m
+[0;34m2025-07-03 12:01:07 INFO PolyChord likelihood result #111000: loglike=55971.065047[0m
+[0;34m2025-07-03 12:01:14 INFO PolyChord likelihood eval #112000: params[0:4]=-15.581060 6.700656 -12.073737 1.927671 0.369958 [0m
+[0;34m2025-07-03 12:01:14 INFO PolyChord likelihood result #112000: loglike=55892.462534[0m
+[0;34m2025-07-03 12:01:21 INFO PolyChord likelihood eval #113000: params[0:4]=-13.591836 2.918796 -11.147608 1.785831 -0.154480 [0m
+[0;34m2025-07-03 12:01:21 INFO PolyChord likelihood result #113000: loglike=55879.448198[0m
+[0;34m2025-07-03 12:01:29 INFO PolyChord likelihood eval #114000: params[0:4]=-13.199093 6.626448 -12.446607 2.028631 -0.303121 [0m
+[0;34m2025-07-03 12:01:29 INFO PolyChord likelihood result #114000: loglike=55861.794716[0m
+[0;34m2025-07-03 12:01:36 INFO PolyChord likelihood eval #115000: params[0:4]=-13.093670 0.774070 -12.229666 3.515684 0.555758 [0m
+[0;34m2025-07-03 12:01:36 INFO PolyChord likelihood result #115000: loglike=55883.237243[0m
+[0;34m2025-07-03 12:01:43 INFO PolyChord likelihood eval #116000: params[0:4]=-16.866626 3.416318 -12.459535 4.946103 -0.117119 [0m
+[0;34m2025-07-03 12:01:43 INFO PolyChord likelihood result #116000: loglike=55950.880450[0m
+[0;34m2025-07-03 12:01:51 INFO PolyChord likelihood eval #117000: params[0:4]=-12.893957 3.730695 -12.608413 5.352892 -0.571284 [0m
+[0;34m2025-07-03 12:01:51 INFO PolyChord likelihood result #117000: loglike=55888.145055[0m
+[0;34m2025-07-03 12:01:58 INFO PolyChord likelihood eval #118000: params[0:4]=-13.473202 6.704241 -13.395754 3.707376 0.010144 [0m
+[0;34m2025-07-03 12:01:58 INFO PolyChord likelihood result #118000: loglike=55902.686797[0m
+[0;34m2025-07-03 12:02:05 INFO PolyChord likelihood eval #119000: params[0:4]=-13.720837 0.079169 -11.531945 6.664657 0.591022 [0m
+[0;34m2025-07-03 12:02:05 INFO PolyChord likelihood result #119000: loglike=55874.816927[0m
+[0;34m2025-07-03 12:02:12 INFO PolyChord likelihood eval #120000: params[0:4]=-15.888091 1.472772 -11.181434 1.382743 0.021107 [0m
+[0;34m2025-07-03 12:02:12 INFO PolyChord likelihood result #120000: loglike=55863.434880[0m
+[0;34m2025-07-03 12:02:20 INFO PolyChord likelihood eval #121000: params[0:4]=-15.205751 5.712644 -11.454647 3.563887 -0.306229 [0m
+[0;34m2025-07-03 12:02:20 INFO PolyChord likelihood result #121000: loglike=55905.030366[0m
+[0;34m2025-07-03 12:02:27 INFO PolyChord likelihood eval #122000: params[0:4]=-12.771803 0.176603 -14.251361 3.800026 -0.668574 [0m
+[0;34m2025-07-03 12:02:27 INFO PolyChord likelihood result #122000: loglike=55922.796360[0m
+[0;34m2025-07-03 12:02:34 INFO PolyChord likelihood eval #123000: params[0:4]=-17.989503 4.666250 -11.777107 1.729967 0.041908 [0m
+[0;34m2025-07-03 12:02:34 INFO PolyChord likelihood result #123000: loglike=55874.950726[0m
+[0;34m2025-07-03 12:02:42 INFO PolyChord likelihood eval #124000: params[0:4]=-13.006397 4.246814 -12.352429 3.500939 0.538471 [0m
+[0;34m2025-07-03 12:02:42 INFO PolyChord likelihood result #124000: loglike=55903.357476[0m
+[0;34m2025-07-03 12:02:49 INFO PolyChord likelihood eval #125000: params[0:4]=-13.764244 0.529179 -13.106476 5.908481 -0.641514 [0m
+[0;34m2025-07-03 12:02:49 INFO PolyChord likelihood result #125000: loglike=55920.370097[0m
+[0;34m2025-07-03 12:02:56 INFO PolyChord likelihood eval #126000: params[0:4]=-12.935923 3.615924 -13.266901 5.963418 0.381616 [0m
+[0;34m2025-07-03 12:02:56 INFO PolyChord likelihood result #126000: loglike=55914.224862[0m
+[0;34m2025-07-03 12:03:04 INFO PolyChord likelihood eval #127000: params[0:4]=-13.037341 1.483931 -11.517895 3.766249 0.450125 [0m
+[0;34m2025-07-03 12:03:04 INFO PolyChord likelihood result #127000: loglike=55934.675615[0m
+[0;34m2025-07-03 12:03:11 INFO PolyChord likelihood eval #128000: params[0:4]=-15.789386 5.823874 -12.608546 5.354172 -0.227935 [0m
+[0;34m2025-07-03 12:03:11 INFO PolyChord likelihood result #128000: loglike=55894.116000[0m
+[0;34m2025-07-03 12:03:18 INFO PolyChord likelihood eval #129000: params[0:4]=-14.313993 4.291952 -11.828384 3.033976 0.201068 [0m
+[0;34m2025-07-03 12:03:18 INFO PolyChord likelihood result #129000: loglike=55827.765145[0m
+[0;34m2025-07-03 12:03:25 INFO PolyChord likelihood eval #130000: params[0:4]=-13.597865 4.287271 -12.092595 6.438975 -0.205215 [0m
+[0;34m2025-07-03 12:03:25 INFO PolyChord likelihood result #130000: loglike=55880.255475[0m
+[0;34m2025-07-03 12:03:33 INFO PolyChord likelihood eval #131000: params[0:4]=-16.178196 1.263333 -11.413717 1.613598 -0.098547 [0m
+[0;34m2025-07-03 12:03:33 INFO PolyChord likelihood result #131000: loglike=55900.237697[0m
+[0;34m2025-07-03 12:03:40 INFO PolyChord likelihood eval #132000: params[0:4]=-13.919411 4.526332 -12.961402 6.494711 -0.273004 [0m
+[0;34m2025-07-03 12:03:40 INFO PolyChord likelihood result #132000: loglike=55893.069888[0m
+[0;34m2025-07-03 12:03:47 INFO PolyChord likelihood eval #133000: params[0:4]=-13.064497 1.193702 -11.956794 4.709642 -0.198269 [0m
+[0;34m2025-07-03 12:03:47 INFO PolyChord likelihood result #133000: loglike=55917.788310[0m
+[0;34m2025-07-03 12:03:55 INFO PolyChord likelihood eval #134000: params[0:4]=-14.155847 4.074639 -11.869479 4.261942 0.410558 [0m
+[0;34m2025-07-03 12:03:55 INFO PolyChord likelihood result #134000: loglike=55950.338707[0m
+[0;34m2025-07-03 12:04:02 INFO PolyChord likelihood eval #135000: params[0:4]=-16.529511 5.051184 -13.370989 6.755568 0.565497 [0m
+[0;34m2025-07-03 12:04:02 INFO PolyChord likelihood result #135000: loglike=55927.661216[0m
+[0;34m2025-07-03 12:04:09 INFO PolyChord likelihood eval #136000: params[0:4]=-16.530057 5.365088 -11.516725 1.687790 0.015924 [0m
+[0;34m2025-07-03 12:04:09 INFO PolyChord likelihood result #136000: loglike=55921.857542[0m
+[0;34m2025-07-03 12:04:16 INFO PolyChord likelihood eval #137000: params[0:4]=-16.250446 4.605400 -11.661304 0.893743 -0.178580 [0m
+[0;34m2025-07-03 12:04:16 INFO PolyChord likelihood result #137000: loglike=55906.065665[0m
+[0;34m2025-07-03 12:04:24 INFO PolyChord likelihood eval #138000: params[0:4]=-15.525614 2.314883 -12.570925 5.181676 -0.368219 [0m
+[0;34m2025-07-03 12:04:24 INFO PolyChord likelihood result #138000: loglike=55857.827172[0m
+[0;34m2025-07-03 12:04:31 INFO PolyChord likelihood eval #139000: params[0:4]=-16.904569 5.734950 -11.633272 2.116717 -0.716308 [0m
+[0;34m2025-07-03 12:04:31 INFO PolyChord likelihood result #139000: loglike=55950.452301[0m
+[0;34m2025-07-03 12:04:38 INFO PolyChord likelihood eval #140000: params[0:4]=-16.658540 4.298263 -11.958599 1.111760 -0.514150 [0m
+[0;34m2025-07-03 12:04:38 INFO PolyChord likelihood result #140000: loglike=55922.934909[0m
+[0;34m2025-07-03 12:04:46 INFO PolyChord likelihood eval #141000: params[0:4]=-16.239547 4.635347 -12.146470 4.823684 0.001994 [0m
+[0;34m2025-07-03 12:04:46 INFO PolyChord likelihood result #141000: loglike=55931.885244[0m
+[0;34m2025-07-03 12:04:53 INFO PolyChord likelihood eval #142000: params[0:4]=-13.941707 4.391795 -12.603459 4.403297 0.148146 [0m
+[0;34m2025-07-03 12:04:53 INFO PolyChord likelihood result #142000: loglike=55514.943469[0m
+[0;34m2025-07-03 12:05:00 INFO PolyChord likelihood eval #143000: params[0:4]=-17.937588 2.758028 -12.544931 5.233436 -0.158266 [0m
+[0;34m2025-07-03 12:05:00 INFO PolyChord likelihood result #143000: loglike=55931.359373[0m
+[0;34m2025-07-03 12:05:08 INFO PolyChord likelihood eval #144000: params[0:4]=-13.265671 3.356043 -13.464499 6.435610 -0.558203 [0m
+[0;34m2025-07-03 12:05:08 INFO PolyChord likelihood result #144000: loglike=55939.663068[0m
+[0;34m2025-07-03 12:05:15 INFO PolyChord likelihood eval #145000: params[0:4]=-13.847797 6.268519 -11.927381 3.272515 0.489148 [0m
+[0;34m2025-07-03 12:05:15 INFO PolyChord likelihood result #145000: loglike=55946.669706[0m
+[0;34m2025-07-03 12:05:22 INFO PolyChord likelihood eval #146000: params[0:4]=-17.730263 4.665981 -11.499417 5.712080 0.066831 [0m
+[0;34m2025-07-03 12:05:22 INFO PolyChord likelihood result #146000: loglike=55945.407583[0m
+[0;34m2025-07-03 12:05:29 INFO PolyChord likelihood eval #147000: params[0:4]=-17.624168 2.362880 -13.324283 5.825039 -0.134222 [0m
+[0;34m2025-07-03 12:05:29 INFO PolyChord likelihood result #147000: loglike=55946.120486[0m
+[0;34m2025-07-03 12:05:37 INFO PolyChord likelihood eval #148000: params[0:4]=-14.879974 0.931451 -12.608345 5.084901 0.647634 [0m
+[0;34m2025-07-03 12:05:37 INFO PolyChord likelihood result #148000: loglike=55935.147364[0m
+[0;34m2025-07-03 12:05:44 INFO PolyChord likelihood eval #149000: params[0:4]=-17.244862 2.688222 -12.386259 5.879302 -0.825464 [0m
+[0;34m2025-07-03 12:05:44 INFO PolyChord likelihood result #149000: loglike=55946.304878[0m
+[0;34m2025-07-03 12:05:51 INFO PolyChord likelihood eval #150000: params[0:4]=-14.451730 2.040587 -11.672130 2.169292 -0.149797 [0m
+[0;34m2025-07-03 12:05:51 INFO PolyChord likelihood result #150000: loglike=55923.652183[0m
+[0;34m2025-07-03 12:05:58 INFO PolyChord likelihood eval #151000: params[0:4]=-15.115511 0.827124 -12.468313 4.545580 0.071926 [0m
+[0;34m2025-07-03 12:05:58 INFO PolyChord likelihood result #151000: loglike=55960.835626[0m
+[0;34m2025-07-03 12:06:06 INFO PolyChord likelihood eval #152000: params[0:4]=-14.194082 3.858891 -12.436874 0.569577 -0.143907 [0m
+[0;34m2025-07-03 12:06:06 INFO PolyChord likelihood result #152000: loglike=55814.716980[0m
+[0;34m2025-07-03 12:06:13 INFO PolyChord likelihood eval #153000: params[0:4]=-16.661848 5.167931 -12.349277 4.359097 0.216582 [0m
+[0;34m2025-07-03 12:06:13 INFO PolyChord likelihood result #153000: loglike=55957.310250[0m
+[0;34m2025-07-03 12:06:21 INFO PolyChord likelihood eval #154000: params[0:4]=-15.943627 5.766619 -12.212371 3.618766 -0.172438 [0m
+[0;34m2025-07-03 12:06:21 INFO PolyChord likelihood result #154000: loglike=55967.450509[0m
+[0;34m2025-07-03 12:06:28 INFO PolyChord likelihood eval #155000: params[0:4]=-13.264535 3.822712 -13.182547 5.836810 0.541365 [0m
+[0;34m2025-07-03 12:06:28 INFO PolyChord likelihood result #155000: loglike=55958.344316[0m
+[0;34m2025-07-03 12:06:35 INFO PolyChord likelihood eval #156000: params[0:4]=-14.212714 5.247408 -11.431343 3.441559 -0.428737 [0m
+[0;34m2025-07-03 12:06:35 INFO PolyChord likelihood result #156000: loglike=55867.446113[0m
+[0;34m2025-07-03 12:06:42 INFO PolyChord likelihood eval #157000: params[0:4]=-13.400728 2.110943 -11.767171 2.949794 -0.797231 [0m
+[0;34m2025-07-03 12:06:42 INFO PolyChord likelihood result #157000: loglike=55980.896134[0m
+[0;34m2025-07-03 12:06:50 INFO PolyChord likelihood eval #158000: params[0:4]=-14.598374 3.636961 -12.537627 5.410652 0.109170 [0m
+[0;34m2025-07-03 12:06:50 INFO PolyChord likelihood result #158000: loglike=55951.150612[0m
+[0;34m2025-07-03 12:06:57 INFO PolyChord likelihood eval #159000: params[0:4]=-14.971106 0.953785 -11.970145 2.332070 0.536595 [0m
+[0;34m2025-07-03 12:06:57 INFO PolyChord likelihood result #159000: loglike=55959.523905[0m
+[0;34m2025-07-03 12:07:04 INFO PolyChord likelihood eval #160000: params[0:4]=-13.872736 4.955866 -12.857642 6.673166 0.147541 [0m
+[0;34m2025-07-03 12:07:04 INFO PolyChord likelihood result #160000: loglike=55912.311538[0m
+[0;34m2025-07-03 12:07:11 INFO PolyChord likelihood eval #161000: params[0:4]=-13.869567 4.023547 -13.395908 6.756892 -0.176563 [0m
+[0;34m2025-07-03 12:07:11 INFO PolyChord likelihood result #161000: loglike=55968.361263[0m
+[0;34m2025-07-03 12:07:19 INFO PolyChord likelihood eval #162000: params[0:4]=-13.258695 2.150630 -12.520636 6.546276 -0.044851 [0m
+[0;34m2025-07-03 12:07:19 INFO PolyChord likelihood result #162000: loglike=55952.428940[0m
+[0;34m2025-07-03 12:07:26 INFO PolyChord likelihood eval #163000: params[0:4]=-15.932684 5.964914 -12.459625 3.842436 -0.368849 [0m
+[0;34m2025-07-03 12:07:26 INFO PolyChord likelihood result #163000: loglike=55953.029604[0m
+[0;34m2025-07-03 12:07:33 INFO PolyChord likelihood eval #164000: params[0:4]=-17.401347 1.894173 -11.838180 0.574919 0.598215 [0m
+[0;34m2025-07-03 12:07:33 INFO PolyChord likelihood result #164000: loglike=55921.283607[0m
+[0;34m2025-07-03 12:07:41 INFO PolyChord likelihood eval #165000: params[0:4]=-13.092328 2.548428 -11.680380 5.291346 0.178015 [0m
+[0;34m2025-07-03 12:07:41 INFO PolyChord likelihood result #165000: loglike=55962.500874[0m
+[0;34m2025-07-03 12:07:48 INFO PolyChord likelihood eval #166000: params[0:4]=-14.933637 2.930394 -12.144996 2.762570 -0.021517 [0m
+[0;34m2025-07-03 12:07:48 INFO PolyChord likelihood result #166000: loglike=55968.418677[0m
+[0;34m2025-07-03 12:07:55 INFO PolyChord likelihood eval #167000: params[0:4]=-14.346044 3.304994 -11.860634 2.016978 -0.012240 [0m
+[0;34m2025-07-03 12:07:55 INFO PolyChord likelihood result #167000: loglike=55876.658658[0m
+[0;34m2025-07-03 12:08:03 INFO PolyChord likelihood eval #168000: params[0:4]=-14.278253 6.384825 -12.545216 5.199687 -0.687117 [0m
+[0;34m2025-07-03 12:08:03 INFO PolyChord likelihood result #168000: loglike=55940.304221[0m
+[0;34m2025-07-03 12:08:10 INFO PolyChord likelihood eval #169000: params[0:4]=-14.738728 3.930267 -11.874631 0.299173 -0.274646 [0m
+[0;34m2025-07-03 12:08:10 INFO PolyChord likelihood result #169000: loglike=55943.657874[0m
+[0;34m2025-07-03 12:08:17 INFO PolyChord likelihood eval #170000: params[0:4]=-16.026096 6.273612 -12.541878 5.210867 -0.187237 [0m
+[0;34m2025-07-03 12:08:17 INFO PolyChord likelihood result #170000: loglike=55958.526211[0m
+[0;34m2025-07-03 12:08:24 INFO PolyChord likelihood eval #171000: params[0:4]=-14.654210 1.104370 -11.845142 3.363838 -0.213569 [0m
+[0;34m2025-07-03 12:08:24 INFO PolyChord likelihood result #171000: loglike=55951.152894[0m
+[0;34m2025-07-03 12:08:32 INFO PolyChord likelihood eval #172000: params[0:4]=-16.275404 6.514522 -12.557980 3.567972 -0.042792 [0m
+[0;34m2025-07-03 12:08:32 INFO PolyChord likelihood result #172000: loglike=55960.504108[0m
+[0;34m2025-07-03 12:08:39 INFO PolyChord likelihood eval #173000: params[0:4]=-17.985337 3.891125 -12.074799 2.860198 -0.027647 [0m
+[0;34m2025-07-03 12:08:39 INFO PolyChord likelihood result #173000: loglike=55963.914330[0m
+[0;34m2025-07-03 12:08:46 INFO PolyChord likelihood eval #174000: params[0:4]=-12.002211 0.918399 -12.585356 5.116661 -0.304242 [0m
+[0;34m2025-07-03 12:08:46 INFO PolyChord likelihood result #174000: loglike=55867.198778[0m
+[0;34m2025-07-03 12:08:54 INFO PolyChord likelihood eval #175000: params[0:4]=-14.181513 4.810013 -11.597455 5.070828 0.110110 [0m
+[0;34m2025-07-03 12:08:54 INFO PolyChord likelihood result #175000: loglike=55967.087964[0m
+[0;34m2025-07-03 12:09:01 INFO PolyChord likelihood eval #176000: params[0:4]=-13.873326 0.663573 -11.990074 4.504991 -0.013385 [0m
+[0;34m2025-07-03 12:09:01 INFO PolyChord likelihood result #176000: loglike=55964.518785[0m
+[0;34m2025-07-03 12:09:08 INFO PolyChord likelihood eval #177000: params[0:4]=-13.374292 5.244357 -12.081937 3.532091 -0.186529 [0m
+[0;34m2025-07-03 12:09:08 INFO PolyChord likelihood result #177000: loglike=55958.748020[0m
+[0;34m2025-07-03 12:09:15 INFO PolyChord likelihood eval #178000: params[0:4]=-14.767989 4.211244 -12.548060 6.456490 -0.073072 [0m
+[0;34m2025-07-03 12:09:15 INFO PolyChord likelihood result #178000: loglike=55967.324962[0m
+[0;34m2025-07-03 12:09:23 INFO PolyChord likelihood eval #179000: params[0:4]=-12.830789 2.354723 -13.306723 6.272416 0.474639 [0m
+[0;34m2025-07-03 12:09:23 INFO PolyChord likelihood result #179000: loglike=55944.057020[0m
+[0;34m2025-07-03 12:09:30 INFO PolyChord likelihood eval #180000: params[0:4]=-15.070813 5.374516 -12.301640 1.696117 -0.071126 [0m
+[0;34m2025-07-03 12:09:30 INFO PolyChord likelihood result #180000: loglike=55903.493967[0m
+[0;34m2025-07-03 12:09:37 INFO PolyChord likelihood eval #181000: params[0:4]=-15.273884 1.416486 -11.939470 3.459640 -0.060798 [0m
+[0;34m2025-07-03 12:09:37 INFO PolyChord likelihood result #181000: loglike=55963.978854[0m
+[0;34m2025-07-03 12:09:45 INFO PolyChord likelihood eval #182000: params[0:4]=-17.290275 4.323478 -13.366338 6.537762 0.164929 [0m
+[0;34m2025-07-03 12:09:45 INFO PolyChord likelihood result #182000: loglike=55969.563682[0m
+[0;34m2025-07-03 12:09:52 INFO PolyChord likelihood eval #183000: params[0:4]=-15.160954 6.601082 -12.001675 1.599900 -0.052340 [0m
+[0;34m2025-07-03 12:09:52 INFO PolyChord likelihood result #183000: loglike=55988.169035[0m
+[0;34m2025-07-03 12:09:59 INFO PolyChord likelihood eval #184000: params[0:4]=-15.511303 6.155205 -12.513994 3.417675 -0.066876 [0m
+[0;34m2025-07-03 12:09:59 INFO PolyChord likelihood result #184000: loglike=55962.838302[0m
+[0;34m2025-07-03 12:10:07 INFO PolyChord likelihood eval #185000: params[0:4]=-13.274073 2.001205 -12.084953 1.229245 0.118301 [0m
+[0;34m2025-07-03 12:10:07 INFO PolyChord likelihood result #185000: loglike=55980.137823[0m
+[0;34m2025-07-03 12:10:14 INFO PolyChord likelihood eval #186000: params[0:4]=-15.279794 2.607227 -12.070686 1.710420 0.132363 [0m
+[0;34m2025-07-03 12:10:14 INFO PolyChord likelihood result #186000: loglike=55974.346781[0m
+[0;34m2025-07-03 12:10:21 INFO PolyChord likelihood eval #187000: params[0:4]=-17.919717 0.195594 -12.000342 1.679170 -0.169335 [0m
+[0;34m2025-07-03 12:10:21 INFO PolyChord likelihood result #187000: loglike=55976.923342[0m
+[0;34m2025-07-03 12:10:28 INFO PolyChord likelihood eval #188000: params[0:4]=-14.489034 6.546165 -12.452222 4.790470 0.232656 [0m
+[0;34m2025-07-03 12:10:28 INFO PolyChord likelihood result #188000: loglike=55972.891227[0m
+[0;34m2025-07-03 12:10:36 INFO PolyChord likelihood eval #189000: params[0:4]=-13.310522 1.800173 -11.700446 2.807861 -0.507089 [0m
+[0;34m2025-07-03 12:10:36 INFO PolyChord likelihood result #189000: loglike=55985.859041[0m
+[0;34m2025-07-03 12:10:43 INFO PolyChord likelihood eval #190000: params[0:4]=-14.989329 5.820544 -11.778595 2.919395 -0.147345 [0m
+[0;34m2025-07-03 12:10:43 INFO PolyChord likelihood result #190000: loglike=55972.445745[0m
+[0;34m2025-07-03 12:10:50 INFO PolyChord likelihood eval #191000: params[0:4]=-14.366112 4.806444 -12.004781 1.590543 -0.326775 [0m
+[0;34m2025-07-03 12:10:50 INFO PolyChord likelihood result #191000: loglike=55974.068437[0m
+[0;34m2025-07-03 12:10:58 INFO PolyChord likelihood eval #192000: params[0:4]=-15.980596 4.587159 -11.618303 1.677830 -0.059126 [0m
+[0;34m2025-07-03 12:10:58 INFO PolyChord likelihood result #192000: loglike=55970.892164[0m
+[0;34m2025-07-03 12:11:05 INFO PolyChord likelihood eval #193000: params[0:4]=-15.671519 1.801615 -13.153772 6.729074 0.121454 [0m
+[0;34m2025-07-03 12:11:05 INFO PolyChord likelihood result #193000: loglike=55973.171549[0m
+[0;34m2025-07-03 12:11:12 INFO PolyChord likelihood eval #194000: params[0:4]=-13.828247 3.498721 -11.955784 1.833764 0.360355 [0m
+[0;34m2025-07-03 12:11:12 INFO PolyChord likelihood result #194000: loglike=55986.410482[0m
+[0;34m2025-07-03 12:11:19 INFO PolyChord likelihood eval #195000: params[0:4]=-14.695509 6.616999 -12.109944 3.726891 0.005585 [0m
+[0;34m2025-07-03 12:11:19 INFO PolyChord likelihood result #195000: loglike=55976.967811[0m
+[0;34m2025-07-03 12:11:27 INFO PolyChord likelihood eval #196000: params[0:4]=-14.696458 3.220173 -12.070459 2.104175 -0.930930 [0m
+[0;34m2025-07-03 12:11:27 INFO PolyChord likelihood result #196000: loglike=55978.512482[0m
+[0;34m2025-07-03 12:11:34 INFO PolyChord likelihood eval #197000: params[0:4]=-13.497003 2.186051 -12.043811 1.222470 0.387576 [0m
+[0;34m2025-07-03 12:11:34 INFO PolyChord likelihood result #197000: loglike=55980.570163[0m
+[0;34m2025-07-03 12:11:41 INFO PolyChord likelihood eval #198000: params[0:4]=-14.792881 5.882228 -12.696479 6.161838 -0.092597 [0m
+[0;34m2025-07-03 12:11:41 INFO PolyChord likelihood result #198000: loglike=55973.833090[0m
+[0;34m2025-07-03 12:11:49 INFO PolyChord likelihood eval #199000: params[0:4]=-14.329709 3.809251 -11.587236 2.741147 -0.001454 [0m
+[0;34m2025-07-03 12:11:49 INFO PolyChord likelihood result #199000: loglike=55975.214386[0m
+[0;34m2025-07-03 12:11:56 INFO PolyChord likelihood eval #200000: params[0:4]=-15.241717 2.513411 -11.775115 2.288161 0.239295 [0m
+[0;34m2025-07-03 12:11:56 INFO PolyChord likelihood result #200000: loglike=55972.402215[0m
+[0;34m2025-07-03 12:12:03 INFO PolyChord likelihood eval #201000: params[0:4]=-16.248974 4.457598 -11.627500 3.154062 0.055870 [0m
+[0;34m2025-07-03 12:12:03 INFO PolyChord likelihood result #201000: loglike=55974.320756[0m
+[0;34m2025-07-03 12:12:11 INFO PolyChord likelihood eval #202000: params[0:4]=-15.042895 6.690129 -12.396666 4.619539 -0.058532 [0m
+[0;34m2025-07-03 12:12:11 INFO PolyChord likelihood result #202000: loglike=55981.140750[0m
+[0;34m2025-07-03 12:12:18 INFO PolyChord likelihood eval #203000: params[0:4]=-15.709826 6.770584 -12.393086 4.694273 0.020879 [0m
+[0;34m2025-07-03 12:12:18 INFO PolyChord likelihood result #203000: loglike=55977.623908[0m
+[0;34m2025-07-03 12:12:25 INFO PolyChord likelihood eval #204000: params[0:4]=-13.503714 0.111715 -12.099866 1.983846 0.229749 [0m
+[0;34m2025-07-03 12:12:25 INFO PolyChord likelihood result #204000: loglike=55988.095127[0m
+[0;34m2025-07-03 12:12:32 INFO PolyChord likelihood eval #205000: params[0:4]=-15.914802 0.097933 -12.024858 4.208305 0.090896 [0m
+[0;34m2025-07-03 12:12:32 INFO PolyChord likelihood result #205000: loglike=55941.832814[0m
+[0;34m2025-07-03 12:12:40 INFO PolyChord likelihood eval #206000: params[0:4]=-16.450175 1.988418 -11.924648 3.019157 0.152618 [0m
+[0;34m2025-07-03 12:12:40 INFO PolyChord likelihood result #206000: loglike=55975.419505[0m
+[0;34m2025-07-03 12:12:47 INFO PolyChord likelihood eval #207000: params[0:4]=-15.089499 4.124169 -12.304859 4.718850 0.170302 [0m
+[0;34m2025-07-03 12:12:47 INFO PolyChord likelihood result #207000: loglike=55976.700400[0m
+[0;34m2025-07-03 12:12:54 INFO PolyChord likelihood eval #208000: params[0:4]=-13.678133 3.401598 -12.770473 4.329569 0.201073 [0m
+[0;34m2025-07-03 12:12:54 INFO PolyChord likelihood result #208000: loglike=55967.606120[0m
+[0;34m2025-07-03 12:13:02 INFO PolyChord likelihood eval #209000: params[0:4]=-14.929724 5.671714 -11.959900 1.555512 0.330953 [0m
+[0;34m2025-07-03 12:13:02 INFO PolyChord likelihood result #209000: loglike=55987.845524[0m
+[0;34m2025-07-03 12:13:09 INFO PolyChord likelihood eval #210000: params[0:4]=-17.795096 3.197263 -12.020509 1.419571 0.193031 [0m
+[0;34m2025-07-03 12:13:09 INFO PolyChord likelihood result #210000: loglike=55983.005867[0m
+[0;34m2025-07-03 12:13:16 INFO PolyChord likelihood eval #211000: params[0:4]=-14.438444 0.679766 -11.803311 2.627204 -0.229425 [0m
+[0;34m2025-07-03 12:13:16 INFO PolyChord likelihood result #211000: loglike=55980.769352[0m
+[0;34m2025-07-03 12:13:23 INFO PolyChord likelihood eval #212000: params[0:4]=-15.597483 5.518311 -12.813157 5.304750 0.030139 [0m
+[0;34m2025-07-03 12:13:23 INFO PolyChord likelihood result #212000: loglike=55980.701842[0m
+[0;34m2025-07-03 12:13:31 INFO PolyChord likelihood eval #213000: params[0:4]=-13.523232 5.085701 -12.053950 2.325951 -0.070286 [0m
+[0;34m2025-07-03 12:13:31 INFO PolyChord likelihood result #213000: loglike=55983.624824[0m
+nposterior =                8383
+nequals    =                  13
+nlike      =               84389
+<nlike>    =          62.02   (           2.48 per slice )
+log(Z)     =        55738.50 +/-  0.49
+log(Z_1)   =        55738.50 +/-  0.49 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4898 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                1809
+nposterior =                9598
+nequals    =                  20
+nlike      =               97071
+<nlike>    =          63.41   (           2.54 per slice )
+log(Z)     =        55805.78 +/-  0.34
+log(Z_1)   =        55805.78 +/-  0.34 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4926 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                2010
+nposterior =               10744
+nequals    =                  24
+nlike      =              110259
+<nlike>    =          65.94   (           2.64 per slice )
+log(Z)     =        55850.72 +/-  0.40
+log(Z_1)   =        55850.72 +/-  0.40 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4559 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                2211
+nposterior =               11971
+nequals    =                  30
+nlike      =              124008
+<nlike>    =          68.75   (           2.75 per slice )
+log(Z)     =        55886.90 +/-  0.35
+log(Z_1)   =        55886.90 +/-  0.35 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4899 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                2412
+nposterior =               13003
+nequals    =                  64
+nlike      =              138169
+<nlike>    =          70.81   (           2.83 per slice )
+log(Z)     =        55908.84 +/-  0.32
+log(Z_1)   =        55908.84 +/-  0.32 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4968 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                2613
+nposterior =               14142
+nequals    =                  61
+nlike      =              152612
+<nlike>    =          72.22   (           2.89 per slice )
+log(Z)     =        55926.27 +/-  0.31
+log(Z_1)   =        55926.27 +/-  0.31 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |5040 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                2814
+nposterior =               15279
+nequals    =                 113
+nlike      =              167498
+<nlike>    =          74.43   (           2.98 per slice )
+log(Z)     =        55939.09 +/-  0.30
+log(Z_1)   =        55939.09 +/-  0.30 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4957 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                3015
+nposterior =               16434
+nequals    =                 132
+nlike      =              182651
+<nlike>    =          75.77   (           3.03 per slice )
+log(Z)     =        55948.74 +/-  0.30
+log(Z_1)   =        55948.74 +/-  0.30 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4780 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                3216
+nposterior =               17577
+nequals    =                 145
+nlike      =              198007
+<nlike>    =          76.78   (           3.07 per slice )
+log(Z)     =        55957.34 +/-  0.30
+log(Z_1)   =        55957.34 +/-  0.30 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4939 |
+posteriors |   0 |
+equals     |   0 |
+[0;34m2025-07-03 12:13:38 INFO PolyChord likelihood eval #214000: params[0:4]=-17.677256 6.857980 -11.999147 2.378074 0.229671 [0m
+[0;34m2025-07-03 12:13:38 INFO PolyChord likelihood result #214000: loglike=55984.708985[0m
+[0;34m2025-07-03 12:13:45 INFO PolyChord likelihood eval #215000: params[0:4]=-16.023510 6.817915 -11.661742 2.410742 0.104307 [0m
+[0;34m2025-07-03 12:13:45 INFO PolyChord likelihood result #215000: loglike=55984.429227[0m
+[0;34m2025-07-03 12:13:53 INFO PolyChord likelihood eval #216000: params[0:4]=-15.834108 4.894717 -12.041393 2.715446 0.004039 [0m
+[0;34m2025-07-03 12:13:53 INFO PolyChord likelihood result #216000: loglike=55987.109409[0m
+[0;34m2025-07-03 12:14:00 INFO PolyChord likelihood eval #217000: params[0:4]=-13.494810 1.993293 -12.873435 6.094435 0.096026 [0m
+[0;34m2025-07-03 12:14:00 INFO PolyChord likelihood result #217000: loglike=55989.672247[0m
+[0;34m2025-07-03 12:14:07 INFO PolyChord likelihood eval #218000: params[0:4]=-14.834277 5.637547 -12.472572 3.447895 0.372719 [0m
+[0;34m2025-07-03 12:14:07 INFO PolyChord likelihood result #218000: loglike=55983.299081[0m
+[0;34m2025-07-03 12:14:15 INFO PolyChord likelihood eval #219000: params[0:4]=-14.561537 3.988002 -11.949566 2.843050 -0.679882 [0m
+[0;34m2025-07-03 12:14:15 INFO PolyChord likelihood result #219000: loglike=55964.228912[0m
+[0;34m2025-07-03 12:14:22 INFO PolyChord likelihood eval #220000: params[0:4]=-14.954372 3.968424 -11.655172 2.346767 0.120971 [0m
+[0;34m2025-07-03 12:14:22 INFO PolyChord likelihood result #220000: loglike=55988.995706[0m
+[0;34m2025-07-03 12:14:29 INFO PolyChord likelihood eval #221000: params[0:4]=-14.609518 4.414385 -11.975759 1.429781 0.158837 [0m
+[0;34m2025-07-03 12:14:29 INFO PolyChord likelihood result #221000: loglike=55992.828103[0m
+[0;34m2025-07-03 12:14:36 INFO PolyChord likelihood eval #222000: params[0:4]=-15.196812 5.385702 -11.636189 1.269574 -0.148152 [0m
+[0;34m2025-07-03 12:14:36 INFO PolyChord likelihood result #222000: loglike=55985.985496[0m
+[0;34m2025-07-03 12:14:44 INFO PolyChord likelihood eval #223000: params[0:4]=-14.630374 5.298730 -12.082066 1.114337 0.063350 [0m
+[0;34m2025-07-03 12:14:44 INFO PolyChord likelihood result #223000: loglike=55984.516194[0m
+[0;34m2025-07-03 12:14:51 INFO PolyChord likelihood eval #224000: params[0:4]=-13.988281 6.402176 -11.870971 1.512839 0.454438 [0m
+[0;34m2025-07-03 12:14:51 INFO PolyChord likelihood result #224000: loglike=55967.483970[0m
+[0;34m2025-07-03 12:14:58 INFO PolyChord likelihood eval #225000: params[0:4]=-15.402022 5.476343 -11.814127 1.765266 0.420802 [0m
+[0;34m2025-07-03 12:14:58 INFO PolyChord likelihood result #225000: loglike=55982.911419[0m
+[0;34m2025-07-03 12:15:06 INFO PolyChord likelihood eval #226000: params[0:4]=-13.628216 5.889807 -11.685951 1.720382 0.021208 [0m
+[0;34m2025-07-03 12:15:06 INFO PolyChord likelihood result #226000: loglike=55991.019171[0m
+[0;34m2025-07-03 12:15:13 INFO PolyChord likelihood eval #227000: params[0:4]=-13.115910 2.243467 -11.884970 2.525309 0.050268 [0m
+[0;34m2025-07-03 12:15:13 INFO PolyChord likelihood result #227000: loglike=55991.169969[0m
+[0;34m2025-07-03 12:15:20 INFO PolyChord likelihood eval #228000: params[0:4]=-14.856216 4.651766 -11.823970 2.859429 -0.136583 [0m
+[0;34m2025-07-03 12:15:20 INFO PolyChord likelihood result #228000: loglike=55947.387300[0m
+[0;34m2025-07-03 12:15:27 INFO PolyChord likelihood eval #229000: params[0:4]=-13.820529 4.258378 -11.999508 3.719259 -0.041832 [0m
+[0;34m2025-07-03 12:15:27 INFO PolyChord likelihood result #229000: loglike=55994.411143[0m
+[0;34m2025-07-03 12:15:35 INFO PolyChord likelihood eval #230000: params[0:4]=-17.402133 6.795451 -11.760616 2.627039 0.113769 [0m
+[0;34m2025-07-03 12:15:35 INFO PolyChord likelihood result #230000: loglike=55988.936304[0m
+[0;34m2025-07-03 12:15:42 INFO PolyChord likelihood eval #231000: params[0:4]=-13.590865 2.831099 -11.992546 2.473659 0.161007 [0m
+[0;34m2025-07-03 12:15:42 INFO PolyChord likelihood result #231000: loglike=55978.095520[0m
+[0;34m2025-07-03 12:15:50 INFO PolyChord likelihood eval #232000: params[0:4]=-14.165850 3.672090 -11.454208 1.482353 0.063842 [0m
+[0;34m2025-07-03 12:15:50 INFO PolyChord likelihood result #232000: loglike=55969.475353[0m
+[0;34m2025-07-03 12:15:57 INFO PolyChord likelihood eval #233000: params[0:4]=-13.229210 2.509403 -11.663118 1.627117 -0.143568 [0m
+[0;34m2025-07-03 12:15:57 INFO PolyChord likelihood result #233000: loglike=55994.365995[0m
+[0;34m2025-07-03 12:16:04 INFO PolyChord likelihood eval #234000: params[0:4]=-17.453700 2.278807 -11.830233 2.135510 0.327707 [0m
+[0;34m2025-07-03 12:16:04 INFO PolyChord likelihood result #234000: loglike=55983.708195[0m
+[0;34m2025-07-03 12:16:11 INFO PolyChord likelihood eval #235000: params[0:4]=-16.018389 4.948065 -11.778324 2.022872 -0.108854 [0m
+[0;34m2025-07-03 12:16:11 INFO PolyChord likelihood result #235000: loglike=55988.735084[0m
+[0;34m2025-07-03 12:16:19 INFO PolyChord likelihood eval #236000: params[0:4]=-14.682373 2.483793 -11.730890 3.125524 -0.256929 [0m
+[0;34m2025-07-03 12:16:19 INFO PolyChord likelihood result #236000: loglike=55985.164103[0m
+[0;34m2025-07-03 12:16:26 INFO PolyChord likelihood eval #237000: params[0:4]=-13.963971 2.047234 -12.285885 4.191629 0.162690 [0m
+[0;34m2025-07-03 12:16:26 INFO PolyChord likelihood result #237000: loglike=55993.605693[0m
+[0;34m2025-07-03 12:16:33 INFO PolyChord likelihood eval #238000: params[0:4]=-14.346366 4.206001 -11.814941 1.765327 0.067542 [0m
+[0;34m2025-07-03 12:16:33 INFO PolyChord likelihood result #238000: loglike=55982.196605[0m
+[0;34m2025-07-03 12:16:40 INFO PolyChord likelihood eval #239000: params[0:4]=-13.799510 1.169254 -12.146473 3.113912 0.303689 [0m
+[0;34m2025-07-03 12:16:40 INFO PolyChord likelihood result #239000: loglike=55993.432588[0m
+[0;34m2025-07-03 12:16:48 INFO PolyChord likelihood eval #240000: params[0:4]=-13.718635 1.996527 -11.754225 1.830528 -0.269394 [0m
+[0;34m2025-07-03 12:16:48 INFO PolyChord likelihood result #240000: loglike=55995.868679[0m
+[0;34m2025-07-03 12:16:55 INFO PolyChord likelihood eval #241000: params[0:4]=-17.758288 0.056339 -12.127634 2.522474 -0.023933 [0m
+[0;34m2025-07-03 12:16:55 INFO PolyChord likelihood result #241000: loglike=55992.149786[0m
+[0;34m2025-07-03 12:17:02 INFO PolyChord likelihood eval #242000: params[0:4]=-13.516196 2.955412 -11.863528 2.516742 -0.261822 [0m
+[0;34m2025-07-03 12:17:02 INFO PolyChord likelihood result #242000: loglike=55990.711577[0m
+[0;34m2025-07-03 12:17:10 INFO PolyChord likelihood eval #243000: params[0:4]=-13.657749 3.588082 -11.851035 3.213931 -0.039118 [0m
+[0;34m2025-07-03 12:17:10 INFO PolyChord likelihood result #243000: loglike=55998.097793[0m
+[0;34m2025-07-03 12:17:17 INFO PolyChord likelihood eval #244000: params[0:4]=-13.462593 1.437650 -11.741128 1.509764 0.001608 [0m
+[0;34m2025-07-03 12:17:17 INFO PolyChord likelihood result #244000: loglike=55994.902759[0m
+[0;34m2025-07-03 12:17:24 INFO PolyChord likelihood eval #245000: params[0:4]=-17.944579 3.009098 -11.697489 2.701255 0.092461 [0m
+[0;34m2025-07-03 12:17:24 INFO PolyChord likelihood result #245000: loglike=55991.500236[0m
+[0;34m2025-07-03 12:17:31 INFO PolyChord likelihood eval #246000: params[0:4]=-15.725747 6.314406 -11.896991 1.731487 -0.478011 [0m
+[0;34m2025-07-03 12:17:31 INFO PolyChord likelihood result #246000: loglike=55992.000935[0m
+[0;34m2025-07-03 12:17:39 INFO PolyChord likelihood eval #247000: params[0:4]=-14.526756 3.832754 -11.929991 1.985611 0.417718 [0m
+[0;34m2025-07-03 12:17:39 INFO PolyChord likelihood result #247000: loglike=55990.075127[0m
+[0;34m2025-07-03 12:17:46 INFO PolyChord likelihood eval #248000: params[0:4]=-14.046085 4.527399 -11.753871 3.677686 -0.099291 [0m
+[0;34m2025-07-03 12:17:46 INFO PolyChord likelihood result #248000: loglike=55993.222299[0m
+[0;34m2025-07-03 12:17:54 INFO PolyChord likelihood eval #249000: params[0:4]=-13.479764 1.935685 -11.901525 3.018241 0.218351 [0m
+[0;34m2025-07-03 12:17:54 INFO PolyChord likelihood result #249000: loglike=55994.176687[0m
+[0;34m2025-07-03 12:18:01 INFO PolyChord likelihood eval #250000: params[0:4]=-13.054089 1.133625 -11.834684 2.043725 -0.648776 [0m
+[0;34m2025-07-03 12:18:01 INFO PolyChord likelihood result #250000: loglike=55997.551883[0m
+[0;34m2025-07-03 12:18:08 INFO PolyChord likelihood eval #251000: params[0:4]=-16.776709 4.482337 -11.686864 2.417541 -0.328490 [0m
+[0;34m2025-07-03 12:18:08 INFO PolyChord likelihood result #251000: loglike=55971.167777[0m
+[0;34m2025-07-03 12:18:15 INFO PolyChord likelihood eval #252000: params[0:4]=-14.564112 4.225597 -11.841791 2.099150 0.027332 [0m
+[0;34m2025-07-03 12:18:15 INFO PolyChord likelihood result #252000: loglike=56006.475916[0m
+[0;34m2025-07-03 12:18:23 INFO PolyChord likelihood eval #253000: params[0:4]=-14.930079 1.861036 -11.973738 2.689737 0.080456 [0m
+[0;34m2025-07-03 12:18:23 INFO PolyChord likelihood result #253000: loglike=55992.439145[0m
+[0;34m2025-07-03 12:18:30 INFO PolyChord likelihood eval #254000: params[0:4]=-14.441006 5.549965 -11.633035 2.277888 0.189269 [0m
+[0;34m2025-07-03 12:18:30 INFO PolyChord likelihood result #254000: loglike=55997.410372[0m
+[0;34m2025-07-03 12:18:37 INFO PolyChord likelihood eval #255000: params[0:4]=-14.634191 2.988292 -11.736252 0.710362 -0.117700 [0m
+[0;34m2025-07-03 12:18:37 INFO PolyChord likelihood result #255000: loglike=55966.376216[0m
+[0;34m2025-07-03 12:18:45 INFO PolyChord likelihood eval #256000: params[0:4]=-13.703468 1.395239 -12.002354 1.787643 -0.004304 [0m
+[0;34m2025-07-03 12:18:45 INFO PolyChord likelihood result #256000: loglike=55995.383650[0m
+[0;34m2025-07-03 12:18:52 INFO PolyChord likelihood eval #257000: params[0:4]=-17.805845 5.305366 -12.048365 2.024588 0.103178 [0m
+[0;34m2025-07-03 12:18:52 INFO PolyChord likelihood result #257000: loglike=55992.843243[0m
+[0;34m2025-07-03 12:18:59 INFO PolyChord likelihood eval #258000: params[0:4]=-13.183876 1.676418 -11.848759 1.671459 -0.073408 [0m
+[0;34m2025-07-03 12:18:59 INFO PolyChord likelihood result #258000: loglike=55995.767349[0m
+[0;34m2025-07-03 12:19:06 INFO PolyChord likelihood eval #259000: params[0:4]=-14.165745 2.665281 -11.828746 2.954966 0.021182 [0m
+[0;34m2025-07-03 12:19:06 INFO PolyChord likelihood result #259000: loglike=55877.620974[0m
+[0;34m2025-07-03 12:19:14 INFO PolyChord likelihood eval #260000: params[0:4]=-13.910941 2.265266 -12.007159 3.069433 0.087030 [0m
+[0;34m2025-07-03 12:19:14 INFO PolyChord likelihood result #260000: loglike=55996.344164[0m
+[0;34m2025-07-03 12:19:21 INFO PolyChord likelihood eval #261000: params[0:4]=-14.427471 4.140705 -11.977465 2.582066 0.204208 [0m
+[0;34m2025-07-03 12:19:21 INFO PolyChord likelihood result #261000: loglike=55996.811874[0m
+[0;34m2025-07-03 12:19:28 INFO PolyChord likelihood eval #262000: params[0:4]=-13.651725 3.693731 -11.691092 2.219296 -0.137164 [0m
+[0;34m2025-07-03 12:19:28 INFO PolyChord likelihood result #262000: loglike=55997.116129[0m
+[0;34m2025-07-03 12:19:35 INFO PolyChord likelihood eval #263000: params[0:4]=-14.769256 4.824928 -12.135084 2.407745 -0.016789 [0m
+[0;34m2025-07-03 12:19:35 INFO PolyChord likelihood result #263000: loglike=55996.751216[0m
+[0;34m2025-07-03 12:19:39 INFO PolyChord progress: 4020 dead points, logZ = 55974.307013 ± 0.315572[0m
+[0;34m2025-07-03 12:19:43 INFO PolyChord likelihood eval #264000: params[0:4]=-13.384002 1.198273 -11.938143 2.221001 -0.133209 [0m
+[0;34m2025-07-03 12:19:43 INFO PolyChord likelihood result #264000: loglike=55997.685494[0m
+[0;34m2025-07-03 12:19:50 INFO PolyChord likelihood eval #265000: params[0:4]=-13.346652 1.959906 -12.395439 4.229563 0.277973 [0m
+[0;34m2025-07-03 12:19:50 INFO PolyChord likelihood result #265000: loglike=55987.608672[0m
+[0;34m2025-07-03 12:19:58 INFO PolyChord likelihood eval #266000: params[0:4]=-14.231666 4.819057 -11.702030 0.777420 0.005808 [0m
+[0;34m2025-07-03 12:19:58 INFO PolyChord likelihood result #266000: loglike=55979.907964[0m
+[0;34m2025-07-03 12:20:05 INFO PolyChord likelihood eval #267000: params[0:4]=-13.611251 2.107763 -11.811486 1.838665 0.216135 [0m
+[0;34m2025-07-03 12:20:05 INFO PolyChord likelihood result #267000: loglike=55986.773335[0m
+[0;34m2025-07-03 12:20:12 INFO PolyChord likelihood eval #268000: params[0:4]=-14.914284 4.987328 -12.181163 3.086357 0.054366 [0m
+[0;34m2025-07-03 12:20:12 INFO PolyChord likelihood result #268000: loglike=56002.015995[0m
+[0;34m2025-07-03 12:20:19 INFO PolyChord likelihood eval #269000: params[0:4]=-13.698515 2.844026 -11.821718 2.615773 0.047397 [0m
+[0;34m2025-07-03 12:20:19 INFO PolyChord likelihood result #269000: loglike=55996.939351[0m
+[0;34m2025-07-03 12:20:27 INFO PolyChord likelihood eval #270000: params[0:4]=-13.581689 1.548151 -11.870321 2.203903 -0.221591 [0m
+[0;34m2025-07-03 12:20:27 INFO PolyChord likelihood result #270000: loglike=55999.983084[0m
+[0;34m2025-07-03 12:20:34 INFO PolyChord likelihood eval #271000: params[0:4]=-13.252194 1.001890 -11.803438 2.308885 0.532134 [0m
+[0;34m2025-07-03 12:20:34 INFO PolyChord likelihood result #271000: loglike=55992.566898[0m
+[0;34m2025-07-03 12:20:41 INFO PolyChord likelihood eval #272000: params[0:4]=-14.591843 5.973705 -12.187186 4.948232 0.074339 [0m
+[0;34m2025-07-03 12:20:41 INFO PolyChord likelihood result #272000: loglike=55997.998594[0m
+[0;34m2025-07-03 12:20:49 INFO PolyChord likelihood eval #273000: params[0:4]=-13.926183 3.132228 -11.774103 2.179031 -0.224108 [0m
+[0;34m2025-07-03 12:20:49 INFO PolyChord likelihood result #273000: loglike=55992.889871[0m
+[0;34m2025-07-03 12:20:56 INFO PolyChord likelihood eval #274000: params[0:4]=-14.341218 5.662599 -11.791062 2.814621 0.221108 [0m
+[0;34m2025-07-03 12:20:56 INFO PolyChord likelihood result #274000: loglike=55998.466738[0m
+[0;34m2025-07-03 12:21:03 INFO PolyChord likelihood eval #275000: params[0:4]=-14.866935 4.342768 -11.860024 2.045698 0.194614 [0m
+[0;34m2025-07-03 12:21:03 INFO PolyChord likelihood result #275000: loglike=56001.203237[0m
+[0;34m2025-07-03 12:21:10 INFO PolyChord likelihood eval #276000: params[0:4]=-16.044671 5.889959 -11.926662 1.623546 0.076212 [0m
+[0;34m2025-07-03 12:21:10 INFO PolyChord likelihood result #276000: loglike=55997.992393[0m
+[0;34m2025-07-03 12:21:18 INFO PolyChord likelihood eval #277000: params[0:4]=-15.673390 6.303620 -11.812653 2.207096 -0.088316 [0m
+[0;34m2025-07-03 12:21:18 INFO PolyChord likelihood result #277000: loglike=56001.207651[0m
+[0;34m2025-07-03 12:21:25 INFO PolyChord likelihood eval #278000: params[0:4]=-14.886209 6.368052 -11.757256 2.234851 -0.018335 [0m
+[0;34m2025-07-03 12:21:25 INFO PolyChord likelihood result #278000: loglike=56001.670426[0m
+[0;34m2025-07-03 12:21:32 INFO PolyChord likelihood eval #279000: params[0:4]=-13.644018 3.373332 -11.990143 3.523827 -0.284722 [0m
+[0;34m2025-07-03 12:21:32 INFO PolyChord likelihood result #279000: loglike=55943.260916[0m
+[0;34m2025-07-03 12:21:40 INFO PolyChord likelihood eval #280000: params[0:4]=-17.919755 4.564634 -12.065242 2.796929 -0.077049 [0m
+[0;34m2025-07-03 12:21:40 INFO PolyChord likelihood result #280000: loglike=55997.923889[0m
+[0;34m2025-07-03 12:21:47 INFO PolyChord likelihood eval #281000: params[0:4]=-13.256926 2.561399 -11.790500 2.356737 -0.081991 [0m
+[0;34m2025-07-03 12:21:47 INFO PolyChord likelihood result #281000: loglike=56006.452213[0m
+[0;34m2025-07-03 12:21:54 INFO PolyChord likelihood eval #282000: params[0:4]=-13.803647 2.064532 -11.948928 2.852787 0.128610 [0m
+[0;34m2025-07-03 12:21:54 INFO PolyChord likelihood result #282000: loglike=55982.784328[0m
+[0;34m2025-07-03 12:22:02 INFO PolyChord likelihood eval #283000: params[0:4]=-13.301282 1.614191 -11.988358 1.504984 -0.018452 [0m
+[0;34m2025-07-03 12:22:02 INFO PolyChord likelihood result #283000: loglike=56000.309472[0m
+[0;34m2025-07-03 12:22:09 INFO PolyChord likelihood eval #284000: params[0:4]=-13.098637 2.313896 -11.962546 1.366679 -0.780320 [0m
+[0;34m2025-07-03 12:22:09 INFO PolyChord likelihood result #284000: loglike=55996.104897[0m
+[0;34m2025-07-03 12:22:16 INFO PolyChord likelihood eval #285000: params[0:4]=-13.474804 2.230376 -12.284108 4.149041 0.078677 [0m
+[0;34m2025-07-03 12:22:16 INFO PolyChord likelihood result #285000: loglike=55992.928417[0m
+[0;34m2025-07-03 12:22:24 INFO PolyChord likelihood eval #286000: params[0:4]=-13.690698 3.799909 -11.885983 3.694504 0.073327 [0m
+[0;34m2025-07-03 12:22:24 INFO PolyChord likelihood result #286000: loglike=55998.859198[0m
+[0;34m2025-07-03 12:22:31 INFO PolyChord likelihood eval #287000: params[0:4]=-13.751440 1.788406 -11.866664 1.445541 -0.558090 [0m
+[0;34m2025-07-03 12:22:31 INFO PolyChord likelihood result #287000: loglike=55997.571757[0m
+[0;34m2025-07-03 12:22:38 INFO PolyChord likelihood eval #288000: params[0:4]=-15.253594 4.960423 -11.959640 2.250852 0.098509 [0m
+[0;34m2025-07-03 12:22:38 INFO PolyChord likelihood result #288000: loglike=55993.763014[0m
+[0;34m2025-07-03 12:22:45 INFO PolyChord likelihood eval #289000: params[0:4]=-13.126817 0.275880 -11.964907 2.052687 -0.138787 [0m
+[0;34m2025-07-03 12:22:45 INFO PolyChord likelihood result #289000: loglike=55998.567873[0m
+[0;34m2025-07-03 12:22:53 INFO PolyChord likelihood eval #290000: params[0:4]=-15.138224 5.767425 -11.829265 1.117059 -0.063143 [0m
+[0;34m2025-07-03 12:22:53 INFO PolyChord likelihood result #290000: loglike=55979.006403[0m
+[0;34m2025-07-03 12:23:00 INFO PolyChord likelihood eval #291000: params[0:4]=-13.680964 3.265560 -11.900114 2.275940 0.096949 [0m
+[0;34m2025-07-03 12:23:00 INFO PolyChord likelihood result #291000: loglike=55972.252843[0m
+[0;34m2025-07-03 12:23:07 INFO PolyChord likelihood eval #292000: params[0:4]=-13.840010 2.895005 -12.037838 2.288357 0.022927 [0m
+[0;34m2025-07-03 12:23:07 INFO PolyChord likelihood result #292000: loglike=55987.793789[0m
+[0;34m2025-07-03 12:23:15 INFO PolyChord likelihood eval #293000: params[0:4]=-13.156858 2.453052 -12.081684 2.579300 -0.146549 [0m
+[0;34m2025-07-03 12:23:15 INFO PolyChord likelihood result #293000: loglike=56000.705040[0m
+[0;34m2025-07-03 12:23:22 INFO PolyChord likelihood eval #294000: params[0:4]=-13.205362 1.453201 -11.950753 1.604124 0.174267 [0m
+[0;34m2025-07-03 12:23:22 INFO PolyChord likelihood result #294000: loglike=56004.262919[0m
+[0;34m2025-07-03 12:23:29 INFO PolyChord likelihood eval #295000: params[0:4]=-13.996488 4.164974 -11.854576 1.526636 -0.203187 [0m
+[0;34m2025-07-03 12:23:29 INFO PolyChord likelihood result #295000: loglike=55992.697312[0m
+[0;34m2025-07-03 12:23:36 INFO PolyChord likelihood eval #296000: params[0:4]=-15.509932 5.583380 -11.849100 2.845629 0.095199 [0m
+[0;34m2025-07-03 12:23:36 INFO PolyChord likelihood result #296000: loglike=56001.206162[0m
+[0;34m2025-07-03 12:23:44 INFO PolyChord likelihood eval #297000: params[0:4]=-13.316078 1.861494 -11.873673 1.901926 0.199674 [0m
+[0;34m2025-07-03 12:23:44 INFO PolyChord likelihood result #297000: loglike=56007.889952[0m
+[0;34m2025-07-03 12:23:51 INFO PolyChord likelihood eval #298000: params[0:4]=-13.388930 0.837390 -11.895750 1.995944 -0.114978 [0m
+[0;34m2025-07-03 12:23:51 INFO PolyChord likelihood result #298000: loglike=56000.176760[0m
+[0;34m2025-07-03 12:23:59 INFO PolyChord likelihood eval #299000: params[0:4]=-15.120009 6.393788 -11.813300 2.447216 0.156419 [0m
+[0;34m2025-07-03 12:23:59 INFO PolyChord likelihood result #299000: loglike=56001.916208[0m
+[0;34m2025-07-03 12:24:06 INFO PolyChord likelihood eval #300000: params[0:4]=-13.407352 2.677593 -11.875884 1.418957 -0.580266 [0m
+[0;34m2025-07-03 12:24:06 INFO PolyChord likelihood result #300000: loglike=55979.645248[0m
+[0;34m2025-07-03 12:24:13 INFO PolyChord likelihood eval #301000: params[0:4]=-13.305827 2.069574 -12.064624 3.741364 0.026734 [0m
+[0;34m2025-07-03 12:24:13 INFO PolyChord likelihood result #301000: loglike=55999.759484[0m
+[0;34m2025-07-03 12:24:20 INFO PolyChord likelihood eval #302000: params[0:4]=-13.013767 2.867808 -11.950426 1.710134 0.026547 [0m
+[0;34m2025-07-03 12:24:20 INFO PolyChord likelihood result #302000: loglike=56004.713304[0m
+[0;34m2025-07-03 12:24:28 INFO PolyChord likelihood eval #303000: params[0:4]=-13.368777 2.072927 -12.016701 2.141957 0.103652 [0m
+[0;34m2025-07-03 12:24:28 INFO PolyChord likelihood result #303000: loglike=56007.012762[0m
+[0;34m2025-07-03 12:24:35 INFO PolyChord likelihood eval #304000: params[0:4]=-14.443045 2.982512 -11.875859 1.642370 0.249045 [0m
+[0;34m2025-07-03 12:24:35 INFO PolyChord likelihood result #304000: loglike=56000.525272[0m
+[0;34m2025-07-03 12:24:42 INFO PolyChord likelihood eval #305000: params[0:4]=-12.908101 3.069288 -11.898065 2.257518 0.318598 [0m
+[0;34m2025-07-03 12:24:42 INFO PolyChord likelihood result #305000: loglike=55993.782833[0m
+[0;34m2025-07-03 12:24:50 INFO PolyChord likelihood eval #306000: params[0:4]=-14.327747 4.445115 -11.980040 2.024276 0.043779 [0m
+[0;34m2025-07-03 12:24:50 INFO PolyChord likelihood result #306000: loglike=56002.656744[0m
+[0;34m2025-07-03 12:24:57 INFO PolyChord likelihood eval #307000: params[0:4]=-13.382249 1.498255 -11.920995 2.154213 0.165817 [0m
+[0;34m2025-07-03 12:24:57 INFO PolyChord likelihood result #307000: loglike=56003.699039[0m
+[0;34m2025-07-03 12:25:04 INFO PolyChord likelihood eval #308000: params[0:4]=-13.706057 1.305981 -11.856964 1.690798 0.001842 [0m
+[0;34m2025-07-03 12:25:04 INFO PolyChord likelihood result #308000: loglike=56002.778505[0m
+[0;34m2025-07-03 12:25:11 INFO PolyChord likelihood eval #309000: params[0:4]=-13.325321 2.227797 -11.939873 2.164974 0.006167 [0m
+[0;34m2025-07-03 12:25:11 INFO PolyChord likelihood result #309000: loglike=56003.342116[0m
+[0;34m2025-07-03 12:25:19 INFO PolyChord likelihood eval #310000: params[0:4]=-13.999095 2.584790 -11.887316 1.248258 0.047493 [0m
+[0;34m2025-07-03 12:25:19 INFO PolyChord likelihood result #310000: loglike=56006.846059[0m
+[0;34m2025-07-03 12:25:26 INFO PolyChord likelihood eval #311000: params[0:4]=-14.933404 6.427011 -11.798058 1.737725 0.223293 [0m
+[0;34m2025-07-03 12:25:26 INFO PolyChord likelihood result #311000: loglike=56003.634898[0m
+[0;34m2025-07-03 12:25:33 INFO PolyChord likelihood eval #312000: params[0:4]=-12.559702 2.427843 -11.837226 2.487473 0.132651 [0m
+[0;34m2025-07-03 12:25:33 INFO PolyChord likelihood result #312000: loglike=55978.871901[0m
+[0;34m2025-07-03 12:25:40 INFO PolyChord likelihood eval #313000: params[0:4]=-14.360782 6.071679 -11.700102 2.033897 -0.063346 [0m
+[0;34m2025-07-03 12:25:41 INFO PolyChord likelihood result #313000: loglike=55996.726534[0m
+[0;34m2025-07-03 12:25:48 INFO PolyChord likelihood eval #314000: params[0:4]=-13.513393 3.323285 -11.803908 1.365027 -0.008272 [0m
+[0;34m2025-07-03 12:25:48 INFO PolyChord likelihood result #314000: loglike=56009.194266[0m
+[0;34m2025-07-03 12:25:55 INFO PolyChord likelihood eval #315000: params[0:4]=-13.724427 2.292459 -11.929440 2.227096 0.057255 [0m
+[0;34m2025-07-03 12:25:55 INFO PolyChord likelihood result #315000: loglike=56005.556703[0m
+[0;34m2025-07-03 12:26:03 INFO PolyChord likelihood eval #316000: params[0:4]=-13.312445 0.373990 -11.809179 2.207391 0.112782 [0m
+[0;34m2025-07-03 12:26:03 INFO PolyChord likelihood result #316000: loglike=56000.482150[0m
+[0;34m2025-07-03 12:26:10 INFO PolyChord likelihood eval #317000: params[0:4]=-13.444989 2.926787 -12.167642 2.931942 0.104796 [0m
+[0;34m2025-07-03 12:26:10 INFO PolyChord likelihood result #317000: loglike=55997.042459[0m
+[0;34m2025-07-03 12:26:17 INFO PolyChord likelihood eval #318000: params[0:4]=-14.324737 5.751759 -11.754381 1.807842 0.069316 [0m
+[0;34m2025-07-03 12:26:17 INFO PolyChord likelihood result #318000: loglike=56003.696104[0m
+[0;34m2025-07-03 12:26:25 INFO PolyChord likelihood eval #319000: params[0:4]=-13.586957 1.715047 -11.988602 2.241100 0.014468 [0m
+[0;34m2025-07-03 12:26:25 INFO PolyChord likelihood result #319000: loglike=56003.412954[0m
+[0;34m2025-07-03 12:26:32 INFO PolyChord likelihood eval #320000: params[0:4]=-13.394410 1.490791 -11.972162 3.961618 0.123552 [0m
+[0;34m2025-07-03 12:26:32 INFO PolyChord likelihood result #320000: loglike=56003.415001[0m
+[0;34m2025-07-03 12:26:39 INFO PolyChord likelihood eval #321000: params[0:4]=-13.050611 1.076414 -12.014844 2.794416 -0.079256 [0m
+[0;34m2025-07-03 12:26:39 INFO PolyChord likelihood result #321000: loglike=56001.987539[0m
+[0;34m2025-07-03 12:26:46 INFO PolyChord likelihood eval #322000: params[0:4]=-13.280388 0.790365 -11.880917 1.959288 0.225465 [0m
+[0;34m2025-07-03 12:26:46 INFO PolyChord likelihood result #322000: loglike=56004.616463[0m
+[0;34m2025-07-03 12:26:54 INFO PolyChord likelihood eval #323000: params[0:4]=-13.796073 2.883891 -11.884330 2.169680 0.302507 [0m
+[0;34m2025-07-03 12:26:54 INFO PolyChord likelihood result #323000: loglike=56002.956378[0m
+[0;34m2025-07-03 12:27:01 INFO PolyChord likelihood eval #324000: params[0:4]=-13.421956 0.941185 -11.916432 2.555509 0.269277 [0m
+[0;34m2025-07-03 12:27:01 INFO PolyChord likelihood result #324000: loglike=56004.762322[0m
+[0;34m2025-07-03 12:27:08 INFO PolyChord likelihood eval #325000: params[0:4]=-13.339391 0.346061 -11.955258 2.464485 0.030922 [0m
+[0;34m2025-07-03 12:27:08 INFO PolyChord likelihood result #325000: loglike=55980.494372[0m
+[0;34m2025-07-03 12:27:15 INFO PolyChord likelihood eval #326000: params[0:4]=-13.581268 1.867442 -11.796729 2.522734 0.044731 [0m
+[0;34m2025-07-03 12:27:15 INFO PolyChord likelihood result #326000: loglike=56008.168346[0m
+[0;34m2025-07-03 12:27:23 INFO PolyChord likelihood eval #327000: params[0:4]=-13.794210 3.758857 -11.955007 2.149895 0.092086 [0m
+[0;34m2025-07-03 12:27:23 INFO PolyChord likelihood result #327000: loglike=56005.915848[0m
+[0;34m2025-07-03 12:27:30 INFO PolyChord likelihood eval #328000: params[0:4]=-13.940654 4.072202 -11.958504 1.689966 0.206361 [0m
+[0;34m2025-07-03 12:27:30 INFO PolyChord likelihood result #328000: loglike=55999.635782[0m
+[0;34m2025-07-03 12:27:37 INFO PolyChord likelihood eval #329000: params[0:4]=-13.498096 2.361209 -11.817760 1.087762 -0.060856 [0m
+[0;34m2025-07-03 12:27:37 INFO PolyChord likelihood result #329000: loglike=55999.867162[0m
+[0;34m2025-07-03 12:27:45 INFO PolyChord likelihood eval #330000: params[0:4]=-14.961867 4.520100 -11.684116 1.052575 0.114919 [0m
+[0;34m2025-07-03 12:27:45 INFO PolyChord likelihood result #330000: loglike=55960.765415[0m
+[0;34m2025-07-03 12:27:52 INFO PolyChord likelihood eval #331000: params[0:4]=-13.356883 2.578220 -12.000987 1.715893 0.109142 [0m
+[0;34m2025-07-03 12:27:52 INFO PolyChord likelihood result #331000: loglike=56006.000870[0m
+[0;34m2025-07-03 12:27:59 INFO PolyChord likelihood eval #332000: params[0:4]=-13.691746 2.953806 -11.966309 1.882355 0.077815 [0m
+[0;34m2025-07-03 12:27:59 INFO PolyChord likelihood result #332000: loglike=56008.549308[0m
+[0;34m2025-07-03 12:28:06 INFO PolyChord likelihood eval #333000: params[0:4]=-13.974112 2.278102 -11.785955 1.858642 0.075256 [0m
+[0;34m2025-07-03 12:28:06 INFO PolyChord likelihood result #333000: loglike=56005.412595[0m
+[0;34m2025-07-03 12:28:14 INFO PolyChord likelihood eval #334000: params[0:4]=-13.349681 3.302237 -12.086738 2.997758 -0.071151 [0m
+[0;34m2025-07-03 12:28:14 INFO PolyChord likelihood result #334000: loglike=56006.566202[0m
+[0;34m2025-07-03 12:28:21 INFO PolyChord likelihood eval #335000: params[0:4]=-13.582370 2.950218 -11.985042 3.537997 -0.027251 [0m
+[0;34m2025-07-03 12:28:21 INFO PolyChord likelihood result #335000: loglike=55998.912714[0m
+[0;34m2025-07-03 12:28:29 INFO PolyChord likelihood eval #336000: params[0:4]=-13.784427 2.615281 -11.830538 1.655302 -0.045128 [0m
+[0;34m2025-07-03 12:28:29 INFO PolyChord likelihood result #336000: loglike=56008.468494[0m
+[0;34m2025-07-03 12:28:36 INFO PolyChord likelihood eval #337000: params[0:4]=-13.974206 3.154937 -11.980867 1.373372 -0.145964 [0m
+[0;34m2025-07-03 12:28:36 INFO PolyChord likelihood result #337000: loglike=56005.634979[0m
+[0;34m2025-07-03 12:28:43 INFO PolyChord likelihood eval #338000: params[0:4]=-13.659139 2.520324 -11.808165 1.300261 0.006251 [0m
+[0;34m2025-07-03 12:28:43 INFO PolyChord likelihood result #338000: loglike=56006.328269[0m
+[0;34m2025-07-03 12:28:51 INFO PolyChord likelihood eval #339000: params[0:4]=-13.692814 2.063773 -11.818022 2.085517 0.055224 [0m
+[0;34m2025-07-03 12:28:51 INFO PolyChord likelihood result #339000: loglike=56008.454110[0m
+[0;34m2025-07-03 12:28:58 INFO PolyChord likelihood eval #340000: params[0:4]=-13.378270 0.639425 -11.952106 0.608008 0.089002 [0m
+[0;34m2025-07-03 12:28:58 INFO PolyChord likelihood result #340000: loglike=55980.940719[0m
+[0;34m2025-07-03 12:29:05 INFO PolyChord likelihood eval #341000: params[0:4]=-13.115000 1.024419 -11.940493 3.428874 -0.027592 [0m
+[0;34m2025-07-03 12:29:05 INFO PolyChord likelihood result #341000: loglike=55516.426612[0m
+[0;34m2025-07-03 12:29:12 INFO PolyChord likelihood eval #342000: params[0:4]=-13.670920 2.347160 -12.017066 1.833401 0.053648 [0m
+[0;34m2025-07-03 12:29:12 INFO PolyChord likelihood result #342000: loglike=56006.697380[0m
+[0;34m2025-07-03 12:29:20 INFO PolyChord likelihood eval #343000: params[0:4]=-13.495664 1.421029 -11.955731 2.086492 -0.063630 [0m
+[0;34m2025-07-03 12:29:20 INFO PolyChord likelihood result #343000: loglike=56009.976280[0m
+[0;34m2025-07-03 12:29:27 INFO PolyChord likelihood eval #344000: params[0:4]=-13.401370 2.094927 -11.892281 2.188576 -0.108826 [0m
+[0;34m2025-07-03 12:29:27 INFO PolyChord likelihood result #344000: loglike=56008.172823[0m
+[0;34m2025-07-03 12:29:34 INFO PolyChord likelihood eval #345000: params[0:4]=-13.994671 4.675825 -11.804558 1.790066 0.187692 [0m
+[0;34m2025-07-03 12:29:34 INFO PolyChord likelihood result #345000: loglike=56006.592931[0m
+[0;34m2025-07-03 12:29:41 INFO PolyChord likelihood eval #346000: params[0:4]=-13.118770 0.476230 -11.827878 2.368641 -0.031947 [0m
+[0;34m2025-07-03 12:29:41 INFO PolyChord likelihood result #346000: loglike=56007.812034[0m
+[0;34m2025-07-03 12:29:49 INFO PolyChord likelihood eval #347000: params[0:4]=-13.598097 1.287586 -11.915344 1.777218 0.026038 [0m
+[0;34m2025-07-03 12:29:49 INFO PolyChord likelihood result #347000: loglike=56006.507237[0m
+[0;34m2025-07-03 12:29:56 INFO PolyChord likelihood eval #348000: params[0:4]=-13.686505 1.997261 -11.984444 2.126723 0.169967 [0m
+[0;34m2025-07-03 12:29:56 INFO PolyChord likelihood result #348000: loglike=56006.614760[0m
+[0;34m2025-07-03 12:30:03 INFO PolyChord likelihood eval #349000: params[0:4]=-13.262666 1.738229 -11.725839 2.439537 0.027831 [0m
+[0;34m2025-07-03 12:30:03 INFO PolyChord likelihood result #349000: loglike=56009.047267[0m
+[0;34m2025-07-03 12:30:11 INFO PolyChord likelihood eval #350000: params[0:4]=-13.814048 1.152236 -11.885416 1.803019 -0.093711 [0m
+[0;34m2025-07-03 12:30:11 INFO PolyChord likelihood result #350000: loglike=56002.266650[0m
+[0;34m2025-07-03 12:30:18 INFO PolyChord likelihood eval #351000: params[0:4]=-13.597024 3.190743 -11.774065 2.136490 -0.019371 [0m
+[0;34m2025-07-03 12:30:18 INFO PolyChord likelihood result #351000: loglike=56007.623827[0m
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                3417
+nposterior =               18715
+nequals    =                 207
+nlike      =              213838
+<nlike>    =          79.16   (           3.17 per slice )
+log(Z)     =        55963.71 +/-  0.30
+log(Z_1)   =        55963.71 +/-  0.30 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4793 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                3618
+nposterior =               19960
+nequals    =                 302
+nlike      =              229837
+<nlike>    =          80.00   (           3.20 per slice )
+log(Z)     =        55968.01 +/-  0.31
+log(Z_1)   =        55968.01 +/-  0.31 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |5167 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                3819
+nposterior =               21032
+nequals    =                 374
+nlike      =              246426
+<nlike>    =          82.95   (           3.32 per slice )
+log(Z)     =        55971.43 +/-  0.31
+log(Z_1)   =        55971.43 +/-  0.31 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4874 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                4020
+nposterior =               22299
+nequals    =                 445
+nlike      =              263379
+<nlike>    =          84.77   (           3.39 per slice )
+log(Z)     =        55974.31 +/-  0.32
+log(Z_1)   =        55974.31 +/-  0.32 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4777 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                4221
+nposterior =               23498
+nequals    =                 580
+nlike      =              280638
+<nlike>    =          86.30   (           3.45 per slice )
+log(Z)     =        55976.92 +/-  0.32
+log(Z_1)   =        55976.92 +/-  0.32 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4950 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                4422
+nposterior =               24613
+nequals    =                 723
+nlike      =              298276
+<nlike>    =          88.19   (           3.53 per slice )
+log(Z)     =        55978.79 +/-  0.32
+log(Z_1)   =        55978.79 +/-  0.32 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |5129 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                4623
+nposterior =               25795
+nequals    =                 932
+nlike      =              315447
+<nlike>    =          85.86   (           3.43 per slice )
+log(Z)     =        55980.12 +/-  0.33
+log(Z_1)   =        55980.12 +/-  0.33 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4674 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                4824
+nposterior =               27061
+nequals    =                1003
+nlike      =              333360
+<nlike>    =          89.56   (           3.58 per slice )
+log(Z)     =        55981.28 +/-  0.33
+log(Z_1)   =        55981.28 +/-  0.33 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4726 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                5025
+nposterior =               28220
+nequals    =                1257
+nlike      =              351547
+<nlike>    =          90.94   (           3.64 per slice )
+log(Z)     =        55982.36 +/-  0.34
+log(Z_1)   =        55982.36 +/-  0.34 (still evaluating)
+[0;34m2025-07-03 12:30:26 INFO PolyChord likelihood eval #352000: params[0:4]=-13.101462 1.482664 -12.346287 3.548633 0.080231 [0m
+[0;34m2025-07-03 12:30:26 INFO PolyChord likelihood result #352000: loglike=56007.245008[0m
+[0;34m2025-07-03 12:30:33 INFO PolyChord likelihood eval #353000: params[0:4]=-13.126077 1.007843 -11.948134 1.915434 0.004571 [0m
+[0;34m2025-07-03 12:30:33 INFO PolyChord likelihood result #353000: loglike=56006.817213[0m
+[0;34m2025-07-03 12:30:40 INFO PolyChord likelihood eval #354000: params[0:4]=-13.503209 3.126480 -11.867433 3.282528 -0.027269 [0m
+[0;34m2025-07-03 12:30:40 INFO PolyChord likelihood result #354000: loglike=56005.521298[0m
+[0;34m2025-07-03 12:30:47 INFO PolyChord likelihood eval #355000: params[0:4]=-13.120394 0.363576 -11.895026 2.555284 0.010010 [0m
+[0;34m2025-07-03 12:30:47 INFO PolyChord likelihood result #355000: loglike=56006.868563[0m
+[0;34m2025-07-03 12:30:55 INFO PolyChord likelihood eval #356000: params[0:4]=-13.391293 1.326284 -11.614519 1.764113 0.081027 [0m
+[0;34m2025-07-03 12:30:55 INFO PolyChord likelihood result #356000: loglike=55998.049884[0m
+[0;34m2025-07-03 12:31:02 INFO PolyChord likelihood eval #357000: params[0:4]=-13.306430 1.635807 -11.848722 2.815905 0.114014 [0m
+[0;34m2025-07-03 12:31:02 INFO PolyChord likelihood result #357000: loglike=56010.482608[0m
+[0;34m2025-07-03 12:31:09 INFO PolyChord likelihood eval #358000: params[0:4]=-13.451639 1.054426 -11.787478 2.107061 0.132509 [0m
+[0;34m2025-07-03 12:31:09 INFO PolyChord likelihood result #358000: loglike=56012.488850[0m
+[0;34m2025-07-03 12:31:16 INFO PolyChord likelihood eval #359000: params[0:4]=-13.435447 2.776255 -11.991808 2.101789 0.110441 [0m
+[0;34m2025-07-03 12:31:16 INFO PolyChord likelihood result #359000: loglike=55964.348720[0m
+[0;34m2025-07-03 12:31:24 INFO PolyChord likelihood eval #360000: params[0:4]=-13.563117 2.184758 -11.753649 1.932441 0.123809 [0m
+[0;34m2025-07-03 12:31:24 INFO PolyChord likelihood result #360000: loglike=56007.935313[0m
+[0;34m2025-07-03 12:31:31 INFO PolyChord likelihood eval #361000: params[0:4]=-13.694269 2.129355 -11.812987 1.519723 0.041700 [0m
+[0;34m2025-07-03 12:31:31 INFO PolyChord likelihood result #361000: loglike=56010.172690[0m
+[0;34m2025-07-03 12:31:38 INFO PolyChord likelihood eval #362000: params[0:4]=-13.541969 2.167556 -11.993713 2.043511 0.064574 [0m
+[0;34m2025-07-03 12:31:38 INFO PolyChord likelihood result #362000: loglike=56008.754301[0m
+[0;34m2025-07-03 12:31:46 INFO PolyChord likelihood eval #363000: params[0:4]=-13.486105 1.736716 -11.834678 3.287705 0.011040 [0m
+[0;34m2025-07-03 12:31:46 INFO PolyChord likelihood result #363000: loglike=55976.072824[0m
+[0;34m2025-07-03 12:31:53 INFO PolyChord likelihood eval #364000: params[0:4]=-13.214060 1.458602 -11.864315 2.146140 0.057237 [0m
+[0;34m2025-07-03 12:31:53 INFO PolyChord likelihood result #364000: loglike=56010.003783[0m
+[0;34m2025-07-03 12:32:00 INFO PolyChord likelihood eval #365000: params[0:4]=-13.659440 1.262562 -11.890590 2.345859 0.147057 [0m
+[0;34m2025-07-03 12:32:00 INFO PolyChord likelihood result #365000: loglike=55905.305914[0m
+[0;34m2025-07-03 12:32:07 INFO PolyChord likelihood eval #366000: params[0:4]=-14.135505 3.371800 -11.894861 1.760939 0.102023 [0m
+[0;34m2025-07-03 12:32:07 INFO PolyChord likelihood result #366000: loglike=56002.291515[0m
+[0;34m2025-07-03 12:32:15 INFO PolyChord likelihood eval #367000: params[0:4]=-13.459997 0.605653 -11.821956 1.625316 0.031962 [0m
+[0;34m2025-07-03 12:32:15 INFO PolyChord likelihood result #367000: loglike=56008.981339[0m
+[0;34m2025-07-03 12:32:22 INFO PolyChord likelihood eval #368000: params[0:4]=-14.322261 4.352541 -11.897366 2.036612 0.079271 [0m
+[0;34m2025-07-03 12:32:22 INFO PolyChord likelihood result #368000: loglike=56005.413629[0m
+[0;34m2025-07-03 12:32:29 INFO PolyChord likelihood eval #369000: params[0:4]=-13.478068 0.719719 -12.056195 2.628249 0.067452 [0m
+[0;34m2025-07-03 12:32:29 INFO PolyChord likelihood result #369000: loglike=55977.072485[0m
+[0;34m2025-07-03 12:32:37 INFO PolyChord likelihood eval #370000: params[0:4]=-13.264619 1.426015 -11.927173 2.202801 0.044327 [0m
+[0;34m2025-07-03 12:32:37 INFO PolyChord likelihood result #370000: loglike=56010.023650[0m
+[0;34m2025-07-03 12:32:44 INFO PolyChord likelihood eval #371000: params[0:4]=-13.425842 2.546465 -11.853818 1.487017 0.101793 [0m
+[0;34m2025-07-03 12:32:44 INFO PolyChord likelihood result #371000: loglike=56010.927927[0m
+[0;34m2025-07-03 12:32:52 INFO PolyChord likelihood eval #372000: params[0:4]=-13.406704 2.089546 -11.960221 2.410332 0.064851 [0m
+[0;34m2025-07-03 12:32:52 INFO PolyChord likelihood result #372000: loglike=56010.422621[0m
+[0;34m2025-07-03 12:32:59 INFO PolyChord likelihood eval #373000: params[0:4]=-13.331611 0.998029 -11.892293 2.269722 0.121973 [0m
+[0;34m2025-07-03 12:32:59 INFO PolyChord likelihood result #373000: loglike=55999.140791[0m
+[0;34m2025-07-03 12:33:06 INFO PolyChord likelihood eval #374000: params[0:4]=-13.308140 1.128696 -11.974259 3.141116 0.141050 [0m
+[0;34m2025-07-03 12:33:06 INFO PolyChord likelihood result #374000: loglike=56010.174780[0m
+[0;34m2025-07-03 12:33:13 INFO PolyChord likelihood eval #375000: params[0:4]=-13.325140 2.991764 -11.882818 1.609256 -0.018849 [0m
+[0;34m2025-07-03 12:33:13 INFO PolyChord likelihood result #375000: loglike=56009.611415[0m
+[0;34m2025-07-03 12:33:21 INFO PolyChord likelihood eval #376000: params[0:4]=-13.461416 1.000822 -11.892624 2.621816 -0.070186 [0m
+[0;34m2025-07-03 12:33:21 INFO PolyChord likelihood result #376000: loglike=56009.800254[0m
+[0;34m2025-07-03 12:33:28 INFO PolyChord likelihood eval #377000: params[0:4]=-14.068860 3.851874 -11.881272 2.134323 0.085870 [0m
+[0;34m2025-07-03 12:33:28 INFO PolyChord likelihood result #377000: loglike=56011.770664[0m
+[0;34m2025-07-03 12:33:35 INFO PolyChord likelihood eval #378000: params[0:4]=-13.216648 1.965314 -12.056412 2.340514 0.099194 [0m
+[0;34m2025-07-03 12:33:35 INFO PolyChord likelihood result #378000: loglike=56011.387475[0m
+[0;34m2025-07-03 12:33:42 INFO PolyChord likelihood eval #379000: params[0:4]=-13.471539 1.422284 -11.863652 1.733620 0.103709 [0m
+[0;34m2025-07-03 12:33:43 INFO PolyChord likelihood result #379000: loglike=56011.028806[0m
+[0;34m2025-07-03 12:33:50 INFO PolyChord likelihood eval #380000: params[0:4]=-13.240855 0.245253 -11.968673 1.645756 0.042623 [0m
+[0;34m2025-07-03 12:33:50 INFO PolyChord likelihood result #380000: loglike=56006.340439[0m
+[0;34m2025-07-03 12:33:57 INFO PolyChord likelihood eval #381000: params[0:4]=-13.368946 0.961145 -11.846869 2.548621 0.084372 [0m
+[0;34m2025-07-03 12:33:57 INFO PolyChord likelihood result #381000: loglike=56012.583120[0m
+[0;34m2025-07-03 12:34:04 INFO PolyChord likelihood eval #382000: params[0:4]=-13.458710 2.651643 -11.957166 2.973172 0.106313 [0m
+[0;34m2025-07-03 12:34:04 INFO PolyChord likelihood result #382000: loglike=56010.072834[0m
+[0;34m2025-07-03 12:34:12 INFO PolyChord likelihood eval #383000: params[0:4]=-13.233818 1.211898 -11.920524 2.694363 0.008574 [0m
+[0;34m2025-07-03 12:34:12 INFO PolyChord likelihood result #383000: loglike=56014.197466[0m
+[0;34m2025-07-03 12:34:19 INFO PolyChord likelihood eval #384000: params[0:4]=-13.705631 2.171731 -11.846937 2.113629 0.086332 [0m
+[0;34m2025-07-03 12:34:19 INFO PolyChord likelihood result #384000: loglike=56011.720495[0m
+[0;34m2025-07-03 12:34:26 INFO PolyChord likelihood eval #385000: params[0:4]=-13.282884 2.582840 -11.888561 2.175710 -0.005201 [0m
+[0;34m2025-07-03 12:34:26 INFO PolyChord likelihood result #385000: loglike=56009.040166[0m
+[0;34m2025-07-03 12:34:33 INFO PolyChord likelihood eval #386000: params[0:4]=-13.396645 2.665986 -11.933781 1.694197 -0.042693 [0m
+[0;34m2025-07-03 12:34:33 INFO PolyChord likelihood result #386000: loglike=56010.555915[0m
+[0;34m2025-07-03 12:34:41 INFO PolyChord likelihood eval #387000: params[0:4]=-13.494288 2.606192 -11.974338 1.440777 0.057439 [0m
+[0;34m2025-07-03 12:34:41 INFO PolyChord likelihood result #387000: loglike=56004.101950[0m
+[0;34m2025-07-03 12:34:48 INFO PolyChord likelihood eval #388000: params[0:4]=-13.129490 1.640826 -11.858022 1.639398 -0.149312 [0m
+[0;34m2025-07-03 12:34:48 INFO PolyChord likelihood result #388000: loglike=56009.017765[0m
+[0;34m2025-07-03 12:34:56 INFO PolyChord likelihood eval #389000: params[0:4]=-13.583500 1.100504 -11.837709 2.235824 0.202469 [0m
+[0;34m2025-07-03 12:34:56 INFO PolyChord likelihood result #389000: loglike=56010.513542[0m
+[0;34m2025-07-03 12:35:03 INFO PolyChord likelihood eval #390000: params[0:4]=-14.156166 2.889436 -11.863227 1.749084 0.105075 [0m
+[0;34m2025-07-03 12:35:03 INFO PolyChord likelihood result #390000: loglike=56009.846501[0m
+[0;34m2025-07-03 12:35:10 INFO PolyChord likelihood eval #391000: params[0:4]=-13.247265 1.381757 -11.910206 3.451329 0.011889 [0m
+[0;34m2025-07-03 12:35:10 INFO PolyChord likelihood result #391000: loglike=56010.577827[0m
+[0;34m2025-07-03 12:35:18 INFO PolyChord likelihood eval #392000: params[0:4]=-14.157194 4.176803 -11.862196 1.685399 0.067566 [0m
+[0;34m2025-07-03 12:35:18 INFO PolyChord likelihood result #392000: loglike=56011.557787[0m
+[0;34m2025-07-03 12:35:25 INFO PolyChord likelihood eval #393000: params[0:4]=-13.497343 1.649140 -11.954505 2.550772 0.118644 [0m
+[0;34m2025-07-03 12:35:25 INFO PolyChord likelihood result #393000: loglike=56005.194323[0m
+[0;34m2025-07-03 12:35:32 INFO PolyChord likelihood eval #394000: params[0:4]=-13.612870 2.506067 -11.880390 2.353739 -0.067806 [0m
+[0;34m2025-07-03 12:35:32 INFO PolyChord likelihood result #394000: loglike=56011.351423[0m
+[0;34m2025-07-03 12:35:39 INFO PolyChord likelihood eval #395000: params[0:4]=-13.221922 1.472513 -12.014058 2.989427 0.027502 [0m
+[0;34m2025-07-03 12:35:39 INFO PolyChord likelihood result #395000: loglike=55957.912373[0m
+[0;34m2025-07-03 12:35:47 INFO PolyChord likelihood eval #396000: params[0:4]=-13.362442 1.996292 -12.037766 1.742295 0.105920 [0m
+[0;34m2025-07-03 12:35:47 INFO PolyChord likelihood result #396000: loglike=56009.768345[0m
+[0;34m2025-07-03 12:35:54 INFO PolyChord likelihood eval #397000: params[0:4]=-13.154129 2.214843 -12.021275 2.656444 0.063510 [0m
+[0;34m2025-07-03 12:35:54 INFO PolyChord likelihood result #397000: loglike=56012.994960[0m
+[0;34m2025-07-03 12:36:01 INFO PolyChord likelihood eval #398000: params[0:4]=-13.527733 1.754470 -11.944851 2.497098 0.072681 [0m
+[0;34m2025-07-03 12:36:01 INFO PolyChord likelihood result #398000: loglike=56011.724764[0m
+[0;34m2025-07-03 12:36:09 INFO PolyChord likelihood eval #399000: params[0:4]=-13.549734 1.414910 -11.830009 1.903944 0.076933 [0m
+[0;34m2025-07-03 12:36:09 INFO PolyChord likelihood result #399000: loglike=56011.308018[0m
+[0;34m2025-07-03 12:36:16 INFO PolyChord likelihood eval #400000: params[0:4]=-13.529884 2.760003 -11.881852 2.053508 0.088700 [0m
+[0;34m2025-07-03 12:36:16 INFO PolyChord likelihood result #400000: loglike=56009.727428[0m
+[0;34m2025-07-03 12:36:23 INFO PolyChord likelihood eval #401000: params[0:4]=-13.611130 2.154614 -11.812550 1.925779 -0.025186 [0m
+[0;34m2025-07-03 12:36:23 INFO PolyChord likelihood result #401000: loglike=56011.915447[0m
+[0;34m2025-07-03 12:36:30 INFO PolyChord likelihood eval #402000: params[0:4]=-13.609908 1.600233 -11.969018 2.376887 0.089574 [0m
+[0;34m2025-07-03 12:36:30 INFO PolyChord likelihood result #402000: loglike=56010.973782[0m
+[0;34m2025-07-03 12:36:38 INFO PolyChord likelihood eval #403000: params[0:4]=-13.290983 2.338940 -11.826561 1.822121 -0.020008 [0m
+[0;34m2025-07-03 12:36:38 INFO PolyChord likelihood result #403000: loglike=56011.371058[0m
+[0;34m2025-07-03 12:36:45 INFO PolyChord likelihood eval #404000: params[0:4]=-13.246894 1.529232 -11.882945 1.891859 0.047887 [0m
+[0;34m2025-07-03 12:36:45 INFO PolyChord likelihood result #404000: loglike=56011.970520[0m
+[0;34m2025-07-03 12:36:52 INFO PolyChord likelihood eval #405000: params[0:4]=-13.507915 1.665420 -11.880629 2.202722 -0.026272 [0m
+[0;34m2025-07-03 12:36:52 INFO PolyChord likelihood result #405000: loglike=56013.621273[0m
+[0;34m2025-07-03 12:36:59 INFO PolyChord likelihood eval #406000: params[0:4]=-13.310863 1.799718 -11.860818 1.530955 -0.085658 [0m
+[0;34m2025-07-03 12:37:00 INFO PolyChord likelihood result #406000: loglike=56008.884845[0m
+[0;34m2025-07-03 12:37:07 INFO PolyChord likelihood eval #407000: params[0:4]=-13.587579 2.349010 -11.929790 2.017736 0.148277 [0m
+[0;34m2025-07-03 12:37:07 INFO PolyChord likelihood result #407000: loglike=55989.922855[0m
+[0;34m2025-07-03 12:37:14 INFO PolyChord likelihood eval #408000: params[0:4]=-13.532253 1.679798 -11.918241 1.912059 0.060857 [0m
+[0;34m2025-07-03 12:37:14 INFO PolyChord likelihood result #408000: loglike=56013.291654[0m
+[0;34m2025-07-03 12:37:22 INFO PolyChord likelihood eval #409000: params[0:4]=-13.568066 2.063528 -11.835551 1.803043 -0.013832 [0m
+[0;34m2025-07-03 12:37:22 INFO PolyChord likelihood result #409000: loglike=56013.547053[0m
+[0;34m2025-07-03 12:37:29 INFO PolyChord likelihood eval #410000: params[0:4]=-13.433189 1.741259 -11.895018 2.108510 0.063934 [0m
+[0;34m2025-07-03 12:37:29 INFO PolyChord likelihood result #410000: loglike=56011.178431[0m
+[0;34m2025-07-03 12:37:36 INFO PolyChord likelihood eval #411000: params[0:4]=-13.236005 1.464597 -12.019919 2.723718 0.091188 [0m
+[0;34m2025-07-03 12:37:36 INFO PolyChord likelihood result #411000: loglike=56014.424604[0m
+[0;34m2025-07-03 12:37:44 INFO PolyChord likelihood eval #412000: params[0:4]=-13.262652 1.007283 -11.877540 2.011969 0.106261 [0m
+[0;34m2025-07-03 12:37:44 INFO PolyChord likelihood result #412000: loglike=56011.394114[0m
+[0;34m2025-07-03 12:37:51 INFO PolyChord likelihood eval #413000: params[0:4]=-13.510309 2.253985 -11.843589 1.761050 0.126147 [0m
+[0;34m2025-07-03 12:37:51 INFO PolyChord likelihood result #413000: loglike=56012.453008[0m
+[0;34m2025-07-03 12:37:58 INFO PolyChord likelihood eval #414000: params[0:4]=-13.639354 2.474437 -11.858945 1.770436 0.053024 [0m
+[0;34m2025-07-03 12:37:58 INFO PolyChord likelihood result #414000: loglike=56012.581421[0m
+[0;34m2025-07-03 12:38:05 INFO PolyChord likelihood eval #415000: params[0:4]=-13.337303 1.801338 -11.965659 2.203733 -0.048845 [0m
+[0;34m2025-07-03 12:38:05 INFO PolyChord likelihood result #415000: loglike=56012.054462[0m
+[0;34m2025-07-03 12:38:13 INFO PolyChord likelihood eval #416000: params[0:4]=-13.291379 1.361908 -11.993341 1.812215 0.054411 [0m
+[0;34m2025-07-03 12:38:13 INFO PolyChord likelihood result #416000: loglike=56012.121535[0m
+[0;34m2025-07-03 12:38:20 INFO PolyChord likelihood eval #417000: params[0:4]=-13.354921 1.652894 -11.820786 1.764319 -0.209582 [0m
+[0;34m2025-07-03 12:38:20 INFO PolyChord likelihood result #417000: loglike=56011.833459[0m
+[0;34m2025-07-03 12:38:27 INFO PolyChord likelihood eval #418000: params[0:4]=-13.415485 1.472207 -11.953978 2.834469 0.136615 [0m
+[0;34m2025-07-03 12:38:27 INFO PolyChord likelihood result #418000: loglike=56013.359813[0m
+[0;34m2025-07-03 12:38:35 INFO PolyChord likelihood eval #419000: params[0:4]=-13.703664 3.454418 -11.908305 1.837670 0.022198 [0m
+[0;34m2025-07-03 12:38:35 INFO PolyChord likelihood result #419000: loglike=56010.627311[0m
+[0;34m2025-07-03 12:38:42 INFO PolyChord likelihood eval #420000: params[0:4]=-13.603858 2.291756 -11.891101 1.378925 -0.053479 [0m
+[0;34m2025-07-03 12:38:42 INFO PolyChord likelihood result #420000: loglike=56012.182304[0m
+[0;34m2025-07-03 12:38:49 INFO PolyChord likelihood eval #421000: params[0:4]=-13.239794 0.760973 -11.821729 1.939587 0.114482 [0m
+[0;34m2025-07-03 12:38:49 INFO PolyChord likelihood result #421000: loglike=56011.640110[0m
+[0;34m2025-07-03 12:38:56 INFO PolyChord likelihood eval #422000: params[0:4]=-13.348621 0.782740 -11.968940 2.422478 0.011173 [0m
+[0;34m2025-07-03 12:38:56 INFO PolyChord likelihood result #422000: loglike=56014.066543[0m
+[0;34m2025-07-03 12:39:04 INFO PolyChord likelihood eval #423000: params[0:4]=-13.875611 3.185439 -11.878148 1.739069 0.025447 [0m
+[0;34m2025-07-03 12:39:04 INFO PolyChord likelihood result #423000: loglike=56013.689936[0m
+[0;34m2025-07-03 12:39:11 INFO PolyChord likelihood eval #424000: params[0:4]=-13.571751 2.296729 -11.849261 1.636345 0.169758 [0m
+[0;34m2025-07-03 12:39:11 INFO PolyChord likelihood result #424000: loglike=56011.714991[0m
+[0;34m2025-07-03 12:39:18 INFO PolyChord likelihood eval #425000: params[0:4]=-13.562118 2.251335 -11.852353 1.610028 0.093996 [0m
+[0;34m2025-07-03 12:39:18 INFO PolyChord likelihood result #425000: loglike=56014.225450[0m
+[0;34m2025-07-03 12:39:26 INFO PolyChord likelihood eval #426000: params[0:4]=-13.340679 1.563664 -11.890269 1.964853 0.028454 [0m
+[0;34m2025-07-03 12:39:26 INFO PolyChord likelihood result #426000: loglike=56006.220837[0m
+[0;34m2025-07-03 12:39:33 INFO PolyChord likelihood eval #427000: params[0:4]=-13.334281 1.073389 -11.747301 1.721218 -0.022293 [0m
+[0;34m2025-07-03 12:39:33 INFO PolyChord likelihood result #427000: loglike=56012.365446[0m
+[0;34m2025-07-03 12:39:41 INFO PolyChord likelihood eval #428000: params[0:4]=-13.279694 1.354981 -11.843747 2.148911 -0.063660 [0m
+[0;34m2025-07-03 12:39:41 INFO PolyChord likelihood result #428000: loglike=56014.255876[0m
+[0;34m2025-07-03 12:39:48 INFO PolyChord likelihood eval #429000: params[0:4]=-13.500059 2.239365 -11.892211 2.091715 0.196367 [0m
+[0;34m2025-07-03 12:39:48 INFO PolyChord likelihood result #429000: loglike=56011.991830[0m
+[0;34m2025-07-03 12:39:55 INFO PolyChord likelihood eval #430000: params[0:4]=-13.969154 3.307589 -11.883285 2.209801 0.011176 [0m
+[0;34m2025-07-03 12:39:55 INFO PolyChord likelihood result #430000: loglike=56013.504341[0m
+[0;34m2025-07-03 12:40:02 INFO PolyChord likelihood eval #431000: params[0:4]=-13.472868 1.898688 -11.968209 1.824347 -0.038704 [0m
+[0;34m2025-07-03 12:40:02 INFO PolyChord likelihood result #431000: loglike=56012.790864[0m
+[0;34m2025-07-03 12:40:10 INFO PolyChord likelihood eval #432000: params[0:4]=-13.462234 3.205813 -11.887072 1.926716 0.036869 [0m
+[0;34m2025-07-03 12:40:10 INFO PolyChord likelihood result #432000: loglike=56012.964321[0m
+[0;34m2025-07-03 12:40:17 INFO PolyChord likelihood eval #433000: params[0:4]=-13.471319 2.530425 -11.907585 2.085892 0.038625 [0m
+[0;34m2025-07-03 12:40:17 INFO PolyChord likelihood result #433000: loglike=56012.777076[0m
+[0;34m2025-07-03 12:40:24 INFO PolyChord likelihood eval #434000: params[0:4]=-13.375323 1.277970 -12.110843 3.035858 0.032345 [0m
+[0;34m2025-07-03 12:40:24 INFO PolyChord likelihood result #434000: loglike=56013.339176[0m
+[0;34m2025-07-03 12:40:32 INFO PolyChord likelihood eval #435000: params[0:4]=-13.287280 1.545766 -11.887519 2.493966 -0.019389 [0m
+[0;34m2025-07-03 12:40:32 INFO PolyChord likelihood result #435000: loglike=55884.516389[0m
+[0;34m2025-07-03 12:40:39 INFO PolyChord likelihood eval #436000: params[0:4]=-13.261013 1.948286 -11.897375 2.183974 0.140538 [0m
+[0;34m2025-07-03 12:40:39 INFO PolyChord likelihood result #436000: loglike=56012.903614[0m
+[0;34m2025-07-03 12:40:46 INFO PolyChord likelihood eval #437000: params[0:4]=-13.539716 1.920085 -11.906413 1.954899 0.076270 [0m
+[0;34m2025-07-03 12:40:46 INFO PolyChord likelihood result #437000: loglike=56012.933665[0m
+[0;34m2025-07-03 12:40:53 INFO PolyChord likelihood eval #438000: params[0:4]=-13.598712 1.633080 -11.913950 2.440587 0.033153 [0m
+[0;34m2025-07-03 12:40:53 INFO PolyChord likelihood result #438000: loglike=56010.816068[0m
+[0;34m2025-07-03 12:41:01 INFO PolyChord likelihood eval #439000: params[0:4]=-13.240709 1.117173 -11.914651 2.339170 0.021242 [0m
+[0;34m2025-07-03 12:41:01 INFO PolyChord likelihood result #439000: loglike=56013.761425[0m
+[0;34m2025-07-03 12:41:08 INFO PolyChord likelihood eval #440000: params[0:4]=-13.468302 1.778067 -11.881315 1.437831 0.003882 [0m
+[0;34m2025-07-03 12:41:08 INFO PolyChord likelihood result #440000: loglike=56013.564953[0m
+[0;34m2025-07-03 12:41:15 INFO PolyChord likelihood eval #441000: params[0:4]=-13.421291 1.265229 -12.075966 2.186922 0.142220 [0m
+[0;34m2025-07-03 12:41:15 INFO PolyChord likelihood result #441000: loglike=56010.677226[0m
+[0;34m2025-07-03 12:41:22 INFO PolyChord likelihood eval #442000: params[0:4]=-13.471610 1.178728 -12.030148 2.219134 -0.004237 [0m
+[0;34m2025-07-03 12:41:23 INFO PolyChord likelihood result #442000: loglike=56013.210625[0m
+[0;34m2025-07-03 12:41:30 INFO PolyChord likelihood eval #443000: params[0:4]=-13.392262 1.434850 -11.885279 2.473025 -0.025616 [0m
+[0;34m2025-07-03 12:41:30 INFO PolyChord likelihood result #443000: loglike=56013.308856[0m
+[0;34m2025-07-03 12:41:37 INFO PolyChord likelihood eval #444000: params[0:4]=-13.442137 1.962596 -11.917997 1.827818 0.008479 [0m
+[0;34m2025-07-03 12:41:37 INFO PolyChord likelihood result #444000: loglike=56013.674920[0m
+[0;34m2025-07-03 12:41:41 INFO PolyChord progress: 6030 dead points, logZ = 55984.803928 ± 0.357489[0m
+[0;34m2025-07-03 12:41:45 INFO PolyChord likelihood eval #445000: params[0:4]=-13.307013 1.760880 -12.035704 2.360168 0.047254 [0m
+[0;34m2025-07-03 12:41:45 INFO PolyChord likelihood result #445000: loglike=56011.723369[0m
+[0;34m2025-07-03 12:41:52 INFO PolyChord likelihood eval #446000: params[0:4]=-13.342154 1.502245 -12.008423 2.040001 0.176448 [0m
+[0;34m2025-07-03 12:41:52 INFO PolyChord likelihood result #446000: loglike=56012.400950[0m
+[0;34m2025-07-03 12:41:59 INFO PolyChord likelihood eval #447000: params[0:4]=-13.828599 2.820626 -11.864334 1.827655 -0.025875 [0m
+[0;34m2025-07-03 12:41:59 INFO PolyChord likelihood result #447000: loglike=56013.953126[0m
+[0;34m2025-07-03 12:42:07 INFO PolyChord likelihood eval #448000: params[0:4]=-13.219873 0.924883 -11.910021 2.294600 0.085018 [0m
+[0;34m2025-07-03 12:42:07 INFO PolyChord likelihood result #448000: loglike=55999.132283[0m
+[0;34m2025-07-03 12:42:14 INFO PolyChord likelihood eval #449000: params[0:4]=-13.487589 1.954601 -11.808608 2.261085 0.079748 [0m
+[0;34m2025-07-03 12:42:14 INFO PolyChord likelihood result #449000: loglike=56013.172532[0m
+[0;34m2025-07-03 12:42:21 INFO PolyChord likelihood eval #450000: params[0:4]=-13.396271 0.955048 -11.979746 2.560246 -0.099314 [0m
+[0;34m2025-07-03 12:42:21 INFO PolyChord likelihood result #450000: loglike=56013.001569[0m
+[0;34m2025-07-03 12:42:28 INFO PolyChord likelihood eval #451000: params[0:4]=-13.492859 2.045777 -11.876886 1.774111 0.129625 [0m
+[0;34m2025-07-03 12:42:29 INFO PolyChord likelihood result #451000: loglike=56013.282323[0m
+[0;34m2025-07-03 12:42:36 INFO PolyChord likelihood eval #452000: params[0:4]=-13.609564 1.476920 -11.842689 1.912172 0.147516 [0m
+[0;34m2025-07-03 12:42:36 INFO PolyChord likelihood result #452000: loglike=56013.062190[0m
+[0;34m2025-07-03 12:42:43 INFO PolyChord likelihood eval #453000: params[0:4]=-13.633249 2.167739 -11.851196 1.940019 -0.046662 [0m
+[0;34m2025-07-03 12:42:43 INFO PolyChord likelihood result #453000: loglike=56013.771819[0m
+[0;34m2025-07-03 12:42:50 INFO PolyChord likelihood eval #454000: params[0:4]=-13.382856 1.735860 -12.034888 2.310946 0.079025 [0m
+[0;34m2025-07-03 12:42:50 INFO PolyChord likelihood result #454000: loglike=56013.381733[0m
+[0;34m2025-07-03 12:42:58 INFO PolyChord likelihood eval #455000: params[0:4]=-13.528278 1.397640 -11.933586 1.837289 -0.051859 [0m
+[0;34m2025-07-03 12:42:58 INFO PolyChord likelihood result #455000: loglike=56012.345091[0m
+[0;34m2025-07-03 12:43:05 INFO PolyChord likelihood eval #456000: params[0:4]=-13.475016 1.437342 -11.869459 1.566728 -0.057456 [0m
+[0;34m2025-07-03 12:43:05 INFO PolyChord likelihood result #456000: loglike=56014.103085[0m
+[0;34m2025-07-03 12:43:12 INFO PolyChord likelihood eval #457000: params[0:4]=-13.408453 2.174206 -11.890968 2.212334 -0.024693 [0m
+[0;34m2025-07-03 12:43:12 INFO PolyChord likelihood result #457000: loglike=56014.423904[0m
+[0;34m2025-07-03 12:43:19 INFO PolyChord likelihood eval #458000: params[0:4]=-13.515855 1.569159 -11.990636 2.763007 0.056718 [0m
+[0;34m2025-07-03 12:43:19 INFO PolyChord likelihood result #458000: loglike=56014.404264[0m
+[0;34m2025-07-03 12:43:27 INFO PolyChord likelihood eval #459000: params[0:4]=-13.396583 1.397380 -11.974562 2.311872 0.008618 [0m
+[0;34m2025-07-03 12:43:27 INFO PolyChord likelihood result #459000: loglike=56009.808349[0m
+[0;34m2025-07-03 12:43:34 INFO PolyChord likelihood eval #460000: params[0:4]=-13.242242 2.165197 -11.949375 2.613740 0.063759 [0m
+[0;34m2025-07-03 12:43:34 INFO PolyChord likelihood result #460000: loglike=56013.570244[0m
+[0;34m2025-07-03 12:43:41 INFO PolyChord likelihood eval #461000: params[0:4]=-13.375705 1.463445 -11.941314 2.023089 0.079021 [0m
+[0;34m2025-07-03 12:43:41 INFO PolyChord likelihood result #461000: loglike=56013.985956[0m
+[0;34m2025-07-03 12:43:49 INFO PolyChord likelihood eval #462000: params[0:4]=-13.178959 0.689667 -11.922693 2.410431 0.046034 [0m
+[0;34m2025-07-03 12:43:49 INFO PolyChord likelihood result #462000: loglike=56013.363092[0m
+[0;34m2025-07-03 12:43:56 INFO PolyChord likelihood eval #463000: params[0:4]=-13.565618 2.838037 -11.922647 2.188519 0.161562 [0m
+[0;34m2025-07-03 12:43:56 INFO PolyChord likelihood result #463000: loglike=55992.789813[0m
+[0;34m2025-07-03 12:44:04 INFO PolyChord likelihood eval #464000: params[0:4]=-13.210164 1.475378 -11.846665 1.581236 0.083330 [0m
+[0;34m2025-07-03 12:44:04 INFO PolyChord likelihood result #464000: loglike=56011.310404[0m
+[0;34m2025-07-03 12:44:11 INFO PolyChord likelihood eval #465000: params[0:4]=-13.258607 0.857377 -11.893035 2.066033 0.088670 [0m
+[0;34m2025-07-03 12:44:11 INFO PolyChord likelihood result #465000: loglike=56015.379230[0m
+[0;34m2025-07-03 12:44:18 INFO PolyChord likelihood eval #466000: params[0:4]=-13.548958 2.867349 -11.860367 1.790704 0.013515 [0m
+[0;34m2025-07-03 12:44:18 INFO PolyChord likelihood result #466000: loglike=56013.690444[0m
+[0;34m2025-07-03 12:44:26 INFO PolyChord likelihood eval #467000: params[0:4]=-13.338261 1.331777 -11.842049 2.198592 0.097903 [0m
+[0;34m2025-07-03 12:44:26 INFO PolyChord likelihood result #467000: loglike=56014.209049[0m
+[0;34m2025-07-03 12:44:33 INFO PolyChord likelihood eval #468000: params[0:4]=-13.175704 1.539098 -11.859237 1.997514 0.041270 [0m
+[0;34m2025-07-03 12:44:33 INFO PolyChord likelihood result #468000: loglike=56008.142150[0m
+[0;34m2025-07-03 12:44:40 INFO PolyChord likelihood eval #469000: params[0:4]=-13.317182 1.229458 -11.832876 1.859631 -0.013476 [0m
+[0;34m2025-07-03 12:44:40 INFO PolyChord likelihood result #469000: loglike=56014.752482[0m
+[0;34m2025-07-03 12:44:47 INFO PolyChord likelihood eval #470000: params[0:4]=-13.426017 1.439306 -11.954406 2.092242 0.018715 [0m
+[0;34m2025-07-03 12:44:47 INFO PolyChord likelihood result #470000: loglike=56013.960773[0m
+[0;34m2025-07-03 12:44:55 INFO PolyChord likelihood eval #471000: params[0:4]=-13.854534 2.677901 -11.795870 1.793592 0.199662 [0m
+[0;34m2025-07-03 12:44:55 INFO PolyChord likelihood result #471000: loglike=56009.753007[0m
+[0;34m2025-07-03 12:45:02 INFO PolyChord likelihood eval #472000: params[0:4]=-13.341878 0.857177 -11.903231 1.849203 0.089473 [0m
+[0;34m2025-07-03 12:45:02 INFO PolyChord likelihood result #472000: loglike=56014.017988[0m
+[0;34m2025-07-03 12:45:09 INFO PolyChord likelihood eval #473000: params[0:4]=-13.430640 1.639242 -12.011399 2.399951 0.006407 [0m
+[0;34m2025-07-03 12:45:09 INFO PolyChord likelihood result #473000: loglike=55998.863394[0m
+[0;34m2025-07-03 12:45:16 INFO PolyChord likelihood eval #474000: params[0:4]=-13.399671 1.522501 -11.917009 1.697163 0.155706 [0m
+[0;34m2025-07-03 12:45:16 INFO PolyChord likelihood result #474000: loglike=56014.034559[0m
+[0;34m2025-07-03 12:45:24 INFO PolyChord likelihood eval #475000: params[0:4]=-13.393191 1.995666 -11.926895 2.093082 0.177247 [0m
+[0;34m2025-07-03 12:45:24 INFO PolyChord likelihood result #475000: loglike=56014.451513[0m
+[0;34m2025-07-03 12:45:31 INFO PolyChord likelihood eval #476000: params[0:4]=-13.462406 2.003695 -11.934766 1.698075 0.029194 [0m
+[0;34m2025-07-03 12:45:31 INFO PolyChord likelihood result #476000: loglike=56014.838496[0m
+[0;34m2025-07-03 12:45:38 INFO PolyChord likelihood eval #477000: params[0:4]=-13.304531 1.382536 -12.026795 2.507938 0.050286 [0m
+[0;34m2025-07-03 12:45:38 INFO PolyChord likelihood result #477000: loglike=56013.998302[0m
+[0;34m2025-07-03 12:45:46 INFO PolyChord likelihood eval #478000: params[0:4]=-13.263612 0.878914 -11.968849 2.323319 0.043658 [0m
+[0;34m2025-07-03 12:45:46 INFO PolyChord likelihood result #478000: loglike=56013.724761[0m
+[0;34m2025-07-03 12:45:53 INFO PolyChord likelihood eval #479000: params[0:4]=-13.604266 1.487233 -11.893724 1.892903 0.050539 [0m
+[0;34m2025-07-03 12:45:53 INFO PolyChord likelihood result #479000: loglike=56014.654730[0m
+[0;34m2025-07-03 12:46:00 INFO PolyChord likelihood eval #480000: params[0:4]=-13.268696 1.571353 -11.939787 1.952047 0.004251 [0m
+[0;34m2025-07-03 12:46:00 INFO PolyChord likelihood result #480000: loglike=56014.890608[0m
+[0;34m2025-07-03 12:46:07 INFO PolyChord likelihood eval #481000: params[0:4]=-13.448854 1.796813 -11.926241 2.092025 0.164981 [0m
+[0;34m2025-07-03 12:46:07 INFO PolyChord likelihood result #481000: loglike=56013.866196[0m
+[0;34m2025-07-03 12:46:15 INFO PolyChord likelihood eval #482000: params[0:4]=-13.390214 1.740771 -11.968945 2.696666 0.004891 [0m
+[0;34m2025-07-03 12:46:15 INFO PolyChord likelihood result #482000: loglike=55987.310743[0m
+[0;34m2025-07-03 12:46:23 INFO PolyChord likelihood eval #483000: params[0:4]=-13.377087 1.603434 -12.044935 2.502744 0.050499 [0m
+[0;34m2025-07-03 12:46:23 INFO PolyChord likelihood result #483000: loglike=56016.383358[0m
+[0;34m2025-07-03 12:46:30 INFO PolyChord likelihood eval #484000: params[0:4]=-13.389104 0.865850 -11.962311 1.997962 0.082679 [0m
+[0;34m2025-07-03 12:46:30 INFO PolyChord likelihood result #484000: loglike=56013.329546[0m
+[0;34m2025-07-03 12:46:37 INFO PolyChord likelihood eval #485000: params[0:4]=-13.325230 1.356714 -11.865819 1.683009 0.029886 [0m
+[0;34m2025-07-03 12:46:37 INFO PolyChord likelihood result #485000: loglike=56015.101426[0m
+[0;34m2025-07-03 12:46:44 INFO PolyChord likelihood eval #486000: params[0:4]=-13.797196 2.567108 -11.812138 1.748578 0.009978 [0m
+[0;34m2025-07-03 12:46:44 INFO PolyChord likelihood result #486000: loglike=56012.180157[0m
+[0;34m2025-07-03 12:46:52 INFO PolyChord likelihood eval #487000: params[0:4]=-13.377644 1.813719 -11.867859 2.279621 0.038940 [0m
+[0;34m2025-07-03 12:46:52 INFO PolyChord likelihood result #487000: loglike=56000.820250[0m
+[0;34m2025-07-03 12:46:59 INFO PolyChord likelihood eval #488000: params[0:4]=-13.574486 1.954073 -11.812983 1.966261 0.111311 [0m
+[0;34m2025-07-03 12:46:59 INFO PolyChord likelihood result #488000: loglike=56014.734681[0m
+[0;34m2025-07-03 12:47:06 INFO PolyChord likelihood eval #489000: params[0:4]=-13.486512 1.559452 -11.867852 2.015563 -0.081561 [0m
+[0;34m2025-07-03 12:47:06 INFO PolyChord likelihood result #489000: loglike=56012.856248[0m
+[0;34m2025-07-03 12:47:14 INFO PolyChord likelihood eval #490000: params[0:4]=-13.312554 1.044805 -12.043158 2.620647 0.072781 [0m
+[0;34m2025-07-03 12:47:14 INFO PolyChord likelihood result #490000: loglike=56002.607757[0m
+[0;34m2025-07-03 12:47:21 INFO PolyChord likelihood eval #491000: params[0:4]=-13.505977 1.469226 -11.863505 1.975879 0.053818 [0m
+[0;34m2025-07-03 12:47:21 INFO PolyChord likelihood result #491000: loglike=56016.074034[0m
+[0;34m2025-07-03 12:47:28 INFO PolyChord likelihood eval #492000: params[0:4]=-13.393370 1.688709 -11.832572 2.085483 0.082291 [0m
+[0;34m2025-07-03 12:47:28 INFO PolyChord likelihood result #492000: loglike=56015.361061[0m
+[0;34m2025-07-03 12:47:35 INFO PolyChord likelihood eval #493000: params[0:4]=-13.381026 1.319881 -11.888876 1.268902 0.011079 [0m
+[0;34m2025-07-03 12:47:35 INFO PolyChord likelihood result #493000: loglike=56008.111118[0m
+[0;34m2025-07-03 12:47:43 INFO PolyChord likelihood eval #494000: params[0:4]=-13.242607 1.475620 -11.885890 2.128888 0.083308 [0m
+[0;34m2025-07-03 12:47:43 INFO PolyChord likelihood result #494000: loglike=56014.942175[0m
+[0;34m2025-07-03 12:47:50 INFO PolyChord likelihood eval #495000: params[0:4]=-13.288854 1.562902 -11.866249 1.958657 -0.093050 [0m
+[0;34m2025-07-03 12:47:50 INFO PolyChord likelihood result #495000: loglike=56015.041918[0m
+[0;34m2025-07-03 12:47:57 INFO PolyChord likelihood eval #496000: params[0:4]=-13.325157 1.799799 -11.854499 2.087884 0.048124 [0m
+[0;34m2025-07-03 12:47:57 INFO PolyChord likelihood result #496000: loglike=56015.019677[0m
+[0;34m2025-07-03 12:48:04 INFO PolyChord likelihood eval #497000: params[0:4]=-13.351437 1.295618 -11.846120 1.707936 0.050490 [0m
+[0;34m2025-07-03 12:48:04 INFO PolyChord likelihood result #497000: loglike=56012.902581[0m
+[0;34m2025-07-03 12:48:12 INFO PolyChord likelihood eval #498000: params[0:4]=-13.479757 1.579083 -11.875296 1.624125 0.074412 [0m
+[0;34m2025-07-03 12:48:12 INFO PolyChord likelihood result #498000: loglike=56015.385868[0m
+[0;34m2025-07-03 12:48:19 INFO PolyChord likelihood eval #499000: params[0:4]=-13.446031 2.067031 -11.865510 2.012630 -0.037028 [0m
+[0;34m2025-07-03 12:48:19 INFO PolyChord likelihood result #499000: loglike=56004.022580[0m
+[0;34m2025-07-03 12:48:26 INFO PolyChord likelihood eval #500000: params[0:4]=-13.399605 1.302250 -11.911851 2.058146 -0.022093 [0m
+[0;34m2025-07-03 12:48:26 INFO PolyChord likelihood result #500000: loglike=56011.239997[0m
+[0;34m2025-07-03 12:48:34 INFO PolyChord likelihood eval #501000: params[0:4]=-13.174521 1.687243 -11.992033 2.415889 0.015878 [0m
+[0;34m2025-07-03 12:48:34 INFO PolyChord likelihood result #501000: loglike=56014.352332[0m
+[0;34m2025-07-03 12:48:41 INFO PolyChord likelihood eval #502000: params[0:4]=-13.274282 1.363791 -11.909001 1.908546 0.059458 [0m
+[0;34m2025-07-03 12:48:41 INFO PolyChord likelihood result #502000: loglike=56015.451083[0m
+[0;34m2025-07-03 12:48:49 INFO PolyChord likelihood eval #503000: params[0:4]=-13.539091 2.208528 -11.827906 2.021745 -0.036266 [0m
+[0;34m2025-07-03 12:48:49 INFO PolyChord likelihood result #503000: loglike=56015.960842[0m
+[0;34m2025-07-03 12:48:56 INFO PolyChord likelihood eval #504000: params[0:4]=-13.376075 1.697473 -12.067312 2.589610 0.001718 [0m
+[0;34m2025-07-03 12:48:56 INFO PolyChord likelihood result #504000: loglike=56015.418338[0m
+[0;34m2025-07-03 12:49:03 INFO PolyChord likelihood eval #505000: params[0:4]=-13.377497 1.816529 -11.952655 2.041995 0.046920 [0m
+[0;34m2025-07-03 12:49:03 INFO PolyChord likelihood result #505000: loglike=56015.540814[0m
+[0;34m2025-07-03 12:49:11 INFO PolyChord likelihood eval #506000: params[0:4]=-13.461956 2.284162 -11.954674 1.915541 0.042143 [0m
+[0;34m2025-07-03 12:49:11 INFO PolyChord likelihood result #506000: loglike=56015.337750[0m
+[0;34m2025-07-03 12:49:18 INFO PolyChord likelihood eval #507000: params[0:4]=-13.427331 2.348253 -11.845171 2.002429 0.091238 [0m
+[0;34m2025-07-03 12:49:18 INFO PolyChord likelihood result #507000: loglike=55999.315419[0m
+[0;34m2025-07-03 12:49:25 INFO PolyChord likelihood eval #508000: params[0:4]=-13.364210 1.576003 -11.818986 2.320563 -0.006169 [0m
+[0;34m2025-07-03 12:49:25 INFO PolyChord likelihood result #508000: loglike=56015.067650[0m
+[0;34m2025-07-03 12:49:32 INFO PolyChord likelihood eval #509000: params[0:4]=-13.567116 1.942659 -11.874664 1.989332 0.115661 [0m
+[0;34m2025-07-03 12:49:32 INFO PolyChord likelihood result #509000: loglike=56005.111468[0m
+[0;34m2025-07-03 12:49:40 INFO PolyChord likelihood eval #510000: params[0:4]=-13.363117 1.569606 -11.976349 2.606134 0.099880 [0m
+[0;34m2025-07-03 12:49:40 INFO PolyChord likelihood result #510000: loglike=56015.749896[0m
+[0;34m2025-07-03 12:49:47 INFO PolyChord likelihood eval #511000: params[0:4]=-13.182546 1.847883 -11.925651 1.914227 -0.043554 [0m
+[0;34m2025-07-03 12:49:47 INFO PolyChord likelihood result #511000: loglike=56008.685555[0m
+[0;34m2025-07-03 12:49:54 INFO PolyChord likelihood eval #512000: params[0:4]=-13.476781 2.355870 -11.793758 1.602674 0.077751 [0m
+[0;34m2025-07-03 12:49:54 INFO PolyChord likelihood result #512000: loglike=56007.877638[0m
+[0;34m2025-07-03 12:50:01 INFO PolyChord likelihood eval #513000: params[0:4]=-13.445663 1.719790 -12.000829 1.993037 0.086013 [0m
+[0;34m2025-07-03 12:50:01 INFO PolyChord likelihood result #513000: loglike=56015.811176[0m
+[0;34m2025-07-03 12:50:09 INFO PolyChord likelihood eval #514000: params[0:4]=-13.402671 1.923615 -11.878098 2.195432 -0.005937 [0m
+[0;34m2025-07-03 12:50:09 INFO PolyChord likelihood result #514000: loglike=56014.731400[0m
+[0;34m2025-07-03 12:50:16 INFO PolyChord likelihood eval #515000: params[0:4]=-13.310571 1.197660 -11.852031 1.574727 -0.077177 [0m
+[0;34m2025-07-03 12:50:16 INFO PolyChord likelihood result #515000: loglike=56013.834753[0m
+[0;34m2025-07-03 12:50:23 INFO PolyChord likelihood eval #516000: params[0:4]=-13.380212 1.468538 -11.944433 2.045672 0.071969 [0m
+[0;34m2025-07-03 12:50:23 INFO PolyChord likelihood result #516000: loglike=56007.551584[0m
+[0;34m2025-07-03 12:50:31 INFO PolyChord likelihood eval #517000: params[0:4]=-13.257823 1.652507 -12.058726 3.242164 0.031576 [0m
+[0;34m2025-07-03 12:50:31 INFO PolyChord likelihood result #517000: loglike=56012.920691[0m
+[0;34m2025-07-03 12:50:38 INFO PolyChord likelihood eval #518000: params[0:4]=-13.530955 2.290324 -11.978887 2.425711 0.057770 [0m
+[0;34m2025-07-03 12:50:38 INFO PolyChord likelihood result #518000: loglike=56007.435018[0m
+[0;34m2025-07-03 12:50:45 INFO PolyChord likelihood eval #519000: params[0:4]=-13.449091 1.694868 -11.937485 1.714016 0.102721 [0m
+[0;34m2025-07-03 12:50:45 INFO PolyChord likelihood result #519000: loglike=56015.434707[0m
+[0;34m2025-07-03 12:50:52 INFO PolyChord likelihood eval #520000: params[0:4]=-13.337947 1.528528 -11.826814 2.378260 -0.061900 [0m
+[0;34m2025-07-03 12:50:52 INFO PolyChord likelihood result #520000: loglike=56014.008237[0m
+[0;34m2025-07-03 12:51:00 INFO PolyChord likelihood eval #521000: params[0:4]=-13.340242 1.857594 -11.876637 2.154719 -0.065813 [0m
+[0;34m2025-07-03 12:51:00 INFO PolyChord likelihood result #521000: loglike=56013.710033[0m
+[0;34m2025-07-03 12:51:07 INFO PolyChord likelihood eval #522000: params[0:4]=-13.336950 1.610043 -11.879115 1.905668 -0.091079 [0m
+[0;34m2025-07-03 12:51:07 INFO PolyChord likelihood result #522000: loglike=56014.363610[0m
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4758 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                5226
+nposterior =               29366
+nequals    =                1653
+nlike      =              369917
+<nlike>    =          91.85   (           3.67 per slice )
+log(Z)     =        55983.16 +/-  0.34
+log(Z_1)   =        55983.16 +/-  0.34 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4664 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                5427
+nposterior =               30534
+nequals    =                1944
+nlike      =              388053
+<nlike>    =          90.68   (           3.63 per slice )
+log(Z)     =        55983.82 +/-  0.35
+log(Z_1)   =        55983.82 +/-  0.35 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4861 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                5628
+nposterior =               31635
+nequals    =                2738
+nlike      =              406852
+<nlike>    =          94.00   (           3.76 per slice )
+log(Z)     =        55984.29 +/-  0.35
+log(Z_1)   =        55984.29 +/-  0.35 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4913 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                5829
+nposterior =               32727
+nequals    =                3722
+nlike      =              425580
+<nlike>    =          93.64   (           3.75 per slice )
+log(Z)     =        55984.60 +/-  0.36
+log(Z_1)   =        55984.60 +/-  0.36 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4923 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                6030
+nposterior =               33865
+nequals    =                4600
+nlike      =              444508
+<nlike>    =          94.64   (           3.79 per slice )
+log(Z)     =        55984.80 +/-  0.36
+log(Z_1)   =        55984.80 +/-  0.36 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4704 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                6231
+nposterior =               35077
+nequals    =                5329
+nlike      =              463462
+<nlike>    =          94.77   (           3.79 per slice )
+log(Z)     =        55984.94 +/-  0.36
+log(Z_1)   =        55984.94 +/-  0.36 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4172 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                6432
+nposterior =               36417
+nequals    =                5926
+nlike      =              482597
+<nlike>    =          95.67   (           3.83 per slice )
+log(Z)     =        55985.03 +/-  0.36
+log(Z_1)   =        55985.03 +/-  0.36 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4976 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                6633
+nposterior =               37451
+nequals    =                6254
+nlike      =              502161
+<nlike>    =          97.82   (           3.91 per slice )
+log(Z)     =        55985.09 +/-  0.36
+log(Z_1)   =        55985.09 +/-  0.36 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |5102 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                6834
+nposterior =               38601
+nequals    =                6466
+nlike      =              522336
+<nlike>    =         100.88   (           4.04 per slice )
+[0;34m2025-07-03 12:51:15 INFO PolyChord likelihood eval #523000: params[0:4]=-13.411779 2.040261 -11.980928 2.227169 0.148677 [0m
+[0;34m2025-07-03 12:51:15 INFO PolyChord likelihood result #523000: loglike=56015.684050[0m
+[0;34m2025-07-03 12:51:22 INFO PolyChord likelihood eval #524000: params[0:4]=-13.420541 1.527148 -11.910760 1.987113 0.060722 [0m
+[0;34m2025-07-03 12:51:22 INFO PolyChord likelihood result #524000: loglike=56016.394349[0m
+[0;34m2025-07-03 12:51:29 INFO PolyChord likelihood eval #525000: params[0:4]=-13.406868 1.801390 -11.884689 1.773813 0.039507 [0m
+[0;34m2025-07-03 12:51:29 INFO PolyChord likelihood result #525000: loglike=56015.790106[0m
+[0;34m2025-07-03 12:51:37 INFO PolyChord likelihood eval #526000: params[0:4]=-13.369000 1.519868 -12.019234 2.957783 0.009524 [0m
+[0;34m2025-07-03 12:51:37 INFO PolyChord likelihood result #526000: loglike=56013.258736[0m
+[0;34m2025-07-03 12:51:44 INFO PolyChord likelihood eval #527000: params[0:4]=-13.476392 1.846920 -11.855263 1.904653 -0.034680 [0m
+[0;34m2025-07-03 12:51:44 INFO PolyChord likelihood result #527000: loglike=56016.157821[0m
+[0;34m2025-07-03 12:51:51 INFO PolyChord likelihood eval #528000: params[0:4]=-13.234732 1.135925 -12.005477 2.186753 0.005994 [0m
+[0;34m2025-07-03 12:51:51 INFO PolyChord likelihood result #528000: loglike=56016.560100[0m
+[0;34m2025-07-03 12:51:59 INFO PolyChord likelihood eval #529000: params[0:4]=-13.527629 1.936074 -11.819038 1.689324 0.045551 [0m
+[0;34m2025-07-03 12:51:59 INFO PolyChord likelihood result #529000: loglike=56015.089402[0m
+[0;34m2025-07-03 12:52:06 INFO PolyChord likelihood eval #530000: params[0:4]=-13.396427 1.297040 -11.951747 2.245213 -0.019911 [0m
+[0;34m2025-07-03 12:52:06 INFO PolyChord likelihood result #530000: loglike=56016.262116[0m
+[0;34m2025-07-03 12:52:13 INFO PolyChord likelihood eval #531000: params[0:4]=-13.252298 1.042066 -11.820738 1.641365 0.030671 [0m
+[0;34m2025-07-03 12:52:13 INFO PolyChord likelihood result #531000: loglike=55947.570241[0m
+[0;34m2025-07-03 12:52:20 INFO PolyChord likelihood eval #532000: params[0:4]=-13.465674 2.244688 -11.848478 1.768005 0.039681 [0m
+[0;34m2025-07-03 12:52:20 INFO PolyChord likelihood result #532000: loglike=56015.571707[0m
+[0;34m2025-07-03 12:52:28 INFO PolyChord likelihood eval #533000: params[0:4]=-13.416410 1.625923 -11.867331 1.747216 -0.012221 [0m
+[0;34m2025-07-03 12:52:28 INFO PolyChord likelihood result #533000: loglike=56016.136197[0m
+[0;34m2025-07-03 12:52:35 INFO PolyChord likelihood eval #534000: params[0:4]=-13.353550 1.762181 -11.951589 1.705324 0.051867 [0m
+[0;34m2025-07-03 12:52:35 INFO PolyChord likelihood result #534000: loglike=56015.950165[0m
+[0;34m2025-07-03 12:52:42 INFO PolyChord likelihood eval #535000: params[0:4]=-13.463310 2.343140 -11.931064 1.950514 0.014514 [0m
+[0;34m2025-07-03 12:52:42 INFO PolyChord likelihood result #535000: loglike=56015.767966[0m
+[0;34m2025-07-03 12:52:50 INFO PolyChord likelihood eval #536000: params[0:4]=-13.304868 1.046741 -11.949383 1.474686 -0.021099 [0m
+[0;34m2025-07-03 12:52:50 INFO PolyChord likelihood result #536000: loglike=56013.150777[0m
+[0;34m2025-07-03 12:52:57 INFO PolyChord likelihood eval #537000: params[0:4]=-13.311373 1.413799 -11.977528 2.424043 -0.023448 [0m
+[0;34m2025-07-03 12:52:57 INFO PolyChord likelihood result #537000: loglike=56014.991693[0m
+[0;34m2025-07-03 12:53:04 INFO PolyChord likelihood eval #538000: params[0:4]=-13.301109 1.753406 -12.154829 3.275294 0.106717 [0m
+[0;34m2025-07-03 12:53:04 INFO PolyChord likelihood result #538000: loglike=56009.637263[0m
+[0;34m2025-07-03 12:53:11 INFO PolyChord likelihood eval #539000: params[0:4]=-13.543274 1.958899 -11.845546 2.183216 0.021036 [0m
+[0;34m2025-07-03 12:53:11 INFO PolyChord likelihood result #539000: loglike=56015.634799[0m
+[0;34m2025-07-03 12:53:19 INFO PolyChord likelihood eval #540000: params[0:4]=-13.352423 1.617730 -11.967988 2.499403 0.165032 [0m
+[0;34m2025-07-03 12:53:19 INFO PolyChord likelihood result #540000: loglike=56015.656266[0m
+[0;34m2025-07-03 12:53:26 INFO PolyChord likelihood eval #541000: params[0:4]=-13.352515 1.894612 -11.839144 2.154564 0.084252 [0m
+[0;34m2025-07-03 12:53:26 INFO PolyChord likelihood result #541000: loglike=56016.097159[0m
+[0;34m2025-07-03 12:53:34 INFO PolyChord likelihood eval #542000: params[0:4]=-13.491428 1.907125 -11.852775 1.815962 0.036258 [0m
+[0;34m2025-07-03 12:53:34 INFO PolyChord likelihood result #542000: loglike=56016.478098[0m
+[0;34m2025-07-03 12:53:41 INFO PolyChord likelihood eval #543000: params[0:4]=-13.336909 1.776668 -11.782511 1.839397 0.067063 [0m
+[0;34m2025-07-03 12:53:41 INFO PolyChord likelihood result #543000: loglike=56015.653542[0m
+[0;34m2025-07-03 12:53:48 INFO PolyChord likelihood eval #544000: params[0:4]=-13.324277 1.727087 -11.894572 2.307761 0.026420 [0m
+[0;34m2025-07-03 12:53:48 INFO PolyChord likelihood result #544000: loglike=56016.488875[0m
+[0;34m2025-07-03 12:53:56 INFO PolyChord likelihood eval #545000: params[0:4]=-13.368519 1.542828 -11.940429 1.946088 0.003133 [0m
+[0;34m2025-07-03 12:53:56 INFO PolyChord likelihood result #545000: loglike=56016.082894[0m
+[0;34m2025-07-03 12:54:03 INFO PolyChord likelihood eval #546000: params[0:4]=-13.481244 1.559133 -11.993021 2.268211 0.017552 [0m
+[0;34m2025-07-03 12:54:03 INFO PolyChord likelihood result #546000: loglike=56015.601297[0m
+[0;34m2025-07-03 12:54:10 INFO PolyChord likelihood eval #547000: params[0:4]=-13.494195 1.712210 -11.788166 1.618338 -0.024847 [0m
+[0;34m2025-07-03 12:54:10 INFO PolyChord likelihood result #547000: loglike=56014.541065[0m
+[0;34m2025-07-03 12:54:17 INFO PolyChord likelihood eval #548000: params[0:4]=-13.463417 1.717864 -11.847965 1.523005 0.067149 [0m
+[0;34m2025-07-03 12:54:17 INFO PolyChord likelihood result #548000: loglike=56015.344954[0m
+[0;34m2025-07-03 12:54:25 INFO PolyChord likelihood eval #549000: params[0:4]=-13.390640 1.459466 -11.883261 1.792081 0.044032 [0m
+[0;34m2025-07-03 12:54:25 INFO PolyChord likelihood result #549000: loglike=56016.266325[0m
+[0;34m2025-07-03 12:54:32 INFO PolyChord likelihood eval #550000: params[0:4]=-13.466041 1.174549 -11.916638 1.679327 -0.008735 [0m
+[0;34m2025-07-03 12:54:32 INFO PolyChord likelihood result #550000: loglike=56015.807326[0m
+[0;34m2025-07-03 12:54:39 INFO PolyChord likelihood eval #551000: params[0:4]=-13.400414 1.665070 -11.877645 1.812874 -0.024563 [0m
+[0;34m2025-07-03 12:54:39 INFO PolyChord likelihood result #551000: loglike=56014.857961[0m
+[0;34m2025-07-03 12:54:47 INFO PolyChord likelihood eval #552000: params[0:4]=-13.451797 1.848799 -11.841974 0.972397 0.039591 [0m
+[0;34m2025-07-03 12:54:47 INFO PolyChord likelihood result #552000: loglike=56001.013333[0m
+[0;34m2025-07-03 12:54:54 INFO PolyChord likelihood eval #553000: params[0:4]=-13.287688 1.697128 -11.894802 1.801030 0.046537 [0m
+[0;34m2025-07-03 12:54:54 INFO PolyChord likelihood result #553000: loglike=56011.792936[0m
+[0;34m2025-07-03 12:55:01 INFO PolyChord likelihood eval #554000: params[0:4]=-13.427894 1.715538 -11.827365 1.815777 0.008909 [0m
+[0;34m2025-07-03 12:55:01 INFO PolyChord likelihood result #554000: loglike=56000.984351[0m
+[0;34m2025-07-03 12:55:08 INFO PolyChord likelihood eval #555000: params[0:4]=-13.246910 1.138364 -11.940775 2.345629 0.056941 [0m
+[0;34m2025-07-03 12:55:08 INFO PolyChord likelihood result #555000: loglike=56016.218740[0m
+[0;34m2025-07-03 12:55:16 INFO PolyChord likelihood eval #556000: params[0:4]=-13.428432 2.041390 -11.890396 1.764354 0.048069 [0m
+[0;34m2025-07-03 12:55:16 INFO PolyChord likelihood result #556000: loglike=56016.381242[0m
+[0;34m2025-07-03 12:55:23 INFO PolyChord likelihood eval #557000: params[0:4]=-13.406194 1.521581 -11.886303 2.156824 -0.003329 [0m
+[0;34m2025-07-03 12:55:23 INFO PolyChord likelihood result #557000: loglike=56017.393266[0m
+[0;34m2025-07-03 12:55:30 INFO PolyChord likelihood eval #558000: params[0:4]=-13.268932 1.236602 -11.856521 2.015878 -0.006768 [0m
+[0;34m2025-07-03 12:55:30 INFO PolyChord likelihood result #558000: loglike=56016.673966[0m
+[0;34m2025-07-03 12:55:38 INFO PolyChord likelihood eval #559000: params[0:4]=-13.320157 1.238180 -11.906052 2.020380 -0.002233 [0m
+[0;34m2025-07-03 12:55:38 INFO PolyChord likelihood result #559000: loglike=56015.941342[0m
+[0;34m2025-07-03 12:55:45 INFO PolyChord likelihood eval #560000: params[0:4]=-13.288910 1.598307 -11.870078 1.804241 0.050195 [0m
+[0;34m2025-07-03 12:55:45 INFO PolyChord likelihood result #560000: loglike=56016.355966[0m
+[0;34m2025-07-03 12:55:53 INFO PolyChord likelihood eval #561000: params[0:4]=-13.286366 1.383905 -11.830508 1.881252 0.046807 [0m
+[0;34m2025-07-03 12:55:53 INFO PolyChord likelihood result #561000: loglike=56016.259666[0m
+[0;34m2025-07-03 12:56:00 INFO PolyChord likelihood eval #562000: params[0:4]=-13.286220 1.374061 -11.886176 2.399619 0.111736 [0m
+[0;34m2025-07-03 12:56:00 INFO PolyChord likelihood result #562000: loglike=56015.733719[0m
+[0;34m2025-07-03 12:56:07 INFO PolyChord likelihood eval #563000: params[0:4]=-13.393596 1.671735 -11.866482 1.858319 0.008819 [0m
+[0;34m2025-07-03 12:56:07 INFO PolyChord likelihood result #563000: loglike=56016.375063[0m
+[0;34m2025-07-03 12:56:15 INFO PolyChord likelihood eval #564000: params[0:4]=-13.450399 1.845908 -11.893201 1.816430 0.031021 [0m
+[0;34m2025-07-03 12:56:15 INFO PolyChord likelihood result #564000: loglike=56016.610831[0m
+[0;34m2025-07-03 12:56:22 INFO PolyChord likelihood eval #565000: params[0:4]=-13.515643 1.389558 -11.905461 2.023433 0.064969 [0m
+[0;34m2025-07-03 12:56:22 INFO PolyChord likelihood result #565000: loglike=56016.423230[0m
+[0;34m2025-07-03 12:56:29 INFO PolyChord likelihood eval #566000: params[0:4]=-13.540611 1.947928 -11.869705 1.668101 0.027804 [0m
+[0;34m2025-07-03 12:56:29 INFO PolyChord likelihood result #566000: loglike=56016.254288[0m
+[0;34m2025-07-03 12:56:36 INFO PolyChord likelihood eval #567000: params[0:4]=-13.532896 1.583815 -11.907077 1.818534 0.009264 [0m
+[0;34m2025-07-03 12:56:36 INFO PolyChord likelihood result #567000: loglike=56016.857207[0m
+[0;34m2025-07-03 12:56:44 INFO PolyChord likelihood eval #568000: params[0:4]=-13.477823 1.654025 -11.883240 1.882642 0.027659 [0m
+[0;34m2025-07-03 12:56:44 INFO PolyChord likelihood result #568000: loglike=56016.917345[0m
+[0;34m2025-07-03 12:56:51 INFO PolyChord likelihood eval #569000: params[0:4]=-13.380519 1.779985 -11.911205 2.459997 0.096076 [0m
+[0;34m2025-07-03 12:56:51 INFO PolyChord likelihood result #569000: loglike=56016.772930[0m
+[0;34m2025-07-03 12:56:58 INFO PolyChord likelihood eval #570000: params[0:4]=-13.424515 1.678265 -11.888944 1.898256 -0.015426 [0m
+[0;34m2025-07-03 12:56:58 INFO PolyChord likelihood result #570000: loglike=56017.176947[0m
+[0;34m2025-07-03 12:57:05 INFO PolyChord likelihood eval #571000: params[0:4]=-13.426245 1.605769 -11.829315 1.954547 0.070877 [0m
+[0;34m2025-07-03 12:57:06 INFO PolyChord likelihood result #571000: loglike=56016.267847[0m
+[0;34m2025-07-03 12:57:13 INFO PolyChord likelihood eval #572000: params[0:4]=-13.323935 1.269425 -11.899368 2.036427 0.069299 [0m
+[0;34m2025-07-03 12:57:13 INFO PolyChord likelihood result #572000: loglike=56016.941168[0m
+[0;34m2025-07-03 12:57:20 INFO PolyChord likelihood eval #573000: params[0:4]=-13.395110 1.965576 -11.898156 1.665972 0.063589 [0m
+[0;34m2025-07-03 12:57:20 INFO PolyChord likelihood result #573000: loglike=56016.802976[0m
+[0;34m2025-07-03 12:57:27 INFO PolyChord likelihood eval #574000: params[0:4]=-13.333182 1.738356 -12.042736 2.167681 0.114420 [0m
+[0;34m2025-07-03 12:57:27 INFO PolyChord likelihood result #574000: loglike=56015.649448[0m
+[0;34m2025-07-03 12:57:35 INFO PolyChord likelihood eval #575000: params[0:4]=-13.396192 1.282807 -11.938099 2.317581 0.057796 [0m
+[0;34m2025-07-03 12:57:35 INFO PolyChord likelihood result #575000: loglike=56016.038583[0m
+[0;34m2025-07-03 12:57:42 INFO PolyChord likelihood eval #576000: params[0:4]=-13.304992 1.463703 -11.852089 1.979026 -0.015165 [0m
+[0;34m2025-07-03 12:57:42 INFO PolyChord likelihood result #576000: loglike=56016.146880[0m
+[0;34m2025-07-03 12:57:49 INFO PolyChord likelihood eval #577000: params[0:4]=-13.407218 1.795076 -11.946725 2.265302 0.033177 [0m
+[0;34m2025-07-03 12:57:49 INFO PolyChord likelihood result #577000: loglike=56017.322234[0m
+[0;34m2025-07-03 12:57:56 INFO PolyChord likelihood eval #578000: params[0:4]=-13.317825 1.130951 -12.027899 2.305271 0.014459 [0m
+[0;34m2025-07-03 12:57:56 INFO PolyChord likelihood result #578000: loglike=56016.896037[0m
+[0;34m2025-07-03 12:58:04 INFO PolyChord likelihood eval #579000: params[0:4]=-13.470422 1.300407 -11.892019 1.740630 0.022406 [0m
+[0;34m2025-07-03 12:58:04 INFO PolyChord likelihood result #579000: loglike=56016.747981[0m
+[0;34m2025-07-03 12:58:12 INFO PolyChord likelihood eval #580000: params[0:4]=-13.413594 1.565969 -11.878881 1.925348 0.048858 [0m
+[0;34m2025-07-03 12:58:12 INFO PolyChord likelihood result #580000: loglike=56016.991358[0m
+[0;34m2025-07-03 12:58:19 INFO PolyChord likelihood eval #581000: params[0:4]=-13.314058 1.679179 -11.952126 1.899800 0.063454 [0m
+[0;34m2025-07-03 12:58:19 INFO PolyChord likelihood result #581000: loglike=56016.600725[0m
+[0;34m2025-07-03 12:58:26 INFO PolyChord likelihood eval #582000: params[0:4]=-13.412809 1.803180 -11.917931 1.815181 0.055013 [0m
+[0;34m2025-07-03 12:58:26 INFO PolyChord likelihood result #582000: loglike=56016.782002[0m
+[0;34m2025-07-03 12:58:33 INFO PolyChord likelihood eval #583000: params[0:4]=-13.377627 2.087582 -11.940494 1.536095 0.018246 [0m
+[0;34m2025-07-03 12:58:33 INFO PolyChord likelihood result #583000: loglike=56011.608717[0m
+[0;34m2025-07-03 12:58:41 INFO PolyChord likelihood eval #584000: params[0:4]=-13.439401 2.085864 -11.907103 1.919129 -0.027811 [0m
+[0;34m2025-07-03 12:58:41 INFO PolyChord likelihood result #584000: loglike=56016.781706[0m
+[0;34m2025-07-03 12:58:48 INFO PolyChord likelihood eval #585000: params[0:4]=-13.266420 1.272950 -12.076423 2.544444 0.022160 [0m
+[0;34m2025-07-03 12:58:48 INFO PolyChord likelihood result #585000: loglike=56017.059869[0m
+[0;34m2025-07-03 12:58:55 INFO PolyChord likelihood eval #586000: params[0:4]=-13.484901 1.291565 -11.788229 1.653806 0.046065 [0m
+[0;34m2025-07-03 12:58:55 INFO PolyChord likelihood result #586000: loglike=56014.229209[0m
+[0;34m2025-07-03 12:59:03 INFO PolyChord likelihood eval #587000: params[0:4]=-13.426776 1.720795 -11.909106 2.042294 0.004674 [0m
+[0;34m2025-07-03 12:59:03 INFO PolyChord likelihood result #587000: loglike=56016.781799[0m
+[0;34m2025-07-03 12:59:10 INFO PolyChord likelihood eval #588000: params[0:4]=-13.339096 1.601677 -12.073286 2.943149 0.112023 [0m
+[0;34m2025-07-03 12:59:10 INFO PolyChord likelihood result #588000: loglike=56014.791029[0m
+[0;34m2025-07-03 12:59:17 INFO PolyChord likelihood eval #589000: params[0:4]=-13.337222 1.262685 -11.899336 2.170649 0.014712 [0m
+[0;34m2025-07-03 12:59:17 INFO PolyChord likelihood result #589000: loglike=56017.030896[0m
+[0;34m2025-07-03 12:59:24 INFO PolyChord likelihood eval #590000: params[0:4]=-13.344203 1.667586 -12.035537 2.657264 0.102927 [0m
+[0;34m2025-07-03 12:59:24 INFO PolyChord likelihood result #590000: loglike=56017.036001[0m
+[0;34m2025-07-03 12:59:32 INFO PolyChord likelihood eval #591000: params[0:4]=-13.353863 1.370839 -11.854702 1.860999 0.004650 [0m
+[0;34m2025-07-03 12:59:32 INFO PolyChord likelihood result #591000: loglike=56017.219279[0m
+[0;34m2025-07-03 12:59:39 INFO PolyChord likelihood eval #592000: params[0:4]=-13.502727 1.735653 -11.913568 2.053729 0.050209 [0m
+[0;34m2025-07-03 12:59:39 INFO PolyChord likelihood result #592000: loglike=56016.556205[0m
+[0;34m2025-07-03 12:59:46 INFO PolyChord likelihood eval #593000: params[0:4]=-13.379806 1.692252 -11.903883 1.607825 0.035918 [0m
+[0;34m2025-07-03 12:59:46 INFO PolyChord likelihood result #593000: loglike=56016.318482[0m
+[0;34m2025-07-03 12:59:54 INFO PolyChord likelihood eval #594000: params[0:4]=-13.401694 1.560863 -11.939705 1.921272 0.042329 [0m
+[0;34m2025-07-03 12:59:54 INFO PolyChord likelihood result #594000: loglike=56017.043876[0m
+[0;34m2025-07-03 13:00:01 INFO PolyChord likelihood eval #595000: params[0:4]=-13.594981 2.406797 -11.876736 1.802944 0.069884 [0m
+[0;34m2025-07-03 13:00:01 INFO PolyChord likelihood result #595000: loglike=56016.881844[0m
+[0;34m2025-07-03 13:00:08 INFO PolyChord likelihood eval #596000: params[0:4]=-13.416501 1.747513 -11.917375 1.828311 0.008058 [0m
+[0;34m2025-07-03 13:00:08 INFO PolyChord likelihood result #596000: loglike=56017.322586[0m
+[0;34m2025-07-03 13:00:15 INFO PolyChord likelihood eval #597000: params[0:4]=-13.294123 1.674757 -11.947907 2.232357 0.044166 [0m
+[0;34m2025-07-03 13:00:15 INFO PolyChord likelihood result #597000: loglike=56016.885569[0m
+[0;34m2025-07-03 13:00:23 INFO PolyChord likelihood eval #598000: params[0:4]=-13.343482 1.862507 -11.826892 2.017027 0.019359 [0m
+[0;34m2025-07-03 13:00:23 INFO PolyChord likelihood result #598000: loglike=56016.427695[0m
+[0;34m2025-07-03 13:00:31 INFO PolyChord likelihood eval #599000: params[0:4]=-13.353689 1.521100 -11.977813 2.188250 0.001921 [0m
+[0;34m2025-07-03 13:00:31 INFO PolyChord likelihood result #599000: loglike=56017.020479[0m
+[0;34m2025-07-03 13:00:38 INFO PolyChord likelihood eval #600000: params[0:4]=-13.381940 1.931661 -11.834976 1.831499 0.004084 [0m
+[0;34m2025-07-03 13:00:38 INFO PolyChord likelihood result #600000: loglike=56017.260652[0m
+[0;34m2025-07-03 13:00:45 INFO PolyChord likelihood eval #601000: params[0:4]=-13.402131 1.544936 -11.855213 2.064652 0.065946 [0m
+[0;34m2025-07-03 13:00:45 INFO PolyChord likelihood result #601000: loglike=56017.210861[0m
+[0;34m2025-07-03 13:00:52 INFO PolyChord likelihood eval #602000: params[0:4]=-13.420608 1.528776 -11.946897 1.981517 0.004154 [0m
+[0;34m2025-07-03 13:00:52 INFO PolyChord likelihood result #602000: loglike=56017.013187[0m
+[0;34m2025-07-03 13:01:00 INFO PolyChord likelihood eval #603000: params[0:4]=-13.363643 1.185585 -11.861437 2.029043 0.045241 [0m
+[0;34m2025-07-03 13:01:00 INFO PolyChord likelihood result #603000: loglike=56017.242235[0m
+[0;34m2025-07-03 13:01:07 INFO PolyChord likelihood eval #604000: params[0:4]=-13.408019 1.678034 -11.884542 2.014950 0.052367 [0m
+[0;34m2025-07-03 13:01:07 INFO PolyChord likelihood result #604000: loglike=56017.244771[0m
+[0;34m2025-07-03 13:01:14 INFO PolyChord likelihood eval #605000: params[0:4]=-13.504881 1.724659 -11.845448 1.661625 -0.024797 [0m
+[0;34m2025-07-03 13:01:14 INFO PolyChord likelihood result #605000: loglike=56016.056803[0m
+[0;34m2025-07-03 13:01:22 INFO PolyChord likelihood eval #606000: params[0:4]=-13.366347 1.934778 -11.937002 1.957627 0.011666 [0m
+[0;34m2025-07-03 13:01:22 INFO PolyChord likelihood result #606000: loglike=56017.270612[0m
+[0;34m2025-07-03 13:01:29 INFO PolyChord likelihood eval #607000: params[0:4]=-13.318384 1.298140 -11.983598 2.341749 0.063129 [0m
+[0;34m2025-07-03 13:01:29 INFO PolyChord likelihood result #607000: loglike=56005.672160[0m
+[0;34m2025-07-03 13:01:36 INFO PolyChord likelihood eval #608000: params[0:4]=-13.492768 2.246500 -11.884261 1.693257 0.067242 [0m
+[0;34m2025-07-03 13:01:36 INFO PolyChord likelihood result #608000: loglike=56017.001004[0m
+[0;34m2025-07-03 13:01:43 INFO PolyChord likelihood eval #609000: params[0:4]=-13.396842 1.506199 -11.885920 2.162199 0.015435 [0m
+[0;34m2025-07-03 13:01:43 INFO PolyChord likelihood result #609000: loglike=56017.583967[0m
+[0;34m2025-07-03 13:01:51 INFO PolyChord likelihood eval #610000: params[0:4]=-13.333786 1.573654 -11.847893 1.834858 0.019101 [0m
+[0;34m2025-07-03 13:01:51 INFO PolyChord likelihood result #610000: loglike=56017.535410[0m
+[0;34m2025-07-03 13:01:58 INFO PolyChord likelihood eval #611000: params[0:4]=-13.345201 1.567190 -11.872470 2.005990 0.061166 [0m
+[0;34m2025-07-03 13:01:58 INFO PolyChord likelihood result #611000: loglike=56017.143930[0m
+[0;34m2025-07-03 13:02:05 INFO PolyChord likelihood eval #612000: params[0:4]=-13.479752 2.022436 -11.908764 1.837248 0.035959 [0m
+[0;34m2025-07-03 13:02:05 INFO PolyChord likelihood result #612000: loglike=56017.155824[0m
+[0;34m2025-07-03 13:02:13 INFO PolyChord likelihood eval #613000: params[0:4]=-13.391193 1.590977 -11.892848 2.043249 0.067379 [0m
+[0;34m2025-07-03 13:02:13 INFO PolyChord likelihood result #613000: loglike=56016.483122[0m
+[0;34m2025-07-03 13:02:20 INFO PolyChord likelihood eval #614000: params[0:4]=-13.340433 1.057925 -12.012025 2.848431 0.094958 [0m
+[0;34m2025-07-03 13:02:20 INFO PolyChord likelihood result #614000: loglike=56017.185610[0m
+[0;34m2025-07-03 13:02:27 INFO PolyChord likelihood eval #615000: params[0:4]=-13.342663 1.913171 -11.982724 2.488524 0.088401 [0m
+[0;34m2025-07-03 13:02:27 INFO PolyChord likelihood result #615000: loglike=56017.058209[0m
+[0;34m2025-07-03 13:02:33 INFO PolyChord sampling completed successfully[0m
+[0;34m2025-07-03 13:02:33 INFO Output files created in: results_pc_fixed/[0m
+[0;34m2025-07-03 13:02:33 INFO PolyChord results written to: results_pc_fixed/TNest-J1853+1303-[0m
+[0;34m2025-07-03 13:02:33 INFO Run summary written to: results_pc_fixed/run_summary.txt[0m
+[0;34m2025-07-03 13:02:33 INFO Parameter names written to: results_pc_fixed/paramnames.txt[0m
+The stop date/time was: Thu Jul  3 13:02:33 2025
+Total Wall clock run time: 4497 
+log(Z)     =        55985.12 +/-  0.36
+log(Z_1)   =        55985.12 +/-  0.36 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |5264 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                7035
+nposterior =               39715
+nequals    =                6588
+nlike      =              541475
+<nlike>    =          95.70   (           3.83 per slice )
+log(Z)     =        55985.14 +/-  0.36
+log(Z_1)   =        55985.14 +/-  0.36 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4787 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                7236
+nposterior =               40993
+nequals    =                6636
+nlike      =              560247
+<nlike>    =          93.86   (           3.75 per slice )
+log(Z)     =        55985.15 +/-  0.36
+log(Z_1)   =        55985.15 +/-  0.36 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |4969 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                7437
+nposterior =               42126
+nequals    =                6664
+nlike      =              579224
+<nlike>    =          94.89   (           3.80 per slice )
+log(Z)     =        55985.15 +/-  0.36
+log(Z_1)   =        55985.15 +/-  0.36 (still evaluating)
+
+
+
+_________________
+lives      | 200 |
+phantoms   |5248 |
+posteriors |   0 |
+equals     |   0 |
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ncluster   =       1 /       1
+ndead      =                7638
+nposterior =               43226
+nequals    =                6677
+nlike      =              598779
+<nlike>    =          97.78   (           3.91 per slice )
+log(Z)     =        55985.15 +/-  0.36
+log(Z_1)   =        55985.15 +/-  0.36 (still evaluating)
+
+
+
+ ____________________________________________________ 
+|                                                    |
+| ndead  =         8012                              |
+| log(Z) =        55985.15657 +/-            0.36250 |
+|____________________________________________________|

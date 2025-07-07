@@ -18,7 +18,8 @@ st.markdown("Generate JSON configuration files for TempoNest. Choose to download
 st.sidebar.header("File Naming Settings")
 main_filename = st.sidebar.text_input("Main Config File Name", value="main.json")
 settings_filename = st.sidebar.text_input("Settings File Name", value="settings.json")
-sampler_filename = st.sidebar.text_input("Sampler File Name", value="sampler.json")
+sampler_filename_base = st.sidebar.text_input("Sampler File Name", value="sampler", 
+                                                        help="Base name for sampler file (will be sampler_multinest.json or sampler_polychord.json)")
 noise_filename = st.sidebar.text_input("Noise Model File Name", value="noise.json")
 timing_filename = st.sidebar.text_input("Timing Model File Name", value="timing.json")
 zip_filename = st.sidebar.text_input("Zip File Name", value="tnest_configs.zip")
@@ -66,12 +67,68 @@ with tabs[2]:
     st.header("Sampler")
     st.markdown("Configure the sampler settings.")
     sampler_type = st.selectbox("Sampler Type", ["multinest", "polychord"], index=0)
-    output_root = st.text_input("Output Root", value="results/TNest-")
-    sample = st.checkbox("Sample", value=True)
-    importance_sampling = st.selectbox("Importance Sampling", options=[0, 1], index=0)
-    constant_efficiency = st.selectbox("Constant Efficiency", options=[0, 1], index=1)
-    efficiency = st.number_input("Efficiency", value=0.1, min_value=0.0, max_value=1.0, step=0.01)
-    live_points = st.number_input("Live Points", value=500, min_value=1, step=1)
+    output_root = st.text_input("Output Root", value="results/TNest-", 
+                               help="Prefix for output files (e.g., 'results/TNest-' creates files like 'results/TNest-post_equal_weights.dat')")
+    
+    # Common parameters
+    live_points = st.number_input("Live Points", value=500, min_value=1, step=1,
+                                 help="Number of live points used in nested sampling")
+    
+    # Initialize variables with defaults to prevent NameError
+    sample = True
+    importance_sampling = 0
+    constant_efficiency = 1
+    efficiency = 0.1
+    num_repeats = 25
+    do_clustering = False
+    precision_criterion = 0.001
+    max_ndead = -1
+    feedback = 1
+    boost_posterior = 5.0
+    seed = -1
+    synchronous = False
+    verbose = True
+    
+    if sampler_type == "multinest":
+        st.subheader("MultiNest Settings")
+        sample = st.checkbox("Sample", value=True, help="Enable sampling mode")
+        importance_sampling = st.selectbox("Importance Sampling", options=[0, 1], index=0,
+                                         help="Enable importance nested sampling (0=disabled, 1=enabled)")
+        constant_efficiency = st.selectbox("Constant Efficiency", options=[0, 1], index=1,
+                                         help="Use constant efficiency mode (0=disabled, 1=enabled)")
+        efficiency = st.number_input("Efficiency", value=0.1, min_value=0.0, max_value=1.0, step=0.01,
+                                    help="Target efficiency for sampling (0.1 is typical for parameter estimation)")
+        
+    elif sampler_type == "polychord":
+        st.subheader("PolyChord Settings")
+        
+        # Essential PolyChord parameters (always visible)
+        num_repeats = st.number_input("Slice Sampling Steps", value=25, min_value=1, step=1,
+                                     help="Number of slice sampling steps per live point (25 is optimal for pulsar timing)")
+        do_clustering = st.checkbox("Enable Multi-modal Detection", value=False,
+                                   help="Enable detection and separation of multiple posterior modes (disabled for pulsar timing)")
+        precision_criterion = st.number_input("Precision Criterion", value=0.001, min_value=0.0, max_value=1.0, step=0.0001, format="%.4f",
+                                             help="Stopping criterion for evidence calculation (smaller = more precise)")
+        verbose = st.checkbox("Verbose Output", value=True,
+                            help="Enable detailed output during sampling")
+        
+        # Advanced PolyChord settings (expandable)
+        with st.expander("Advanced PolyChord Settings"):
+            st.markdown("**Advanced parameters for fine-tuning PolyChord behavior:**")
+            st.markdown("*Note: These parameters have optimal defaults for pulsar timing and are usually not written to JSON.*")
+            
+            sample = st.checkbox("Enable Sampling", value=True,
+                               help="Enable sampling mode (usually always True)")
+            max_ndead = st.number_input("Max Dead Points", value=-1, min_value=-1, step=1,
+                                      help="Maximum dead points before forced termination (-1 = auto-calculate)")
+            feedback = st.selectbox("Console Feedback Level", options=[0, 1, 2], index=1,
+                                   help="Console output verbosity (0=quiet, 1=normal, 2=verbose)")
+            boost_posterior = st.number_input("Posterior Boost", value=5.0, min_value=0.0, max_value=10.0, step=0.1,
+                                            help="Posterior enhancement factor (5.0 is optimal for pulsar timing)")
+            synchronous = st.checkbox("Synchronous Mode", value=False,
+                                    help="Use synchronous sampling (False = parallel, usually faster)")
+            seed = st.number_input("Random Seed", value=-1, min_value=-1, step=1,
+                                 help="Random seed for reproducibility (-1 = automatic)")
 
 # --- Callback functions for Noise Model ---
 def delete_noise_element(index):
@@ -717,6 +774,9 @@ with tabs[0]:
         
         timing_elements_final = [timing_element]
         
+        # Create dynamic sampler filename based on sampler type
+        sampler_filename = f"{sampler_filename_base}_{sampler_type}.json"
+        
         # Build the configuration dictionaries
         main_config = {
             "INCLUDE": [settings_filename, sampler_filename, noise_filename, timing_filename]
@@ -728,17 +788,48 @@ with tabs[0]:
                 "test_mode": test_mode
             }
         }
-        sampler_config = {
-            "sampler": {
-                "type": sampler_type,
-                "output_root": output_root,
-                "sample": sample,
-                "importance_sampling": importance_sampling,
-                "constant_efficiency": constant_efficiency,
-                "efficiency": efficiency,
-                "live_points": live_points
+        
+        # Build sampler config based on sampler type
+        if sampler_type == "multinest":
+            sampler_config = {
+                "sampler": {
+                    "type": "multinest",
+                    "output_root": output_root,
+                    "sample": sample,
+                    "importance_sampling": importance_sampling,
+                    "constant_efficiency": constant_efficiency,
+                    "efficiency": efficiency,
+                    "live_points": live_points
+                }
             }
-        }
+        elif sampler_type == "polychord":
+            # Create minimal PolyChord config with only essential parameters
+            sampler_config = {
+                "sampler": {
+                    "type": "polychord",
+                    "output_root": output_root,
+                    "num_live": live_points,
+                    "num_repeats": num_repeats,
+                    "precision_criterion": precision_criterion,
+                    "verbose": verbose  # Always include verbose setting
+                }
+            }
+            
+            # Only add non-default parameters to keep JSON minimal
+            if sample != True:  # Only add if not default
+                sampler_config["sampler"]["sample"] = sample
+            if do_clustering != False:  # Only add if not default
+                sampler_config["sampler"]["do_clustering"] = do_clustering
+            if max_ndead != -1:  # Only add if not default
+                sampler_config["sampler"]["max_ndead"] = max_ndead
+            if feedback != 1:  # Only add if not default
+                sampler_config["sampler"]["feedback"] = feedback
+            if boost_posterior != 5.0:  # Only add if not default
+                sampler_config["sampler"]["boost_posterior"] = boost_posterior
+            if synchronous != False:  # Only add if not default
+                sampler_config["sampler"]["synchronous"] = synchronous
+            if seed != -1:  # Only add if not default
+                sampler_config["sampler"]["seed"] = seed
         noise_model_config = {
             "elements": noise_elements_for_json
         }

@@ -4,6 +4,7 @@
 #include "elements/timing_model.h"
 #include "../utils/logger.h"
 #include "t2fit.h"
+#include <iomanip>
 
 model_space_t::model_space_t()
 {
@@ -183,6 +184,7 @@ void model_space_t::load_model()
                 // Calculate how many new parameters were added
                 int new_dims = element->get_fitted_dims() - previous_dims;
 
+
                 // Increment param_index by the number of new parameters
                 param_index += new_dims;
 
@@ -195,8 +197,16 @@ void model_space_t::load_model()
             die("Element " + element_name + " is not fully specified.");
         }
 
-        elements_[element_name] = std::move(element);
-        elements_[element_name]->print_formatted(element_index);
+        // Handle multiple instances of the same element type (like ECORR)
+        string_t unique_element_name = element_name;
+        int instance_counter = 0;
+        while (elements_.find(unique_element_name) != elements_.end()) {
+            instance_counter++;
+            unique_element_name = element_name + "_" + std::to_string(instance_counter);
+        }
+        
+        elements_[unique_element_name] = std::move(element);
+        elements_[unique_element_name]->print_formatted(element_index);
         element_index++;
         
         if (element_name == "Timing Model") {
@@ -309,26 +319,65 @@ void model_space_t::update_array_size_info()
 
     // Calculate frequencies for noise models based on time span
     output_formatter::print_header("FREQUENCY COEFFICIENTS");
-    std::cout << "    Time span: " << max_tspan_ << " days" << std::endl;
+    
+    // Display observation time span
+    std::cout << "  📊 " << output_formatter::BOLD << "Observation Span:" << output_formatter::RESET 
+              << " " << std::fixed << std::setprecision(2) << max_tspan_ << " days" << std::endl;
+    std::cout << std::endl;
+    
+    // Display noise model frequency information
+    bool has_noise_models = false;
     
     if (auto pl_red_opt = get_optional_element<pl_red_noise_t>("Power Law Red Noise")) {
         auto& pl = pl_red_opt->get();
         pl.calculate_frequencies(max_tspan_);
-        std::cout << "    Red Noise: " << pl.num_freqs << " frequencies (" << pl.days_per_coeff 
-                  << " days/coeff, total coeffs: " << (2 * pl.num_freqs) << ")" << std::endl;
+        has_noise_models = true;
+        std::cout << "  🔴 " << output_formatter::BOLD << "Red Noise:" << output_formatter::RESET 
+                  << std::endl;
+        std::cout << "     ├─ Frequencies: " << output_formatter::GREEN << pl.num_freqs << output_formatter::RESET << std::endl;
+        std::cout << "     ├─ Days per coefficient: " << output_formatter::YELLOW << pl.days_per_coeff << output_formatter::RESET << std::endl;
+        std::cout << "     └─ Total coefficients: " << output_formatter::BLUE << (2 * pl.num_freqs) << output_formatter::RESET << std::endl;
+        std::cout << std::endl;
     }
 
     if (auto pl_dm_opt = get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
         auto& pl = pl_dm_opt->get();
         pl.calculate_frequencies(max_tspan_);
-        std::cout << "    DM Noise: " << pl.num_freqs << " frequencies (" << pl.days_per_coeff 
-                  << " days/coeff, total coeffs: " << (2 * pl.num_freqs) << ")" << std::endl;
+        has_noise_models = true;
+        std::cout << "  🟣 " << output_formatter::BOLD << "DM Noise:" << output_formatter::RESET 
+                  << std::endl;
+        std::cout << "     ├─ Frequencies: " << output_formatter::GREEN << pl.num_freqs << output_formatter::RESET << std::endl;
+        std::cout << "     ├─ Days per coefficient: " << output_formatter::YELLOW << pl.days_per_coeff << output_formatter::RESET << std::endl;
+        std::cout << "     └─ Total coefficients: " << output_formatter::BLUE << (2 * pl.num_freqs) << output_formatter::RESET << std::endl;
+        std::cout << std::endl;
     }
 
-    if (auto ecorr_opt = get_optional_element<ecorr_t>("ECORR")) {
-        auto& ecorr = ecorr_opt->get();
-        std::cout << "    ECORR: " << ecorr.get_num_coefficients() << " epochs" << std::endl;
+    // Handle multiple ECORR instances
+    int total_ecorr_epochs = 0;
+    for (const auto& [name, element] : elements_) {
+        if (name.find("ECORR") == 0) {
+            auto* ecorr = element->as<ecorr_t>();
+            if (ecorr) {
+                total_ecorr_epochs += ecorr->get_num_coefficients();
+                has_noise_models = true;
+            }
+        }
     }
+    
+    if (total_ecorr_epochs > 0) {
+        std::cout << "  ⚡ " << output_formatter::BOLD << "ECORR:" << output_formatter::RESET 
+                  << std::endl;
+        std::cout << "     └─ Total epochs: " << output_formatter::BLUE << total_ecorr_epochs << output_formatter::RESET << std::endl;
+        std::cout << std::endl;
+    }
+    
+    if (!has_noise_models) {
+        std::cout << "  ℹ️  " << output_formatter::YELLOW << "No stochastic noise models configured" << output_formatter::RESET << std::endl;
+        std::cout << std::endl;
+    }
+    
+    // Add visual separator
+    output_formatter::print_section_separator();
 
     // Calculate total coefficients
     int totCoeff = 0;
@@ -343,9 +392,14 @@ void model_space_t::update_array_size_info()
         totCoeff += 2 * pl.num_freqs;
     }
 
-    if (auto ecorr_opt = get_optional_element<ecorr_t>("ECORR")) {
-        auto& ecorr = ecorr_opt->get();
-        totCoeff += ecorr.get_num_coefficients();
+    // Handle multiple ECORR instances
+    for (const auto& [name, element] : elements_) {
+        if (name.find("ECORR") == 0) {
+            auto* ecorr = element->as<ecorr_t>();
+            if (ecorr) {
+                totCoeff += ecorr->get_num_coefficients();
+            }
+        }
     }
 
     noise_size_ = totCoeff;
@@ -483,13 +537,16 @@ void model_space_t::store_total_matrix()
     /////////////////////////ECORR Epochs///////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    if (auto ecorr_opt = get_optional_element<ecorr_t>("ECORR")) {
-        auto& ecorr = ecorr_opt->get();
-        
-        // Add ECORR quantization matrices to the design matrix
-        ecorr.get_design_matrix(total_matrix_, TimetoMargin + startpos);
-        
-        startpos += ecorr.get_num_coefficients();
+    // Handle multiple ECORR instances
+    for (const auto& [name, element] : elements_) {
+        if (name.find("ECORR") == 0) {
+            auto* ecorr = element->as<ecorr_t>();
+            if (ecorr) {
+                // Add ECORR quantization matrices to the design matrix
+                ecorr->get_design_matrix(total_matrix_, TimetoMargin + startpos);
+                startpos += ecorr->get_num_coefficients();
+            }
+        }
     }
 
     delete[] DMVec;

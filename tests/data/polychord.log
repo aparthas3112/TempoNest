@@ -1,0 +1,465 @@
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under conditions of GPL license.
+
+Looking for /home/aparthas/software/apps/tempo2/plugins//temponest_linux-gnu_plug.t2
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under conditions of GPL license.
+
+The start date/time is: Wed Jul  2 14:09:07 2025
+Using config filename: tnest_config_test/main.json 
+Current filename = test.tim
+Rel path = /home/aparthas/software/sources/GPU_Timing/TempoNest/tests/data/test_tims/J1853+1303_PINT_20220302.nb.tim
+call pre process
+initialise pulsar
+form bats
+[observatory.C:272] Warning: Assuming site 'arecibo' means 'ao'
+[tempo2Util.C:397] [TROP2] Assume standard atmospheric pressure (no data) for site ao at MJD 55789.1
+[tempo2Util.C:397] [TROP1] Assume zero zenith wet delay (no data) for site ao  at MJD 55789.1
+[tempo2Util.C:401] Warning: [DUP1] duplicated warnings have been suppressed.
+form residuals
+[t2fit.C:789] ss/fs 0 0
+[t2fit.C:818] START=55731.1937186050345 FINISH = 59051.1334073910111
+[t2fit.C:1305] Generated 189 TNepochs from 4 TNECORRs
+[TKfit.C:273] QR nparams=209 nconst=189 ndata=4570
+[t2fit_nestlike.C:222] 0 param_jitter 55789.05 -5.909e-09 1.16332e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55818.02 -2.49899e-08 1.16272e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55758.15 -9.77597e-08 1.15386e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55731.20 -3.97565e-08 1.16073e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55912.70 9.08392e-09 1.16444e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57264.00 5.55198e-08 1.16011e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57240.06 5.45193e-08 1.15545e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57116.41 1.45309e-08 1.16378e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57390.66 8.48285e-09 1.16304e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57958.13 -1.48356e-07 1.14909e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56577.89 -7.88965e-08 1.1302e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58810.82 3.13849e-08 1.16253e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57668.94 -2.18073e-08 1.1564e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57032.65 1.19173e-07 1.13628e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56380.43 1.6117e-08 1.15839e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57305.89 2.71923e-08 1.16191e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58622.29 2.58669e-08 1.15938e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58747.94 8.7353e-08 1.15131e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58790.83 5.98471e-08 1.15996e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57326.82 8.4346e-09 1.16408e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56235.83 1.15164e-08 1.165e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58901.57 1.34248e-08 1.16012e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59030.23 -2.23407e-08 1.1605e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57915.25 -2.70925e-08 1.16023e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58986.37 -3.68761e-09 1.16042e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58578.41 6.87136e-08 1.14664e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57096.46 6.40896e-08 1.15689e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58964.38 -2.94029e-08 1.15601e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56662.66 2.44479e-08 1.16074e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59051.14 -1.73174e-08 1.15973e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57375.68 6.2468e-08 1.16021e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57347.76 2.83756e-08 1.16229e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57418.58 6.83781e-09 1.16484e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56417.34 -3.90762e-09 1.15728e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56399.38 5.46055e-09 1.1611e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58730.00 6.54139e-08 1.15706e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57978.08 -3.51828e-08 1.16097e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57746.68 -5.598e-08 1.15427e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56438.30 4.66906e-09 1.16473e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57850.41 -1.09173e-07 1.15003e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56955.87 2.12999e-08 1.1606e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57053.56 5.83865e-08 1.15495e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56934.93 1.13826e-08 1.15996e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56998.75 1.81849e-08 1.16026e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58538.52 3.26851e-08 1.15111e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56738.46 1.32567e-08 1.16044e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55989.50 2.245e-08 1.15861e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58831.71 5.49875e-09 1.16329e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57810.51 -3.98271e-08 1.15611e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56299.65 4.86692e-09 1.16276e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56479.17 8.30537e-09 1.16184e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57069.53 2.35783e-08 1.15916e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57503.35 6.48972e-09 1.16202e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57522.30 1.06765e-08 1.15731e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57200.18 6.1154e-08 1.15765e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57667.90 -2.22342e-08 1.15633e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57768.62 -8.7799e-08 1.15409e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56874.07 -3.15306e-08 1.15551e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57187.23 3.77888e-08 1.15988e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58765.89 7.37515e-08 1.15567e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56977.80 1.64259e-08 1.15778e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58642.24 4.36971e-08 1.1571e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57894.28 -9.64325e-08 1.15348e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57649.95 -1.24803e-08 1.16264e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58880.57 6.87972e-09 1.16423e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57937.18 -5.06242e-07 1.11433e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58683.13 2.24509e-08 1.15695e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57018.69 1.13624e-07 1.14949e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57223.11 1.02006e-07 1.15209e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57705.82 -8.135e-08 1.14746e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59007.29 -3.18644e-08 1.15764e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58475.68 3.84426e-08 1.16079e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58943.44 -1.71726e-08 1.16132e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57186.21 1.0316e-08 1.16077e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56458.22 8.28353e-10 1.16543e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56023.41 -5.24088e-08 1.14718e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57028.66 1.00875e-07 1.1426e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56277.71 2.94593e-08 1.16243e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58544.55 1.91593e-08 1.16166e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57627.05 3.87371e-08 1.15794e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56853.16 -2.96406e-08 1.14692e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56498.10 -3.11957e-10 1.16589e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57608.07 -2.06915e-08 1.15329e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58454.74 3.79503e-08 1.15713e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57538.26 3.30945e-08 1.15495e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57565.19 2.75825e-08 1.15853e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56538.00 -2.62801e-08 1.16094e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56341.54 2.65677e-09 1.16364e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57137.34 1.84728e-08 1.16291e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57588.14 2.02457e-08 1.15757e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57834.45 -1.87758e-07 1.1432e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55731.21 -2.90057e-10 1.16563e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55817.96 -3.14637e-08 1.15888e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55912.68 5.59667e-09 1.15942e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55789.03 -4.42157e-09 1.16581e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55758.12 -3.06021e-09 1.16284e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58729.98 -2.10486e-08 1.11318e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59007.26 8.14133e-08 1.06012e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57069.55 -2.60461e-08 1.13542e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57834.43 -1.02352e-07 1.03264e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56235.81 2.08032e-08 1.1179e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58642.22 2.5286e-08 1.12716e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57187.24 2.19561e-07 8.99973e-08
+[t2fit_nestlike.C:222] 0 param_jitter 58747.93 -2.64466e-08 1.00663e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56057.30 -8.79275e-08 1.07852e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56577.87 3.78484e-09 1.08851e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56738.44 -1.82868e-08 1.1526e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57375.70 7.8493e-08 9.08741e-08
+[t2fit_nestlike.C:222] 0 param_jitter 57305.91 2.89623e-08 1.1089e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56498.11 -3.65129e-08 1.07183e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57116.43 1.2563e-07 1.10442e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57565.17 -1.14207e-07 1.06621e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58964.36 7.7222e-08 1.06336e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57522.29 9.57543e-09 9.55831e-08
+[t2fit_nestlike.C:222] 0 param_jitter 56319.57 -1.77776e-08 1.05507e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57053.58 3.51263e-09 1.15701e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58790.81 2.72565e-08 1.12118e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57768.60 -2.03908e-07 1.05162e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56977.78 1.03295e-08 1.14911e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57588.12 -5.34568e-08 8.20136e-08
+[t2fit_nestlike.C:222] 0 param_jitter 58901.55 -4.56207e-08 1.14395e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57326.83 -5.90349e-08 1.02837e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59051.12 6.87271e-10 1.15242e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57503.34 -6.27051e-08 1.09103e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57608.06 -1.25853e-08 1.15161e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57186.22 1.04749e-07 1.05287e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58765.88 2.23281e-08 1.12968e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56662.63 3.39498e-08 9.61584e-08
+[t2fit_nestlike.C:222] 0 param_jitter 57200.20 1.98458e-07 1.04132e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57705.80 -3.58643e-08 1.13084e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57958.11 -3.21049e-08 1.14214e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56023.39 -1.22277e-07 1.05501e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56874.08 2.43058e-08 1.08937e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58683.11 -8.45625e-09 1.12776e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57418.56 -5.99617e-08 9.59124e-08
+[t2fit_nestlike.C:222] 0 param_jitter 57223.13 9.53552e-09 1.04804e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56998.73 -2.05685e-08 1.14787e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56438.28 4.97969e-08 1.09248e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58538.50 -1.77384e-08 1.15114e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56537.98 -8.39752e-08 1.06495e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57240.08 2.7151e-07 8.4219e-08
+[t2fit_nestlike.C:222] 0 param_jitter 57937.16 -5.4583e-08 1.01008e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57894.27 -5.84021e-08 1.10637e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56201.91 1.09841e-09 1.1331e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56399.36 8.08144e-08 1.07349e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57538.25 -9.41606e-09 1.15343e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58831.69 -1.44635e-08 1.15757e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57627.03 3.08708e-08 1.00609e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57978.06 -1.16905e-07 1.02657e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57137.36 1.01433e-07 1.11459e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57667.89 -4.77465e-08 1.14114e-07
+[t2fit_nestlike.C:222] 0 param_jitter 55989.48 -4.1522e-09 1.15908e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57810.50 -6.93156e-09 1.16446e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58880.57 -7.59844e-11 1.16567e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57032.64 -7.75057e-08 9.48525e-08
+[t2fit_nestlike.C:222] 0 param_jitter 58810.80 -4.70602e-08 1.13039e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56955.85 1.15e-07 1.06579e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58475.67 -5.75164e-09 1.16402e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57096.47 9.75677e-08 9.73598e-08
+[t2fit_nestlike.C:222] 0 param_jitter 56166.02 1.0819e-08 1.1247e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57915.23 -7.70768e-08 1.07215e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57264.02 7.75638e-08 1.06793e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58922.48 2.17601e-09 1.16549e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57746.66 -2.05807e-08 1.15592e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58943.42 2.20361e-08 1.14926e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56140.09 -8.82037e-11 1.1224e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57390.64 2.23354e-08 1.15883e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56458.21 2.36778e-08 1.09267e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56380.42 -5.63225e-08 1.02301e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57850.40 -3.07633e-08 1.03415e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58986.35 7.86222e-08 1.08686e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58558.45 -4.58828e-09 1.10799e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57028.65 2.24098e-09 9.46459e-08
+[t2fit_nestlike.C:222] 0 param_jitter 56853.14 9.50933e-08 1.11223e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57347.77 3.88083e-08 1.0695e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57649.94 -2.43972e-07 1.02403e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58544.54 1.06249e-09 1.13031e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58454.73 -1.59893e-08 1.14459e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56417.32 -1.21895e-08 9.63341e-08
+[t2fit_nestlike.C:222] 0 param_jitter 58578.39 6.0441e-08 1.10933e-07
+[t2fit_nestlike.C:222] 0 param_jitter 58622.28 4.33891e-08 1.13499e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56277.69 -7.71385e-08 1.09891e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56341.52 4.31299e-09 1.12568e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56479.15 6.60458e-08 1.09104e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57668.93 -4.90905e-08 1.13794e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56934.91 3.61923e-08 1.13691e-07
+[t2fit_nestlike.C:222] 0 param_jitter 59030.21 1.65576e-08 1.14969e-07
+[t2fit_nestlike.C:222] 0 param_jitter 56299.62 -3.3673e-08 1.09982e-07
+[t2fit_nestlike.C:222] 0 param_jitter 57018.68 -8.83428e-08 1.09259e-07
+
+
+Results for PSR J1853+1303
+
+
+RMS pre-fit residual = 1.506 (us), RMS post-fit residual = 1.472 (us)
+Fit Chisq = 6186	Chisqr/nfree = 6185.53/4550 = 1.35946	pre/post = 1.02272
+Number of fit parameters: 209
+Number of points in fit = 4570
+Offset: 5.59393e-07 1.24481e-06 offset_e*sqrt(n) = 8.41512e-05 n = 4570
+
+
+PARAMETER       Pre-fit                   Post-fit                  Uncertainty   Difference   Fit
+---------------------------------------------------------------------------------------------------
+ELONG           286.257303904631          286.257303905553          6.2068e-09    9.2236e-10    Y
+ELAT            35.7433491692             35.7433491312639          8.7331e-09    -3.7936e-08   Y
+F0 (s^-1)       244.391373923512          244.391373923512          1.3948e-13    -1.1369e-13   Y
+F1 (s^-2)       -5.20687474439809e-16     -5.20691687245269e-16     3.2971e-21    -4.2128e-21   Y
+PEPOCH (MJD)    57391                     57391                     0             0             N
+POSEPOCH (MJD)  57391                     57391                     0             0             N
+DMEPOCH (MJD)   57391                     57391                     0             0             N
+DM (cm^-3 pc)   30.5701401411977          30.5701641063565          4.9935e-05    2.3965e-05    Y
+DM1 (cm^-3 pc y 8.26117721705731e-05      8.12798384528089e-05      2.2245e-06    -1.3319e-06   Y
+DM2 (cm^-3 pc y 1.54501607461932e-05      1.27652146625802e-05      1.6515e-06    -2.6849e-06   Y
+PMELONG         -1.92603551329247         -1.92807265718405         0.0073906     -0.0020371    Y
+PMELAT          -2.72287618561326         -2.72136271101307         0.016634      0.0015135     Y
+PX (mas)        0.498733219705827         0.331516462585442         0.10986       -0.16722      Y
+SINI            0.94511211661403          0.960616935536924         0.1058        0.015505      Y
+PB (d)          115.653788230616          115.653788231187          2.6107e-09    5.7069e-10    Y
+T0 (MJD)        57400.7512962562          57400.7510077196          0.0059449     -0.00028854   Y
+A1 (lt-s)       40.7695243193548          40.769524454034           6.7601e-07    1.3468e-07    Y
+OM (deg)        346.644898047842          346.643999923588          0.018505      -0.00089812   Y
+ECC             2.36952020103122e-05      2.36940281371559e-05      2.5714e-09    -1.1739e-09   Y
+XDOT            1.54280026648889e-14      1.53358329307734e-14      6.9389e-16    -9.217e-17    Y
+M2              0.0548075338775524        0.0418648232654017        0.066602      -0.012943     Y
+START (MJD)     55731.193718605           55731.193718605           0             0             N
+FINISH (MJD)    59051.133407391           59051.133407391           0             0             N
+TZRMJD          57390.6587742196          57390.6587742196          0             -1.4552e-11   N
+TZRFRQ (MHz)    426.875                   426.875                   0             0             N
+TZRSITE         arecibo                  
+TRES            1.453                     1.47240991341531          0             0.01941       N
+EPHVER          TEMPO2                    TEMPO2                    
+NE_SW (cm^-3)   1                         1                         0             0             N
+DM_SERIES       TAYLOR                   
+---------------------------------------------------------------------------------------------------
+[textOutput.C:305] Notice: Parameter uncertainties multiplied by sqrt(red. chisq)
+
+Jump 1 ( -fe L-wide 6.904825308869e-05 1): 7.0066169809673e-05 1.0039663938209e-06 Y
+
+Derived parameters:
+
+P0 (s)      = 0.004091797447454         2.3354e-18   
+P1          = 8.71784008811834e-21      5.5202e-26   
+tau_c (Myr) = 7441.6
+bs (G)      = 1.9112e+08
+
+Binary model: DD
+Mass function                  = 0.005439637244  +- 0.000000000271 solar masses 
+Minimum, median and maximum companion mass: 0.2395 < 0.2814 < 0.6379 solar masses
+Pulsar Mass (Shapiro Delay): 0.067484 (+/- 0.195178) Msun.
+
+Parallax distance is 3016.44 (+/- 999.63) pc.
+MTOT derived from sin i and m2 = 0.10935224038583
+Inclination angle (deg)        = 73.866518020267 (+ nan - 15.12677)
+Total proper motion = 3.3352 +/- 0.014229 mas/yr
+Total time span = 3319.940 days = 9.089 years
+
+Tempo2 usage
+Units:                 TCB (tempo2)
+Time ephemeris:        IF99 (tempo2)
+Troposphere corr.?     Yes (tempo2)
+Dilate freq?           Yes (tempo2)
+Electron density (1AU) 1
+Solar system ephem     DE440
+Time scale             TT(TAI)
+Binary model           DD
+
+[textOutput.C:1738] Warning: There are output parameters with very high covariance
+                  DM        param_JUMP(1) -0.99110
+                  OM                   T0 +1.00000
+                  M2                   A1 -0.99453
+Notice: There were 3 warnings. Summaries are shown below, check logs for full details.
+Warning #1: Assuming site 'arecibo' means 'ao'
+Warning #2: [DUP1] duplicated warnings have been suppressed.
+Warning #3: There are output parameters with very high covariance
+
+Loading TempoNest configuration...
+┌────────────────────────────────────────────────────────────────────┐
+│                      [1mTEMPONEST CONFIGURATION[0m                       │
+└────────────────────────────────────────────────────────────────────┘
+
+[1mGlobal Settings:[0m
+  • Debug Mode: [31mOFF[0m
+  • Tempo2 Iterations: [32m1[0m
+  • Original Errors: [32mON[0m
+  • Test Mode: [31mOFF[0m
+[0;34m2025-07-02 14:09:09 INFO Using GPU for calculations[0m
+Available devices: 1
+CUDA backend available and selected
+Using device: NVIDIA_GeForce_RTX_4090
+  Platform: CUDA
+  Toolkit: v12.2
+  Compute: 8.9
+Active backend: CUDA
+ArrayFire v3.9.0 (CUDA, 64-bit Linux, build b59a1ae53)
+Platform: CUDA Runtime 12.2, Driver: 535.230.02
+[0] NVIDIA GeForce RTX 4090, 24210 MB, CUDA Compute 8.9
+  • GPU Acceleration: [32mON[0m
+  • GPU Optimized: [32mON[0m
+
+┌────────────────────────────────────────────────────────────────────┐
+│                           [1mMODEL ELEMENTS[0m                           │
+└────────────────────────────────────────────────────────────────────┘
+
+
+[1] [1mPower Law Red Noise[0m [33m(30 frequencies (110.000000 days/coeff))[0m
+    ├─ [1mspectral_index[0m: uniform [0, 7][32m ✓ included[0m
+    └─ [1mamplitude[0m: log-uniform [-18, -10][32m ✓ included[0m
+
+[2] [1mPower Law DM Noise[0m [33m(100 frequencies (33.000000 days/coeff))[0m
+    ├─ [1mspectral_index[0m: uniform [0, 7][32m ✓ included[0m
+    └─ [1mamplitude[0m: log-uniform [-18, -10][32m ✓ included[0m
+
+[3] [1mEFAC[0m [33m(Per-flag (-group, 4 values))[0m
+    ├─ [1mper_flag::-group::L-wide_PUPPI[0m: uniform [-1, 0.7][32m ✓ included[0m
+    ├─ [1mper_flag::-group::L-wide_ASP[0m: uniform [-1, 0.7][32m ✓ included[0m
+    ├─ [1mper_flag::-group::430_PUPPI[0m: uniform [-1, 0.7][32m ✓ included[0m
+    └─ [1mper_flag::-group::430_ASP[0m: uniform [-1, 0.7][32m ✓ included[0m
+
+[4] [1mEQUAD[0m [33m(Per-flag (-group, 4 values))[0m
+    ├─ [1mper_flag::-group::L-wide_PUPPI[0m: log-uniform [-9, -3][32m ✓ included[0m
+    ├─ [1mper_flag::-group::L-wide_ASP[0m: log-uniform [-9, -3][32m ✓ included[0m
+    ├─ [1mper_flag::-group::430_PUPPI[0m: log-uniform [-9, -3][32m ✓ included[0m
+    └─ [1mper_flag::-group::430_ASP[0m: log-uniform [-9, -3][32m ✓ included[0m
+
+[5] [1mECORR[0m [33m(4 backends, 189 epochs)[0m
+
+[5] [1mECORR[0m
+    ├─ [1mecorr::-f::L-wide_PUPPI[0m: log-uniform [-9, -3][32m ✓ included[0m
+    ├─ [1mecorr::-f::L-wide_ASP[0m: log-uniform [-9, -3][32m ✓ included[0m
+    ├─ [1mecorr::-f::430_PUPPI[0m: log-uniform [-9, -3][32m ✓ included[0m
+    └─ [1mecorr::-f::430_ASP[0m: log-uniform [-9, -3][32m ✓ included[0m
+
+[6] [1mDeterministic Solar Wind[0m
+    └─ [1melectron_density[0m: uniform [0, 16][32m ✓ included[0m
+
+[7] [1mTiming Model[0m [33m(Fully marginalised (19 parameters))[0m
+    └─ [33mAll fitted parameters from .par file will be marginalised[0m
+
+┌────────────────────────────────────────────────────────────────────┐
+│                       [1mFREQUENCY COEFFICIENTS[0m                       │
+└────────────────────────────────────────────────────────────────────┘
+
+  📊 [1mObservation Span:[0m 3319.94 days
+
+  🔴 [1mRed Noise:[0m
+     ├─ Frequencies: [32m30[0m
+     ├─ Days per coefficient: [33m110.00[0m
+     └─ Total coefficients: [34m60[0m
+
+  🟣 [1mDM Noise:[0m
+     ├─ Frequencies: [32m100[0m
+     ├─ Days per coefficient: [33m33.00[0m
+     └─ Total coefficients: [34m200[0m
+
+  ⚡ [1mECORR:[0m
+     └─ Total epochs: [34m189[0m
+
+  ──────────────────────────────────────────────────────────────────
+
+Forming Design Matrix 19
+Graphical Interface: TempoNest
+Author:              L. Lentati
+Version:             1.0
+----------------------------------------------------------------
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under conditions of GPL license.
+
+----------------------------------------------------------------
+
+
+
+
+*****************************************************
+Starting TempoNest
+*****************************************************
+
+┌────────────────────────────────────────────────────────────────────┐
+│                       [1mANALYSIS CONFIGURATION[0m                       │
+└────────────────────────────────────────────────────────────────────┘
+
+  🎯 [1mOutput Configuration:[0m
+     └─ File root: [32mresults_pc_test/TNest-J1853+1303-[0m
+
+  ──────────────────────────────────────────────────────────────────
+
+run 
+dir path: results_pc_test
+[0;34m2025-07-02 14:09:09 INFO Created PolyChord subdirectories[0m
+[0;34m2025-07-02 14:09:09 INFO Starting PolyChord nested sampling[0m
+[0;34m2025-07-02 14:09:09 INFO Number of parameters: 17[0m
+[0;34m2025-07-02 14:09:09 INFO Number of live points: 1000[0m
+[0;34m2025-07-02 14:09:09 INFO Number of repeats (requested): 50[0m
+[0;34m2025-07-02 14:09:09 INFO Number of repeats (actual): 185[0m
+[0;34m2025-07-02 14:09:09 INFO Precision criterion: 0.010000[0m
+[0;34m2025-07-02 14:09:09 INFO Output directory: results_pc_test/[0m
+[0;34m2025-07-02 14:09:09 INFO File root: TNest-J1853+1303-[0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord prior_wrapper: nDims=17, parameters.size()=17[0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 0: amplitude [-18.000000, -10.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 1: spectral_index [0.000000, 7.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 2: amplitude [-18.000000, -10.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 3: spectral_index [0.000000, 7.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 4: per_flag [-1.000000, 0.700000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 5: per_flag [-1.000000, 0.700000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 6: per_flag [-1.000000, 0.700000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 7: per_flag [-1.000000, 0.700000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 8: per_flag [-9.000000, -3.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 9: per_flag [-9.000000, -3.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 10: per_flag [-9.000000, -3.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 11: per_flag [-9.000000, -3.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 12: per_backend [-9.000000, -3.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 13: per_backend [-9.000000, -3.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 14: per_backend [-9.000000, -3.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 15: per_backend [-9.000000, -3.000000][0m
+[0;34m2025-07-02 14:09:09 INFO Parameter 16: electron_density [0.000000, 16.000000][0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord prior transform #0: cube→physical: 0.382358→-14.941136 0.720916→5.046414 0.138923→-16.888613 0.897297→6.281078 0.986802→0.677563 [0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord likelihood eval #0: params[0:4]=-14.941136 5.046414 -16.888613 6.281078 0.677563 [0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord likelihood result #0: loglike=43987.330577[0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord prior transform #1: cube→physical: 0.409729→-14.722168 0.229816→1.608713 0.886482→-10.908147 0.029956→0.209690 0.824610→0.401837 [0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord likelihood eval #1: params[0:4]=-14.722168 1.608713 -10.908147 0.209690 0.401837 [0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord likelihood result #1: loglike=37244.216766[0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord prior transform #2: cube→physical: 0.491327→-14.069380 0.265693→1.859852 0.686577→-12.507383 0.391473→2.740312 0.165215→-0.719135 [0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord likelihood eval #2: params[0:4]=-14.069380 1.859852 -12.507383 2.740312 -0.719135 [0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord likelihood result #2: loglike=32968.616358[0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord likelihood eval #3: params[0:4]=-14.305831 2.587847 -15.851893 3.392282 -0.841299 [0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord likelihood result #3: loglike=51938.568406[0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord likelihood eval #4: params[0:4]=-17.090629 6.463991 -14.053494 2.989555 -0.010488 [0m
+[0;34m2025-07-02 14:09:09 INFO PolyChord likelihood result #4: loglike=47243.512856[0m
+[0;34m2025-07-02 14:09:17 INFO PolyChord likelihood eval #1000: params[0:4]=-13.378381 5.130505 -13.093559 6.124265 -0.639414 [0m
+[0;34m2025-07-02 14:09:17 INFO PolyChord likelihood result #1000: loglike=45920.875939[0m
+[0;34m2025-07-02 14:09:24 INFO PolyChord likelihood eval #2000: params[0:4]=-17.561449 0.874396 -17.883732 2.310441 -0.363570 [0m
+[0;34m2025-07-02 14:09:24 INFO PolyChord likelihood result #2000: loglike=-12358.018276[0m
+[0;34m2025-07-02 14:09:31 INFO PolyChord likelihood eval #3000: params[0:4]=-17.391095 1.710403 -14.046220 2.848916 -0.662549 [0m
+[0;34m2025-07-02 14:09:31 INFO PolyChord likelihood result #3000: loglike=-1986.643566[0m
+[0;34m2025-07-02 14:09:38 INFO PolyChord likelihood eval #4000: params[0:4]=-16.531406 3.101144 -11.882095 2.757940 -0.166300 [0m
+[0;34m2025-07-02 14:09:38 INFO PolyChord likelihood result #4000: loglike=39401.087322[0m
+[0;34m2025-07-02 14:09:46 INFO PolyChord likelihood eval #5000: params[0:4]=-10.821608 6.653138 -11.191117 4.194702 0.496456 [0m
+[0;34m2025-07-02 14:09:46 INFO PolyChord likelihood result #5000: loglike=41252.001044[0m
+[0;34m2025-07-02 14:09:53 INFO PolyChord likelihood eval #6000: params[0:4]=-15.101002 5.809176 -13.714314 4.977756 0.397665 [0m
+[0;34m2025-07-02 14:09:53 INFO PolyChord likelihood result #6000: loglike=43206.372275[0m
