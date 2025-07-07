@@ -2,6 +2,7 @@
 #include "../../utils/settings.h"
 #include "../../utils/output_formatter.h"
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <set>
 
@@ -236,9 +237,19 @@ void ecorr_t::apply(const std::vector<double>& parameter_values,
         string_t param_name = "ecorr::" + flag_ + "::" + backend_names_[backend_idx];
         auto param = get_parameter(param_name);
         
-        // Get the log10_ecorr parameter value
-        double log10_ecorr = parameter_values[param->get_index()];
+        // Get the log10_ecorr parameter value  
+        int param_index = param->get_index();
+        
+        // BOUNDS CHECK: Ensure parameter index is within valid range
+        if (param_index < 0 || param_index >= static_cast<int>(parameter_values.size())) {
+            throw std::runtime_error("ECORR parameter index " + std::to_string(param_index) + 
+                                    " out of bounds [0, " + std::to_string(parameter_values.size()) + ") for backend " + 
+                                    backend_names_[backend_idx]);
+        }
+        
+        double log10_ecorr = parameter_values[param_index];
         double ecorr_variance = std::pow(10.0, 2.0 * log10_ecorr);
+        
         
         // Set coefficient for each epoch of this backend
         int num_epochs_this_backend = quantization_matrices_[backend_idx].cols();

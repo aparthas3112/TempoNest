@@ -17,13 +17,17 @@ bool use_original_errors = true;
 
 bool test_mode = false;
 
-bool tempo2_quiet = false;
 
 #ifdef HAVE_ARRAYFIRE
 bool use_gpu = true;
 #else
 bool use_gpu = false;
 #endif
+
+bool use_gpu_optimized = true;   // Always use optimized GPU functions
+
+bool verbose_mode = false;  // Default to false, will be set by sampler
+VerbosityLevel verbosity_level = VerbosityLevel::QUIET;  // Default to quiet
 
 json_loader_t config;
 
@@ -42,7 +46,6 @@ void load_settings(const string_t& filename)
         num_tempo2_its = json_globals.get_optional_value<int>("num_tempo2_its").value_or(1);
         use_original_errors = json_globals.get_optional_value<bool>("use_original_errors").value_or(true);
         test_mode = json_globals.get_optional_value<bool>("test_mode").value_or(false);
-        tempo2_quiet = json_globals.get_optional_value<bool>("tempo2_quiet").value_or(false);
 
         // see if we want to override use_gpu
         bool use_gpu_override = json_globals.get_optional_value<bool>("use_gpu").value_or(use_gpu);
@@ -50,6 +53,7 @@ void load_settings(const string_t& filename)
             die("GPU support not available");
         }
         use_gpu = use_gpu_override;
+        
     }
 
     print();
@@ -70,11 +74,25 @@ void print()
         initializeArrayFire();
         // Get GPU device info after initialization
         output_formatter::print_setting("GPU Acceleration", "ON", true);
+        output_formatter::print_setting("GPU Optimized", use_gpu_optimized ? "ON" : "OFF", use_gpu_optimized);
     } else {
         logger::log_info("Using CPU for calculations");
         output_formatter::print_setting("GPU Acceleration", "OFF", false);
     }
     
+    
     output_formatter::print_separator();
+}
+
+void set_verbose_mode(bool verbose)
+{
+    verbose_mode = verbose;
+}
+
+void set_verbosity_level(VerbosityLevel level)
+{
+    verbosity_level = level;
+    // Also update verbose_mode for backward compatibility
+    verbose_mode = (level == VerbosityLevel::FULL);
 }
 }  // namespace globals

@@ -58,10 +58,42 @@ The GUI will open in your default web browser at `http://localhost:8501`.
 - **Test Mode**: Enable debugging output
 
 #### 2. Sampler Configuration
+
+The GUI now supports both **MultiNest** and **PolyChord** samplers with simplified, sampler-specific parameter interfaces.
+
+**Sampler Selection:**
+- **MultiNest**: Traditional nested sampling (default)
+- **PolyChord**: Advanced slice sampling with multi-modal detection
+
+**MultiNest Settings:**
 - **Live Points**: Choose from preset values (500/1000/4000) or custom
-- **Efficiency**: Exploration vs speed trade-off
-- **Output Settings**: File prefix and directory
-- **Advanced Options**: Evidence tolerance, resume capability
+- **Efficiency**: Exploration vs speed trade-off (0.1 typical for parameter estimation)
+- **Importance Sampling**: Enable advanced sampling mode
+- **Constant Efficiency**: Use constant efficiency mode
+
+**PolyChord Settings (Simplified):**
+- **Essential Parameters** (always visible):
+  - **Live Points**: Number of live points (500 equivalent to MultiNest default)
+  - **Slice Sampling Steps**: Controls thoroughness vs speed (5 = balanced)
+  - **Multi-modal Detection**: Enable posterior mode separation
+  - **Output Root**: Results directory prefix
+  
+- **Advanced Parameters** (expandable section):
+  - **Precision Criterion**: Stopping criterion (0.001 = standard)
+  - **Max Dead Points**: Backup termination limit (auto-calculated)
+  - **Verbosity Level**: Output detail (0=quiet, 1=normal, 2=verbose)
+  - **Posterior Boost**: Enhancement factor (0.0 = no boost)
+  - **Random Seed**: Reproducibility control (-1 = automatic)
+
+**Key Simplifications:**
+- **Reduced complexity**: PolyChord parameters reduced from 24 to 4 essential + 5 advanced
+- **Sensible defaults**: 11 parameters automatically set for parameter estimation workflows
+- **Equivalent settings**: PolyChord defaults match typical MultiNest configurations
+- **Dynamic filenames**: Generates `sampler_multinest.json` or `sampler_polychord.json`
+- **Helpful tooltips**: Brief explanations for parameter effects
+
+**Hidden Parameters (Auto-configured):**
+All file output options, sampling modes, and advanced flags are set to optimal values for pulsar timing parameter estimation, reducing user configuration burden while maintaining full functionality.
 
 #### 3. Model Elements
 - **Add Elements**: Dropdown selection of all supported model types

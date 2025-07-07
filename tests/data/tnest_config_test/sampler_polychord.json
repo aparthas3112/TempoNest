@@ -1,0 +1,26 @@
+{
+    "sampler": {
+        "type": "polychord",
+        "output_root": "results_pc_test/TNest-",
+        "sample": true,
+        "num_live":2000,
+        "num_repeats": 185,
+        "precision_criterion": 0.001,
+        "max_ndead": -1,
+        "do_clustering": true,
+        "feedback": 1,
+        "posteriors": true,
+        "equals": true,
+        "cluster_posteriors": true,
+        "write_resume": true,
+        "write_paramnames": true,
+        "read_resume": true,
+        "write_stats": true,
+        "write_live": false,
+        "write_dead": false,
+        "write_prior": false,
+        "boost_posterior": 0.0,
+        "synchronous": false,
+        "seed": -1
+    }
+}

@@ -49,6 +49,7 @@
 #include <cstring>
 #include <fstream>
 #include "../core/utils/run_summary.h"
+#include "../core/utils/output_formatter.h"
 #include <iostream>
 #include <iterator>
 #include <sstream>
@@ -193,9 +194,17 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
 
         printf("\n\n\n\n*****************************************************\n");
         printf("Starting TempoNest\n");
-        printf("*****************************************************\n\n\n\n");
-        printf("Details of the fit:\n");
-        printf("file root set to %s \n", sampler->get_settings().output_root.c_str());
+        printf("*****************************************************\n\n");
+        
+        // Print detailed configuration info with improved formatting
+        output_formatter::print_header("ANALYSIS CONFIGURATION");
+        
+        std::cout << "  🎯 " << output_formatter::BOLD << "Output Configuration:" << output_formatter::RESET << std::endl;
+        std::cout << "     └─ File root: " << output_formatter::GREEN << sampler->get_settings().output_root << output_formatter::RESET << std::endl;
+        std::cout << std::endl;
+        
+        // Add visual separator  
+        output_formatter::print_section_separator();
     }
 
     // if we are running unit tests do that now rather than sampling

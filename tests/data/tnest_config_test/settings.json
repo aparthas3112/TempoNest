@@ -1,0 +1,7 @@
+{
+    "globals": {
+        "use_original_errors": true,
+        "num_tempo2_its": 1,
+        "test_mode": false
+    }
+}

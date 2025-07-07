@@ -7,6 +7,7 @@
 #include <vector>
 #include "../utils/logger.h"
 #include "multinest.h"
+#include "polychord.h"
 
 bool sampler_t::create_output_directories()
 {
@@ -67,6 +68,13 @@ std::unique_ptr<sampler_t> sampler_factory_t::create(const json_node_t& config)
             die("Invalid settings for MultiNest sampler");
         }
         return std::make_unique<multinest_sampler_t>(std::move(settings));
+    }
+    else if (type == "polychord") {
+        auto settings = polychord_settings_t::from_json(config);
+        if (!settings->validate()) {
+            die("Invalid settings for PolyChord sampler");
+        }
+        return std::make_unique<polychord_sampler_t>(std::move(settings));
     }
     // Add new samplers here with additional else if statements
 

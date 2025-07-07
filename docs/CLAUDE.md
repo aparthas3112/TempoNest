@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-TempoNest is a Bayesian pulsar timing analysis tool that integrates with Tempo2 as a plugin. Uses MultiNest for nested sampling with C++/MPI parallelization and optional GPU acceleration.
+TempoNest is a Bayesian pulsar timing analysis tool that integrates with Tempo2 as a plugin. Uses MultiNest or PolyChord for nested sampling with C++/MPI parallelization and optional GPU acceleration.
 
 ## Quick Start
 

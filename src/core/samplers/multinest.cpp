@@ -1,6 +1,7 @@
 #include "multinest.h"
 #include "../../plugin/TempoNest.h"
 #include "../utils/logger.h"
+#include "../utils/settings.h"
 #include <cfloat>
 #include <filesystem>
 #include <fstream>
@@ -30,6 +31,7 @@ void multinest_settings_t::load_from_json(const json_node_t& json)
     efficiency = json.get_optional_value<double>("efficiency").value_or(0.1);
     update_interval = json.get_optional_value<int>("update_interval").value_or(2000);
     num_cluster_parameters = json.get_optional_value<int>("num_cluster_parameters").value_or(1);
+    verbose = json.get_optional_value<bool>("verbose").value_or(false);
 }
 
 /**
@@ -58,6 +60,9 @@ void multinest_sampler_t::run(std::shared_ptr<model_t> model)
     model_ = model;
 
     sampling_parameters_ = model_->get_sampling_parameters();
+    
+    // Set global verbose mode based on sampler settings
+    globals::set_verbose_mode(mn_settings.verbose);
 
     // Set the MultiNest sampling parameters
 
@@ -74,8 +79,7 @@ void multinest_sampler_t::run(std::shared_ptr<model_t> model)
     int fb = 1;                 // need feedback on standard output?
     int resume = 1;             // resume from a previous job?
     int outfile = 1;            // write output files?
-    int initMPI = 0;            // initialize MPI routines?, relevant only if compiling with MPI set it to F
-                                // if you want your main program to handle MPI initialization
+    int initMPI = 0;            // MPI initialization handled by mpirun, not MultiNest
     double logZero = -DBL_MAX;  // points with loglike < logZero will be ignored by MultiNest
     int maxiter = 0;            // max no. of iterations, a non-positive value means infinity. MultiNest will
                                 // terminate if either it has done max no. of iterations or convergence

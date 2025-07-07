@@ -25,8 +25,6 @@ extern bool use_original_errors;
 // test mode - to run unit tests
 extern bool test_mode;
 
-// tempo2 output verbosity control
-extern bool tempo2_quiet;
 
 // json config document
 extern json_loader_t config;
@@ -34,7 +32,25 @@ extern json_loader_t config;
 // are we using gpus
 extern bool use_gpu;
 
+// use optimized GPU functions (for validation testing)
+extern bool use_gpu_optimized;
+
+// Verbosity levels
+enum class VerbosityLevel {
+    QUIET = 0,    // Minimal output
+    NORMAL = 1,   // Progress updates and important info
+    FULL = 2      // Full debug output
+};
+
+// verbose mode flag (controlled by sampler settings)
+extern bool verbose_mode;
+extern VerbosityLevel verbosity_level;
+
 void load_settings(const string_t& filename);
 
 void print();
+
+// Set verbose mode (called by samplers)
+void set_verbose_mode(bool verbose);
+void set_verbosity_level(VerbosityLevel level);
 }  // namespace globals

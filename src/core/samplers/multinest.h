@@ -2,6 +2,7 @@
 
 #include "multinest_interface.h"
 #include "sampler.h"
+#include "../utils/logger.h"
 
 /**
  * @brief Settings specific to the MultiNest sampling algorithm
@@ -68,6 +69,9 @@ public:
     // nClsPar:  Number of parameters to cluster over when doing multi modal analysis
     int num_cluster_parameters;
 
+    /** @brief Enable verbose debug output for likelihood evaluations (default: false) */
+    bool verbose = false;
+
     /**
      * @brief Validate MultiNest specific settings
      *
@@ -118,20 +122,61 @@ private:
      */
     static void loglike_wrapper(double* Cube, int& ndim, int& npars, double& lnew, void* context)
     {
+        static int call_count = 0;
+        call_count++;
 
         // Cast the context back to the object instance and call the instance method
         multinest_sampler_t* self = static_cast<multinest_sampler_t*>(context);
         std::vector<const parameter_t*> parameters = self->model_->get_sampling_parameters();
 
+        // DEBUG: Log parameter information on first call
+        static bool first_call = true;
+        if (first_call) {
+            logger::log_info("MultiNest loglike_wrapper: ndim=" + std::to_string(ndim) + 
+                            ", parameters.size()=" + std::to_string(parameters.size()));
+            for (int i = 0; i < ndim && i < static_cast<int>(parameters.size()); ++i) {
+                logger::log_info("MultiNest Parameter " + std::to_string(i) + ": " + parameters[i]->name + 
+                                " [" + std::to_string(parameters[i]->min_value) + 
+                                ", " + std::to_string(parameters[i]->max_value) + "]");
+            }
+            first_call = false;
+        }
+
         std::vector<double> params(ndim);
 
+        // Transform from unit hypercube [0,1] to physical parameter space
         for (int i = 0; i < ndim; ++i) {
             double physical_value = parameters[i]->min_value + Cube[i] * (parameters[i]->max_value - parameters[i]->min_value);
             Cube[i] = physical_value;
             params[i] = physical_value;
         }
 
-        lnew = self->model_->calc_loglike(params);
+        // DEBUG: Log some likelihood evaluations (only if verbose is enabled)
+        const auto& settings = static_cast<const multinest_settings_t&>(self->get_settings());
+        if (settings.verbose && (call_count <= 5 || call_count % 1000 == 0)) {
+            std::string param_str = "";
+            for (int i = 0; i < std::min(5, ndim); ++i) {
+                param_str += std::to_string(params[i]) + " ";
+            }
+            logger::log_info("MultiNest likelihood eval #" + std::to_string(call_count) + 
+                            ": params[0:4]=" + param_str);
+        }
+
+        try {
+            lnew = self->model_->calc_loglike(params);
+            
+            // DEBUG: Log likelihood values (only if verbose is enabled)
+            if (settings.verbose && (call_count <= 5 || call_count % 1000 == 0)) {
+                logger::log_info("MultiNest likelihood result #" + std::to_string(call_count) + 
+                                ": loglike=" + std::to_string(lnew));
+            }
+        } catch (const std::exception& e) {
+            logger::log_error("Error in MultiNest loglike_wrapper: " + std::string(e.what()));
+            lnew = -1e30;
+        } catch (...) {
+            logger::log_error("Unknown error in MultiNest loglike_wrapper");
+            lnew = -1e30;
+        }
     }
 
     /************************************************* dumper routine

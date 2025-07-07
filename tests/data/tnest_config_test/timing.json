@@ -1,0 +1,9 @@
+{
+    "elements": [
+        {
+            "name": "Timing Model",
+            "marginalise": "all",
+            "parameters": []
+        }
+    ]
+}
