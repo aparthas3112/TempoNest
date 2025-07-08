@@ -77,18 +77,6 @@ double temponest_v1_t::operator()(const model_space_t& model_space, const std::v
         }
     }
 
-    // Apply EQUAD if present
-    if (auto equad = model_space.get_optional_element<equad_t>("EQUAD")) {
-        equad->get().apply(parameter_values, noise, uniform_prior);
-        if (debug_this_call) {
-            double min_noise_equad = noise.minCoeff();
-            double max_noise_equad = noise.maxCoeff();
-            bool has_nan_equad = !noise.allFinite();
-            logger::log_info("DEBUG STEP 4 - After EQUAD: min=" + std::to_string(min_noise_equad) + 
-                            ", max=" + std::to_string(max_noise_equad) + ", has_nan=" + (has_nan_equad ? "YES" : "NO"));
-        }
-    }
-
     // Apply Deterministic Solar Wind if present (modifies residuals)
     if (auto det_sw = model_space.get_optional_element<deterministic_solar_wind_t>("Deterministic Solar Wind")) {
         det_sw->get().apply(parameter_values, Resvec);
@@ -96,7 +84,7 @@ double temponest_v1_t::operator()(const model_space_t& model_space, const std::v
             double min_res_sw = Resvec.minCoeff();
             double max_res_sw = Resvec.maxCoeff();
             bool has_nan_res_sw = !Resvec.allFinite();
-            logger::log_info("DEBUG STEP 5 - After Det Solar Wind: min=" + std::to_string(min_res_sw) + 
+            logger::log_info("DEBUG STEP 4 - After Det Solar Wind: min=" + std::to_string(min_res_sw) + 
                             ", max=" + std::to_string(max_res_sw) + ", has_nan=" + (has_nan_res_sw ? "YES" : "NO"));
         }
     }
@@ -108,22 +96,25 @@ double temponest_v1_t::operator()(const model_space_t& model_space, const std::v
             double min_noise_stoch = noise.minCoeff();
             double max_noise_stoch = noise.maxCoeff();
             bool has_nan_stoch = !noise.allFinite();
-            logger::log_info("DEBUG STEP 6 - After Stoch Solar Wind: min=" + std::to_string(min_noise_stoch) + 
+            logger::log_info("DEBUG STEP 5 - After Stoch Solar Wind: min=" + std::to_string(min_noise_stoch) + 
                             ", max=" + std::to_string(max_noise_stoch) + ", has_nan=" + (has_nan_stoch ? "YES" : "NO"));
         }
     }
 
-    // CRITICAL FIX: Add minimum noise floor to prevent division by zero
-    // This prevents NaN when EFAC/EQUAD combinations produce zero noise
-    const double min_noise_floor = 1e-12;  // 1 picosecond - extremely small but non-zero
-    noise = noise.array().max(min_noise_floor);
+    // Square the noise to get variance (noise is currently sigma, need sigma^2)
+    // This matches the legacy implementation: 1/(EFAC^2 * sigma^2 + EQUAD + ...)
+    noise = noise.array().square();
     
-    if (debug_this_call) {
-        double min_noise_floor_applied = noise.minCoeff();
-        double max_noise_floor_applied = noise.maxCoeff();
-        bool has_nan_floor = !noise.allFinite();
-        logger::log_info("DEBUG STEP 6.5 - After noise floor: min=" + std::to_string(min_noise_floor_applied) + 
-                        ", max=" + std::to_string(max_noise_floor_applied) + ", has_nan=" + (has_nan_floor ? "YES" : "NO"));
+    // Apply EQUAD if present (adds to noise variance)
+    if (auto equad = model_space.get_optional_element<equad_t>("EQUAD")) {
+        equad->get().apply(parameter_values, noise, uniform_prior);
+        if (debug_this_call) {
+            double min_noise_equad = noise.minCoeff();
+            double max_noise_equad = noise.maxCoeff();
+            bool has_nan_equad = !noise.allFinite();
+            logger::log_info("DEBUG STEP 6 - After EQUAD: min=" + std::to_string(min_noise_equad) + 
+                            ", max=" + std::to_string(max_noise_equad) + ", has_nan=" + (has_nan_equad ? "YES" : "NO"));
+        }
     }
     
     noise = noise.array().inverse();
@@ -220,6 +211,78 @@ double temponest_v1_t::operator()(const model_space_t& model_space, const std::v
                     dm_coeffs_str += std::to_string(powercoeff[i]) + " ";
                 }
                 logger::log_info("DEBUG STEP 7.2 - " + dm_coeffs_str);
+            }
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////Chromatic GP Noise//////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Apply Chromatic GP Noise if present  
+    if (auto chrom_gp = model_space.get_optional_element<chromatic_gp_noise_t>("Chromatic GP Noise")) {
+        int old_start_pos = start_pos;
+        double old_freq_det = freq_det;
+        chrom_gp->get().apply(parameter_values, powercoeff, start_pos, maxtspan, uniform_prior, freq_det);
+        
+        if (debug_this_call) {
+            int chrom_coeffs = start_pos - old_start_pos;
+            if (chrom_coeffs > 0) {
+                logger::log_info("DEBUG STEP 7.3 - Chromatic GP Noise applied: coeffs=" + std::to_string(chrom_coeffs) +
+                                ", freq_det_contrib=" + std::to_string(freq_det - old_freq_det));
+                
+                // Show some powercoeff values for chromatic GP noise
+                double min_chrom = 1e100, max_chrom = -1e100;
+                for (int i = old_start_pos; i < start_pos; ++i) {
+                    if (powercoeff[i] < min_chrom) min_chrom = powercoeff[i];
+                    if (powercoeff[i] > max_chrom) max_chrom = powercoeff[i];
+                }
+                logger::log_info("DEBUG STEP 7.3 - Chromatic GP powercoeff range: min=" + std::to_string(min_chrom) + 
+                                ", max=" + std::to_string(max_chrom));
+                
+                // Log first few chromatic GP noise coefficients
+                std::string chrom_coeffs_str = "chrom_gp_powercoeff[0:5]: ";
+                for (int i = old_start_pos; i < std::min(start_pos, old_start_pos + 5); ++i) {
+                    chrom_coeffs_str += std::to_string(powercoeff[i]) + " ";
+                }
+                logger::log_info("DEBUG STEP 7.3 - " + chrom_coeffs_str);
+            }
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////Stochastic Solar Wind GP//////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    
+    // Apply Stochastic Solar Wind GP if present
+    if (auto stoch_sw = model_space.get_optional_element<stochastic_solar_wind_t>("Stochastic Solar Wind")) {
+        if (stoch_sw->get().has_gp_mode()) {
+            int old_start_pos = start_pos;
+            double old_freq_det = freq_det;
+            stoch_sw->get().apply_gp(parameter_values, powercoeff, start_pos, maxtspan, uniform_prior, freq_det);
+            
+            if (debug_this_call) {
+                int sw_coeffs = start_pos - old_start_pos;
+                if (sw_coeffs > 0) {
+                    logger::log_info("DEBUG STEP 7.4 - Solar Wind GP applied: coeffs=" + std::to_string(sw_coeffs) +
+                                    ", freq_det_contrib=" + std::to_string(freq_det - old_freq_det));
+                    
+                    // Show some powercoeff values for solar wind GP
+                    double min_sw = 1e100, max_sw = -1e100;
+                    for (int i = old_start_pos; i < start_pos; ++i) {
+                        if (powercoeff[i] < min_sw) min_sw = powercoeff[i];
+                        if (powercoeff[i] > max_sw) max_sw = powercoeff[i];
+                    }
+                    logger::log_info("DEBUG STEP 7.4 - Solar Wind GP powercoeff range: min=" + std::to_string(min_sw) + 
+                                    ", max=" + std::to_string(max_sw));
+                    
+                    // Log first few solar wind GP coefficients
+                    std::string sw_coeffs_str = "sw_gp_powercoeff[0:5]: ";
+                    for (int i = old_start_pos; i < std::min(start_pos, old_start_pos + 5); ++i) {
+                        sw_coeffs_str += std::to_string(powercoeff[i]) + " ";
+                    }
+                    logger::log_info("DEBUG STEP 7.4 - " + sw_coeffs_str);
+                }
             }
         }
     }
@@ -353,10 +416,7 @@ double temponest_v1_t::operator()(const model_space_t& model_space, const std::v
                                 ", max=" + std::to_string(max_powercoeff) + ", has_nan=" + std::string(has_nan_powercoeff ? "YES" : "NO"));
             }
             
-            // CRITICAL FIX: Add floor to powercoeff to prevent division by zero
-            const double min_powercoeff_floor = 1e-30;
-            Eigen::VectorXd safe_powercoeff = powercoeff.array().max(min_powercoeff_floor);
-            TNT.diagonal().tail(totCoeff) += safe_powercoeff.cwiseInverse();
+            TNT.diagonal().tail(totCoeff) += powercoeff.cwiseInverse();
         }
 
         // Perform Cholesky decomposition

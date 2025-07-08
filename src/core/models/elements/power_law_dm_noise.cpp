@@ -88,7 +88,7 @@ void pl_dm_noise_t::apply(const std::vector<double>& parameter_values, Eigen::Ve
 
     double f1yr = 1.0 / 3.16e7;
 
-    double pl_amp = (dm_amp * dm_amp) * pow(f1yr, (-3)) / (maxtspan * 24 * 60 * 60);
+    double pl_amp = (dm_amp * dm_amp / 12.0 / (M_PI * M_PI)) * pow(f1yr, (-3)) / (maxtspan * 24 * 60 * 60);
 
     dm_coeffs *= pl_amp;
 

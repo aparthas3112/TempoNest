@@ -1,8 +1,0 @@
-{
-    "INCLUDE": [
-        "settings.json",
-        "sampler_multinest.json",
-        "noise.json",
-        "timing.json"
-    ]
-}

@@ -97,7 +97,7 @@ void model_space_t::load_model()
         auto* element_ptr = element.get();  // Get raw pointer before moving
         
         // Calculate frequencies for noise models before printing (requires temporary tspan calculation)
-        if (element_name == "Power Law Red Noise" || element_name == "Power Law DM Noise") {
+        if (element_name == "Power Law Red Noise" || element_name == "Power Law DM Noise" || element_name == "Chromatic GP Noise" || element_name == "Stochastic Solar Wind") {
             // We need to calculate maxtspan early for proper display
             // This is a temporary calculation - will be done again later with final values
             double start = 1e20, end = -1e20;
@@ -113,6 +113,12 @@ void model_space_t::load_model()
             } else if (element_name == "Power Law DM Noise") {
                 auto* dm_noise = static_cast<pl_dm_noise_t*>(element_ptr);
                 dm_noise->calculate_frequencies(temp_maxtspan);
+            } else if (element_name == "Chromatic GP Noise") {
+                auto* chrom_gp = static_cast<chromatic_gp_noise_t*>(element_ptr);
+                chrom_gp->calculate_frequencies(temp_maxtspan);
+            } else if (element_name == "Stochastic Solar Wind") {
+                auto* stoch_sw = static_cast<stochastic_solar_wind_t*>(element_ptr);
+                stoch_sw->calculate_frequencies(temp_maxtspan);
             }
         }
 
@@ -255,7 +261,10 @@ element_t model_space_t::create_element(const string_t& type, const std::optiona
         return std::make_unique<deterministic_solar_wind_t>();
     }
     if (type == "Stochastic Solar Wind") {
-        return std::make_unique<stochastic_solar_wind_t>();
+        return std::make_unique<stochastic_solar_wind_t>(element_json);
+    }
+    if (type == "Chromatic GP Noise") {
+        return std::make_unique<chromatic_gp_noise_t>(element_json);
     }
 
     // Add other element types here...
@@ -352,6 +361,32 @@ void model_space_t::update_array_size_info()
         std::cout << std::endl;
     }
 
+    if (auto chrom_gp_opt = get_optional_element<chromatic_gp_noise_t>("Chromatic GP Noise")) {
+        auto& chrom_gp = chrom_gp_opt->get();
+        chrom_gp.calculate_frequencies(max_tspan_);
+        has_noise_models = true;
+        std::cout << "  🌈 " << output_formatter::BOLD << "Chromatic GP Noise:" << output_formatter::RESET 
+                  << std::endl;
+        std::cout << "     ├─ Frequencies: " << output_formatter::GREEN << chrom_gp.num_freqs << output_formatter::RESET << std::endl;
+        std::cout << "     ├─ Days per coefficient: " << output_formatter::YELLOW << chrom_gp.days_per_coeff << output_formatter::RESET << std::endl;
+        std::cout << "     └─ Total coefficients: " << output_formatter::BLUE << (2 * chrom_gp.num_freqs) << output_formatter::RESET << std::endl;
+        std::cout << std::endl;
+    }
+
+    if (auto sw_gp_opt = get_optional_element<stochastic_solar_wind_t>("Stochastic Solar Wind")) {
+        auto& sw_gp = sw_gp_opt->get();
+        if (sw_gp.has_gp_mode()) {
+            sw_gp.calculate_frequencies(max_tspan_);
+            has_noise_models = true;
+            std::cout << "  ☀️ " << output_formatter::BOLD << "Solar Wind GP:" << output_formatter::RESET 
+                      << std::endl;
+            std::cout << "     ├─ Frequencies: " << output_formatter::GREEN << sw_gp.num_freqs << output_formatter::RESET << std::endl;
+            std::cout << "     ├─ Days per coefficient: " << output_formatter::YELLOW << sw_gp.days_per_coeff << output_formatter::RESET << std::endl;
+            std::cout << "     └─ Total coefficients: " << output_formatter::BLUE << (2 * sw_gp.num_freqs) << output_formatter::RESET << std::endl;
+            std::cout << std::endl;
+        }
+    }
+
     // Handle multiple ECORR instances
     int total_ecorr_epochs = 0;
     for (const auto& [name, element] : elements_) {
@@ -390,6 +425,18 @@ void model_space_t::update_array_size_info()
     if (auto pl_dm_opt = get_optional_element<pl_dm_noise_t>("Power Law DM Noise")) {
         auto& pl = pl_dm_opt->get();
         totCoeff += 2 * pl.num_freqs;
+    }
+
+    if (auto chrom_gp_opt = get_optional_element<chromatic_gp_noise_t>("Chromatic GP Noise")) {
+        auto& chrom_gp = chrom_gp_opt->get();
+        totCoeff += 2 * chrom_gp.num_freqs;
+    }
+
+    if (auto sw_gp_opt = get_optional_element<stochastic_solar_wind_t>("Stochastic Solar Wind")) {
+        auto& sw_gp = sw_gp_opt->get();
+        if (sw_gp.has_gp_mode()) {
+            totCoeff += 2 * sw_gp.num_freqs;
+        }
     }
 
     // Handle multiple ECORR instances
@@ -455,6 +502,11 @@ void model_space_t::store_total_matrix()
 {
     total_matrix_ = Eigen::MatrixXd::Zero(globals::pulsar->nobs, total_size_);
 
+    
+    std::cout << "\n================================================================\n";
+    std::cout << "                    DESIGN MATRIX CONSTRUCTION\n";
+    std::cout << "================================================================\n";
+    
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////Form the Design Matrix////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -500,8 +552,8 @@ void model_space_t::store_total_matrix()
         for (int i = 0; i < pl.num_freqs; i++) {
             for (int k = 0; k < globals::pulsar->nobs; k++) {
                 double time = (double)globals::pulsar->obsn[k].bat;
-                total_matrix_(k, i + TimetoMargin + startpos) = cos(2 * M_PI * freqs[i] * time);
-                total_matrix_(k, i + pl.num_freqs + TimetoMargin + startpos) = sin(2 * M_PI * freqs[i] * time);
+                total_matrix_(k, i + TimetoMargin + startpos) = cos(2 * M_PI * freqs[startpos + i] * time);
+                total_matrix_(k, i + pl.num_freqs + TimetoMargin + startpos) = sin(2 * M_PI * freqs[startpos + i] * time);
             }
         }
 
@@ -531,6 +583,89 @@ void model_space_t::store_total_matrix()
         }
 
         startpos += 2 * pl.num_freqs;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////Chromatic GP Noise//////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+    if (auto chrom_gp_opt = get_optional_element<chromatic_gp_noise_t>("Chromatic GP Noise")) {
+        auto& chrom_gp = chrom_gp_opt->get();
+
+        // Calculate ChromVec with ν^(-idx) scaling for each observation
+        double* ChromVec = new double[globals::pulsar->nobs];
+        
+        // Reference frequency: 1400 MHz (standard in pulsar timing)
+        double ref_freq = 1400.0e6; // 1400 MHz in Hz
+        
+        // Determine chromatic index (fixed or default for fitted case)
+        double chromatic_idx;
+        if (chrom_gp.is_idx_fitted()) {
+            // Dynamic scaling: idx will be updated during likelihood evaluation
+            // For matrix construction, use reference value (scaling applied dynamically)
+            chromatic_idx = 4.0;  // Reference value for matrix construction
+            std::cout << "  🌈 " << output_formatter::GREEN << "Dynamic chromatic scaling enabled!" << output_formatter::RESET << std::endl;
+            std::cout << "      ├─ Matrix constructed with reference idx: " << chromatic_idx << std::endl;
+            std::cout << "      └─ Scaling correction applied dynamically during sampling" << std::endl;
+        } else {
+            // Fixed chromatic index mode
+            chromatic_idx = chrom_gp.get_fixed_idx();
+            std::cout << "  • Using fixed chromatic index: " << chromatic_idx << std::endl;
+        }
+        
+        for (int o = 0; o < globals::pulsar->nobs; o++) {
+            double obs_freq = (double)globals::pulsar->obsn[o].freqSSB;
+            ChromVec[o] = std::pow(ref_freq / obs_freq, chromatic_idx);
+        }
+
+        for (int i = 0; i < chrom_gp.num_freqs; i++) {
+            freqs[startpos + i] = chrom_gp.frequencies[i] / max_tspan_;
+            freqs[startpos + i + chrom_gp.num_freqs] = freqs[startpos + i];
+
+            for (int k = 0; k < globals::pulsar->nobs; k++) {
+                double time = (double)globals::pulsar->obsn[k].bat;
+                total_matrix_(k, i + TimetoMargin + startpos) = cos(2 * M_PI * freqs[startpos + i] * time) * ChromVec[k];
+                total_matrix_(k, i + chrom_gp.num_freqs + TimetoMargin + startpos) = sin(2 * M_PI * freqs[startpos + i] * time) * ChromVec[k];
+            }
+        }
+
+        startpos += 2 * chrom_gp.num_freqs;
+        delete[] ChromVec;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////Solar Wind GP Noise/////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+    if (auto sw_gp_opt = get_optional_element<stochastic_solar_wind_t>("Stochastic Solar Wind")) {
+        auto& sw_gp = sw_gp_opt->get();
+        
+        // Only build design matrix if in GP mode
+        if (sw_gp.has_gp_mode()) {
+            // Calculate solar wind scaling vector
+            double* SWVec = new double[globals::pulsar->nobs];
+            double ne_reference = globals::pulsar->ne_sw;
+            
+            for (int o = 0; o < globals::pulsar->nobs; o++) {
+                double tdis2 = globals::pulsar->obsn[o].tdis2;
+                SWVec[o] = tdis2 / ne_reference;
+            }
+            
+            // Build design matrix with solar wind scaling
+            for (int i = 0; i < sw_gp.num_freqs; i++) {
+                freqs[startpos + i] = sw_gp.frequencies[i] / max_tspan_;
+                freqs[startpos + i + sw_gp.num_freqs] = freqs[startpos + i];
+                
+                for (int k = 0; k < globals::pulsar->nobs; k++) {
+                    double time = (double)globals::pulsar->obsn[k].bat;
+                    total_matrix_(k, i + TimetoMargin + startpos) = cos(2 * M_PI * freqs[startpos + i] * time) * SWVec[k];
+                    total_matrix_(k, i + sw_gp.num_freqs + TimetoMargin + startpos) = sin(2 * M_PI * freqs[startpos + i] * time) * SWVec[k];
+                }
+            }
+            
+            startpos += 2 * sw_gp.num_freqs;
+            delete[] SWVec;
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////

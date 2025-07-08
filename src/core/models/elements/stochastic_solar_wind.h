@@ -1,10 +1,21 @@
 #pragma once
 
+#include <unordered_set>
 #include "../../../../eigen_config.h"
 #include "../../types/model_element.h"
 
 class stochastic_solar_wind_t : public model_element_t {
 public:
+
+    // GP mode parameters (when using GP mode)
+    Eigen::VectorXd frequencies;
+    int num_freqs;
+    double days_per_coeff;
+
+    stochastic_solar_wind_t(const std::optional<json_node_t>& element_json);
+    
+    // Calculate num_freqs based on time span (for GP mode)
+    void calculate_frequencies(double maxtspan);
 
     void set_parameter(const string_t& name, const parameter_t& param, const json_node_t& param_json) override;
     bool is_fully_specified() const override;
@@ -13,8 +24,18 @@ public:
 
     void write_to_par_file(FILE* par_file, const std::vector<double>& parameters, const std::vector<double>& uncertainties) const override;
 
-    // Apply stochastic solar wind noise to noise vector
+    // Determine which modes are active
+    bool has_white_mode() const { return get_optional_parameter("log_amplitude").has_value(); }
+    bool has_gp_mode() const { return get_optional_parameter("log10_A_sw").has_value(); }
+
+    // Apply white solar wind noise to noise vector (existing method)
     // Formula: noise[i] += [10^(log_amp) × tdis2[i] / ne_sw]²
+    void apply_white(const std::vector<double>& parameter_values, Eigen::VectorXd& noise) const;
+    
+    // Apply GP solar wind noise to power coefficient vector (new method)
+    void apply_gp(const std::vector<double>& parameter_values, Eigen::VectorXd& powercoeff, int& start_pos, double maxtspan, double& uniform_prior, double& freq_det) const;
+
+    // Main apply method - calls appropriate sub-methods
     void apply(const std::vector<double>& parameter_values, Eigen::VectorXd& noise) const;
 
     void print_formatted(int element_index) const override

@@ -129,9 +129,10 @@ private:
         multinest_sampler_t* self = static_cast<multinest_sampler_t*>(context);
         std::vector<const parameter_t*> parameters = self->model_->get_sampling_parameters();
 
-        // DEBUG: Log parameter information on first call
+        // DEBUG: Log parameter information on first call (only if verbose is enabled)
+        const auto& settings = static_cast<const multinest_settings_t&>(self->get_settings());
         static bool first_call = true;
-        if (first_call) {
+        if (first_call && settings.verbose) {
             logger::log_info("MultiNest loglike_wrapper: ndim=" + std::to_string(ndim) + 
                             ", parameters.size()=" + std::to_string(parameters.size()));
             for (int i = 0; i < ndim && i < static_cast<int>(parameters.size()); ++i) {
@@ -152,7 +153,6 @@ private:
         }
 
         // DEBUG: Log some likelihood evaluations (only if verbose is enabled)
-        const auto& settings = static_cast<const multinest_settings_t&>(self->get_settings());
         if (settings.verbose && (call_count <= 5 || call_count % 1000 == 0)) {
             std::string param_str = "";
             for (int i = 0; i < std::min(5, ndim); ++i) {

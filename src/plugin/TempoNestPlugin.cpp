@@ -183,9 +183,10 @@ extern "C" int graphicalInterface(int argc, char** argv, pulsar* psr, int* pnum_
     globals::config.validate();
 
     if (rank == 0) {
-        printf("Graphical Interface: TempoNest\n");
-        printf("Author:              L. Lentati\n");
-        printf("Version:             1.0\n");
+        printf("──────────────────────────────────────────────────────────────────\n\n");
+        printf("Using TempoNest\n");
+        printf("Author:              A. Parthasarathy, L. Lentati\n");
+        printf("Version:             2.0\n");
         printf("----------------------------------------------------------------\n");
         printf("This program comes with ABSOLUTELY NO WARRANTY.\n");
         printf("This is free software, and you are welcome to redistribute it\n");

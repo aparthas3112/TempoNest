@@ -84,27 +84,35 @@ string_t efac_t::get_name() const
 void efac_t::apply(const std::vector<double>& parameter_values, Eigen::VectorXd& noise, double& prior_term) const
 {
     if (auto param = get_optional_parameter("global")) {
-        double multiplier = param.value()->get_exp_value(parameter_values);
+        double efac = param.value()->get_exp_value(parameter_values);
 
         if (param.value()->prior_type == prior_type_t::uniform) {
-            prior_term += log(multiplier);
+            prior_term += log(efac);
         }
 
-        noise = (noise * multiplier).array().square();
+        // Apply EFAC^2 to the error variance (noise is sigma, not sigma^2)
+        // Legacy: 1/(EFAC^2 * sigma^2 + EQUAD + ...) 
+        // So we multiply noise by EFAC: noise = sigma * EFAC
+        noise = noise * efac;
     }
 
     if (!flag_values.empty()) {
-        Eigen::VectorXd multipliers = Eigen::VectorXd::Ones(flag_values.size());
+        Eigen::VectorXd efacs = Eigen::VectorXd::Ones(flag_values.size());
         for (size_t i = 0; i < flag_values.size(); i++) {
             string_t param_name = "per_flag::" + flag + "::" + flag_values[i];
             auto param = get_parameter(param_name);
-            multipliers(i) = param->get_exp_value(parameter_values);
+            efacs(i) = param->get_exp_value(parameter_values);
 
             if (param->prior_type == prior_type_t::uniform) {
-                prior_term += log(multipliers(i));
+                prior_term += log(efacs(i));
             }
         }
 
-        noise = noise.cwiseProduct(multipliers(flag_indices)).array().square();
+        // Apply EFAC to each observation based on its flag
+        // Legacy: 1/(EFAC^2 * sigma^2 + EQUAD + ...)
+        // So we multiply noise by EFAC: noise = sigma * EFAC
+        for (int o = 0; o < noise.size(); o++) {
+            noise(o) = noise(o) * efacs(flag_indices(o));
+        }
     }
 }

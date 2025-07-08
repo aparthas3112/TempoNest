@@ -141,9 +141,9 @@ def add_noise_element():
         "days_per_coeff": 30.0,  # Default for Power Law noise models
         "parameters": [
             {"name": "amplitude", "description": "log amplitude of the power law noise process",
-             "prior_type": "log_uniform", "include": True, "fit": True, "min_value": -18, "max_value": -10},
+             "prior_type": "log_uniform", "include": True, "min_value": -18, "max_value": -10},
             {"name": "spectral_index", "description": "spectral index (red)",
-             "prior_type": "uniform", "include": True, "fit": True, "min_value": 0, "max_value": 7}
+             "prior_type": "uniform", "include": True, "min_value": 0, "max_value": 7}
         ]
     }
     st.session_state.noise_elements_list.append(new_noise)
@@ -158,6 +158,10 @@ with tabs[3]:
     • **Power Law Red/DM Noise**: Stochastic processes with time-span dependent frequency grids
       - `days_per_coeff`: Controls frequency spacing (default: 30 days/coeff)
       - Number of frequencies = floor(observation_span / days_per_coeff)
+    • **Chromatic GP Noise**: Frequency-dependent correlated noise with ν^(-idx) scaling
+      - Enterprise-compatible implementation for chromatic effects
+      - Configurable idx parameter (fixed or fitted): 4.0=scattering-like, 2.0=DM-like
+      - Parameters: log10_A (amplitude), gamma (spectral index), idx (frequency scaling)
     • **EFAC/EQUAD**: Error scaling (EFAC) and quadrature addition (EQUAD) - Global or Per-Flag
     • **ECORR**: Epoch correlations for timing noise - Multiple flags with shared priors
       - Epoch window: 10 seconds (legacy compatible)
@@ -177,9 +181,9 @@ with tabs[3]:
                 "days_per_coeff": 30.0,
                 "parameters": [
                     {"name": "amplitude", "description": "log amplitude of the power law noise process",
-                     "prior_type": "log_uniform", "include": True, "fit": True, "min_value": -18, "max_value": -10},
+                     "prior_type": "log_uniform", "include": True, "min_value": -18, "max_value": -10},
                     {"name": "spectral_index", "description": "spectral index (red)",
-                     "prior_type": "uniform", "include": True, "fit": True, "min_value": 0, "max_value": 7}
+                     "prior_type": "uniform", "include": True, "min_value": 0, "max_value": 7}
                 ]
             },
             {
@@ -187,9 +191,9 @@ with tabs[3]:
                 "days_per_coeff": 30.0,
                 "parameters": [
                     {"name": "amplitude", "description": "log amplitude of the DM noise process",
-                     "prior_type": "log_uniform", "include": True, "fit": True, "min_value": -18, "max_value": -10},
+                     "prior_type": "log_uniform", "include": True, "min_value": -18, "max_value": -10},
                     {"name": "spectral_index", "description": "spectral index (DM)",
-                     "prior_type": "uniform", "include": True, "fit": True, "min_value": 0, "max_value": 7}
+                     "prior_type": "uniform", "include": True, "min_value": 0, "max_value": 7}
                 ]
             },
             {
@@ -198,7 +202,7 @@ with tabs[3]:
                 "flag": "-group",
                 "parameters": [
                     {"name": "per_flag", "description": "EFAC per flag value",
-                     "prior_type": "uniform", "include": True, "fit": True, "min_value": -1, "max_value": 0.7, "flag": "-group"}
+                     "prior_type": "uniform", "include": True, "min_value": -1, "max_value": 0.7, "flag": "-group"}
                 ]
             },
             {
@@ -207,7 +211,7 @@ with tabs[3]:
                 "flag": "-group",
                 "parameters": [
                     {"name": "per_flag", "description": "EQUAD per flag value",
-                     "prior_type": "log_uniform", "include": True, "fit": True, "min_value": -9, "max_value": -3, "flag": "-group"}
+                     "prior_type": "log_uniform", "include": True, "min_value": -9, "max_value": -3, "flag": "-group"}
                 ]
             }
             # Uncomment below to include solar wind models by default
@@ -232,8 +236,8 @@ with tabs[3]:
         with st.expander("", expanded=True):
             old_elem_name = elem["element_name"]
             new_elem_name = st.selectbox("Element Name",
-                                         ["Power Law Red Noise", "Power Law DM Noise", "EFAC", "EQUAD", "ECORR", "Deterministic Solar Wind", "Stochastic Solar Wind"],
-                                         index=["Power Law Red Noise", "Power Law DM Noise", "EFAC", "EQUAD", "ECORR", "Deterministic Solar Wind", "Stochastic Solar Wind"].index(elem["element_name"]),
+                                         ["Power Law Red Noise", "Power Law DM Noise", "Chromatic GP Noise", "EFAC", "EQUAD", "ECORR", "Deterministic Solar Wind", "Stochastic Solar Wind"],
+                                         index=["Power Law Red Noise", "Power Law DM Noise", "Chromatic GP Noise", "EFAC", "EQUAD", "ECORR", "Deterministic Solar Wind", "Stochastic Solar Wind"].index(elem["element_name"]),
                                          key=f"noise_elem_name_{i}")
             st.session_state.noise_elements_list[i]["element_name"] = new_elem_name
             
@@ -269,33 +273,106 @@ with tabs[3]:
                     "description": "Solar wind electron density scaling factor",
                     "prior_type": "uniform",
                     "include": True,
-                    "fit": True,
                     "min_value": min_value,
                     "max_value": max_value
                 }]
             elif new_elem_name in ["Stochastic Solar Wind"]:
                 # Stochastic Solar Wind configuration
-                st.markdown("**Stochastic Solar Wind**: Adds frequency-dependent white noise from unmodeled solar wind fluctuations.")
-                col1, col2 = st.columns(2)
-                with col1:
-                    min_value = st.number_input("Log Amplitude Min Value",
-                                                value=elem["parameters"][0].get("min_value", -18.0) if elem["parameters"] else -18.0,
-                                                help="Minimum value for log10 amplitude prior (typical range: -18.0 to -10.0)",
-                                                key=f"stoch_sw_min_{i}")
-                with col2:
-                    max_value = st.number_input("Log Amplitude Max Value",
-                                                value=elem["parameters"][0].get("max_value", -10.0) if elem["parameters"] else -10.0,
-                                                help="Maximum value for log10 amplitude prior (typical range: -18.0 to -10.0)",
-                                                key=f"stoch_sw_max_{i}")
-                st.session_state.noise_elements_list[i]["parameters"] = [{
-                    "name": "log_amplitude",
-                    "description": "Log10 amplitude of stochastic solar wind noise",
-                    "prior_type": "log_uniform",
-                    "include": True,
-                    "fit": True,
-                    "min_value": min_value,
-                    "max_value": max_value
-                }]
+                st.markdown("**Stochastic Solar Wind**: Models unmodeled solar wind fluctuations as either white noise or GP.")
+                
+                # Mode selection
+                current_mode = "White Noise"
+                if elem.get("parameters"):
+                    # Check if GP parameters exist to determine current mode
+                    param_names = [p.get("name", "") for p in elem["parameters"]]
+                    if "log10_A_sw" in param_names or "gamma_sw" in param_names:
+                        current_mode = "GP Mode"
+                
+                mode = st.selectbox("Mode", 
+                                   ["White Noise", "GP Mode"], 
+                                   index=0 if current_mode == "White Noise" else 1,
+                                   help="White Noise: Simple frequency-dependent noise. GP Mode: Gaussian Process with power-law spectrum.",
+                                   key=f"stoch_sw_mode_{i}")
+                
+                if mode == "White Noise":
+                    # White noise mode configuration
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        min_value = st.number_input("Log Amplitude Min Value",
+                                                    value=elem["parameters"][0].get("min_value", -18.0) if elem.get("parameters") else -18.0,
+                                                    help="Minimum value for log10 amplitude prior (typical range: -18.0 to -10.0)",
+                                                    key=f"stoch_sw_min_{i}")
+                    with col2:
+                        max_value = st.number_input("Log Amplitude Max Value",
+                                                    value=elem["parameters"][0].get("max_value", -10.0) if elem.get("parameters") else -10.0,
+                                                    help="Maximum value for log10 amplitude prior (typical range: -18.0 to -10.0)",
+                                                    key=f"stoch_sw_max_{i}")
+                    st.session_state.noise_elements_list[i]["parameters"] = [{
+                        "name": "log_amplitude",
+                        "description": "Log10 amplitude of stochastic solar wind noise",
+                        "prior_type": "log_uniform",
+                        "include": True,
+                        "min_value": min_value,
+                        "max_value": max_value
+                    }]
+                else:
+                    # GP mode configuration
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        days_per_coeff = st.number_input("Days per GP Coefficient",
+                                                        value=elem.get("days_per_coeff", 30.0),
+                                                        min_value=1.0,
+                                                        max_value=365.0,
+                                                        help="Time span per GP coefficient in days (typical: 30)",
+                                                        key=f"stoch_sw_days_{i}")
+                    
+                    # GP Amplitude parameters
+                    st.markdown("**GP Amplitude (log10_A_sw)**")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        amp_min = st.number_input("GP Amplitude Min",
+                                                 value=-18.0,
+                                                 help="Minimum log10 amplitude for GP noise",
+                                                 key=f"stoch_sw_amp_min_{i}")
+                    with col2:
+                        amp_max = st.number_input("GP Amplitude Max",
+                                                 value=-10.0,
+                                                 help="Maximum log10 amplitude for GP noise",
+                                                 key=f"stoch_sw_amp_max_{i}")
+                    
+                    # GP Spectral Index parameters
+                    st.markdown("**GP Spectral Index (gamma_sw)**")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        gamma_min = st.number_input("Spectral Index Min",
+                                                   value=0.0,
+                                                   help="Minimum spectral index (steeper than -2 due to fixed ν^-2 scaling)",
+                                                   key=f"stoch_sw_gamma_min_{i}")
+                    with col2:
+                        gamma_max = st.number_input("Spectral Index Max",
+                                                   value=7.0,
+                                                   help="Maximum spectral index",
+                                                   key=f"stoch_sw_gamma_max_{i}")
+                    
+                    st.session_state.noise_elements_list[i]["days_per_coeff"] = days_per_coeff
+                    st.session_state.noise_elements_list[i]["parameters"] = [
+                        {
+                            "name": "log10_A_sw",
+                            "description": "Log10 amplitude of stochastic solar wind GP noise",
+                            "prior_type": "log_uniform",
+                            "include": True,
+                            "min_value": amp_min,
+                            "max_value": amp_max
+                        },
+                        {
+                            "name": "gamma_sw",
+                            "description": "Spectral index for stochastic solar wind GP",
+                            "prior_type": "uniform",
+                            "include": True,
+                            "min_value": gamma_min,
+                            "max_value": gamma_max
+                        }
+                    ]
             elif new_elem_name in ["EFAC", "EQUAD"]:
                 # Model type selection (Global vs Per-Flag)
                 model_type = st.selectbox("Model Type", 
@@ -319,7 +396,6 @@ with tabs[3]:
                         "description": f"global scaling for {new_elem_name}" if new_elem_name=="EFAC" else f"global quadrature term for {new_elem_name}",
                         "prior_type": "uniform" if new_elem_name=="EFAC" else "log_uniform",
                         "include": True,
-                        "fit": True,
                         "min_value": min_value,
                         "max_value": max_value
                     }]
@@ -345,7 +421,6 @@ with tabs[3]:
                         "description": f"{new_elem_name} per flag value",
                         "prior_type": "uniform" if new_elem_name=="EFAC" else "log_uniform",
                         "include": True,
-                        "fit": True,
                         "min_value": min_value,
                         "max_value": max_value,
                         "flag": flag_name
@@ -414,12 +489,89 @@ with tabs[3]:
                     "description": "ECORR per backend (shared priors across flags)",
                     "prior_type": "log_uniform",
                     "include": True,
-                    "fit": True,
                     "min_value": min_value,
                     "max_value": max_value
                 }]
+            elif new_elem_name == "Chromatic GP Noise":
+                # Chromatic GP Noise configuration
+                st.markdown("**Chromatic GP Noise**: Frequency-dependent correlated noise with ν^(-idx) scaling.")
+                
+                # Days per coefficient configuration
+                days_per_coeff = st.number_input("Days per Coefficient", 
+                                                value=elem.get("days_per_coeff", 30.0), 
+                                                min_value=1.0, 
+                                                step=1.0,
+                                                help="Time span per frequency coefficient in days (default: 30.0). Number of frequencies = floor(time_span/days_per_coeff)",
+                                                key=f"chromatic_days_per_coeff_{i}")
+                st.session_state.noise_elements_list[i]["days_per_coeff"] = days_per_coeff
+                
+                # log10_A parameter
+                st.markdown("**Log10 Amplitude (log10_A):**")
+                col1, col2 = st.columns(2)
+                with col1:
+                    log10A_include = st.checkbox("Include log10_A", value=elem["parameters"][0].get("include", True) if len(elem.get("parameters", [])) > 0 else True, key=f"chromatic_log10A_include_{i}")
+                with col2:
+                    log10A_min = st.number_input("log10_A Min Value", value=elem["parameters"][0].get("min_value", -18) if len(elem.get("parameters", [])) > 0 else -18, key=f"chromatic_log10A_min_{i}")
+                    log10A_max = st.number_input("log10_A Max Value", value=elem["parameters"][0].get("max_value", -10) if len(elem.get("parameters", [])) > 0 else -10, key=f"chromatic_log10A_max_{i}")
+                
+                # gamma parameter  
+                st.markdown("**Spectral Index (gamma):**")
+                col3, col4 = st.columns(2)
+                with col3:
+                    gamma_include = st.checkbox("Include gamma", value=elem["parameters"][1].get("include", True) if len(elem.get("parameters", [])) > 1 else True, key=f"chromatic_gamma_include_{i}")
+                with col4:
+                    gamma_min = st.number_input("gamma Min Value", value=elem["parameters"][1].get("min_value", 0) if len(elem.get("parameters", [])) > 1 else 0, key=f"chromatic_gamma_min_{i}")
+                    gamma_max = st.number_input("gamma Max Value", value=elem["parameters"][1].get("max_value", 7) if len(elem.get("parameters", [])) > 1 else 7, key=f"chromatic_gamma_max_{i}")
+                
+                # idx parameter configuration
+                st.markdown("**Chromatic Index (idx):**")
+                idx_mode = st.radio("Chromatic Index Configuration", 
+                                   ["Fixed", "Variable"], 
+                                   index=0 if not (len(elem.get("parameters", [])) > 2 and elem["parameters"][2].get("mode", "fixed") == "variable") else 1,
+                                   help="Fixed: Use a constant chromatic index. Variable: Sample the chromatic index.",
+                                   key=f"chromatic_idx_mode_{i}")
+                
+                if idx_mode == "Fixed":
+                    idx_value = st.number_input("Fixed idx Value", 
+                                              value=elem.get("fixed_idx_value", 4.0),
+                                              min_value=0.0, 
+                                              max_value=10.0,
+                                              step=0.1,
+                                              help="Fixed chromatic index value (default: 4.0 for scattering-like, 2.0 for DM-like)",
+                                              key=f"chromatic_idx_fixed_{i}")
+                    st.session_state.noise_elements_list[i]["fixed_idx_value"] = idx_value
+                    st.caption("ℹ️ When idx is fixed, mode='fixed' with value field")
+                    
+                    # Create parameters with fixed idx using mode field
+                    parameters = [
+                        {"name": "log10_A", "description": "log10 amplitude of chromatic GP noise", "prior_type": "log_uniform",
+                         "include": log10A_include, "min_value": log10A_min, "max_value": log10A_max},
+                        {"name": "gamma", "description": "spectral index for chromatic GP", "prior_type": "uniform",
+                         "include": gamma_include, "min_value": gamma_min, "max_value": gamma_max},
+                        {"name": "idx", "description": "chromatic frequency index", "prior_type": "uniform",
+                         "include": True, "mode": "fixed", "value": idx_value}
+                    ]
+                else:  # Variable
+                    col5, col6 = st.columns(2)
+                    with col5:
+                        idx_include = st.checkbox("Include idx", value=True, key=f"chromatic_idx_include_{i}")
+                    with col6:
+                        idx_min = st.number_input("idx Min Value", value=elem["parameters"][2].get("min_value", 0) if len(elem.get("parameters", [])) > 2 else 0, key=f"chromatic_idx_min_{i}")
+                        idx_max = st.number_input("idx Max Value", value=elem["parameters"][2].get("max_value", 7) if len(elem.get("parameters", [])) > 2 else 7, key=f"chromatic_idx_max_{i}")
+                    
+                    # Create parameters with variable idx using mode field
+                    parameters = [
+                        {"name": "log10_A", "description": "log10 amplitude of chromatic GP noise", "prior_type": "log_uniform",
+                         "include": log10A_include, "min_value": log10A_min, "max_value": log10A_max},
+                        {"name": "gamma", "description": "spectral index for chromatic GP", "prior_type": "uniform",
+                         "include": gamma_include, "min_value": gamma_min, "max_value": gamma_max},
+                        {"name": "idx", "description": "chromatic frequency index", "prior_type": "uniform",
+                         "include": idx_include, "mode": "variable", "min_value": idx_min, "max_value": idx_max}
+                    ]
+                
+                st.session_state.noise_elements_list[i]["parameters"] = parameters
             else:
-                # Add days_per_coeff configuration
+                # Add days_per_coeff configuration for Power Law noise models
                 days_per_coeff = st.number_input("Days per Coefficient", 
                                                 value=elem.get("days_per_coeff", 30.0), 
                                                 min_value=1.0, 
@@ -431,22 +583,20 @@ with tabs[3]:
                 col1, col2 = st.columns(2)
                 with col1:
                     amp_include = st.checkbox("Include amplitude", value=elem["parameters"][0].get("include", True), key=f"noise_amp_include_{i}")
-                    amp_fit = st.checkbox("Fit amplitude", value=elem["parameters"][0].get("fit", True), key=f"noise_amp_fit_{i}")
-                with col2:
                     amp_min = st.number_input("Amplitude Min Value", value=elem["parameters"][0].get("min_value", -18), key=f"noise_amp_min_{i}")
+                with col2:
                     amp_max = st.number_input("Amplitude Max Value", value=elem["parameters"][0].get("max_value", -10), key=f"noise_amp_max_{i}")
                 col3, col4 = st.columns(2)
                 with col3:
                     si_include = st.checkbox("Include spectral_index", value=elem["parameters"][1].get("include", True), key=f"noise_si_include_{i}")
-                    si_fit = st.checkbox("Fit spectral_index", value=elem["parameters"][1].get("fit", True), key=f"noise_si_fit_{i}")
-                with col4:
                     si_min = st.number_input("spectral_index Min Value", value=elem["parameters"][1].get("min_value", 0), key=f"noise_si_min_{i}")
+                with col4:
                     si_max = st.number_input("spectral_index Max Value", value=elem["parameters"][1].get("max_value", 7), key=f"noise_si_max_{i}")
                 st.session_state.noise_elements_list[i]["parameters"] = [
                     {"name": "amplitude", "description": "log amplitude of the power law noise process", "prior_type": "log_uniform",
-                     "include": amp_include, "fit": amp_fit, "min_value": amp_min, "max_value": amp_max},
+                     "include": amp_include, "min_value": amp_min, "max_value": amp_max},
                     {"name": "spectral_index", "description": "spectral index (red)", "prior_type": "uniform",
-                     "include": si_include, "fit": si_fit, "min_value": si_min, "max_value": si_max}
+                     "include": si_include, "min_value": si_min, "max_value": si_max}
                 ]
             st.button("Delete this Noise Element", key=f"noise_delete_{i}", on_click=delete_noise_element, args=(i,))
     st.button("Add Noise Element", on_click=add_noise_element)
@@ -463,7 +613,6 @@ with tabs[3]:
                         "name": "per_backend",
                         "prior_type": "log_uniform",
                         "include": True,
-                        "fit": True,
                         "min_value": elem.get("min_value", -9),
                         "max_value": elem.get("max_value", -3),
                         "flag": flag,
@@ -478,8 +627,8 @@ with tabs[3]:
                 "name": elem["element_name"],
                 "parameters": elem["parameters"]
             }
-            # Add days_per_coeff for Power Law noise models
-            if elem["element_name"] in ["Power Law Red Noise", "Power Law DM Noise"] and "days_per_coeff" in elem:
+            # Add days_per_coeff for Power Law, Chromatic GP, and Stochastic Solar Wind noise models
+            if elem["element_name"] in ["Power Law Red Noise", "Power Law DM Noise", "Chromatic GP Noise", "Stochastic Solar Wind"] and "days_per_coeff" in elem:
                 json_elem["days_per_coeff"] = elem["days_per_coeff"]
             noise_elements_for_json.append(json_elem)
 
@@ -492,8 +641,7 @@ def add_timing_param():
     new_param = {
         "name": f"PARAM{len(st.session_state.timing_params)+1}",
         "prior_type": "uniform",
-        "include": True,
-        "fit": True
+        "include": True
     }
     st.session_state.timing_params.append(new_param)
 
@@ -546,10 +694,10 @@ with tabs[4]:
     # Initialize timing parameters if not already in session state.
     if "timing_params" not in st.session_state:
         st.session_state.timing_params = [
-            {"name": "RAJ", "prior_type": "uniform", "include": False, "fit": True},
-            {"name": "DECJ", "prior_type": "uniform", "include": False, "fit": True},
-            {"name": "F0", "prior_type": "uniform", "include": False, "fit": True},
-            {"name": "F1", "prior_type": "uniform", "include": False, "fit": True}
+            {"name": "RAJ", "prior_type": "uniform", "include": False},
+            {"name": "DECJ", "prior_type": "uniform", "include": False},
+            {"name": "F0", "prior_type": "uniform", "include": False},
+            {"name": "F1", "prior_type": "uniform", "include": False}
         ]
     
     # Show parameter configuration based on selected mode
@@ -576,15 +724,14 @@ with tabs[4]:
             for i, param in enumerate(st.session_state.timing_params):
                 container = st.container()
                 with container:
-                    col1, col2, col3, col4, col5 = st.columns([2, 2, 1, 1, 1])
+                    col1, col2, col3, col4 = st.columns([3, 3, 2, 2])
                     new_name = col1.text_input("Parameter Name", value=param["name"], key=f"timing_name_{i}")
                     new_prior = col2.selectbox("Prior Type", ["uniform", "log_uniform"],
                                                 index=0 if param["prior_type"]=="uniform" else 1,
                                                 key=f"timing_prior_{i}")
                     new_include = col3.checkbox("Include", value=param["include"], key=f"timing_include_{i}")
-                    new_fit = col4.checkbox("Fit", value=param["fit"], key=f"timing_fit_{i}")
                     # Use on_click callback to delete immediately.
-                    col5.button("Delete", key=f"timing_delete_{i}", on_click=delete_timing_param, args=(i,))
+                    col4.button("Delete", key=f"timing_delete_{i}", on_click=delete_timing_param, args=(i,))
                     
                     # Show uncertainty multiplier inputs only if parameter is included
                     if new_include:
@@ -608,7 +755,6 @@ with tabs[4]:
                         "name": new_name,
                         "prior_type": new_prior,
                         "include": new_include,
-                        "fit": new_fit,
                         "min_value": new_min,
                         "max_value": new_max
                     }
@@ -618,15 +764,14 @@ with tabs[4]:
         for i, param in enumerate(st.session_state.timing_params):
             container = st.container()
             with container:
-                col1, col2, col3, col4, col5 = st.columns([2, 2, 1, 1, 1])
+                col1, col2, col3, col4 = st.columns([3, 3, 2, 2])
                 new_name = col1.text_input("Parameter Name", value=param["name"], key=f"timing_name_{i}")
                 new_prior = col2.selectbox("Prior Type", ["uniform", "log_uniform"],
                                             index=0 if param["prior_type"]=="uniform" else 1,
                                             key=f"timing_prior_{i}")
                 new_include = col3.checkbox("Include", value=param["include"], key=f"timing_include_{i}")
-                new_fit = col4.checkbox("Fit", value=param["fit"], key=f"timing_fit_{i}")
                 # Use on_click callback to delete immediately.
-                col5.button("Delete", key=f"timing_delete_{i}", on_click=delete_timing_param, args=(i,))
+                col4.button("Delete", key=f"timing_delete_{i}", on_click=delete_timing_param, args=(i,))
                 
                 # Show uncertainty multiplier inputs only if parameter is included
                 if new_include:
@@ -650,7 +795,6 @@ with tabs[4]:
                     "name": new_name,
                     "prior_type": new_prior,
                     "include": new_include,
-                    "fit": new_fit,
                     "min_value": new_min,
                     "max_value": new_max
                 }
@@ -670,7 +814,6 @@ with tabs[4]:
                     "name": param["name"],
                     "prior_type": param["prior_type"],
                     "include": param["include"],
-                    "fit": param["fit"],
                     "min_value": param["min_value"],
                     "max_value": param["max_value"]
                 })
@@ -687,7 +830,6 @@ with tabs[4]:
             "name": "F0",
             "prior_type": "uniform", 
             "include": False,
-            "fit": True,
             "min_value": -sigma_multiplier,
             "max_value": sigma_multiplier
         }]
@@ -702,7 +844,6 @@ with tabs[4]:
                     "name": param["name"],
                     "prior_type": param["prior_type"],
                     "include": param["include"],
-                    "fit": param["fit"],
                     "min_value": param["min_value"],
                     "max_value": param["max_value"]
                 })
@@ -732,7 +873,6 @@ with tabs[0]:
                         "name": param["name"],
                         "prior_type": param["prior_type"],
                         "include": param["include"],
-                        "fit": param["fit"],
                         "min_value": param["min_value"],
                         "max_value": param["max_value"]
                     })
@@ -749,7 +889,6 @@ with tabs[0]:
                 "name": "F0",
                 "prior_type": "uniform", 
                 "include": False,
-                "fit": True,
                 "min_value": -sigma_multiplier,
                 "max_value": sigma_multiplier
             }]
@@ -764,7 +903,6 @@ with tabs[0]:
                         "name": param["name"],
                         "prior_type": param["prior_type"],
                         "include": param["include"],
-                        "fit": param["fit"],
                         "min_value": param["min_value"],
                         "max_value": param["max_value"]
                     })

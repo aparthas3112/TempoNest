@@ -39,11 +39,12 @@ initialize_build_environment() {
     
     # Clear potentially problematic environment variables
     # This ensures the build script works regardless of user's .zshrc/.bashrc
-    unset MULTINEST_DIR ARRAYFIRE_PATH
+    unset MULTINEST_DIR POLYCHORD_DIR ARRAYFIRE_PATH
     unset LDFLAGS  # Reset to clean state
     
     # Set clean working directory paths (will be set properly by setup functions)
     export MULTINEST_DIR=""
+    export POLYCHORD_DIR=""
     export ARRAYFIRE_PATH=""
     export LDFLAGS=""
     
@@ -62,6 +63,9 @@ setup_dependencies() {
     
     # Setup MultiNest (download if needed)
     setup_multinest
+    
+    # Setup PolyChord (download if needed)
+    setup_polychord
     
     # Setup ArrayFire (download if needed, optional)
     setup_arrayfire
@@ -221,6 +225,53 @@ setup_arrayfire() {
     fi
 }
 
+# Function to setup PolyChord (download and build)
+setup_polychord() {
+    print_status "Setting up PolyChordLite for nested sampling..."
+    
+    local polychord_dir="$(pwd)/external/PolyChordLite"
+    
+    # Check if PolyChordLite already exists
+    if [ -d "$polychord_dir" ] && [ -f "$polychord_dir/Makefile" ]; then
+        print_status "PolyChordLite directory already exists"
+        
+        # Check if it's properly built
+        if [ -f "$polychord_dir/lib/libchord.so" ] || [ -f "$polychord_dir/lib/libchord.a" ]; then
+            print_success "PolyChordLite already built"
+            export POLYCHORD_DIR="$polychord_dir"
+            return 0
+        else
+            print_status "PolyChordLite exists but not built - will compile"
+            export POLYCHORD_DIR="$polychord_dir"
+            return 0
+        fi
+    fi
+    
+    # Download PolyChordLite from GitHub
+    print_status "Downloading PolyChordLite from GitHub..."
+    
+    # Create external directory if it doesn't exist
+    mkdir -p external
+    
+    # Clone PolyChordLite
+    if command_exists git; then
+        cd external
+        if git clone https://github.com/PolyChord/PolyChordLite.git PolyChordLite; then
+            print_success "PolyChordLite downloaded successfully"
+            cd ..
+            export POLYCHORD_DIR="$polychord_dir"
+        else
+            print_error "Failed to clone PolyChordLite repository"
+            cd ..
+            exit 1
+        fi
+    else
+        print_error "Git not found - cannot download PolyChordLite"
+        print_status "Please install git or manually download PolyChordLite to external/PolyChordLite/"
+        exit 1
+    fi
+}
+
 # Function to check required tools
 check_dependencies() {
     print_status "Checking build dependencies..."
@@ -233,6 +284,10 @@ check_dependencies() {
     
     if ! command_exists g++; then
         missing_deps+=("g++")
+    fi
+    
+    if ! command_exists gfortran; then
+        missing_deps+=("gfortran")
     fi
     
     if ! command_exists make; then
@@ -309,6 +364,9 @@ wipe_everything() {
     print_status "Removing external dependencies (preserving bundled MultiNest)..."
     if [ -d "external/ArrayFire" ]; then
         rm -rf external/ArrayFire/
+    fi
+    if [ -d "external/PolyChordLite" ]; then
+        rm -rf external/PolyChordLite/
     fi
     
     # Remove all build artifacts
@@ -414,6 +472,47 @@ build_multinest() {
     fi
 }
 
+# Function to build PolyChordLite
+build_polychord() {
+    print_status "Building PolyChordLite..."
+    
+    if [ ! -d "external/PolyChordLite" ]; then
+        print_error "PolyChordLite source not found in external/ directory"
+        exit 1
+    fi
+    
+    # Check if already built
+    if [ -f "external/PolyChordLite/lib/libchord.so" ] || [ -f "external/PolyChordLite/lib/libchord.a" ]; then
+        print_success "PolyChordLite already built"
+        return 0
+    fi
+    
+    # Build PolyChordLite
+    print_status "Building PolyChordLite from source..."
+    cd external/PolyChordLite
+    
+    # Check if Makefile exists
+    if [ ! -f "Makefile" ]; then
+        print_error "PolyChordLite Makefile not found"
+        cd ../..
+        exit 1
+    fi
+    
+    # Clean previous builds
+    make clean >/dev/null 2>&1 || true
+    
+    # Build the library
+    if make; then
+        print_success "PolyChordLite built successfully"
+        cd ../..
+        return 0
+    else
+        print_error "PolyChordLite build failed"
+        cd ../..
+        exit 1
+    fi
+}
+
 # Function to setup library paths
 setup_library_paths() {
     print_status "Setting up library paths..."
@@ -422,6 +521,15 @@ setup_library_paths() {
     if [ -z "$MULTINEST_DIR" ]; then
         export MULTINEST_DIR="$(pwd)/external/MultiNest"
         print_status "Set MULTINEST_DIR to: $MULTINEST_DIR"
+    fi
+    
+    # Ensure POLYCHORD_DIR is set if PolyChord exists
+    if [ -z "$POLYCHORD_DIR" ]; then
+        local polychord_dir="$(pwd)/external/PolyChordLite"
+        if [ -d "$polychord_dir" ]; then
+            export POLYCHORD_DIR="$polychord_dir"
+            print_status "Set POLYCHORD_DIR to: $POLYCHORD_DIR"
+        fi
     fi
     
     # Ensure ARRAYFIRE_PATH is set if ArrayFire exists
@@ -458,6 +566,12 @@ setup_library_paths() {
         export LD_LIBRARY_PATH="$multinest_path:$LD_LIBRARY_PATH"
     fi
     
+    # Add PolyChord paths if available
+    if [ -n "$POLYCHORD_DIR" ]; then
+        export LDFLAGS="-L$POLYCHORD_DIR/lib $LDFLAGS"
+        export LD_LIBRARY_PATH="$POLYCHORD_DIR/lib:$LD_LIBRARY_PATH"
+    fi
+    
     # Add ArrayFire paths if available
     if [ -n "$ARRAYFIRE_PATH" ]; then
         export LDFLAGS="-L$ARRAYFIRE_PATH/lib64 -L$ARRAYFIRE_PATH/lib $LDFLAGS"
@@ -466,6 +580,9 @@ setup_library_paths() {
     
     print_success "Library paths configured"
     print_status "MULTINEST_DIR: $MULTINEST_DIR"
+    if [ -n "$POLYCHORD_DIR" ]; then
+        print_status "POLYCHORD_DIR: $POLYCHORD_DIR"
+    fi
     if [ -n "$ARRAYFIRE_PATH" ]; then
         print_status "ARRAYFIRE_PATH: $ARRAYFIRE_PATH"
     fi
@@ -491,10 +608,21 @@ configure_build() {
         configure_args="$configure_args --with-multinest=$MULTINEST_DIR"
     fi
     
+    # Add PolyChord if available
+    if [ -n "$POLYCHORD_DIR" ]; then
+        configure_args="$configure_args --with-polychord=$POLYCHORD_DIR"
+        print_status "Configuring with PolyChord support"
+    fi
+    
     # Ensure environment variables are exported for configure
     if [ -n "$MULTINEST_DIR" ]; then
         export MULTINEST_DIR
         print_status "Exported MULTINEST_DIR=$MULTINEST_DIR"
+    fi
+    
+    if [ -n "$POLYCHORD_DIR" ]; then
+        export POLYCHORD_DIR
+        print_status "Exported POLYCHORD_DIR=$POLYCHORD_DIR"
     fi
     
     if [ -n "$ARRAYFIRE_PATH" ]; then
@@ -594,6 +722,13 @@ EOF
         fi
     fi
     
+    # PolyChord - use absolute paths
+    if [ -n "$POLYCHORD_DIR" ] && [ -d "$POLYCHORD_DIR" ]; then
+        local abs_polychord_dir=$(cd "$POLYCHORD_DIR" && pwd)
+        echo "export POLYCHORD_DIR=\"$abs_polychord_dir\"" >> "$env_file"
+        echo "export LD_LIBRARY_PATH=\"$abs_polychord_dir/lib:\$LD_LIBRARY_PATH\"" >> "$env_file"
+    fi
+    
     # ArrayFire - use absolute paths
     if [ -n "$ARRAYFIRE_PATH" ] && [ -d "$ARRAYFIRE_PATH" ]; then
         local abs_arrayfire_path=$(cd "$ARRAYFIRE_PATH" && pwd)
@@ -628,6 +763,7 @@ echo "TempoNest Environment Loaded"
 echo "==============================================="
 echo "TEMPO2: $TEMPO2"
 echo "MULTINEST_DIR: $MULTINEST_DIR"
+echo "POLYCHORD_DIR: $POLYCHORD_DIR"
 echo "ARRAYFIRE_PATH: $ARRAYFIRE_PATH"
 echo "LD_LIBRARY_PATH configured for runtime"
 echo "==============================================="
@@ -656,6 +792,7 @@ Options:
 
 Dependencies:
     - Uses bundled MultiNest (included in repository)
+    - Downloads PolyChordLite from GitHub if not present
     - Uses ArrayFire installer from scripts/ directory if available
     - Auto-detects Tempo2 installation
 
@@ -731,6 +868,7 @@ main() {
     
     # Build process
     build_multinest
+    build_polychord
     setup_library_paths
     generate_build_system
     configure_build

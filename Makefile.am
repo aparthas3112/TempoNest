@@ -34,7 +34,7 @@ common_sources = src/plugin/TempoNestTextOutput.cpp src/core/utils/pulsar_utils.
                  
 
 common_sources += src/core/models/elements/timing_model.cpp src/core/models/elements/efac.cpp src/core/models/elements/equad.cpp src/core/models/elements/ecorr.cpp src/core/models/elements/power_law_red_noise.cpp \
-					src/core/models/elements/power_law_dm_noise.cpp src/core/models/elements/deterministic_solar_wind.cpp src/core/models/elements/stochastic_solar_wind.cpp
+					src/core/models/elements/power_law_dm_noise.cpp src/core/models/elements/chromatic_gp_noise.cpp src/core/models/elements/deterministic_solar_wind.cpp src/core/models/elements/stochastic_solar_wind.cpp
 common_sources += src/core/types/parameter.cpp
 common_sources += src/core/utils/settings.cpp
 common_sources += src/json/json_loader.cpp src/json/json_node.cpp

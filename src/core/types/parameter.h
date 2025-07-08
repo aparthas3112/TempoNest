@@ -12,7 +12,6 @@ public:
     std::string description;
     prior_type_t prior_type;
     bool include;
-    bool fit;
     double min_value;
     double max_value;
 

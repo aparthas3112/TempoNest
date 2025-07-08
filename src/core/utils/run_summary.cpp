@@ -194,7 +194,7 @@ std::string run_summary_t::generate_summary_content(std::shared_ptr<model_t> mod
             
             ss << "    " << connector << " " << param->name << ": ";
             
-            if (param->include && param->fit) {
+            if (param->include) {
                 std::string prior_str = (param->prior_type == prior_type_t::uniform) ? "uniform" : "log-uniform";
                 ss << prior_str << " [" << param->min_value << ", " << param->max_value << "] ✓ included";
             } else {
@@ -293,6 +293,16 @@ void run_summary_t::write_parameter_names(std::shared_ptr<model_t> model,
                         param_name = "red_" + param_name;
                     } else if (element_name == "Power Law DM Noise") {
                         param_name = "dm_" + param_name;
+                    } else if (element_name == "Chromatic GP Noise") {
+                        if (param->name == "log10_A") {
+                            param_name = "chrom_gp_amp";
+                        } else if (param->name == "idx") {
+                            param_name = "chrom_gp_index";
+                        } else if (param->name == "gamma") {
+                            param_name = "chrom_gp_gamma";
+                        } else {
+                            param_name = "chrom_gp_" + param_name;
+                        }
                     }
                 }
             } else {
@@ -302,6 +312,16 @@ void run_summary_t::write_parameter_names(std::shared_ptr<model_t> model,
                     param_name = "red_" + param->name;
                 } else if (element_name == "Power Law DM Noise") {
                     param_name = "dm_" + param->name;
+                } else if (element_name == "Chromatic GP Noise") {
+                    if (param->name == "log10_A") {
+                        param_name = "chrom_gp_amp";
+                    } else if (param->name == "idx") {
+                        param_name = "chrom_gp_index";
+                    } else if (param->name == "gamma") {
+                        param_name = "chrom_gp_gamma";
+                    } else {
+                        param_name = "chrom_gp_" + param->name;
+                    }
                 } else if (element_name == "EFAC") {
                     param_name = "efac_" + param->name;
                 } else if (element_name == "EQUAD") {

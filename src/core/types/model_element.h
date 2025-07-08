@@ -117,3 +117,4 @@ public:
 #include "../models/elements/timing_model.h"
 #include "../models/elements/deterministic_solar_wind.h"
 #include "../models/elements/stochastic_solar_wind.h"
+#include "../models/elements/chromatic_gp_noise.h"

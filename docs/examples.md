@@ -215,14 +215,15 @@ Complete noise characterization including red noise, DM noise, and white noise c
 
 ## Solar Wind Analysis
 
-Specialized configuration for studying solar wind effects on pulsar timing.
+Specialized configurations for studying solar wind effects on pulsar timing, including both deterministic and stochastic approaches.
 
 ### Use Case
 - Investigating solar wind variations in timing data
 - Correcting for interplanetary medium effects
 - Solar activity correlation studies
+- Comprehensive solar wind modeling
 
-### Configuration
+### Basic Solar Wind Configuration
 
 ```json
 {
@@ -299,8 +300,156 @@ Specialized configuration for studying solar wind effects on pulsar timing.
 }
 ```
 
+### Advanced Solar Wind GP Configuration
+
+Comprehensive solar wind modeling using both deterministic corrections and stochastic GP processes.
+
+```json
+{
+  "globals": {
+    "use_original_errors": true,
+    "num_tempo2_its": 1,
+    "test_mode": false
+  },
+  "sampler": {
+    "type": "multinest",
+    "sample": true,
+    "live_points": 1500,
+    "efficiency": 0.1,
+    "output_root": "solar_wind_gp_analysis/TNest-",
+    "resume": false,
+    "verbose": true
+  },
+  "elements": [
+    {
+      "name": "Timing Model",
+      "marginalise": "all",
+      "parameters": []
+    },
+    {
+      "name": "Deterministic Solar Wind",
+      "parameters": [
+        {
+          "name": "electron_density",
+          "description": "Mean solar wind electron density",
+          "prior_type": "uniform",
+          "include": true,
+          "min_value": 0.0,
+          "max_value": 10.0
+        }
+      ]
+    },
+    {
+      "name": "Stochastic Solar Wind",
+      "days_per_coeff": 30.0,
+      "parameters": [
+        {
+          "name": "log_amplitude",
+          "description": "White solar wind noise amplitude",
+          "prior_type": "log_uniform",
+          "include": true,
+          "min_value": -20.0,
+          "max_value": -12.0
+        }
+      ]
+    },
+    {
+      "name": "Stochastic Solar Wind",
+      "days_per_coeff": 60.0,
+      "parameters": [
+        {
+          "name": "log10_A_sw",
+          "description": "Solar wind GP amplitude",
+          "prior_type": "log_uniform",
+          "include": true,
+          "min_value": -18.0,
+          "max_value": -10.0
+        },
+        {
+          "name": "gamma_sw",
+          "description": "Solar wind GP spectral index",
+          "prior_type": "uniform",
+          "include": true,
+          "min_value": 0.0,
+          "max_value": 7.0
+        }
+      ]
+    },
+    {
+      "name": "Power Law Red Noise",
+      "days_per_coeff": 30.0,
+      "parameters": [
+        {
+          "name": "amplitude",
+          "description": "Residual red noise",
+          "prior_type": "log_uniform",
+          "include": true,
+          "min_value": -18,
+          "max_value": -10
+        },
+        {
+          "name": "spectral_index",
+          "description": "Residual red noise spectral index",
+          "prior_type": "uniform",
+          "include": true,
+          "min_value": 0,
+          "max_value": 7
+        }
+      ]
+    },
+    {
+      "name": "EFAC",
+      "parameters": [
+        {
+          "name": "per_flag",
+          "description": "Error scaling per observing group",
+          "prior_type": "uniform",
+          "include": true,
+          "min_value": -1,
+          "max_value": 0.7,
+          "flag": "-group"
+        }
+      ]
+    },
+    {
+      "name": "EQUAD",
+      "parameters": [
+        {
+          "name": "per_flag",
+          "description": "Additional white noise per group",
+          "prior_type": "log_uniform",
+          "include": true,
+          "min_value": -9,
+          "max_value": -3,
+          "flag": "-group"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Key Features of Advanced Configuration
+- **Three-layer solar wind modeling**:
+  1. Deterministic correction for mean solar wind
+  2. White stochastic noise for uncorrelated fluctuations  
+  3. GP stochastic process for correlated variations (e.g., solar cycle)
+- **Dual stochastic elements**: Both modes can run simultaneously
+- **Different time scales**: White noise (30 days) vs GP (60 days) for multi-scale modeling
+- **Enterprise compatibility**: ν⁻² scaling matches Enterprise solar wind models
+- **Comprehensive error model**: EFAC and EQUAD for systematic effects
+
 ### Requirements
-- Tempo2 data must include `tdis2` and `ne_sw` values
+- **Tempo2 preparation**: Data must include `tdis2` and `ne_sw` values
+- **Solar wind geometry**: Ensure Tempo2 computed solar wind delays properly
+- **Data span**: Longer datasets (>3 years) benefit most from GP modeling
+- **Computational resources**: Advanced config requires ~1500 live points (2-4 hour runtime)
+
+### Scientific Applications
+- **Solar cycle studies**: GP mode captures ~11-year solar activity variations
+- **Short-term fluctuations**: White mode models day-to-day solar wind changes  
+- **Precision timing**: Combined approach removes solar wind bias for gravitational wave detection
+- **Cross-validation**: Compare with ACE/WIND solar wind monitor data
 - Use pulsars with significant solar wind delays (low ecliptic latitude)
 
 ### Alternative: Stochastic Solar Wind

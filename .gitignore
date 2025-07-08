@@ -71,3 +71,6 @@ chains/
 *.tmp
   *~
   .DS_Store
+continue.md
+docs/CLAUDE.md
+external/PolyChordLite/*

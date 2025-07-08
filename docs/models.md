@@ -378,11 +378,17 @@ Where:
 
 ### Stochastic Solar Wind
 
-Adds frequency-dependent white noise scaled by solar wind delay to model unmodeled solar wind variations.
+Models unmodeled solar wind variations using either white noise or Gaussian process models. Both approaches use the ν⁻² frequency scaling characteristic of dispersion measure variations.
+
+**Two Operating Modes:**
+
+#### White Noise Mode
+
+Adds frequency-dependent white noise scaled by solar wind delay.
 
 **Mathematical Model**: 
 ```
-Noise variance ∝ A × (tdis2)²
+Noise variance ∝ A × (tdis2/ne_sw)²
 ```
 
 **Configuration**:
@@ -401,10 +407,60 @@ Noise variance ∝ A × (tdis2)²
 }
 ```
 
+#### Gaussian Process Mode
+
+Models solar wind variations as correlated noise with power-law temporal spectrum.
+
+**Mathematical Model**:
+```
+P(f_temporal) = A² × f_temporal^(-γ)
+Frequency scaling: ν⁻² (fixed, from tdis2/ne_sw)
+```
+
+**Configuration**:
+```json
+{
+  "name": "Stochastic Solar Wind",
+  "days_per_coeff": 30.0,
+  "parameters": [
+    {
+      "name": "log10_A_sw",
+      "description": "Log₁₀ amplitude of stochastic solar wind GP noise",
+      "prior_type": "log_uniform",
+      "min_value": -18.0,
+      "max_value": -10.0
+    },
+    {
+      "name": "gamma_sw",
+      "description": "Spectral index for stochastic solar wind GP",
+      "prior_type": "uniform",
+      "min_value": 0.0,
+      "max_value": 7.0
+    }
+  ]
+}
+```
+
+**Key Parameters for GP Mode**:
+- `days_per_coeff`: Time span per frequency coefficient (default: 30.0 days)
+- `log10_A_sw`: Log₁₀ amplitude, typically in range [-18, -10]
+- `gamma_sw`: Spectral index, typical values γ ∈ [0, 7]
+
+**Physical Interpretation**: 
+- **White Mode**: Accounts for uncorrelated solar wind fluctuations
+- **GP Mode**: Models temporally correlated solar wind variations (e.g., solar cycle effects)
+- **Combined Mode**: Both modes can be used simultaneously for comprehensive modeling
+
+**Enterprise Compatibility**: 
+- Frequency scaling (ν⁻²) matches Enterprise's solar wind implementation
+- Uses Tempo2's pre-computed solar wind geometry (tdis2 parameter)
+- Temporal power spectrum follows standard pulsar timing conventions
+
 **Usage Notes**:
-- Typically use deterministic OR stochastic solar wind, not both
-- Requires Tempo2 to provide `tdis2` values
-- Amplitude units are log₁₀(s²)
+- Can be used alongside deterministic solar wind for comprehensive modeling
+- Requires Tempo2 to provide `tdis2` and `ne_sw` values
+- GP mode provides more sophisticated modeling of correlated solar wind variations
+- Amplitude units are log₁₀(s²) for both modes
 
 ---
 
