@@ -2,9 +2,12 @@
 #include "../utils/logger.h"
 #include "../utils/settings.h"
 #include "gpu_functions.h"
+#include <algorithm>
+#include <iostream>
 
 double temponest_v1_t::operator()(const model_space_t& model_space, const std::vector<double>& parameter_values) const
 {
+    
     // NaN debugging: Track each computation step
     static int debug_call_count = 0;
     debug_call_count++;
@@ -458,5 +461,7 @@ double temponest_v1_t::operator()(const model_space_t& model_space, const std::v
     
     logtchk("Exiting TempoNest Likelihood");
 
+    // Record the end of likelihood call for profiling
+    
     return likelihood;
 }

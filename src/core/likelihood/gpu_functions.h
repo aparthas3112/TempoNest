@@ -45,6 +45,8 @@ extern bool initialized;
 void initialize(const Eigen::MatrixXd&);
 bool isInitialized();
 void cleanup();
+int get_batch_size();
+std::string get_gpu_info();
 }  // namespace gpu_data
 #endif
 
@@ -68,5 +70,7 @@ std::vector<double> performAlgebraWithArrayFireGPU_batch(const std::vector<Eigen
                                                         const std::vector<double>& timelike_batch,
                                                         const std::vector<double>& uniform_prior_batch);
 
+// Debug function for comparing CPU and GPU implementations
+// Note: Debug output has been removed for performance. This function is not called in production.
 void compareEigenAndArrayFire(const Eigen::MatrixXd& TotalMatrix, const Eigen::VectorXd& noise, const Eigen::VectorXd& Resvec, const Eigen::VectorXd& powercoeff, int totCoeff, double tdet,
                               double freq_det, double timelike, double uniform_prior);

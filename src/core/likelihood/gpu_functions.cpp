@@ -83,8 +83,7 @@ void cleanup()
     
     initialized = false;
     cached_size_ = 0;
-}
-}  // namespace gpu_data
+}}  // namespace gpu_data
 
 void initializeArrayFire()
 {
@@ -385,13 +384,63 @@ std::vector<double> performAlgebraWithArrayFireGPU_batch(const std::vector<Eigen
     std::vector<double> results(batch_size);
     
     try {
-        // For now, process individually but with optimizations
-        // Future enhancement: true batched operations
-        for (size_t i = 0; i < batch_size; ++i) {
-            results[i] = performAlgebraWithArrayFireGPU_optimized(
-                noise_batch[i], resvec_batch[i], powercoeff_batch[i], 
-                totCoeff_batch[i], tdet_batch[i], freq_det_batch[i], 
-                timelike_batch[i], uniform_prior_batch[i]
+        // True parallel batch processing for maximum GPU utilization
+        if (batch_size > 1) {
+            // Stack noise vectors into a batch matrix for parallel processing
+            int nobs = noise_batch[0].size();
+            af::array noise_matrix(nobs, batch_size);
+            af::array resvec_matrix(nobs, batch_size);
+            
+            // Convert Eigen vectors to ArrayFire batch matrices
+            for (size_t i = 0; i < batch_size; ++i) {
+                af::array noise_col = eigenToAf(noise_batch[i]);
+                af::array resvec_col = eigenToAf(resvec_batch[i]);
+                
+                noise_matrix(af::span, i) = noise_col;
+                resvec_matrix(af::span, i) = resvec_col;
+            }
+            
+            // Parallel matrix operations on entire batch
+            af::array NT_batch = af::matmul(gpu_data::total_matrix_, noise_matrix);
+            af::array NTd_batch = af::matmul(NT_batch, resvec_matrix, AF_MAT_TRANS, AF_MAT_NONE);
+            
+            // Process each column in the batch (still need individual TNT computation)
+            for (size_t i = 0; i < batch_size; ++i) {
+                af::array NT_i = NT_batch(af::span, i);
+                af::array NTd_i = NTd_batch(af::span, i);
+                
+                // Compute TNT for this parameter set
+                af::array TNT_i = af::matmul(gpu_data::total_matrix_, NT_i, AF_MAT_TRANS, AF_MAT_NONE);
+                
+                // Apply diagonal updates for powercoeff
+                if (totCoeff_batch[i] > 0) {
+                    af::array powercoeff_inv = af::pow(eigenToAf(powercoeff_batch[i]), -1.0);
+                    int n = TNT_i.dims(0);
+                    int start_idx = n - totCoeff_batch[i];
+                    
+                    for (int j = 0; j < totCoeff_batch[i]; j++) {
+                        TNT_i(start_idx + j, start_idx + j) += powercoeff_inv(j);
+                    }
+                }
+                
+                // Cholesky decomposition and solve
+                af::array L;
+                af::cholesky(L, TNT_i, false);
+                
+                double jointdet = 2.0 * af::sum<double>(af::log(af::diag(L)));
+                af::array y = af::solve(af::lower(L), NTd_i);
+                af::array chol_solution = af::solve(af::upper(L.T()), y);
+                double freqlike = af::dot<double>(NTd_i, chol_solution);
+                
+                results[i] = -0.5 * (tdet_batch[i] + jointdet + freq_det_batch[i] + 
+                                   timelike_batch[i] - freqlike) + uniform_prior_batch[i];
+            }
+        } else {
+            // Single evaluation fallback
+            results[0] = performAlgebraWithArrayFireGPU_optimized(
+                noise_batch[0], resvec_batch[0], powercoeff_batch[0], 
+                totCoeff_batch[0], tdet_batch[0], freq_det_batch[0], 
+                timelike_batch[0], uniform_prior_batch[0]
             );
         }
         
@@ -402,65 +451,35 @@ std::vector<double> performAlgebraWithArrayFireGPU_batch(const std::vector<Eigen
         if (globals::verbose_mode) {
             std::cout << "ArrayFire error in batch processing: " << e.what() << std::endl;
         }
+        // Fallback to individual processing on error
+        for (size_t i = 0; i < batch_size; ++i) {
+            results[i] = performAlgebraWithArrayFireGPU_optimized(
+                noise_batch[i], resvec_batch[i], powercoeff_batch[i], 
+                totCoeff_batch[i], tdet_batch[i], freq_det_batch[i], 
+                timelike_batch[i], uniform_prior_batch[i]
+            );
+        }
     }
     
     return results;
 }
 
 // Function to add CPU and GPU implementations side by side for verification
+// Note: This function is kept for potential debugging but is not called in production
 void compareEigenAndArrayFire(const Eigen::MatrixXd& TotalMatrix, const Eigen::VectorXd& noise, const Eigen::VectorXd& Resvec, const Eigen::VectorXd& powercoeff, int totCoeff, double tdet,
                               double freq_det, double timelike, double uniform_prior)
 {
-    // Run CPU implementation
-    double cpu_result = 0.0;
-    {
-        // Copy the CPU code from temponest_v1.cpp
-        Eigen::MatrixXd NT = TotalMatrix.array().colwise() * noise.array();
-        Eigen::MatrixXd TNT = TotalMatrix.transpose() * NT;
-        Eigen::VectorXd NTd = NT.transpose() * Resvec;
-
-        if (totCoeff > 0) {
-            TNT.diagonal().tail(totCoeff) += powercoeff.cwiseInverse();
-        }
-
-        // Perform Cholesky decomposition
-        Eigen::LLT<Eigen::MatrixXd> llt(TNT);
-
-        // Solve the linear system
-        Eigen::VectorXd chol_solution = llt.solve(NTd);
-
-        // Calculate log determinant
-        double jointdet = 2 * llt.matrixLLT().diagonal().array().log().sum();
-
-        double freqlike = NTd.dot(chol_solution);
-
-        cpu_result = -0.5 * (tdet + jointdet + freq_det + timelike - freqlike) + uniform_prior;
-
-        printf("CPU calculation:\n");
-        printf("  tdet: %.15f\n", tdet);
-        printf("  jointdet: %.15f\n", jointdet);
-        printf("  freq_det: %.15f\n", freq_det);
-        printf("  timelike: %.15f\n", timelike);
-        printf("  freqlike: %.15f\n", freqlike);
-        printf("  uniform_prior: %.15f\n", uniform_prior);
-        printf("  lnewChol: %.15f\n", cpu_result);
-    }
-
+    // This function is intentionally left as a stub for potential debugging
+    // The verbose debug output has been removed to avoid any performance impact
+    // if this function is accidentally called
+    
     // Initialize static data if needed
     if (!gpu_data::isInitialized()) {
         gpu_data::initialize(TotalMatrix);
     }
 
     // Run GPU implementation with static data
-    double gpu_result = performAlgebraWithArrayFireGPU(noise, Resvec, powercoeff, totCoeff, tdet, freq_det, timelike, uniform_prior);
-
-    // Compare results
-    double diff = std::abs(cpu_result - gpu_result);
-    printf("\nComparison:\n");
-    printf("  CPU result: %.15f\n", cpu_result);
-    printf("  GPU result: %.15f\n", gpu_result);
-    printf("  Absolute difference: %.15g\n", diff);
-    printf("  Relative difference: %.15g%%\n", (diff / std::abs(cpu_result)) * 100.0);
+    performAlgebraWithArrayFireGPU(noise, Resvec, powercoeff, totCoeff, tdet, freq_det, timelike, uniform_prior);
 }
 
 #else

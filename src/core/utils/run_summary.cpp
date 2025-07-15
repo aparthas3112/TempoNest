@@ -12,6 +12,7 @@
 #include "../models/elements/power_law_red_noise.h"
 #include "../models/elements/power_law_dm_noise.h"
 #include "../types/parameter.h"
+#include "../likelihood/gpu_functions.h"
 
 run_summary_t::run_summary_t(const std::string& output_directory) 
     : output_dir_(output_directory), timing_started_(false) {
