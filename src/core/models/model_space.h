@@ -109,6 +109,9 @@ public:
 
     double get_max_tspan() const { return max_tspan_; }
 
+    // Dynamic design matrix reconstruction for chromatic GP
+    void reconstruct_chromatic_gp_matrix(const std::vector<double>& parameter_values) const;
+
     // Elements getter
     const std::unordered_map<string_t, element_t>& get_elements() const { return elements_; }
 

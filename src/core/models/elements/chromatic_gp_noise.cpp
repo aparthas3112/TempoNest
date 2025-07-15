@@ -138,93 +138,87 @@ void chromatic_gp_noise_t::apply(const std::vector<double>& parameter_values, Ei
         return;
     }
 
+    // Get parameters (exactly like DM noise pattern)
     const parameter_t* log10_A_param = get_parameter("log10_A");
     const parameter_t* gamma_param = get_parameter("gamma");
 
-    // Get parameter values
-    double log10_A = log10_A_param->get_value(parameter_values);
+    double amplitude = log10_A_param->get_exp_value(parameter_values);
     double gamma = gamma_param->get_value(parameter_values);
-
-    // Calculate temporal power spectral density (same pattern as DM noise)
-    // Following TempoNest/Enterprise convention: P(f_temporal) = A² × f_temporal^(-γ)
-    double amplitude = std::pow(10.0, log10_A);
     
-    // Power law coefficients for each temporal frequency
+    // Get chromatic index (variable or fixed)
+    double chromatic_idx;
+    if (is_idx_fitted()) {
+        const parameter_t* idx_param = get_parameter("idx");
+        chromatic_idx = idx_param->get_value(parameter_values);
+    } else {
+        chromatic_idx = fixed_chromatic_idx;
+    }
+    
+    // Power law coefficients for temporal frequencies (same as DM noise)
+    // NOTE: No chromatic scaling here - that goes in the design matrix per-observation
     Eigen::VectorXd chrom_coeffs = (frequencies * 365.25 / maxtspan).array().pow(-gamma);
 
-    // Add uniform prior contribution if needed
+    // Add uniform prior contribution (same as DM noise)
     if (log10_A_param->prior_type == prior_type_t::uniform) {
-        uniform_prior += log10_A; // log10_A is already in log space
+        uniform_prior += log(amplitude);
     }
 
-    // Normalization following consistent GP convention (with 12π² factor)
-    double f1yr = 1.0 / 3.16e7; // 1/(1 year in seconds)
+    // Normalization (same as DM noise)
+    double f1yr = 1.0 / 3.16e7;
     double pl_amp = (amplitude * amplitude / 12.0 / (M_PI * M_PI)) * std::pow(f1yr, -3) / (maxtspan * 24 * 60 * 60);
 
     chrom_coeffs *= pl_amp;
 
-    // Apply dynamic scaling correction if idx is fitted (variable mode)
-    if (is_idx_fitted()) {
-        const parameter_t* idx_param = get_parameter("idx");
-        double current_idx = idx_param->get_value(parameter_values);
-        double reference_idx = 4.0; // Same reference used in matrix construction
-        
-        // Calculate and apply scaling correction factor
-        double correction_factor = calculate_scaling_correction(current_idx, reference_idx);
-        chrom_coeffs *= correction_factor;
-        
-        // Add idx parameter to uniform prior if needed
-        if (idx_param->prior_type == prior_type_t::uniform) {
-            uniform_prior += current_idx; // idx is already in linear space
-        }
-    }
-
-    // Store coefficients for both sine and cosine components
-    // Note: When idx is fixed, the radio frequency scaling was applied in the design matrix
-    // When idx is variable, the scaling correction is applied here dynamically
+    // Store coefficients (same pattern as DM noise)
     powercoeff.segment(start_pos, num_freqs) += chrom_coeffs;
     powercoeff.segment(start_pos + num_freqs, num_freqs) += chrom_coeffs;
 
-    // Update frequency determinant
+    // Frequency determinant (same pattern as DM noise)
     freq_det += 2 * powercoeff.segment(start_pos, num_freqs).array().log().sum();
     
-    // Advance position for next model element
     start_pos += 2 * num_freqs;
 }
 
-double chromatic_gp_noise_t::calculate_scaling_correction(double current_idx, double reference_idx) const
+// Reconstruct chromatic GP design matrix columns when chromatic index changes
+void chromatic_gp_noise_t::reconstruct_design_matrix_columns(Eigen::MatrixXd& total_matrix, 
+                                                            const std::vector<double>& parameter_values,
+                                                            int start_col, double maxtspan) const
 {
-    // Calculate the scaling correction factor based on the ratio of 
-    // frequency scaling powers for current vs reference chromatic index
-    //
-    // Mathematical background:
-    // If design matrix was built with (ν_ref/ν)^ref_idx but we want (ν_ref/ν)^curr_idx,
-    // the power correction is the ratio of squared scaling factors summed over observations
-    //
-    // correction_factor = Σₖ[(ν_ref/νₖ)^(2×current_idx)] / Σₖ[(ν_ref/νₖ)^(2×reference_idx)]
-    
-    if (!globals::pulsar) {
-        throw std::runtime_error("Global pulsar data not available for scaling correction");
+    // Only reconstruct if chromatic index is being fitted
+    if (!is_idx_fitted()) {
+        return; // Fixed index, no reconstruction needed
     }
+
+    // Get current chromatic index value
+    const parameter_t* idx_param = get_parameter("idx");
+    double current_chromatic_idx = idx_param->get_value(parameter_values);
     
-    const double ref_freq = 1400.0e6; // 1400 MHz reference frequency
-    double sum_current = 0.0;
-    double sum_reference = 0.0;
+    // Reference values for scaling calculation
+    double ref_chromatic_idx = 4.0; // Reference index used in initial construction
+    double ref_freq = 1400.0e6; // 1400 MHz in Hz
     
-    for (int k = 0; k < globals::pulsar->nobs; k++) {
-        if (globals::pulsar->obsn[k].deleted == 0) { // Only use non-deleted observations
+    // Calculate the scaling ratio: (new_idx / ref_idx) scaling
+    // For each observation: (ref_freq/obs_freq)^current_idx / (ref_freq/obs_freq)^ref_idx 
+    //                     = (ref_freq/obs_freq)^(current_idx - ref_idx)
+    double idx_difference = current_chromatic_idx - ref_chromatic_idx;
+    
+    // Update each chromatic GP column with new scaling
+    for (int i = 0; i < num_freqs; i++) {
+        for (int k = 0; k < globals::pulsar->nobs; k++) {
             double obs_freq = (double)globals::pulsar->obsn[k].freqSSB;
-            double freq_ratio = ref_freq / obs_freq;
+            double time = (double)globals::pulsar->obsn[k].bat;
             
-            sum_current += std::pow(freq_ratio, 2.0 * current_idx);
-            sum_reference += std::pow(freq_ratio, 2.0 * reference_idx);
+            // Calculate new chromatic scaling for this observation
+            double new_chrom_scaling = std::pow(ref_freq / obs_freq, current_chromatic_idx);
+            
+            // Get frequency for this mode
+            double freq = frequencies[i] / maxtspan;
+            
+            // Rebuild matrix elements with new chromatic scaling
+            total_matrix(k, start_col + i) = cos(2 * M_PI * freq * time) * new_chrom_scaling;
+            total_matrix(k, start_col + i + num_freqs) = sin(2 * M_PI * freq * time) * new_chrom_scaling;
         }
     }
-    
-    // Avoid division by zero (should not happen with reasonable reference_idx)
-    if (sum_reference == 0.0) {
-        throw std::runtime_error("Reference scaling sum is zero - invalid reference_idx");
-    }
-    
-    return sum_current / sum_reference;
 }
+
+

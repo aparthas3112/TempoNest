@@ -2,6 +2,9 @@
 #include "../likelihood/gpu_functions.h"
 #include "../utils/output_formatter.h"
 #include "elements/timing_model.h"
+#include "elements/chromatic_gp_noise.h"
+#include "elements/power_law_red_noise.h"
+#include "elements/power_law_dm_noise.h"
 #include "../utils/logger.h"
 #include "t2fit.h"
 #include <iomanip>
@@ -592,45 +595,32 @@ void model_space_t::store_total_matrix()
     if (auto chrom_gp_opt = get_optional_element<chromatic_gp_noise_t>("Chromatic GP Noise")) {
         auto& chrom_gp = chrom_gp_opt->get();
 
-        // Calculate ChromVec with ν^(-idx) scaling for each observation
-        double* ChromVec = new double[globals::pulsar->nobs];
-        
-        // Reference frequency: 1400 MHz (standard in pulsar timing)
+        // Build design matrix with per-observation chromatic scaling (like DM noise)
+        // Use reference chromatic index for initial construction
+        double ref_chromatic_idx = 4.0; // Reference index for initial matrix construction
         double ref_freq = 1400.0e6; // 1400 MHz in Hz
         
-        // Determine chromatic index (fixed or default for fitted case)
-        double chromatic_idx;
-        if (chrom_gp.is_idx_fitted()) {
-            // Dynamic scaling: idx will be updated during likelihood evaluation
-            // For matrix construction, use reference value (scaling applied dynamically)
-            chromatic_idx = 4.0;  // Reference value for matrix construction
-            std::cout << "  🌈 " << output_formatter::GREEN << "Dynamic chromatic scaling enabled!" << output_formatter::RESET << std::endl;
-            std::cout << "      ├─ Matrix constructed with reference idx: " << chromatic_idx << std::endl;
-            std::cout << "      └─ Scaling correction applied dynamically during sampling" << std::endl;
-        } else {
-            // Fixed chromatic index mode
-            chromatic_idx = chrom_gp.get_fixed_idx();
-            std::cout << "  • Using fixed chromatic index: " << chromatic_idx << std::endl;
-        }
-        
+        // Calculate per-observation chromatic scaling vector (like DMVec)
+        double* ChromVec = new double[globals::pulsar->nobs];
         for (int o = 0; o < globals::pulsar->nobs; o++) {
             double obs_freq = (double)globals::pulsar->obsn[o].freqSSB;
-            ChromVec[o] = std::pow(ref_freq / obs_freq, chromatic_idx);
+            ChromVec[o] = std::pow(ref_freq / obs_freq, ref_chromatic_idx);
         }
-
+        
         for (int i = 0; i < chrom_gp.num_freqs; i++) {
             freqs[startpos + i] = chrom_gp.frequencies[i] / max_tspan_;
             freqs[startpos + i + chrom_gp.num_freqs] = freqs[startpos + i];
 
             for (int k = 0; k < globals::pulsar->nobs; k++) {
                 double time = (double)globals::pulsar->obsn[k].bat;
+                // Per-observation chromatic scaling like DM noise
                 total_matrix_(k, i + TimetoMargin + startpos) = cos(2 * M_PI * freqs[startpos + i] * time) * ChromVec[k];
                 total_matrix_(k, i + chrom_gp.num_freqs + TimetoMargin + startpos) = sin(2 * M_PI * freqs[startpos + i] * time) * ChromVec[k];
             }
         }
 
-        startpos += 2 * chrom_gp.num_freqs;
         delete[] ChromVec;
+        startpos += 2 * chrom_gp.num_freqs;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -686,4 +676,102 @@ void model_space_t::store_total_matrix()
 
     delete[] DMVec;
     delete[] freqs;
+}
+
+void model_space_t::reconstruct_chromatic_gp_matrix(const std::vector<double>& parameter_values) const
+{
+    // Check if we have a chromatic GP element
+    auto chrom_gp_opt = get_optional_element<chromatic_gp_noise_t>("Chromatic GP Noise");
+    if (!chrom_gp_opt.has_value()) {
+        return; // No chromatic GP, nothing to reconstruct
+    }
+
+    const auto& chrom_gp = chrom_gp_opt->get();
+    
+    // Only reconstruct if the chromatic index is being fitted
+    if (!chrom_gp.is_idx_fitted()) {
+        return; // Fixed chromatic index, no reconstruction needed
+    }
+    
+    // DEBUG: Print that we're entering reconstruction
+    if (globals::verbose_mode) {
+        std::cout << "DEBUG MODEL_SPACE: Entering chromatic GP reconstruction" << std::endl;
+    }
+
+    // Find the column position of the chromatic GP in the design matrix
+    // We need to calculate the starting column position
+    int start_col = design_size_; // Start after the design matrix columns
+    
+    // DEBUG: Print initial column position
+    if (globals::verbose_mode) {
+        std::cout << "DEBUG MODEL_SPACE: Initial start_col=" << start_col << " (design_size_=" << design_size_ << ")" << std::endl;
+    }
+    
+    // Find the chromatic GP element position in the noise section
+    const auto& elements = get_elements();
+    bool found_chrom_gp = false;
+    
+    // DEBUG: Print all element names
+    if (globals::verbose_mode) {
+        std::cout << "DEBUG MODEL_SPACE: All elements in model:" << std::endl;
+        for (const auto& [name, element] : elements) {
+            std::cout << "  Element: '" << name << "'" << std::endl;
+        }
+    }
+    
+    // First pass: accumulate columns from all noise elements that come before chromatic GP in the design matrix
+    for (const auto& [name, element] : elements) {
+        if (name == "Chromatic GP Noise") {
+            found_chrom_gp = true;
+            // Don't break - we need to continue to see what comes after
+        }
+        
+        // Add columns for noise elements - we need to match the order in store_total_matrix()
+        // In store_total_matrix(), the order is: Red Noise -> DM Noise -> Chromatic GP -> Solar Wind -> ECORR
+        if (name.find("Power Law Red Noise") == 0) {
+            auto* red_noise = element->as<pl_red_noise_t>();
+            if (red_noise) {
+                int red_cols = 2 * red_noise->num_freqs; // sine + cosine components
+                start_col += red_cols;
+                
+                // DEBUG: Print column adjustment
+                if (globals::verbose_mode) {
+                    std::cout << "DEBUG MODEL_SPACE: Added " << red_cols << " columns for red noise, start_col=" << start_col << std::endl;
+                }
+            }
+        }
+        
+        // Add DM noise columns if they come before chromatic GP
+        if (name.find("Power Law DM Noise") == 0) {
+            auto* dm_noise = element->as<pl_dm_noise_t>();
+            if (dm_noise) {
+                int dm_cols = 2 * dm_noise->num_freqs; // sine + cosine components
+                start_col += dm_cols;
+                
+                // DEBUG: Print column adjustment
+                if (globals::verbose_mode) {
+                    std::cout << "DEBUG MODEL_SPACE: Added " << dm_cols << " columns for DM noise, start_col=" << start_col << std::endl;
+                }
+            }
+        }
+        
+        // Note: We don't add chromatic GP columns here as that's what we're reconstructing
+        // Note: Solar Wind and ECORR come after chromatic GP in the matrix, so we don't count them
+    }
+    
+    if (!found_chrom_gp) {
+        return; // Chromatic GP not found in elements
+    }
+    
+    // DEBUG: Print final column position
+    if (globals::verbose_mode) {
+        std::cout << "DEBUG MODEL_SPACE: Final start_col=" << start_col << std::endl;
+    }
+    
+    // Reconstruct the chromatic GP columns in the total matrix
+    // Note: We need to modify the total_matrix_ which is const, so we'll cast away const
+    // This is safe because we're only modifying the matrix content, not the structure
+    Eigen::MatrixXd& mutable_total_matrix = const_cast<Eigen::MatrixXd&>(total_matrix_);
+    
+    chrom_gp.reconstruct_design_matrix_columns(mutable_total_matrix, parameter_values, start_col, max_tspan_);
 }

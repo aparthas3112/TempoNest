@@ -38,9 +38,11 @@ public:
         return fixed_chromatic_idx; 
     }
 
-    // Calculate scaling correction factor for dynamic idx scaling
-    // This accounts for the difference between current idx and reference idx used in matrix construction
-    double calculate_scaling_correction(double current_idx, double reference_idx) const;
+    // Dynamic design matrix reconstruction for variable chromatic index
+    void reconstruct_design_matrix_columns(Eigen::MatrixXd& total_matrix, 
+                                          const std::vector<double>& parameter_values,
+                                          int start_col, double maxtspan) const;
+
 
     void print() const override
     {
@@ -68,4 +70,6 @@ public:
             output_formatter::print_parameter(name, prior_str, param.min_value, param.max_value, param.include, is_last);
         }
     }
+
+private:
 };
